@@ -1,0 +1,6 @@
+{
+        "Port": 7500,
+        "Cores": 1,
+        "BaseUrl": "/zbs-server",
+        "RedisAdd": "127.0.0.1:6379"
+}

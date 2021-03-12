@@ -1,0 +1,6 @@
+{
+        "Level": 0,
+        "FileName": "/export/jcloud-zbs/log/zbs_server/zbs_server.log",
+        "FileMaxSize": 102400000,
+        "FileCount": 10
+}
