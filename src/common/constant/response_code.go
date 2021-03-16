@@ -17,29 +17,28 @@ const (
 	CodeVolInvalResize = -7
 )
 
-//snapshot
-const (
-	CodeSnpNotExist  = -101
-	CodeSnpBusy      = -102
-	CodeSnpNotEnough = -103
-)
-
 //account subject
 const (
-	CodeAccSubNotExist  = -101
+	CodeAccSubNotExist   = -101
+	CodeInvalAccSubLevel = -102
 )
 
 //company information
 const (
-	CodeComInfoNotExist  = -201
+	CodeComInfoNotExist = -201
 )
 
 //operator information
 const (
-	CodeOptInfoNotExist  = -301
+	CodeOptInfoNotExist = -301
 )
 
 //voucher information
 const (
-	CodeVoucherInfoNotExist  = -401
+	CodeVoucherInfoNotExist = -401
+)
+
+//voucher record
+const (
+	CodeVoucherRecordNotExist = -501
 )

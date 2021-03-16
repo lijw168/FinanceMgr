@@ -3,14 +3,14 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	//"errors"
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
 	"net/http"
 	"time"
 
 	"common/log"
-	"common/message"
+	//"common/message"
 )
 
 type HttpClient struct {
@@ -47,57 +47,57 @@ func genCurl(req *http.Request, body []byte) string {
 	return msg
 }
 
-func (hc *HttpClient) SendRequest(domain, reqMethod, action string, dataContent interface{}) (*message.ResponseParam, error) {
-	input, _ := json.Marshal(dataContent)
-	url := domain + "?Action=" + action
-	req, err := http.NewRequest(reqMethod, url, bytes.NewReader(input))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "ZbsClient")
-	if hc.traceID == "" {
-		hc.traceID = Uuid()
-	}
-	req.Header.Set("Trace-Id", hc.traceID)
-	if hc.verbose {
-		if hc.logger != nil {
-			hc.logger.DebugContext(req.Context(), "Request: %s]", genCurl(req, input))
-		}
-	}
+// func (hc *HttpClient) SendRequest(domain, reqMethod, action string, dataContent interface{}) (*message.ResponseParam, error) {
+// 	input, _ := json.Marshal(dataContent)
+// 	url := domain + "?Action=" + action
+// 	req, err := http.NewRequest(reqMethod, url, bytes.NewReader(input))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	req.Header.Add("Content-Type", "application/json")
+// 	req.Header.Set("User-Agent", "ZbsClient")
+// 	if hc.traceID == "" {
+// 		hc.traceID = Uuid()
+// 	}
+// 	req.Header.Set("Trace-Id", hc.traceID)
+// 	if hc.verbose {
+// 		if hc.logger != nil {
+// 			hc.logger.DebugContext(req.Context(), "Request: %s]", genCurl(req, input))
+// 		}
+// 	}
 
-	resp, err := hc.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
+// 	resp, err := hc.client.Do(req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	body, _ := ioutil.ReadAll(resp.Body)
+// 	resp.Body.Close()
 
-	if hc.verbose {
-		if hc.logger != nil {
-			hc.logger.DebugContext(req.Context(), "Response:")
-			hc.logger.DebugContext(req.Context(), "Trace-Id:"+resp.Header.Get("Trace-Id"))
-			hc.logger.DebugContext(req.Context(), "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
-			hc.logger.DebugContext(req.Context(), fmt.Sprintf("%s", body))
-		}
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP Error Code: %d", resp.StatusCode)
-	}
-	result := &message.ResponseParam{}
-	decoder := json.NewDecoder(bytes.NewReader(body))
-	decoder.UseNumber()
-	decoder.Decode(result)
+// 	if hc.verbose {
+// 		if hc.logger != nil {
+// 			hc.logger.DebugContext(req.Context(), "Response:")
+// 			hc.logger.DebugContext(req.Context(), "Trace-Id:"+resp.Header.Get("Trace-Id"))
+// 			hc.logger.DebugContext(req.Context(), "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
+// 			hc.logger.DebugContext(req.Context(), fmt.Sprintf("%s", body))
+// 		}
+// 	}
+// 	if resp.StatusCode != 200 {
+// 		return nil, fmt.Errorf("HTTP Error Code: %d", resp.StatusCode)
+// 	}
+// 	result := &message.ResponseParam{}
+// 	decoder := json.NewDecoder(bytes.NewReader(body))
+// 	decoder.UseNumber()
+// 	decoder.Decode(result)
 
-	if result.Code != 0 {
-		msg := result.Message
-		if result.Detail != "" {
-			msg += ":" + result.Detail
-		}
-		return nil, errors.New(msg)
-	}
-	return result, nil
-}
+// 	if result.Code != 0 {
+// 		msg := result.Message
+// 		if result.Detail != "" {
+// 			msg += ":" + result.Detail
+// 		}
+// 		return nil, errors.New(msg)
+// 	}
+// 	return result, nil
+// }
 
 func (hc *HttpClient) FormatView(data interface{}, view interface{}) error {
 	b, err := json.Marshal(data)

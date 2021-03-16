@@ -380,12 +380,12 @@ func MemsetUint32(a []uint32, v uint32) {
 }
 
 func SetLimit() error {
-	var rLimit syscall.Rlimit
-	rLimit.Max = constant.MAX_OPEN_FD_LIMIT
-	rLimit.Cur = constant.MAX_OPEN_FD_LIMIT
-	err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	if err != nil {
-		return err
-	}
+	// var rLimit syscall.Rlimit
+	// rLimit.Max = constant.MAX_OPEN_FD_LIMIT
+	// rLimit.Cur = constant.MAX_OPEN_FD_LIMIT
+	// err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
