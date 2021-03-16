@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"time"
 
-	cons "common/constant"
-	"common/log"
-	"jdebs/ebs/src/github.com/go-sql-driver/mysql"
 	"analysis-server/api/db"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
+	"jdebs/ebs/src/github.com/go-sql-driver/mysql"
 )
 
 type VoucherService struct {
@@ -33,17 +33,17 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	requestId string) ([]int, CcError) {
 	FuncName := "VoucherService/service/CreateVoucher"
 	// Begin transaction
-	if tx, err = vs.Db.Begin(); err != nil {
+	tx, err := vs.Db.Begin()
+	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
-	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%s,VoucherMonth:%d",
-		*params.CompanyID, *params.VoucherMonth)
 	infoParams := params.InfoParams
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
 	filterFields["voucherMonth"] = *infoParams.VoucherMonth
+	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d", *infoParams.CompanyID, *infoParams.VoucherMonth)
 	count, err := vs.VInfoDao.CountByFilter(ctx, tx, filterFields)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -53,11 +53,11 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	vInfo := new(model.VoucherInfo)
 	vInfo.CompanyID = *infoParams.CompanyID
 	vInfo.VoucherMonth = *infoParams.VoucherMonth
-	vInfo.NumOfMonth = count + 1
+	vInfo.NumOfMonth = int(count + 1)
 	vInfo.VoucherDate = time.Now()
 	vInfo.VoucherID = vs.GenVoucherId.GetId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
-	if err = vs.VInfoDao.create(ctx, tx, vInfo); err != nil {
+	if err = vs.VInfoDao.Create(ctx, tx, vInfo); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [VInfoDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -67,16 +67,16 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 		vRecord.RecordID = vs.GenRecordId.GetId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = vInfo.VoucherID
-		vRecord.SubjectName = recParam.SubjectName
-		vRecord.DebitMoney = recParam.DebitMoney
-		vRecord.CreditMoney = recParam.CreditMoney
-		vRecord.Summary = recParam.Summary
-		vRecord.BillCount = recParam.BillCount
-		vRecord.SubID1 = recParam.SubID1
-		vRecord.SubID2 = recParam.SubID2
-		vRecord.SubID3 = recParam.SubID3
-		vRecord.SubID4 = recParam.SubID4
-		if err = vs.VRecordDao.create(ctx, tx, vRecord); err != nil {
+		vRecord.SubjectName = *recParam.SubjectName
+		vRecord.DebitMoney = *recParam.DebitMoney
+		vRecord.CreditMoney = *recParam.CreditMoney
+		vRecord.Summary = *recParam.Summary
+		vRecord.BillCount = *recParam.BillCount
+		vRecord.SubID1 = *recParam.SubID1
+		vRecord.SubID2 = *recParam.SubID2
+		vRecord.SubID3 = *recParam.SubID3
+		vRecord.SubID4 = *recParam.SubID4
+		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -104,15 +104,16 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 
 func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requestId string) CcError {
 	FuncName := "VoucherService/service/DeleteVoucher"
-	vs.Logger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%s", voucherID)
+	vs.Logger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%d", voucherID)
 	// Begin transaction
-	if tx, err = vs.Db.Begin(); err != nil {
+	tx, err := vs.Db.Begin()
+	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
 
-	err := vs.VInfoDao.Delete(ctx, tx, voucherID)
+	err = vs.VInfoDao.Delete(ctx, tx, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
@@ -125,16 +126,17 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	vs.Logger.InfoContext(ctx, "DeleteVoucher method end, "+"voucher ID:%s", voucherID)
+	vs.Logger.InfoContext(ctx, "DeleteVoucher method end, "+"voucher ID:%d", voucherID)
 	return nil
 }
 
 func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID int,
 	requestId string) (*model.VoucherView, CcError) {
 	FuncName := "VoucherService/service/GetVoucherByVoucherID"
-	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method begin, "+"voucher ID:%s", voucherID)
+	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method begin, "+"voucher ID:%d", voucherID)
 	//Begin transaction
-	if tx, err = vs.Db.Begin(); err != nil {
+	tx, err := vs.Db.Begin()
+	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
@@ -148,9 +150,9 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	default:
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	voucherViewSlice := make([]*model.VoucherView, 0)
-	voucherViewSlice.VouInfoView = *(VoucherInfoModelToView(vInfo))
-	recordViewSlice := make([]*model.VoucherRecordView, 0)
+	voucherView := &model.VoucherView{}
+	voucherView.VouInfoView = *(VoucherInfoModelToView(vInfo))
+	recordViewSlice := make([]model.VoucherRecordView, 0)
 	filterFields := make(map[string]interface{})
 	limit, offset := -1, 0
 	filterFields["voucherId"] = voucherID
@@ -168,18 +170,18 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		if index >= 100 {
 			break
 		}
-		vouRecordView := VoucherRecordModelToView(vouRecord)
+		vouRecordView := *(VoucherRecordModelToView(vouRecord))
 		recordViewSlice = append(recordViewSlice, vouRecordView)
 	}
-	voucherViewSlice.VouRecordTotalCount = len(voucherRecords)
-	voucherViewSlice.VouRecordViewSli = append(voucherViewSlice.VouRecordViewSli, recordViewSlice...)
+	voucherView.VouRecordTotalCount = len(voucherRecords)
+	voucherView.VouRecordViewSli = append(voucherView.VouRecordViewSli, recordViewSlice...)
 
 	if err = tx.Commit(); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method end, "+"voucher ID:%s", voucherID)
-	return voucherViewSlice, nil
+	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method end, "+"voucher ID:%d", voucherID)
+	return voucherView, nil
 }
 
 // func (vs *VoucherService) UpdateVoucherInfo(ctx context.Context, voucherID int, params map[string]interface{}) service.CcError {

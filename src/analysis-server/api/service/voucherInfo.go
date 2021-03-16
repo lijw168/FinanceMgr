@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	cons "common/constant"
-	"common/log"
 	"analysis-server/api/db"
 	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
 )
 
 type VoucherInfoService struct {
@@ -32,9 +32,9 @@ func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID 
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
-		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+		return nil, NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
 	default:
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	vInfoView := VoucherInfoModelToView(vInfo)
 	return vInfoView, nil
@@ -50,7 +50,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
 				filterFields[*f.Field] = f.Value
 			default:
-				return vouInfoViewSlice, 0, NewError(ErrDesc, ErrUnsupported, ErrField, *f.Field)
+				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
@@ -66,7 +66,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherInfos, err := vs.VInfoDao.List(ctx, ps.Db, filterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

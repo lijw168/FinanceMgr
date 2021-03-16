@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	cons "common/constant"
-	"common/log"
 	"analysis-server/api/db"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
 )
 
 type CompanyService struct {
@@ -26,7 +26,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	// Begin transaction
 	tx, err := cs.Db.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, cs.Logger, FuncName, tx)
@@ -57,13 +57,13 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.Backup = *params.Backup
 	//>100,as subjectId
 	comInfo.CompanyID = cs.GenComId.GetId()
-	if err = cs.CompanyDao.create(ctx, tx, comInfo); err != nil {
+	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [CompanyDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		cs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	comView := cs.CompanyModelToView(comInfo)
 	cs.Logger.InfoContext(ctx, "CreateCompany method end, "+"companyName:%s", *params.CompanyName)
@@ -75,7 +75,7 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	comView := new(model.CompanyView)
 	comView.CompanyName = comInfo.CompanyName
 	comView.AbbrevName = comInfo.AbbrevName
-	comViewCorporator = comInfo.Corporator
+	comView.Corporator = comInfo.Corporator
 	comView.Phone = comInfo.Phone
 	comView.Summary = comInfo.Summary
 	comView.Email = comInfo.Email
@@ -85,9 +85,9 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	return comView
 }
 
-func (cs *CompanyService) GetCompanyById(ctx context.Context, companyId string,
+func (cs *CompanyService) GetCompanyById(ctx context.Context, companyId int,
 	requestId string) (*model.CompanyView, CcError) {
-	comInfo, err := cs.CompanyDao.Get(ctx, vs.Db, companyId)
+	comInfo, err := cs.CompanyDao.Get(ctx, cs.Db, companyId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -112,26 +112,26 @@ func (cs *CompanyService) GetCompanyById(ctx context.Context, companyId string,
 
 func (cs *CompanyService) DeleteCompanyByID(ctx context.Context, companyID int,
 	requestId string) CcError {
-	cs.Logger.InfoContext(ctx, "DeleteCompanyByID method begin, "+"company ID:%s", companyID)
+	cs.Logger.InfoContext(ctx, "DeleteCompanyByID method begin, company ID:%d", companyID)
 	err := cs.CompanyDao.Delete(ctx, cs.Db, companyID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	cs.Logger.InfoContext(ctx, "DeleteCompanyByID method end, "+"company ID:%s", companyID)
+	cs.Logger.InfoContext(ctx, "DeleteCompanyByID method end, company ID:%d", companyID)
 	return nil
 }
 
-func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId string, params map[string]interface{}) CcError {
+func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, params map[string]interface{}) CcError {
 	FuncName := "CompanyService/Company/UpdateCompanyById"
 	// Begin transaction
 	tx, err := cs.Db.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, cs.Logger, FuncName, tx)
 	//insure the volume exist
-	company, err := cs.CompanyDao.Get(ctx, tx, companyId)
+	_, err = cs.CompanyDao.Get(ctx, tx, companyId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -146,7 +146,7 @@ func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId strin
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		cs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	return nil
@@ -168,7 +168,7 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 			case "phone", "e_mail", "companyAddr", "backup":
 				filterFields[*f.Field] = f.Value
 			default:
-				return comViewSlice, 0, NewError(ErrDesc, ErrUnsupported, ErrField, *f.Field)
+				return comViewSlice, 0, NewError(ErrCompany, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
@@ -186,19 +186,19 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 	}
 	comInfos, err := cs.CompanyDao.List(ctx, cs.Db, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[CompanyService/service/ListCompany] [CompanyDao.List: %s, filterFields: %v]",
+		cs.Logger.ErrorContext(ctx, "[CompanyService/service/ListCompany] [CompanyDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
 		return comViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
 	for _, comInfo := range comInfos {
-		comInfoView := cs.AccSubMdelToView(comInfo)
+		comInfoView := cs.CompanyModelToView(comInfo)
 		comViewSlice = append(comViewSlice, comInfoView)
 	}
 	comInfoCount := len(comViewSlice)
 	//volumeCount, CcErr := vs.CountByFilter(ctx, vs.Db, filterFields)
-	if CcErr != nil {
-		return nil, 0, CcErr
-	}
+	// if CcErr != nil {
+	// 	return nil, 0, CcErr
+	// }
 	return comViewSlice, comInfoCount, nil
 }

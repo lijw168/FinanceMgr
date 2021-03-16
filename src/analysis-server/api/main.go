@@ -79,7 +79,7 @@ func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) error {
 	return http.ListenAndServe(":"+strconv.Itoa(serverConf.Port), nil)
 }
 
-func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *cfg.ApiServerCfg) error {
+func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *cfg.ApiServerConf) error {
 	var err error
 	// if serverConf.IsUserApiServer() {
 	// 	err = initUserApiServer(serverConf.UserServerCfg, logger, httpRouter, copySnpCfg)
@@ -97,7 +97,7 @@ func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *c
 }
 
 func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *url.UrlRouter) error {
-	_db, err := config.MysqlInstance{Conf: smysqlConf, Logger: logger}.NewMysqlInstance()
+	_db, err := config.MysqlInstance{Conf: mysqlConf, Logger: logger}.NewMysqlInstance()
 	if err != nil {
 		fmt.Println("[Init] Create Db connection error: ", err)
 		return err
@@ -111,11 +111,31 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
 	/*service*/
 	idInfoService := &service.IDInfoService{Logger: logger, IdInfoDao: idInfoDao, Db: _db}
-	idInfoView := idInfoService.GetIdInfo()
-	genSubIdInfo := aUtils.NewGenIdInfo(idInfoView.SubjectID)
-	genComIdInfo := aUtils.NewGenIdInfo(idInfoView.CompanyID)
-	genVouIdInfo := aUtils.NewGenIdInfo(idInfoView.VoucherID)
-	genVouRecIdInfo := aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
+	idInfoView, err2 := idInfoService.GetIdInfo()
+	if err2 != nil {
+		fmt.Println("[Init] GetIdInfo failed,error: ", err2.Error())
+		return err2
+	}
+	genSubIdInfo, err := aUtils.NewGenIdInfo(idInfoView.SubjectID)
+	if err != nil {
+		fmt.Println("[Init] initialize subjectID ,failed. error: ", err)
+		return err
+	}
+	genComIdInfo, err := aUtils.NewGenIdInfo(idInfoView.CompanyID)
+	if err != nil {
+		fmt.Println("[Init] initialize companyID ,failed. error: ", err)
+		return err
+	}
+	genVouIdInfo, err := aUtils.NewGenIdInfo(idInfoView.VoucherID)
+	if err != nil {
+		fmt.Println("[Init] initialize voucherID ,failed. error: ", err)
+		return err
+	}
+	genVouRecIdInfo, err := aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
+	if err != nil {
+		fmt.Println("[Init] initialize voucherRecordID ,failed. error: ", err)
+		return err
+	}
 
 	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: genSubIdInfo}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: genComIdInfo}

@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"common/model"
+	"analysis-server/model"
 	"common/utils"
 )
 

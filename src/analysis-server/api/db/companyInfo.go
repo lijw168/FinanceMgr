@@ -21,7 +21,7 @@ var (
 								"e_mail", "companyAddr", "backup"}
 	scanCompanyInfo   = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-					 &st.Summary, &st.Email, &st.CompAddr, &st.Backup)
+					 &st.Summary, &st.Email, &st.CompanyAddr, &st.Backup)
 	}
 )
 
@@ -55,10 +55,10 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 // }
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
-	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") + ") 
-	           values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") + 
+				") values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		                    st.Summary, st.Email,st.CompAddr,st.Backup}
+		                    st.Summary, st.Email,st.CompanyAddr,st.Backup}
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

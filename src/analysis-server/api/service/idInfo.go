@@ -24,8 +24,8 @@ func (is *IDInfoService) CreateIDInfo(params *model.IDInfoParams,
 	idInfo.SubjectID = *params.SubjectID
 	idInfo.VoucherID = *params.VoucherID
 	idInfo.VoucherRecordID = *params.VoucherRecordID
-	if err = is.IdInfoDao.create(is.Db, idInfo); err != nil {
-		is.Logger.Error("[%s] [IdInfoDao.Create: %s]", FuncName, err.Error())
+	if err := is.IdInfoDao.Create(is.Db, idInfo); err != nil {
+		is.Logger.Error("[CreateIDInfo] [IdInfoDao.Create: %s]", err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	idInfoView := is.IdInfoModelToView(idInfo)
@@ -58,20 +58,20 @@ func (is *IDInfoService) GetIdInfo() (*model.IDInfoView, CcError) {
 
 func (is *IDInfoService) DeleteIdInfo() CcError {
 	is.Logger.Info("DeleteIdInfo method begin")
-	err := is.IdInfoDao.Delete(ctx, is.Db, strSubName)
+	err := is.IdInfoDao.Delete(is.Db)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	is.Logger.Info(ctx, "DeleteIdInfo method end")
+	is.Logger.Info("DeleteIdInfo method end")
 	return nil
 }
 
 func (is *IDInfoService) UpdateIdInfo(params map[string]interface{}) CcError {
 	is.Logger.Info("UpdateIdInfo method begin")
-	err = is.IdInfoDao.Update(params)
+	err := is.IdInfoDao.Update(is.Db,params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	is.Logger.Info(ctx, "UpdateIdInfo method end")
+	is.Logger.Info("UpdateIdInfo method end")
 	return nil
 }

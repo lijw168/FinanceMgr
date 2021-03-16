@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"common/model"
 )
 
 // const (
@@ -590,24 +588,24 @@ func UpdateDb(do DbOperator, tn string, id string, kv map[string]interface{}) er
 	return err
 }
 
-func listBasicDb(do DbOperator, tn string, filter map[string]interface{}, limit int, offset int, order string, od int) ([]*model.ResourceBasic, error) {
-	var ret []*model.ResourceBasic
-	strSql, values := transferListSql(tn, filter, []string{"id", "version"}, limit, offset, order, od)
-	result, err := do.Query(strSql, values...)
-	if err != nil {
-		return nil, err
-	}
-	defer result.Close()
-	for result.Next() {
-		r := new(model.ResourceBasic)
-		err = result.Scan(&(r.Id), &(r.Version))
-		if err != nil {
-			return ret, err
-		}
-		ret = append(ret, r)
-	}
-	return ret, nil
-}
+// func listBasicDb(do DbOperator, tn string, filter map[string]interface{}, limit int, offset int, order string, od int) ([]*model.ResourceBasic, error) {
+// 	var ret []*model.ResourceBasic
+// 	strSql, values := transferListSql(tn, filter, []string{"id", "version"}, limit, offset, order, od)
+// 	result, err := do.Query(strSql, values...)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer result.Close()
+// 	for result.Next() {
+// 		r := new(model.ResourceBasic)
+// 		err = result.Scan(&(r.Id), &(r.Version))
+// 		if err != nil {
+// 			return ret, err
+// 		}
+// 		ret = append(ret, r)
+// 	}
+// 	return ret, nil
+// }
 
 //gen sql with order by list
 func transferListSqlWithOrders(table string, filter map[string]interface{}, field []string, limit int, offset int, orders []string, ods []int) (string, []interface{}) {

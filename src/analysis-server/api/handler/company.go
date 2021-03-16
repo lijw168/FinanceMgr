@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"common/log"
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	"common/log"
 )
 
 type CompanyHandlers struct {
 	CCHandler
 	Logger     *log.Logger
-	ComService service.CompanyService
+	ComService *service.CompanyService
 }
 
 func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
@@ -27,14 +27,14 @@ func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["companyId"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["companyName"] = utils.Attribute{utils.T_String, nil}
-		filterMap["abbreviationName"] = utils.Attribute{utils.T_String, nil}
-		filterMap["corporator"] = utils.Attribute{utils.T_String, nil}
-		filterMap["phone"] = utils.Attribute{utils.T_String, nil}
-		filterMap["e_mail"] = utils.Attribute{utils.T_String, nil}
-		filterMap["companyAddr"] = utils.Attribute{utils.T_String, nil}
-		filterMap["backup"] = utils.Attribute{utils.T_String, nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["abbreviationName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["corporator"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["phone"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["e_mail"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["companyAddr"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["backup"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrCompany, service.ErrValue, service.ErrField, service.ErrNull)
 			ch.Response(r.Context(), ch.Logger, w, ce, nil)
@@ -154,7 +154,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if params.CompanyID == nil || *params.CompanyID == "" {
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrId, service.ErrNull)
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
@@ -199,7 +199,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
 	ccErr := ch.ComService.UpdateCompanyById(r.Context(), *params.CompanyID, updateFields)
@@ -220,13 +220,13 @@ func (ch *CompanyHandlers) DeleteCompany(w http.ResponseWriter, r *http.Request)
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
-	if params.CompanyId == nil || *params.ID <= 0 {
+	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrId, service.ErrNull)
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
 	requestId := ch.GetTraceId(r)
-	ccErr = ch.ComService.DeleteCompanyByID(r.Context(), *params.ID, requestId)
+	ccErr := ch.ComService.DeleteCompanyByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		ch.Logger.WarnContext(r.Context(), "[company/DeleteCompany/ServeHTTP] [ComService.DeleteCompanyByID: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)

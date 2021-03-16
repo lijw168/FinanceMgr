@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type VoucherRecordDao struct {
@@ -17,11 +17,11 @@ type VoucherRecordDao struct {
 
 var (
 	voucherRecordTN     = "voucherRecordInfo_2020"
-	voucherRecordFields = []string{"recordId", "voucherId", "subjectName", "debitMoney", "creditMoney", 
-									"summary", "subId1", "subId2", "subId3", "subId4","billCount"}
-	scanVoucherRecord   = func(r DbScanner, st *model.VoucherRecord) error {
+	voucherRecordFields = []string{"recordId", "voucherId", "subjectName", "debitMoney", "creditMoney",
+		"summary", "subId1", "subId2", "subId3", "subId4", "billCount"}
+	scanVoucherRecord = func(r DbScanner, st *model.VoucherRecord) error {
 		return r.Scan(&st.RecordID, &st.VoucherID, &st.SubjectName, &st.DebitMoney, &st.CreditMoney,
-					 &st.Summary, &st.SbuID1,&st.SbuID2,&st.SbuID3,&st.SbuID4,&st.BillCount)
+			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.BillCount)
 	}
 )
 
@@ -45,12 +45,12 @@ func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId in
 }
 
 //get the count of the table
-func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, error) {
+func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + voucherInfoTN
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -65,10 +65,10 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, err
 // }
 
 func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *model.VoucherRecord) error {
-	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") + ") 
-	           values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") +
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
-		                    st.Summary, st.SbuID1,st.SbuID2,st.SbuID3,st.SbuID4,st.BillCount}
+		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.BillCount}
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -137,11 +137,11 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map
 	return voucherRecordSlice, nil
 }
 
-func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, strName string,
-	                               params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucherId","SubjectName": "subjectName", "DebitMoney": "debitMoney",
-							"CreditMoney": "creditMoney", "Summary": "summary", "SubID1": "subId1", "SubID2": "subId2",
-							"SubID3": "subId3", "RecordID": "recordId"}
+func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId int,
+	params map[string]interface{}) error {
+	var keyMap = map[string]string{"VoucherID": "voucherId", "SubjectName": "subjectName", "DebitMoney": "debitMoney",
+		"CreditMoney": "creditMoney", "Summary": "summary", "SubID1": "subId1", "SubID2": "subId2",
+		"SubID3": "subId3", "RecordID": "recordId"}
 	strSql := "update " + voucherRecordTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -159,8 +159,8 @@ func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, strName 
 	if first {
 		return nil
 	}
-	strSql += " where name = ?"
-	values = append(values, strName)
+	strSql += " where recordId = ?"
+	values = append(values, recordId)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

@@ -19,7 +19,7 @@ var (
 	operatorInfoTN     = "operatorInfo"
 	operatorInfoFields = []string{"companyId", "name", "password", "job", "department", "status", "role"}
 	scanOperatorInfo   = func(r DbScanner, st *model.OperatorInfo) error {
-		return r.Scan(&st.companyId, &st.Name, &st.Password, &st.Job, &st.Department, &st.Status, &st.Role)
+		return r.Scan(&st.CompanyID, &st.Name, &st.Password, &st.Job, &st.Department, &st.Status, &st.Role)
 	}
 )
 
@@ -54,7 +54,7 @@ func (dao *OperatorInfoDao) CountByFilter(ctx context.Context, do DbOperator, fi
 
 func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model.OperatorInfo) error {
 	strSql := "insert into " + operatorInfoTN + " (" + strings.Join(operatorInfoFields, ",") + ") values (?, ?, ?, ?, ?, ?, ?)"
-	values := []interface{}{st.Name, st.Password, st.Job, st.Department, st.State, st.ServiceId, st.Status}
+	values := []interface{}{st.CompanyID, st.Name, st.Password, st.Job, st.Department, st.Status, st.Role}
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

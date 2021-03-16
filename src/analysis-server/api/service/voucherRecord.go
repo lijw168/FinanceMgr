@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	cons "common/constant"
-	"common/log"
 	"analysis-server/api/db"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
 )
 
 type VoucherRecordService struct {
@@ -26,20 +26,20 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 	FuncName := "VoucherRecordService/CreateVoucherRecord"
 	vRecord := new(model.VoucherRecord)
 	vRecord.RecordID = vs.GenRecordId.GetId()
-	vRecord.VoucherID = params.VoucherID
-	vRecord.SubjectName = params.SubjectName
-	vRecord.DebitMoney = params.DebitMoney
-	vRecord.CreditMoney = params.CreditMoney
-	vRecord.Summary = params.Summary
-	vRecord.BillCount = params.BillCount
-	vRecord.SubID1 = params.SubID1
-	vRecord.SubID2 = params.SubID2
-	vRecord.SubID3 = params.SubID3
-	vRecord.SubID4 = params.SubID4
+	vRecord.VoucherID = *params.VoucherID
+	vRecord.SubjectName = *params.SubjectName
+	vRecord.DebitMoney = *params.DebitMoney
+	vRecord.CreditMoney = *params.CreditMoney
+	vRecord.Summary = *params.Summary
+	vRecord.BillCount = *params.BillCount
+	vRecord.SubID1 = *params.SubID1
+	vRecord.SubID2 = *params.SubID2
+	vRecord.SubID3 = *params.SubID3
+	vRecord.SubID4 = *params.SubID4
 
-	if err = vs.VRecordDao.create(ctx, vs.Db, vRecord); err != nil {
+	if err := vs.VRecordDao.Create(ctx, vs.Db, vRecord); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		return -1, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//vRecordView := vs.VoucherRecordModelToView(vRecord)
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecord method end ")
@@ -51,7 +51,8 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 	//create
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method start, "+"requestId:%s", requestId)
 	FuncName := "VoucherRecordService/CreateVoucherRecords"
-	if tx, err = vs.Db.Begin(); err != nil {
+	tx, err := vs.Db.Begin()
+	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
@@ -61,17 +62,17 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vRecord := new(model.VoucherRecord)
 		vRecord.RecordID = vs.GenRecordId.GetId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
-		vRecord.VoucherID = itemParam.VoucherID
-		vRecord.SubjectName = itemParam.SubjectName
-		vRecord.DebitMoney = itemParam.DebitMoney
-		vRecord.CreditMoney = itemParam.CreditMoney
-		vRecord.Summary = itemParam.Summary
-		vRecord.BillCount = itemParam.BillCount
-		vRecord.SubID1 = itemParam.SubID1
-		vRecord.SubID2 = itemParam.SubID2
-		vRecord.SubID3 = itemParam.SubID3
-		vRecord.SubID4 = itemParam.SubID4
-		if err = vs.VRecordDao.create(ctx, tx, vRecord); err != nil {
+		vRecord.VoucherID = *itemParam.VoucherID
+		vRecord.SubjectName = *itemParam.SubjectName
+		vRecord.DebitMoney = *itemParam.DebitMoney
+		vRecord.CreditMoney = *itemParam.CreditMoney
+		vRecord.Summary = *itemParam.Summary
+		vRecord.BillCount = *itemParam.BillCount
+		vRecord.SubID1 = *itemParam.SubID1
+		vRecord.SubID2 = *itemParam.SubID2
+		vRecord.SubID3 = *itemParam.SubID3
+		vRecord.SubID4 = *itemParam.SubID4
+		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -93,7 +94,7 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 	vRecordView.VoucherID = vRecord.VoucherID
 	vRecordView.RecordID = vRecord.RecordID
 	vRecordView.SubjectName = vRecord.SubjectName
-	vRecord.DebitMoney = vRecord.DebitMoney
+	vRecordView.DebitMoney = vRecord.DebitMoney
 	vRecordView.CreditMoney = vRecord.CreditMoney
 	vRecordView.Summary = vRecord.Summary
 	vRecordView.BillCount = vRecord.BillCount
@@ -118,7 +119,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 			case "recordId", "voucherId", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
 			default:
-				return recordViewSlice, 0, NewError(ErrDesc, ErrUnsupported, ErrField, *f.Field)
+				return recordViewSlice, 0, NewError(ErrVoucher, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
@@ -134,7 +135,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherRecords, err := vs.VRecordDao.List(ctx, ps.Db, filterFields, limit, offset, orderField, orderDirection)
+	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return recordViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -153,12 +154,12 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 }
 
 func (vs *VoucherRecordService) DeleteVoucherRecordByID(ctx context.Context, recordID int, requestId string) CcError {
-	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method begin, "+"record ID:%s", recordID)
+	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method begin, "+"record ID:%d", recordID)
 	err := vs.VRecordDao.Delete(ctx, vs.Db, recordID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method end, "+"voucher ID:%s", recordID)
+	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method end, "+"voucher ID:%d", recordID)
 	return nil
 }
 
@@ -168,26 +169,27 @@ func (vs *VoucherRecordService) GetVoucherRecordByID(ctx context.Context, record
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
-		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the voucher record is not exist")
+		return nil, NewCcError(cons.CodeVoucherRecordNotExist, ErrVoucher, ErrNotFound, ErrNull, "the voucher record is not exist")
 	default:
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	vRecordView := vs.VoucherInfoModelToView(vRecord)
+	vRecordView := VoucherRecordModelToView(vRecord)
 	return vRecordView, nil
 }
 
 func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordID int, params map[string]interface{}) CcError {
 	FuncName := "VoucherRecordService/UpdateVoucherRecord"
-	if tx, err = vs.Db.Begin(); err != nil {
+	tx, err := vs.Db.Begin()
+	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
-	vRecord, err := vs.VRecordDao.Get(ctx, tx, recordID)
+	_, err = vs.VRecordDao.Get(ctx, tx, recordID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
-		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+		return NewCcError(cons.CodeVoucherRecordNotExist, ErrVoucher, ErrNotFound, ErrNull, "the Voucher record is not exist")
 	default:
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

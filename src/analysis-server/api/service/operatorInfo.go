@@ -1,33 +1,27 @@
 package service
 
 import (
+	"analysis-server/api/db"
+	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
-	"strings"
-	"time"
-
-	cons "common/constant"
-	cmodel "common/model"
-	"common/utils"
-	"analysis-server/model"
-	"analysis-server/api/db"
-	"common/log"
 )
 
 type OperatorInfoService struct {
-	Logger          *log.Logger
-	OptInfoDao      *db.operatorInfoDao
-	Db              *sql.DB
+	Logger     *log.Logger
+	OptInfoDao *db.OperatorInfoDao
+	Db         *sql.DB
 }
 
-func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context,params *model.CreateOperatorInfoParams,
+func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.OperatorInfoParams,
 	requestId string) (*model.OperatorInfoView, CcError) {
 	ps.Logger.InfoContext(ctx, "CreateOptInfo method start, "+"operator Name:%s", *params.Name)
 
 	FuncName := "OperatorInfoService/operater/CreateOptInfo"
-	if tx, err = ps.Db.Begin(); err != nil {
+	tx, err := ps.Db.Begin()
+	if err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
@@ -37,11 +31,11 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context,params *model.C
 	filterFields["name"] = *params.Name
 	conflictCount, err := ps.OptInfoDao.CountByFilter(ctx, tx, filterFields)
 	if err != nil {
-		return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if conflictCount > 0 {
-		return nil, NewError(ErrCompany, ErrConflict,ErrNull, err.Error())
-	}	
+		return nil, NewError(ErrCompany, ErrConflict, ErrNull, err.Error())
+	}
 	//generate company
 	optInfo := new(model.OperatorInfo)
 	optInfo.Name = *params.Name
@@ -52,15 +46,15 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context,params *model.C
 	optInfo.Status = *params.Status
 	optInfo.Role = *params.Role
 
-	if err = ps.OptInfoDao.create(ctx, tx, optInfo); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [OptInfoDao.Create: %s]",FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
+	if err = ps.OptInfoDao.Create(ctx, tx, optInfo); err != nil {
+		ps.Logger.ErrorContext(ctx, "[%s] [OptInfoDao.Create: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	optView := ps.CompanyMdelToView(optInfo)
+	optView := ps.OperateInfoMdelToView(optInfo)
 	ps.Logger.InfoContext(ctx, "CreateOptInfo method end, "+"operator Name:%s", *params.Name)
 	return optView, nil
 }
@@ -77,10 +71,10 @@ func (ps *OperatorInfoService) ListOperators(ctx context.Context,
 			// case "fuzzy_name":
 			// 	volName := "%" + f.Value.(string) + "%"
 			// 	fuzzyMatchFields["volume_name"] = volName
-			case "name","companyId","job","department","status","role":
+			case "name", "companyId", "job", "department", "status", "role":
 				filterFields[*f.Field] = f.Value
 			default:
-				return OptViewSlice, 0, NewError(ErrDesc, ErrUnsupported, ErrField, *f.Field)
+				return OptViewSlice, 0, NewError(ErrOperator, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
@@ -123,8 +117,8 @@ func (ps *OperatorInfoService) OperateInfoMdelToView(optInfo *model.OperatorInfo
 	return optView
 }
 
-func (ps *OperatorInfoService) GetOperatorInfoByName(ctx context.Context, , strOperatorName string,
-													requestId string) (*model.OperatorInfoView, CcError) {
+func (ps *OperatorInfoService) GetOperatorInfoByName(ctx context.Context, strOperatorName string,
+	requestId string) (*model.OperatorInfoView, CcError) {
 	optInfo, err := ps.OptInfoDao.Get(ctx, ps.Db, strOperatorName)
 	switch err {
 	case nil:
@@ -137,13 +131,12 @@ func (ps *OperatorInfoService) GetOperatorInfoByName(ctx context.Context, , strO
 	return optInfoView, nil
 }
 
-
 func (ps *OperatorInfoService) DeleteOperatorInfoByName(ctx context.Context, strOperatorName string,
-											  		requestId string) CcError {
+	requestId string) CcError {
 	ps.Logger.InfoContext(ctx, "DeleteOperatorInfoByName method begin, "+"operator Name:%s", strOperatorName)
-	err := ps.Delete(ctx, ps.Db, strSubName)
+	err := ps.OptInfoDao.Delete(ctx, ps.Db, strOperatorName)
 	if err != nil {
-		return NewError(ErrSystem, ErrError,ErrNull, "Delete failed")
+		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
 	ps.Logger.InfoContext(ctx, "DeleteOperatorInfoByName method end, "+"operator Name:%s", strOperatorName)
 	return nil
@@ -162,12 +155,13 @@ func (ps *OperatorInfoService) DeleteOperatorInfoByName(ctx context.Context, str
 
 func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName string, params map[string]interface{}) CcError {
 	FuncName := "OperatorInfoService/UpdateOperator"
-	if tx, err = ps.Db.Begin(); err != nil {
+	tx, err := ps.Db.Begin()
+	if err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, ps.Logger, FuncName, tx)
-	company, err := ps.OptInfoDao.Get(ctx, tx, strOptName)
+	_, err = ps.OptInfoDao.Get(ctx, tx, strOptName)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:

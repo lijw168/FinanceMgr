@@ -26,11 +26,11 @@ type CompanyView struct {
 }
 
 type OperatorInfoView struct {
-	CompanyID  string `json:"companyId"`
+	CompanyID  int    `json:"companyId"`
 	Name       string `json:"name"`
-	Job        int    `json:"job"`
+	Job        string `json:"job"`
 	Department string `json:"department"`
-	Status     string `json:"Status"`
+	Status     int    `json:"Status"`
 	Role       int    `json:"role"`
 }
 

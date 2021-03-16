@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"net/http"
-	"unicode/utf8"
-
-	"common/log"
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	"common/log"
+	"net/http"
 )
 
 // var (
@@ -18,9 +16,9 @@ import (
 type VoucherHandlers struct {
 	CCHandler
 	Logger *log.Logger
-	Vis    service.VoucherInfoService
-	Vrs    service.VoucherRecordService
-	Vs     service.VoucherService
+	Vis    *service.VoucherInfoService
+	Vrs    *service.VoucherRecordService
+	Vs     *service.VoucherService
 }
 
 func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Request) {
@@ -34,13 +32,13 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucherId"] = utils.Attribute{utils.T_Int_Arr, nil}
-		filterMap["companyId"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["voucherMonth"] = utils.Attribute{utils.T_Int_Arr, nil}
-		filterMap["numOfMonth"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["voucherDate"] = utils.Attribute{utils.T_Int, nil}
+		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
-			ce := service.NewError(service.ErrVoucher, service.ErrDesc, service.ErrField, service.ErrNull)
+			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
@@ -98,16 +96,16 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucherId"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["recordId"] = utils.Attribute{utils.T_Int_Arr, nil}
-		filterMap["subjectName"] = utils.Attribute{utils.T_String, nil}
-		filterMap["summary"] = utils.Attribute{utils.T_String, nil}
-		filterMap["subId1"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["subId2"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["subId3"] = utils.Attribute{utils.T_Int, nil}
-		filterMap["subId4"] = utils.Attribute{utils.T_Int, nil}
+		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["subId1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
-			ce := service.NewError(service.ErrVoucher, service.ErrDesc, service.ErrField, service.ErrNull)
+			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
@@ -220,28 +218,28 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
-		ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
 	if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
-		ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
 	for _, recParam := range params.RecordsParams {
 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
 		if recParam.CreditMoney == nil || *recParam.CreditMoney <= 0.001 {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
 		if recParam.DebitMoney == nil || *recParam.DebitMoney <= 0.001 {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
@@ -254,7 +252,7 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	dataBuf := &DescData{len(IdSlice), IdSlice}
+	dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 	return
 }
@@ -274,7 +272,7 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	requestId := vh.GetTraceId(r)
-	ccErr = vh.Vs.DeleteVoucher(r.Context(), *params.ID, requestId)
+	ccErr := vh.Vs.DeleteVoucher(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucher/ServeHTTP] [Vs.DeleteVoucher: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
@@ -286,7 +284,7 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 
 func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.Request) {
 	var recordsParams []model.VoucherRecordParams
-	err := vh.HttpRequestParse(r, params)
+	err := vh.HttpRequestParse(r, recordsParams)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucher/CreateVoucherRecords] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
@@ -294,29 +292,29 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 		return
 	}
 	if len(recordsParams) == 0 {
-		ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherRecord, service.ErrNull)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherRecord, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	
-	for _, recParam := recordsParams {
+
+	for _, recParam := range recordsParams {
 		if recParam.VoucherID == nil || *recParam.VoucherID == 0 {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrIds, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrIds, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
 		if recParam.CreditMoney == nil || *recParam.CreditMoney <= 0.001 {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
 		if recParam.DebitMoney == nil || *recParam.DebitMoney <= 0.001 {
-			ccErr = service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
@@ -329,7 +327,7 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	dataBuf := &DescData{len(IdSlice), IdSlice}
+	dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 	return
 }
@@ -357,7 +355,7 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 		}
 		updateFields["SubjectName"] = *params.SubjectName
 	}
-	if params.Summary != nil {		
+	if params.Summary != nil {
 		updateFields["Summary"] = *params.Summary
 	}
 	if params.BillCount != nil {
@@ -398,25 +396,25 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 
 func (vh *VoucherHandlers) DeleteVoucherRecord(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.DeleteIDParams)
-	err := oh.HttpRequestParse(r, params)
+	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		oh.Logger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecord] [HttpRequestParse: %v]", err)
+		vh.Logger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecord] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	requestId := oh.GetTraceId(r)
-	ccErr = vh.Vrs.DeleteVoucherRecordByID(r.Context(), *params.ID, requestId)
+	requestId := vh.GetTraceId(r)
+	ccErr := vh.Vrs.DeleteVoucherRecordByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServeHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
-		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServeHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	oh.Response(r.Context(), oh.Logger, w, nil, nil)
+	vh.Response(r.Context(), vh.Logger, w, nil, nil)
 	return
 }

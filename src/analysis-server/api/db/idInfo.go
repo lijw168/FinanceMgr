@@ -1,7 +1,7 @@
 package db
 
 import (
-	"context"
+	//"context"
 	"database/sql"
 	"strings"
 	"time"
@@ -31,7 +31,7 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 	defer func() {
 		dao.Logger.Info("[IDInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanIdInfo(do.QueryRowContext(strSql), idInfo); err {
+	switch err := scanIdInfo(do.QueryRow(strSql), idInfo); err {
 	case nil:
 		return idInfo, nil
 	case sql.ErrNoRows:
@@ -43,8 +43,8 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 }
 
 func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
-	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") + ") 
-	           values (?, ?, ?, ?)"
+	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") + 
+				") values (?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.SubjectID, st.VoucherID, st.VoucherRecordID}
 	dao.Logger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
@@ -83,7 +83,7 @@ func (dao *IDInfoDao) Count(do DbOperator) (int64, error) {
 }
 
 func (dao *IDInfoDao) Update(do DbOperator,	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subjectId", "CompanyID": "companyId", "VoucherID": "voucherId",, "VoucherRecordID": "voucherRecordId"}
+	var keyMap = map[string]string{"SubjectID": "subjectId", "CompanyID": "companyId", "VoucherID": "voucherId","VoucherRecordID": "voucherRecordId"}
 	strSql := "update " + idInfoTN + " set "
 	var values []interface{}
 	var first bool = true

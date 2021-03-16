@@ -26,7 +26,7 @@ var (
 func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strName string) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subjectName=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByName] [sql: %s ,values: %s]", strSql, strName)
-	var accSub = &model.accountSubject{}
+	var accSub = &model.AccSubject{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByName] [SqlElapsed: %v]", time.Since(start))
@@ -45,7 +45,7 @@ func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strNam
 func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, strID string) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subjectId=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %s]", strSql, strID)
-	var accSub = &model.accountSubject{}
+	var accSub = &model.AccSubject{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByID] [SqlElapsed: %v]", time.Since(start))
@@ -126,7 +126,7 @@ func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID i
 }
 
 func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
-	offset int, order string, od int) ([]*model.AccSubject, error) {
+						   offset int, order string, od int) ([]*model.AccSubject, error) {
 	var accountSubjectSlice []*model.AccSubject
 	strSql, values := transferListSql(accSubInfoTN, filter, accSubInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/List] sql %s with values %v", strSql, values)
@@ -142,12 +142,12 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 	defer result.Close()
 	for result.Next() {
 		accountSubject := new(model.AccSubject)
-		err = scanAccSubTask(result, AccSubject)
+		err = scanAccSubTask(result, accountSubject)
 		if err != nil {
 			dao.Logger.ErrorContext(ctx, "[accountSubject/db/List] [ScanSnapshot: %s]", err.Error())
 			return accountSubjectSlice, err
 		}
-		accountSubjectSlice = append(accountSubjectSlice, AccSubject)
+		accountSubjectSlice = append(accountSubjectSlice, accountSubject)
 	}
 	return accountSubjectSlice, nil
 }

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"common/log"
-	"common/model"
+	"analysis-server/model"
 	"analysis-server/api/service"
 )
 

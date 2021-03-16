@@ -1,30 +1,25 @@
 package service
 
 import (
+	"analysis-server/api/db"
+	"analysis-server/api/utils"
+	"analysis-server/model"
+	cons "common/constant"
+	"common/log"
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
-	"strings"
-	"time"
-
-	cons "common/constant"
-	cmodel "common/model"
-	"common/utils"
-	"analysis-server/model"
-	"analysis-server/api/db"
-	"common/log"
+	"strconv"
 )
 
 type AccountSubService struct {
-	Logger      *log.Logger
-	AccSubDao   *db.AccSubDao
-	Db          *sql.DB
-	GenSubId 	*utils.GenIdInfo
+	Logger    *log.Logger
+	AccSubDao *db.AccSubDao
+	Db        *sql.DB
+	GenSubId  *utils.GenIdInfo
 }
 
-func (as *AccountSubService) CreateAccSub(ctx context.Context,params *model.CreateSubjectParams,
-							 			  requestId string) (*model.AccSubjectView, CcError) {
+func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.CreateSubjectParams,
+	requestId string) (*model.AccSubjectView, CcError) {
 	//create
 	as.Logger.InfoContext(ctx, "CreateAccSub method start, "+"subjectName:%s", *params.SubjectName)
 
@@ -33,7 +28,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context,params *model.Crea
 	tx, err := as.Db.Begin()
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError,ErrNull, "tx begin error")
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, as.Logger, FuncName, tx)
 
@@ -41,30 +36,30 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context,params *model.Crea
 	filterFields["subjectName"] = *params.SubjectName
 	conflictCount, err := as.AccSubDao.CountByFilter(ctx, tx, filterFields)
 	if err != nil {
-		return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if conflictCount > 0 {
-		return nil, NewError(ErrAccSub, ErrConflict,ErrNull, err.Error())
+		return nil, NewError(ErrAccSub, ErrConflict, ErrNull, err.Error())
 	}
 	//get the count of the table accountSubject
 	// var accSubCount int
 	// accSubCount, err = as.AccSubDao.Count(ctx, tx)
 	// if err != nil {
 	// 	return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
-	// }	
+	// }
 	//generate account subject
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
-	accSub.SubjectID = as.GenSubId.GetId()
-	if err = as.AccSubDao.create(ctx, tx, accSub); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]",FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
+	accSub.SubjectID = strconv.Itoa(as.GenSubId.GetId())
+	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//commit
 	if err = tx.Commit(); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err2.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	accSubView := as.AccSubMdelToView(accSub)
 	as.Logger.InfoContext(ctx, "CreateAccSub method end, "+"subjectName:%s", *params.SubjectName)
@@ -75,11 +70,11 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context,params *model.Crea
 func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.AccSubjectView {
 	accSubView := new(model.AccSubjectView)
 	accSubView.SubjectName = accSub.SubjectName
-	accSubView.SubjectLevel = accSub.SubjectLevel	
+	accSubView.SubjectLevel = accSub.SubjectLevel
 	return accSubView
 }
 
-func (as *AccountSubService) GetAccSubByName(ctx context.Context, ,strSubName string,
+func (as *AccountSubService) GetAccSubByName(ctx context.Context, strSubName string,
 	requestId string) (*model.AccSubjectView, CcError) {
 	accSubject, err := as.AccSubDao.GetAccSubByName(ctx, as.Db, strSubName)
 	switch err {
@@ -95,7 +90,7 @@ func (as *AccountSubService) GetAccSubByName(ctx context.Context, ,strSubName st
 
 func (as *AccountSubService) GetAccSubById(ctx context.Context, subId int,
 	requestId string) (*model.AccSubjectView, CcError) {
-	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, subId)
+	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, strconv.Itoa(subId))
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -106,7 +101,6 @@ func (as *AccountSubService) GetAccSubById(ctx context.Context, subId int,
 	accSubView := as.AccSubMdelToView(accSubject)
 	return accSubView, nil
 }
-
 
 func (as *AccountSubService) DeleteAccSubByName(ctx context.Context, strSubName string,
 	requestId string) CcError {
@@ -120,7 +114,7 @@ func (as *AccountSubService) DeleteAccSubByName(ctx context.Context, strSubName 
 	//defer RollbackLog(ctx, as.Logger, FuncName, tx)
 	err := as.AccSubDao.DeleteByName(ctx, as.Db, strSubName)
 	if err != nil {
-		return NewError(ErrSystem, ErrError,ErrNull, "Delete failed")
+		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
 	as.Logger.InfoContext(ctx, "DeleteAccSubByName method end, "+"subjectName:%s", strSubName)
 	return nil
@@ -128,12 +122,12 @@ func (as *AccountSubService) DeleteAccSubByName(ctx context.Context, strSubName 
 
 func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int,
 	requestId string) CcError {
-	as.Logger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%s", subjectID)
-	err := as.DeleteByID(ctx, as.Db, subjectID)
+	as.Logger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%d", subjectID)
+	err := as.AccSubDao.DeleteByID(ctx, as.Db, subjectID)
 	if err != nil {
-		return NewError(ErrSystem, ErrError,ErrNull, "Delete failed")
+		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	as.Logger.InfoContext(ctx, "DeleteAccSubByID method end, "+"subject:%s", subjectID)
+	as.Logger.InfoContext(ctx, "DeleteAccSubByID method end, "+"subject:%d", subjectID)
 	return nil
 }
 
@@ -142,10 +136,10 @@ func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName 
 	tx, err := as.Db.Begin()
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError,ErrNull, "tx begin error")
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, as.Logger, FuncName, tx)
-	accSubject, err := as.AccSubDao.GetAccSubByName(ctx, tx, strSubName)
+	_, err = as.AccSubDao.GetAccSubByName(ctx, tx, strSubName)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -161,7 +155,7 @@ func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName 
 	}
 	if err = tx.Commit(); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err2.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	return nil
 }
@@ -171,10 +165,10 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, strSubID stri
 	tx, err := as.Db.Begin()
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return nil, NewError(ErrSystem, ErrError,ErrNull, "tx begin error")
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, as.Logger, FuncName, tx)
-	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, tx, strSubID)
+	_, err = as.AccSubDao.GetAccSubByID(ctx, tx, strSubID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -190,13 +184,13 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, strSubID stri
 	}
 	if err = tx.Commit(); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err2.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	return nil
 }
 
 func (as *AccountSubService) ListAccSub(ctx context.Context,
-										params *model.ListSubjectParams) ([]*model.AccSubjectView, int, CcError) {
+	params *model.ListSubjectParams) ([]*model.AccSubjectView, int, CcError) {
 	accSubViewSlice := make([]*model.AccSubjectView, 0)
 	filterFields := make(map[string]interface{})
 	limit, offset := -1, 0
@@ -206,10 +200,10 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 			// case "fuzzy_name":
 			// 	volName := "%" + f.Value.(string) + "%"
 			// 	fuzzyMatchFields["volume_name"] = volName
-			case "subjectId","subjectName","subjectLevel":
+			case "subjectId", "subjectName", "subjectLevel":
 				filterFields[*f.Field] = f.Value
 			default:
-				return accSubViewSlice, 0, NewError(ErrDesc, ErrUnsupported, ErrField, *f.Field)
+				return accSubViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
@@ -236,9 +230,5 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 		accSubViewSlice = append(accSubViewSlice, accSubInfoView)
 	}
 	accSubInfoCount := len(accSubInfos)
-	//volumeCount, CcErr := as.CountByFilter(ctx, as.Db, filterFields)
-	if CcErr != nil {
-		return nil, 0, CcErr
-	}
 	return accSubViewSlice, accSubInfoCount, nil
 }

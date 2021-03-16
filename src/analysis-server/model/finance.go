@@ -6,12 +6,12 @@ import (
 
 //OperatorInfo ...
 type OperatorInfo struct {
-	CompanyID  string `orm:"column(companyId)"`
+	CompanyID  int    `orm:"column(companyId)"`
 	Name       string `orm:"pk;column(name)"`
 	Password   string `orm:"column(password)"`
-	Job        int    `orm:"column(job)"`
+	Job        string `orm:"column(job)"`
 	Department string `orm:"column(department)"`
-	Status     string `orm:"column(Status)"`
+	Status     int    `orm:"column(Status)"`
 	Role       int    `orm:"column(role)"`
 }
 
@@ -65,4 +65,12 @@ type IDInfo struct {
 	CompanyID       int `orm:"column(companyId)"`
 	SubjectID       int `orm:"column(subjectId)"`
 	VoucherRecordID int `orm:"column(voucherRecordId)"`
+}
+
+//CommResp ...
+type CommResp struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Detail  string      `json:"detail"`
+	Data    interface{} `json:"data"`
 }

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type VoucherInfoDao struct {
@@ -48,7 +48,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, err
 	strSql := "select count(1) from " + voucherInfoTN
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -64,8 +64,8 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, fil
 
 //voucherID由数据库中的自增ID产生，所以此时就不用再对该字段进行赋值了。
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
-	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") + ") 
-			   values (?, ?, ?, ?)"
+	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
+		") values (?, ?, ?, ?)"
 	//values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate}
 	values := []interface{}{st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate}
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Create] [sql: %s, values: %v]", strSql, values)
@@ -93,7 +93,7 @@ func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId 
 	return nil
 }
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
-								offset int, order string, od int) ([]*model.VoucherInfo, error) {
+	offset int, order string, od int) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
 	strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
@@ -109,7 +109,7 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 	defer result.Close()
 	for result.Next() {
 		voucherInfo := new(model.VoucherInfo)
-		err = scanVoucherInfo(result, VoucherInfo)
+		err = scanVoucherInfo(result, voucherInfo)
 		if err != nil {
 			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/List] [ScanSnapshot: %s]", err.Error())
 			return voucherInfoSlice, err
@@ -120,9 +120,9 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 }
 
 func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId int,
-	                               params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucherId","CompanyID": "companyId", "VoucherDate": "voucherDate",
-									"NumOfMonth": "numOfMonth", "VoucherMonth": "voucherMonth"}
+	params map[string]interface{}) error {
+	var keyMap = map[string]string{"VoucherID": "voucherId", "CompanyID": "companyId", "VoucherDate": "voucherDate",
+		"NumOfMonth": "numOfMonth", "VoucherMonth": "voucherMonth"}
 	strSql := "update " + voucherInfoTN + " set "
 	var values []interface{}
 	var first bool = true

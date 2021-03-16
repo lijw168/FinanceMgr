@@ -69,7 +69,7 @@ type ModifyCompanyParams struct {
 }
 
 type OperatorInfoParams struct {
-	CompanyID  *string `json:"companyId"`
+	CompanyID  *int    `json:"companyId"`
 	Name       *string `json:"name"`
 	Password   *string `json:"password"`
 	Job        *string `json:"job"`
