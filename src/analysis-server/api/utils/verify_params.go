@@ -14,6 +14,6 @@ func VerStrP(s string) bool {
 	return strParaRe.Match([]byte(s))
 }
 
-func VerHostnameP(s string) bool {
-	return hnParaRe.Match([]byte(s))
-}
+// func VerHostnameP(s string) bool {
+// 	return hnParaRe.Match([]byte(s))
+// }

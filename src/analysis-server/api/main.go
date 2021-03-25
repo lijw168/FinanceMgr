@@ -154,6 +154,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
 	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
 	httpRouter.RegisterFunc("GetAccSub", accSubHandlers.GetAccSub)
+	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
 
 	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
 	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)

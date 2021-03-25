@@ -32,7 +32,7 @@ type VoucherRecord struct {
 
 //AccSubject ...
 type AccSubject struct {
-	SubjectID    string `orm:"pk;column(subjectId)"`
+	SubjectID    int    `orm:"pk;column(subjectId)"`
 	SubjectName  string `orm:"column(subjectName)"`
 	SubjectLevel int    `orm:"column(subjectLevel)"`
 }

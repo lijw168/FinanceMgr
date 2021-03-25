@@ -10,6 +10,10 @@ type OrderItem struct {
 	Direction *int    `json:"direction"`
 }
 
+type BaseParams struct {
+	ID *int `json:"id"`
+}
+
 // CreateSubjectParams ...
 type CreateSubjectParams struct {
 	SubjectName  *string `json:"subjectName"`
@@ -17,7 +21,7 @@ type CreateSubjectParams struct {
 }
 
 type ModifySubjectParams struct {
-	SubjectID    *string `json:"subjectId"`
+	SubjectID    *int    `json:"subjectId"`
 	SubjectName  *string `json:"subjectName"`
 	SubjectLevel *int    `json:"subjectLevel"`
 }
@@ -103,9 +107,23 @@ type VoucherInfoParams struct {
 	VoucherMonth *int `json:"voucherMonth"`
 }
 
-//VoucherRecordParams ...
-type VoucherRecordParams struct {
+//CreateVoucherRecordParams ...
+type CreateVoucherRecordParams struct {
 	VoucherID   *int     `json:"voucherId"`
+	SubjectName *string  `json:"subjectName"`
+	DebitMoney  *float64 `json:"debitMoney"`
+	CreditMoney *float64 `json:"creditMoney"`
+	Summary     *string  `json:"summary"`
+	SubID1      *int     `json:"subId1"`
+	SubID2      *int     `json:"subId2"`
+	SubID3      *int     `json:"subId3"`
+	SubID4      *int     `json:"subId4"`
+	BillCount   *int     `json:"billCount"`
+}
+
+//ModifyVoucherRecordParams ...
+type ModifyVoucherRecordParams struct {
+	VouRecordID *int     `json:"vouRecordId"`
 	SubjectName *string  `json:"subjectName"`
 	DebitMoney  *float64 `json:"debitMoney"`
 	CreditMoney *float64 `json:"creditMoney"`
@@ -119,8 +137,8 @@ type VoucherRecordParams struct {
 
 //VoucherParams...
 type VoucherParams struct {
-	InfoParams    *VoucherInfoParams     `json:"infoParams"`
-	RecordsParams []*VoucherRecordParams `json:"recordsParams"`
+	InfoParams    *VoucherInfoParams           `json:"infoParams"`
+	RecordsParams []*CreateVoucherRecordParams `json:"recordsParams"`
 }
 
 type ListParams struct {

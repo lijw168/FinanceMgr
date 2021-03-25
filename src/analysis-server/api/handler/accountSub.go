@@ -145,7 +145,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if params.SubjectID == nil || *params.SubjectID == "" {
+	if params.SubjectID == nil || *params.SubjectID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return

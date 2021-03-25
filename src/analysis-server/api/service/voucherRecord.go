@@ -18,7 +18,7 @@ type VoucherRecordService struct {
 	GenRecordId *utils.GenIdInfo
 }
 
-func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params *model.VoucherRecordParams,
+func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params *model.CreateVoucherRecordParams,
 	requestId string) (int, CcError) {
 	//create
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecord method start, "+"VoucherId:%d", *params.VoucherID)
@@ -46,7 +46,7 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 	return vRecord.RecordID, nil
 }
 
-func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, recordsParams []model.VoucherRecordParams,
+func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, recordsParams []*model.CreateVoucherRecordParams,
 	requestId string) ([]int, CcError) {
 	//create
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method start, "+"requestId:%s", requestId)

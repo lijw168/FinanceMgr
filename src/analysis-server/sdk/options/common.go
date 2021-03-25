@@ -7,14 +7,14 @@ type CommResp struct {
 }
 
 type BaseOptions struct {
-	Id string
+	ID int
 }
 
-type ModifyAttributeOptions struct {
-	Id          string
-	Name        *string
-	Description *string
-}
+// type ModifyAttributeOptions struct {
+// 	ID          string
+// 	Name        *string
+// 	Description *string
+// }
 
 type ListOptions struct {
 	Filter map[string]interface{}
@@ -23,7 +23,7 @@ type ListOptions struct {
 	Orders map[string]int
 }
 
-type UpdateStatusOptions struct {
-	Id     string
-	Status int
-}
+// type UpdateStatusOptions struct {
+// 	ID     string
+// 	Status int
+// }

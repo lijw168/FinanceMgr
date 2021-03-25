@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type AccSubDao struct {
@@ -42,15 +42,15 @@ func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strNam
 	}
 }
 
-func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, strID string) (*model.AccSubject, error) {
+func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectID int) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subjectId=?"
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %s]", strSql, strID)
+	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %d]", strSql, subjectID)
 	var accSub = &model.AccSubject{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByID] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, strID), accSub); err {
+	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, subjectID), accSub); err {
 	case nil:
 		return accSub, nil
 	case sql.ErrNoRows:
@@ -113,7 +113,7 @@ func (dao *AccSubDao) DeleteByName(ctx context.Context, do DbOperator, strName s
 func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID int) error {
 	strSql := "delete from " + accSubInfoTN + " where subjectId = ?"
 
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByID] [sql: %s, id: %s]", strSql, subjectID)
+	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByID] [sql: %s, id: %d]", strSql, subjectID)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/DeleteByID] [SqlElapsed: %v]", time.Since(start))
@@ -126,7 +126,7 @@ func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID i
 }
 
 func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
-						   offset int, order string, od int) ([]*model.AccSubject, error) {
+	offset int, order string, od int) ([]*model.AccSubject, error) {
 	var accountSubjectSlice []*model.AccSubject
 	strSql, values := transferListSql(accSubInfoTN, filter, accSubInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/List] sql %s with values %v", strSql, values)
@@ -179,7 +179,7 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 // 	return accountSubjectSlice, nil
 // }
 
-func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, strSubID string,
+func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectID int,
 	params map[string]interface{}) error {
 	var keyMap = map[string]string{"SubjectID": "subjectId", "SubjectName": "subjectName", "SubjectLevel": "subjectLevel"}
 	strSql := "update " + accSubInfoTN + " set "
@@ -200,7 +200,7 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, strSubID
 		return nil
 	}
 	strSql += " where subjectId = ?"
-	values = append(values, strSubID)
+	values = append(values, subjectID)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateBySubID] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

@@ -217,8 +217,8 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
-		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+	if params.InfoParams.CompanyID == nil || *(params.InfoParams.CompanyID) <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -283,7 +283,7 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 }
 
 func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.Request) {
-	var recordsParams []model.VoucherRecordParams
+	var recordsParams []*model.CreateVoucherRecordParams
 	err := vh.HttpRequestParse(r, recordsParams)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucher/CreateVoucherRecords] [HttpRequestParse: %v]", err)
@@ -333,7 +333,7 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 }
 
 func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.VoucherRecordParams)
+	var params = new(model.ModifyVoucherRecordParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucher/UpdateVoucherRecord] [HttpRequestParse: %v]", err)
@@ -341,7 +341,7 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherID == nil || *params.VoucherID <= 0 {
+	if params.VouRecordID == nil || *params.VouRecordID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
@@ -384,7 +384,7 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	ccErr := vh.Vrs.UpdateVoucherRecord(r.Context(), *params.VoucherID, updateFields)
+	ccErr := vh.Vrs.UpdateVoucherRecord(r.Context(), *params.VouRecordID, updateFields)
 	if ccErr != nil {
 		vh.Logger.WarnContext(r.Context(), "[voucher/UpdateVoucherRecord/ServeHTTP] [Vrs.UpdateVoucherRecord: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)

@@ -4,15 +4,15 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/spf13/cobra"
 	"analysis-server/sdk"
+	"github.com/spf13/cobra"
 )
 
 var (
 	Verbose bool
 	Admin   bool
 	Domain  string
-	Tenant  string
+	//Tenant  string
 	Sdk     *sdk.CcSdk
 	Help    bool
 	Timeout uint64
@@ -21,7 +21,7 @@ var (
 func NewCcCli() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ccs [OPTIONS] COMMAND [arg...]",
-		Short: "A self-sufficient runtime for zbs system",
+		Short: "A self-sufficient runtime for analysis system",
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -33,18 +33,18 @@ func NewCcCli() *cobra.Command {
 	cmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	cmd.PersistentFlags().BoolVarP(&Admin, "admin", "a", false, "admin role")
 	cmd.PersistentFlags().StringVar(&Domain, "server-url", "", "URL of zbs server api")
-	cmd.PersistentFlags().StringVar(&Tenant, "tenant-id", "", "Tenant ID used to call api")
+	//cmd.PersistentFlags().StringVar(&Tenant, "tenant-id", "", "Tenant ID used to call api")
 	cmd.PersistentFlags().BoolVarP(&Help, "help", "h", false, "Type for help")
 	cmd.PersistentFlags().Uint64Var(&Timeout, "timeout", 0, "network timeout (ms)")
 
 	al := len(os.Args)
 	for i := 0; i < al; i++ {
 		switch os.Args[i] {
-		case "--tenant-id":
-			if i < al-1 {
-				Tenant = os.Args[i+1]
-				i++
-			}
+		// case "--tenant-id":
+		// 	if i < al-1 {
+		// 		Tenant = os.Args[i+1]
+		// 		i++
+		// 	}
 		case "--server-url":
 			if i < al-1 {
 				Domain = os.Args[i+1]
@@ -74,16 +74,10 @@ func NewCcCli() *cobra.Command {
 		}
 	}
 	// add command
-	NewDiskCommand(cmd)
-	NewHostCommand(cmd)
-	NewRackCommand(cmd)
-	NewPoolCommand(cmd)
-	NewRgCommand(cmd)
-	NewProxyCommand(cmd)
-	NewVolumeCommand(cmd)
-	NewSnapshotCommand(cmd)
-	NewAtCommand(cmd)
-	NewRTCommand(cmd)
-	NewZbsProxyCommand(cmd)
+	NewAccSubCommand(cmd)
+	NewCompanyCommand(cmd)
+	NewOperatorCommand(cmd)
+	NewVoucherCommand(cmd)
+
 	return cmd
 }

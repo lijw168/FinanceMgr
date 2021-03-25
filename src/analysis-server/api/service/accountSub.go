@@ -8,7 +8,6 @@ import (
 	"common/log"
 	"context"
 	"database/sql"
-	"strconv"
 )
 
 type AccountSubService struct {
@@ -51,7 +50,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
-	accSub.SubjectID = strconv.Itoa(as.GenSubId.GetId())
+	accSub.SubjectID = as.GenSubId.GetId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -69,6 +68,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 // convert accSubject to accSubjectView ...
 func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.AccSubjectView {
 	accSubView := new(model.AccSubjectView)
+	accSubView.SubjectID = accSub.SubjectID
 	accSubView.SubjectName = accSub.SubjectName
 	accSubView.SubjectLevel = accSub.SubjectLevel
 	return accSubView
@@ -88,9 +88,9 @@ func (as *AccountSubService) GetAccSubByName(ctx context.Context, strSubName str
 	return accSubView, nil
 }
 
-func (as *AccountSubService) GetAccSubById(ctx context.Context, subId int,
+func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 	requestId string) (*model.AccSubjectView, CcError) {
-	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, strconv.Itoa(subId))
+	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, subjectID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -160,7 +160,7 @@ func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName 
 	return nil
 }
 
-func (as *AccountSubService) UpdateAccSubById(ctx context.Context, strSubID string, params map[string]interface{}) CcError {
+func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int, params map[string]interface{}) CcError {
 	FuncName := "AccountSubService/accountSub/UpdateAccSubById"
 	tx, err := as.Db.Begin()
 	if err != nil {
@@ -168,7 +168,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, strSubID stri
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, as.Logger, FuncName, tx)
-	_, err = as.AccSubDao.GetAccSubByID(ctx, tx, strSubID)
+	_, err = as.AccSubDao.GetAccSubByID(ctx, tx, subjectID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -178,7 +178,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, strSubID stri
 	}
 	//update info
 	//params["UpdatedAt"] = time.Now()
-	err = as.AccSubDao.UpdateBySubID(ctx, tx, strSubID, params)
+	err = as.AccSubDao.UpdateBySubID(ctx, tx, subjectID, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

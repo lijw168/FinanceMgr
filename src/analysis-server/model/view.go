@@ -6,9 +6,14 @@ import (
 	"time"
 )
 
+type DescData struct {
+	Tc       int64       `json:"total_count"`
+	Elements interface{} `json:"elements"`
+}
+
 //AccSubjectView ...
 type AccSubjectView struct {
-	SubjectID    string `json:"subjectId"`
+	SubjectID    int    `json:"subjectId"`
 	SubjectName  string `json:"subjectName"`
 	SubjectLevel int    `json:"subjectLevel"`
 }
