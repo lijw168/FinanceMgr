@@ -10,7 +10,7 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
-	"jdebs/ebs/src/github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 type VoucherService struct {
