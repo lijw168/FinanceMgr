@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	ZBS_BUILD_VERSION  string // commit
-	ZBS_BUILD_TIME     string
-	GO_VERSION         string // go version
-	WEB_SERVER_VERSION string
+	FINANCE_BUILD_VERSION string // commit
+	FINANCE_BUILD_TIME    string
+	GO_VERSION            string // go version
+	WEB_SERVER_VERSION    string
 
 	// ZBS_CLIENT_VER    string
 	// ZBS_COMMON_VER    string
@@ -45,10 +45,10 @@ type VersionInfo struct {
 
 func CheckAndShowVersion() bool {
 	if *showVersion {
-		log.Println("BuildTime\t", ZBS_BUILD_TIME)
+		log.Println("BuildTime\t", FINANCE_BUILD_TIME)
 		log.Println("GoVersion\t", GO_VERSION)
-		log.Println("BuildVersion\t", ZBS_BUILD_VERSION)
-		log.Println("BuildVersion\t", WEB_SERVER_VERSION)
+		log.Println("BuildVersion\t", FINANCE_BUILD_VERSION)
+		log.Println("analysis-server\t", WEB_SERVER_VERSION)
 		// log.Println("ZbsClientVersion\t", ZBS_CLIENT_VER)
 		// log.Println("ZbsCommonVersion\t", ZBS_COMMON_VER)
 		// log.Println("ZbsGatewayVersion\t", ZBS_GATEWAY_VER)
@@ -70,8 +70,8 @@ func ShowVersionHandler(w http.ResponseWriter, r *http.Request) {
 	var buf []byte
 	var err error
 	info := VersionInfo{
-		BuildVersion:     ZBS_BUILD_VERSION,
-		BuildTime:        ZBS_BUILD_TIME,
+		BuildVersion:     FINANCE_BUILD_VERSION,
+		BuildTime:        FINANCE_BUILD_TIME,
 		GoVersion:        GO_VERSION,
 		WebServerVersion: WEB_SERVER_VERSION,
 		// ZbsClientVersion:    ZBS_CLIENT_VER,

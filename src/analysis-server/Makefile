@@ -1,9 +1,9 @@
-TARGET_DIR := ${ZBS_BIN_PATH}
+TARGET_DIR := ${FINANCE_BIN_PATH}
 ifeq (${TARGET_DIR},)
     TARGET_DIR=.
 endif
-API_TARGET := $(TARGET_DIR)/zbs-server
-CLI_TARGET := $(TARGET_DIR)/zbs-cli
+API_TARGET := $(TARGET_DIR)/analysis-server
+CLI_TARGET := $(TARGET_DIR)/analysis-cli
 DEPENDCY := $(shell find . -name "*.go")
 API_SOURCE:= api/main.go
 CLI_SOURCE:= cli/main.go
@@ -15,25 +15,17 @@ define get_git_commit_id
     if [ -d $(1) ]; then cd $(1);git rev-parse HEAD;fi
 endef
 
-ZBS_COMMON=`$(call get_git_commit_id, "../zbs-common")`
-ZBS_CLIENT=`$(call get_git_commit_id, "../zbs-client")`
-ZBS_GATEWAY=`$(call get_git_commit_id, "../zbs-gateway")`
-ZBS_SCHEDULER=`$(call get_git_commit_id, "../zbs-scheduler")`
-ZBS_SERVER=`$(call get_git_commit_id, "../zbs-server")`
-ZBS_STORAGE=`$(call get_git_commit_id, "../zbs-storage")`
-ZBS_WORKER=`$(call get_git_commit_id, "../zbs-worker")`
-ZBS_OPEN_API=`$(call get_git_commit_id, "../zbs-openapi")`
+COMMON=`$(call get_git_commit_id, "../common")`
+ANALYSIS_SERVER=`$(call get_git_commit_id, "../analysis-server")`
 
 COMMIT_ID=`git rev-parse HEAD`
 
 DATAFMT=`date "+%Y%m%d%H%M%S"`
 GOVERSION=`go version | awk '{print $3}' `
-LDFLAGS=-ldflags "-X common/tag.ZBS_CLIENT_VER=${ZBS_CLIENT} -X common/tag.ZBS_COMMON_VER=${ZBS_COMMON} \
-        -X common/tag.ZBS_GATEWAY_VER=${ZBS_GATEWAY} -X common/tag.ZBS_SCHEDULER_VER=${ZBS_SCHEDULER} \
-        -X common/tag.ZBS_SERVER_VER=${ZBS_SERVER} -X common/tag.ZBS_STORAGE_VER=${ZBS_STORAGE} \
-        -X common/tag.ZBS_WORKER_VER=${ZBS_WORKER} -X common/tag.ZBS_BUILD_TIME=$(DATAFMT) \
-        -X 'common/tag.GO_VERSION=${GOVERSION}' -X common/tag.ZBS_BUILD_VERSION=${COMMIT_ID}--${BRANCH} \
-        -X common/tag.ZBS_OPENAPI_VER=${ZBS_OPEN_API} "
+
+LDFLAGS=-ldflags "-X common/tag.WEB_SERVER_VERSION=${ANALYSIS_SERVER} -X common/tag.COMMON_VER=${COMMON} \
+                  -X common/tag.FINANCE_BUILD_TIME=$(DATAFMT) -X 'common/tag.GO_VERSION=${GOVERSION}' \
+                  -X common/tag.FINANCE_BUILD_VERSION=${COMMIT_ID}--${BRANCH}"
 
 DBG_FLAGS=-gcflags "-N -l"
 
