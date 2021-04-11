@@ -14,6 +14,8 @@ create table if not exists `finance_mgr`.`operatorInfo`
    `department`           varchar(64),
    `status`               int COMMENT '状态 ：0:offline;1:online;2:invalid user',
    `role`                 int COMMENT '角色 ：1：记账，2：审核，3：出纳，4：制单',
+   `create_at`            datetime,
+   `update_at`            datetime,
    primary key (`name`)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
@@ -38,6 +40,8 @@ create table  if not exists `finance_mgr`.`voucherRecordInfo_2020`
    `subId3`               int not null default(0) COMMENT '三级会计科目ID',
    `subId4`               int not null default(0) COMMENT '四级会计科目ID',
    `billCount`            int not null default(0) COMMENT '该凭证记录的单据个数',
+   `create_at`            datetime,
+   `update_at`            datetime,
    primary key (recordId)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
@@ -84,6 +88,8 @@ create table if not exists `finance_mgr`.`voucherInfo_2020`
    `voucherMonth`         int not null COMMENT '制证月份',
    `numOfMonth`           int not null COMMENT '本月第几次记录凭证',
    `voucherDate`          date not null COMMENT '制证日期',
+   `create_at`            datetime,
+   `update_at`            datetime,
    primary key (voucherId)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
@@ -106,6 +112,8 @@ create table if not exists `finance_mgr`.`companyInfo`
    `e_mail`               varchar(32),
    `companyAddr`          varchar(128),
    `backup`               varchar(32),
+   `create_at`            datetime,
+   `update_at`            datetime,
    primary key (companyId),
    UNIQUE KEY `companyName` (`companyName`),
    UNIQUE KEY `abbreviationName` (`abbreName`)

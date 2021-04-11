@@ -55,6 +55,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	vInfo.VoucherMonth = *infoParams.VoucherMonth
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.VoucherDate = time.Now()
+	vInfo.CreatedAt = time.Now()
 	vInfo.VoucherID = vs.GenVoucherId.GetId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
 	if err = vs.VInfoDao.Create(ctx, tx, vInfo); err != nil {
@@ -76,6 +77,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 		vRecord.SubID2 = *recParam.SubID2
 		vRecord.SubID3 = *recParam.SubID3
 		vRecord.SubID4 = *recParam.SubID4
+		vRecord.CreatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

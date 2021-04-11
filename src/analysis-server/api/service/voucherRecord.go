@@ -9,6 +9,7 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	"time"
 )
 
 type VoucherRecordService struct {
@@ -36,6 +37,7 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 	vRecord.SubID2 = *params.SubID2
 	vRecord.SubID3 = *params.SubID3
 	vRecord.SubID4 = *params.SubID4
+	vRecord.CreatedAt = time.Now()
 
 	if err := vs.VRecordDao.Create(ctx, vs.Db, vRecord); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
@@ -72,6 +74,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vRecord.SubID2 = *itemParam.SubID2
 		vRecord.SubID3 = *itemParam.SubID3
 		vRecord.SubID4 = *itemParam.SubID4
+		vRecord.CreatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -194,7 +197,7 @@ func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordI
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//update voucher record
-	//params["DeletedAt"] = time.Now()
+	params["UpdatedAt"] = time.Now()
 	err = vs.VRecordDao.Update(ctx, tx, recordID, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())

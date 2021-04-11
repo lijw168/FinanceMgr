@@ -7,6 +7,7 @@ import (
 	"common/log"
 	"context"
 	"database/sql"
+	"time"
 )
 
 type OperatorInfoService struct {
@@ -45,6 +46,7 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 	optInfo.Department = *params.Department
 	optInfo.Status = *params.Status
 	optInfo.Role = *params.Role
+	optInfo.CreatedAt = time.Now()
 
 	if err = ps.OptInfoDao.Create(ctx, tx, optInfo); err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [OptInfoDao.Create: %s]", FuncName, err.Error())
@@ -170,7 +172,7 @@ func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName st
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//update info
-	//params["UpdatedAt"] = time.Now()
+	params["UpdatedAt"] = time.Now()
 	err = ps.OptInfoDao.Update(ctx, tx, strOptName, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())

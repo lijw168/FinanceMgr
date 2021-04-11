@@ -9,6 +9,7 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	"time"
 )
 
 type CompanyService struct {
@@ -55,6 +56,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.Email = *params.Email
 	comInfo.CompanyAddr = *params.CompanyAddr
 	comInfo.Backup = *params.Backup
+	comInfo.UpdatedAt = time.Now()
 	//>100,as subjectId
 	comInfo.CompanyID = cs.GenComId.GetId()
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
@@ -70,7 +72,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	return comView, nil
 }
 
-// convert accSubject to CompanyView ...
+// CompanyModelToView... ,convert accSubject to CompanyView ...
 func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.CompanyView {
 	comView := new(model.CompanyView)
 	comView.CompanyName = comInfo.CompanyName
@@ -140,7 +142,7 @@ func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, 
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//update info
-	//params["UpdatedAt"] = time.Now()
+	params["UpdatedAt"] = time.Now()
 	err = cs.CompanyDao.Update(ctx, tx, companyId, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
