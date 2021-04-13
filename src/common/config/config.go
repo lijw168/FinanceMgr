@@ -1,115 +1,118 @@
-//json cfg file utility
 package config
 
 import (
-	"encoding/json"
+	"database/sql"
 	"fmt"
-	"io/ioutil"
-	"strconv"
+	"time"
+
+	"common/log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type Config struct {
-	data map[string]interface{}
+type ConfigCheck interface {
+	CheckValid() error
 }
 
-func newConfig() *Config {
-	result := new(Config)
-	result.data = make(map[string]interface{})
-	return result
+type MysqlConf struct {
+	Ip            string
+	Port          int
+	User          string
+	Passwd        string
+	DB            string
+	Timeout       int
+	MaxConnection int
+	MaxLifetime   int
 }
 
-// Loads config information from a JSON file
-func LoadConfigFile(filename string) (*Config, error) {
-	result := newConfig()
-	err := result.parse(filename)
-	if err != nil {
-		err = fmt.Errorf("error loading config file %s: %s", filename, err)
+func (c *MysqlConf) CheckValid() error {
+	if len(c.Ip) == 0 {
+		return fmt.Errorf("invalid Ip")
 	}
-	return result, err
-}
-
-// Loads config information from a JSON string
-func LoadConfigString(s string) (*Config, error) {
-	result := newConfig()
-	err := json.Unmarshal([]byte(s), &result.data)
-	if err != nil {
-		err = fmt.Errorf("error parsing config string %s: %s", s, err)
+	if c.Port == 0 {
+		c.Port = 3306
 	}
-	return result, err
-}
-
-func (c *Config) parse(fileName string) error {
-	jsonFileBytes, err := ioutil.ReadFile(fileName)
-	if err == nil {
-		err = json.Unmarshal(jsonFileBytes, &c.data)
+	if len(c.User) == 0 || len(c.Passwd) == 0 || len(c.DB) == 0 {
+		return fmt.Errorf("invalid MysqlConf")
 	}
-	return err
-}
-
-// Returns a string for the config variable key
-func (c *Config) GetString(key string) string {
-	result, present := c.data[key]
-	if !present {
-		return ""
+	if c.Timeout == 0 {
+		c.Timeout = 3000
 	}
-	return result.(string)
-}
-
-// Returns a int for the config variable key
-func (c *Config) GetInt(key string) int {
-	if x, ok := c.data[key]; ok {
-		str := x.(string)
-		if v, err := strconv.Atoi(str); err == nil {
-			return v
-		}
+	if c.MaxConnection == 0 {
+		c.MaxConnection = 300
 	}
-
-	return -1
-}
-
-// Returns a float for the config variable key
-func (c *Config) GetFloat(key string) float64 {
-	x, ok := c.data[key]
-	if !ok {
-		return -1
+	if c.MaxLifetime == 0 {
+		c.MaxLifetime = 1000
 	}
-	return x.(float64)
-}
-
-// Returns a bool for the config variable key
-func (c *Config) GetBool(key string) bool {
-	x, ok := c.data[key]
-	if !ok {
-		return false
-	}
-	return x.(bool)
-}
-
-// Returns a map for the config variable key
-func (c *Config) GetMap(key string) map[string]interface{} {
-	x, ok := c.data[key]
-	if !ok {
-		return nil
-	}
-	if xmap, ok := x.(map[string]interface{}); ok {
-		return xmap
-	}
-	//	mim := make(map[string]interface{})
-	//	err := json.Unmarshal([]byte(ss), &mim)
-	//	if err != nil {
-	//		log.Fatalf("error parsing config string %s: %s", x, err)
-	//	}
-	//	if innerMap, ok := mim[key].(map[string]interface{}); ok {
-	//		return innerMap
-	//	}
 	return nil
 }
 
-// Returns an array for the config variable key
-func (c *Config) GetArray(key string) []interface{} {
-	result, present := c.data[key]
-	if !present {
-		return []interface{}(nil)
+type MysqlInstance struct {
+	Conf   *MysqlConf
+	Logger log.ILog
+}
+
+func (ins MysqlInstance) NewMysqlInstance() (*sql.DB, error) {
+	strConn := "%s:%s@tcp(%s:%d)/%s?autocommit=true&parseTime=true&timeout=%dms&loc=Asia%%2FShanghai"
+	url := fmt.Sprintf(strConn, ins.Conf.User, ins.Conf.Passwd,
+		ins.Conf.Ip, ins.Conf.Port, ins.Conf.DB, ins.Conf.Timeout)
+	var db *sql.DB
+	var err error
+	db, err = sql.Open("mysql", url)
+	if err != nil {
+		ins.Logger.Error("mysql open err: %s", err.Error())
+		return nil, err
 	}
-	return result.([]interface{})
+	ins.Logger.Info("open mysql success\n")
+	db.SetMaxOpenConns(ins.Conf.MaxConnection)
+	db.SetMaxIdleConns(ins.Conf.MaxConnection)
+	db.SetConnMaxLifetime(time.Second * time.Duration(ins.Conf.MaxLifetime))
+
+	err = db.Ping()
+	if err != nil {
+		ins.Logger.Error("mysql ping err(%s)\n", err.Error())
+		return nil, err
+	}
+
+	ins.Logger.Debug("[db] MySQLInit, configure: %+v", ins.Conf)
+	return db, nil
+}
+
+type LogConf struct {
+	Level       int    `json:"Level"`
+	FileName    string `json:"FileName"`
+	FileMaxSize int    `json:"FileMaxSize"`
+	FileCount   int    `json:"FileCount"`
+}
+
+func (c *LogConf) CheckValid() error {
+	if len(c.FileName) == 0 {
+		return fmt.Errorf("AdminServerCfg need MysqlConf")
+	}
+	if c.FileMaxSize <= 1024 {
+		c.FileMaxSize = 102400000
+	}
+	if c.FileCount < 1 {
+		c.FileCount = 1
+	}
+	return nil
+}
+
+type LogFac struct {
+	Logconf *LogConf
+}
+
+func (fac LogFac) NewLogger() (*log.Logger, error) {
+	var h log.Handler
+	var err error
+	h, err = log.NewRotatingFileHandler(fac.Logconf.FileName, fac.Logconf.FileMaxSize, fac.Logconf.FileCount)
+	if err != nil {
+		fmt.Printf("new log handler err: %v\n", err.Error())
+		return nil, err
+	}
+
+	logger := log.NewDefault(h)
+	logger.SetLevel(fac.Logconf.Level)
+
+	return logger, nil
 }
