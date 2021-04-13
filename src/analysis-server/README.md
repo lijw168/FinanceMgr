@@ -13,7 +13,7 @@ mkdir FinanceMgr
 cd FinanceMgr
 
 
-mysql < /root/FinanceMgr/src/analysis_server/api/sql/first_create_db.sql
+mysql < /root/FinanceMgr/src/analysis-server/api/sql/first_create_db.sql
 
 mysql -e "GRANT ALL PRIVILEGES ON finance_mgr.* TO 'mgr'@'localhost' IDENTIFIED BY 'mgr'"
 
