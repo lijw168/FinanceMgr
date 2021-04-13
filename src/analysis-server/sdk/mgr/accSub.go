@@ -1,4 +1,4 @@
-package zbs
+package mgr
 
 import (
 	"analysis-server/model"

@@ -95,12 +95,12 @@ func NewConn(ipaddr string) (*net.TCPConn, error) {
 }
 
 func LBUrl(ipaddr, action string) string {
-	url := "http://" + ipaddr + "/zbs-server?Action=" + action
+	url := "http://" + ipaddr + "/analysis-server?Action=" + action
 	return url
 }
 
 func ServerUrl(apiAddr, action string) string {
-	return fmt.Sprintf("http://%s/zbs-server?Action=%s", apiAddr, action)
+	return fmt.Sprintf("http://%s/analysis-server?Action=%s", apiAddr, action)
 }
 
 func NewAlignedByteSlice(bufSize, alignSize int) []byte {
@@ -108,10 +108,6 @@ func NewAlignedByteSlice(bufSize, alignSize int) []byte {
 	alignedPos := calculateAlignedPos(data, alignSize)
 	data = data[alignedPos : alignedPos+bufSize]
 	return data
-}
-
-func NewSectorAlignedBuffer(bufSize int) []byte {
-	return NewAlignedByteSlice(bufSize, int(constant.DISK_SECTOR_SIZE))
 }
 
 func calculateAlignedPos(tmpBuffer []byte, alignSize int) int {

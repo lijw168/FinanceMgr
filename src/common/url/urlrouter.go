@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"common/constant"
+	//"common/constant"
 	"common/log"
 	"common/message"
 	"common/utils"
@@ -126,16 +126,8 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
-	if action == constant.LB_ACTION_HEARTBEAT || action == constant.LB_ACTION_REPLICASTATUS {
-		p.Logger.TraceContext(r.Context(), "[url/handler] [method: %v, url: %v, body: %v, remote_addr:%v, action: %v, header : %v ]", r.Method,
-			r.URL.RequestURI(), strings.Replace(string(body), "\n", " ", -1), r.RemoteAddr, action, r.Header)
-	} else if action == "AttachVolume" {
-		p.Logger.InfoContext(r.Context(), "[url/handler] [method: %v, url: %v, remote_addr:%v, action: %v, header : %v ]", r.Method,
-			r.URL.RequestURI(), r.RemoteAddr, action, r.Header)
-	} else {
-		p.Logger.InfoContext(r.Context(), "[url/handler] [method: %v, url: %v, body: %v, remote_addr:%v, action: %v, header : %v ]", r.Method,
-			r.URL.RequestURI(), strings.Replace(string(body), "\n", " ", -1), r.RemoteAddr, action, r.Header)
-	}
+	p.Logger.InfoContext(r.Context(), "[url/handler] [method: %v, url: %v, body: %v, remote_addr:%v, action: %v, header : %v ]", r.Method,
+		r.URL.RequestURI(), strings.Replace(string(body), "\n", " ", -1), r.RemoteAddr, action, r.Header)
 
 	if IhandlerFunc != nil {
 		IhandlerFunc(w, r)
@@ -145,14 +137,8 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.Logger.ErrorContext(r.Context(), "[url/handler]")
 		return
 	}
-
 	elapsed := time.Since(start)
-	if action == constant.LB_ACTION_HEARTBEAT || action == constant.LB_ACTION_REPLICASTATUS {
-		p.Logger.TraceContext(r.Context(), "[url/handler] elapsed: %v]", elapsed)
-	} else {
-		p.Logger.InfoContext(r.Context(), "[url/handler] elapsed: %v]", elapsed)
-	}
-
+	p.Logger.InfoContext(r.Context(), "[url/handler] elapsed: %v]", elapsed)
 }
 
 func (p *UrlRouter) SetLogLevel(w http.ResponseWriter, r *http.Request) {

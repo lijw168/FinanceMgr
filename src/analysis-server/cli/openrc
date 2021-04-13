@@ -1,2 +1,1 @@
-export CC_SERVER_URL="http://127.0.0.1:9698/zbs-server"
-export CC_TENANT_ID="zbs-admin"
+export CC_SERVER_URL="http://127.0.0.1:7500/analysis_server"

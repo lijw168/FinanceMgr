@@ -54,13 +54,13 @@ func DoRequestwithToken(clientToken, action string,
 		return nil, &RespErr{Code: -1, Err: err}
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "ZbsClient")
+	req.Header.Set("User-Agent", "MgrClient")
 	if TraceId == "" {
 		TraceId = utils.Uuid()
 	}
 	req.Header.Set("Trace-Id", TraceId)
 	if Admin {
-		req.Header.Set("Secret-Id", "ZbsClientSecretId")
+		req.Header.Set("Secret-Id", "MgrClientSecretId")
 	}
 	if clientToken != "" {
 		req.Header.Set("Client-Token", clientToken)

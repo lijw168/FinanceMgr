@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"analysis-server/sdk/mgr"
 	"analysis-server/sdk/util"
-	"analysis-server/sdk/zbs"
 )
 
 type CcSdk struct {
@@ -15,10 +15,10 @@ type CcSdk struct {
 	Admin   bool
 	TraceId string
 	Timeout uint64
-	zbs.AccSub
-	zbs.Company
-	zbs.Operator
-	zbs.Voucher
+	mgr.AccSub
+	mgr.Company
+	mgr.Operator
+	mgr.Voucher
 }
 
 func (c *CcSdk) Setup() {

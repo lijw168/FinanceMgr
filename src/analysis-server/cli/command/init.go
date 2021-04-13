@@ -32,7 +32,7 @@ func NewCcCli() *cobra.Command {
 	}
 	cmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	cmd.PersistentFlags().BoolVarP(&Admin, "admin", "a", false, "admin role")
-	cmd.PersistentFlags().StringVar(&Domain, "server-url", "", "URL of zbs server api")
+	cmd.PersistentFlags().StringVar(&Domain, "server-url", "", "URL of web server api")
 	//cmd.PersistentFlags().StringVar(&Tenant, "tenant-id", "", "Tenant ID used to call api")
 	cmd.PersistentFlags().BoolVarP(&Help, "help", "h", false, "Type for help")
 	cmd.PersistentFlags().Uint64Var(&Timeout, "timeout", 0, "network timeout (ms)")

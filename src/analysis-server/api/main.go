@@ -31,7 +31,7 @@ func main() {
 
 	// all in one
 	var apiServerCfgFile = flag.String("c",
-		"/etc/analysis/api_server.cfg", "Server config file name")
+		"/etc/analysis/web_server.cfg", "Server config file name")
 
 	flag.Parse()
 	if tag.CheckAndShowVersion() {

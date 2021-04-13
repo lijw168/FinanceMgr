@@ -1,9 +1,9 @@
 {
         "Ip": "10.12.209.152",
         "Port": 3306,
-        "User": "zbs",
-        "Passwd": "zbs",
-        "DB": "zbs",
+        "User": "mgr",
+        "Passwd": "mgr",
+        "DB": "finance_mgr",
         "Timeout": 3000,
         "MaxConnection": 300,
         "MaxLifetime": 1000

@@ -1,6 +1,6 @@
 {
         "Port": 7500,
         "Cores": 1,
-        "BaseUrl": "/zbs-server",
+        "BaseUrl": "/analysis_server",
         "RedisAdd": "127.0.0.1:6379"
 }

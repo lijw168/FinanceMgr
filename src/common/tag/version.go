@@ -15,17 +15,7 @@ var (
 	FINANCE_BUILD_TIME    string
 	GO_VERSION            string // go version
 	WEB_SERVER_VERSION    string
-
-	// ZBS_CLIENT_VER    string
-	// ZBS_COMMON_VER    string
-	// ZBS_GATEWAY_VER   string
-	// ZBS_SCHEDULER_VER string
-	// ZBS_SERVER_VER    string
-	// ZBS_STORAGE_VER   string
-	// ZBS_WORKER_VER    string
-	// ZBS_OPENAPI_VER   string
-
-	showVersion = flag.Bool("v", false, "show build version and time")
+	showVersion           = flag.Bool("v", false, "show build version and time")
 )
 
 type VersionInfo struct {
@@ -33,14 +23,6 @@ type VersionInfo struct {
 	GoVersion        string
 	BuildVersion     string
 	WebServerVersion string
-	// ZbsClientVersion    string
-	// ZbsCommonVersion    string
-	// ZbsGatewayVersion   string
-	// ZbsSchedulerVersion string
-	// ZbsServerVersion    string
-	// ZbsStorageVersion   string
-	// ZbsWorkerVersion    string
-	// ZbsOpenApiVersion   string
 }
 
 func CheckAndShowVersion() bool {
@@ -49,21 +31,13 @@ func CheckAndShowVersion() bool {
 		log.Println("GoVersion\t", GO_VERSION)
 		log.Println("BuildVersion\t", FINANCE_BUILD_VERSION)
 		log.Println("analysis-server\t", WEB_SERVER_VERSION)
-		// log.Println("ZbsClientVersion\t", ZBS_CLIENT_VER)
-		// log.Println("ZbsCommonVersion\t", ZBS_COMMON_VER)
-		// log.Println("ZbsGatewayVersion\t", ZBS_GATEWAY_VER)
-		// log.Println("ZbsSchedulerVersion\t", ZBS_SCHEDULER_VER)
-		// log.Println("ZbsServerVersion\t", ZBS_SERVER_VER)
-		// log.Println("ZbsStorageVersion\t", ZBS_STORAGE_VER)
-		// log.Println("ZbsWorkerVersion\t", ZBS_WORKER_VER)
-		// log.Println("ZbsOpenApiVersion\t", ZBS_OPENAPI_VER)
 		return true
 	}
 	return false
 }
 
 const (
-	ZBS_WEB_VERSION_PATH = "/version"
+	VERSION_PATH = "/version"
 )
 
 func ShowVersionHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,13 +48,6 @@ func ShowVersionHandler(w http.ResponseWriter, r *http.Request) {
 		BuildTime:        FINANCE_BUILD_TIME,
 		GoVersion:        GO_VERSION,
 		WebServerVersion: WEB_SERVER_VERSION,
-		// ZbsClientVersion:    ZBS_CLIENT_VER,
-		// ZbsCommonVersion:    ZBS_COMMON_VER,
-		// ZbsGatewayVersion:   ZBS_GATEWAY_VER,
-		// ZbsSchedulerVersion: ZBS_SCHEDULER_VER,
-		// ZbsServerVersion:    ZBS_SERVER_VER,
-		// ZbsStorageVersion:   ZBS_STORAGE_VER,
-		// ZbsWorkerVersion:    ZBS_WORKER_VER,
 	}
 	if buf, err = json.Marshal(info); err != nil {
 		w.Write([]byte(err.Error()))
@@ -93,7 +60,7 @@ func QueryVersion(host string) (*VersionInfo, error) {
 	var err error
 	var buf []byte
 	var rsp *http.Response
-	url := fmt.Sprintf("%s%s", host, ZBS_WEB_VERSION_PATH)
+	url := fmt.Sprintf("%s%s", host, VERSION_PATH)
 	if rsp, err = http.Get(url); err != nil {
 		return nil, err
 	}
