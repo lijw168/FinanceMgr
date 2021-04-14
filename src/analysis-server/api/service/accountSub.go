@@ -38,7 +38,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if conflictCount > 0 {
-		return nil, NewError(ErrAccSub, ErrConflict, ErrNull, err.Error())
+		return nil, NewError(ErrAccSub, ErrConflict, ErrNull, ErrRecordExist)
 	}
 	//get the count of the table accountSubject
 	// var accSubCount int

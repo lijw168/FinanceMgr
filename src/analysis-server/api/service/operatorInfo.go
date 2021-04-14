@@ -35,7 +35,7 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if conflictCount > 0 {
-		return nil, NewError(ErrCompany, ErrConflict, ErrNull, err.Error())
+		return nil, NewError(ErrCompany, ErrConflict, ErrNull, ErrRecordExist)
 	}
 	//generate company
 	optInfo := new(model.OperatorInfo)

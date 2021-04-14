@@ -56,6 +56,10 @@ const (
 	ErrSubjectName   = "subjectName"
 )
 
+const (
+	ErrRecordExist = "该记录已存在"
+)
+
 /*
  * C: Error Code
  * R: Resource Type (vpc, subnet)
