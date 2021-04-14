@@ -115,4 +115,6 @@ create table if not exists `finance_mgr_2021`.`idInfo`
    `voucherRecordId`      int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
+--insert into idInfo (companyId,subjectId,voucherId,voucherRecordId) value(100,101,501,1001);
+
 

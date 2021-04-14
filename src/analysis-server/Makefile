@@ -2,8 +2,8 @@ TARGET_DIR := ${FINANCE_BIN_PATH}
 ifeq (${TARGET_DIR},)
     TARGET_DIR=.
 endif
-API_TARGET := $(TARGET_DIR)/analysis-server
-CLI_TARGET := $(TARGET_DIR)/analysis-cli
+API_TARGET := $(TARGET_DIR)/analysis_server
+CLI_TARGET := $(TARGET_DIR)/analysis_cli
 DEPENDCY := $(shell find . -name "*.go")
 API_SOURCE:= api/main.go
 CLI_SOURCE:= cli/main.go
