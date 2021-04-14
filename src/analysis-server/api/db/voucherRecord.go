@@ -17,16 +17,16 @@ type VoucherRecordDao struct {
 
 var (
 	voucherRecordTN     = "voucherRecordInfo_2020"
-	voucherRecordFields = []string{"recordId", "voucherId", "subjectName", "debitMoney", "creditMoney",
-		"summary", "subId1", "subId2", "subId3", "subId4", "billCount"}
+	voucherRecordFields = []string{"record_id", "voucher_id", "subject_name", "debit_money", "credit_money",
+		"summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4", "bill_count", "created_at", "updated_at"}
 	scanVoucherRecord = func(r DbScanner, st *model.VoucherRecord) error {
 		return r.Scan(&st.RecordID, &st.VoucherID, &st.SubjectName, &st.DebitMoney, &st.CreditMoney,
-			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.BillCount)
+			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.BillCount, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
 func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId int) (*model.VoucherRecord, error) {
-	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " + voucherRecordTN + " where recordId=?"
+	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " + voucherRecordTN + " where record_id=?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Get] [sql: %s ,values: %s]", strSql, recordId)
 	var recInfo = &model.VoucherRecord{}
 	start := time.Now()
@@ -66,9 +66,9 @@ func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator) (int64, e
 
 func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *model.VoucherRecord) error {
 	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
-		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.BillCount}
+		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.BillCount, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -81,7 +81,7 @@ func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *mode
 }
 
 func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId int) error {
-	strSql := "delete from " + voucherRecordTN + " where recordId = ?"
+	strSql := "delete from " + voucherRecordTN + " where record_id = ?"
 
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Delete] [sql: %s, id: %s]", strSql, recordId)
 	start := time.Now()
@@ -96,7 +96,7 @@ func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId
 }
 
 func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperator, voucherId int) error {
-	strSql := "delete from " + voucherRecordTN + " where voucherId = ?"
+	strSql := "delete from " + voucherRecordTN + " where voucher_id = ?"
 
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByVoucherId] [sql: %s, id: %s]", strSql, voucherId)
 	start := time.Now()
@@ -139,9 +139,9 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map
 
 func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucherId", "SubjectName": "subjectName", "DebitMoney": "debitMoney",
-		"CreditMoney": "creditMoney", "Summary": "summary", "SubID1": "subId1", "SubID2": "subId2",
-		"SubID3": "subId3", "RecordID": "recordId"}
+	var keyMap = map[string]string{"VoucherID": "voucher_id", "SubjectName": "subject_name", "DebitMoney": "debit_money",
+		"CreditMoney": "credit_money", "Summary": "summary", "SubID1": "sub_id1", "SubID2": "sub_id2",
+		"SubID3": "sub_id3", "SubID4": "sub_id4", "RecordID": "record_id"}
 	strSql := "update " + voucherRecordTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -159,7 +159,7 @@ func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId
 	if first {
 		return nil
 	}
-	strSql += " where recordId = ?"
+	strSql += " where record_id = ?"
 	values = append(values, recordId)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Update] [sql: %s, values: %v]", strSql, values)

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type IDInfoDao struct {
@@ -17,7 +17,7 @@ type IDInfoDao struct {
 
 var (
 	idInfoTN     = "idInfo"
-	idInfoFields = []string{"companyId", "subjectId", "voucherId", "voucherRecordId"}
+	idInfoFields = []string{"company_id", "subject_id", "voucher_id", "voucher_record_id"}
 	scanIdInfo   = func(r DbScanner, st *model.IDInfo) error {
 		return r.Scan(&st.CompanyID, &st.SubjectID, &st.VoucherID, &st.VoucherRecordID)
 	}
@@ -43,8 +43,8 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 }
 
 func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
-	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") + 
-				") values (?, ?, ?, ?)"
+	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") +
+		") values (?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.SubjectID, st.VoucherID, st.VoucherRecordID}
 	dao.Logger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
@@ -58,7 +58,7 @@ func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 }
 
 func (dao *IDInfoDao) Delete(do DbOperator) error {
-	strSql := "delete from " + idInfoTN 
+	strSql := "delete from " + idInfoTN
 
 	dao.Logger.Debug("[IDInfo/db/Delete] [sql: %s]", strSql)
 	start := time.Now()
@@ -82,8 +82,8 @@ func (dao *IDInfoDao) Count(do DbOperator) (int64, error) {
 	return c, err
 }
 
-func (dao *IDInfoDao) Update(do DbOperator,	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subjectId", "CompanyID": "companyId", "VoucherID": "voucherId","VoucherRecordID": "voucherRecordId"}
+func (dao *IDInfoDao) Update(do DbOperator, params map[string]interface{}) error {
+	var keyMap = map[string]string{"SubjectID": "subject_id", "CompanyID": "company_id", "VoucherID": "voucher_id", "VoucherRecordID": "voucher_record_id"}
 	strSql := "update " + idInfoTN + " set "
 	var values []interface{}
 	var first bool = true

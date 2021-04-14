@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type OperatorInfoDao struct {
@@ -17,9 +17,9 @@ type OperatorInfoDao struct {
 
 var (
 	operatorInfoTN     = "operatorInfo"
-	operatorInfoFields = []string{"companyId", "name", "password", "job", "department", "status", "role"}
+	operatorInfoFields = []string{"company_id", "name", "password", "job", "department", "status", "role", "created_at", "updated_at"}
 	scanOperatorInfo   = func(r DbScanner, st *model.OperatorInfo) error {
-		return r.Scan(&st.CompanyID, &st.Name, &st.Password, &st.Job, &st.Department, &st.Status, &st.Role)
+		return r.Scan(&st.CompanyID, &st.Name, &st.Password, &st.Job, &st.Department, &st.Status, &st.Role, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -53,8 +53,8 @@ func (dao *OperatorInfoDao) CountByFilter(ctx context.Context, do DbOperator, fi
 }
 
 func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model.OperatorInfo) error {
-	strSql := "insert into " + operatorInfoTN + " (" + strings.Join(operatorInfoFields, ",") + ") values (?, ?, ?, ?, ?, ?, ?)"
-	values := []interface{}{st.CompanyID, st.Name, st.Password, st.Job, st.Department, st.Status, st.Role}
+	strSql := "insert into " + operatorInfoTN + " (" + strings.Join(operatorInfoFields, ",") + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	values := []interface{}{st.CompanyID, st.Name, st.Password, st.Job, st.Department, st.Status, st.Role, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -135,8 +135,9 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 
 func (dao *OperatorInfoDao) Update(ctx context.Context, do DbOperator, strName string,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"CompanyId": "companyId", "Name": "name", "Password": "password",
-		"Job": "job", "Department": "department", "Status": "status", "Role": "role"}
+	var keyMap = map[string]string{"CompanyId": "company_id", "Name": "name", "Password": "password",
+		"Job": "job", "Department": "department", "Status": "status", "Role": "role",
+		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + operatorInfoTN + " set "
 	var values []interface{}
 	var first bool = true

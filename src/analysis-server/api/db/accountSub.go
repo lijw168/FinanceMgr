@@ -17,14 +17,14 @@ type AccSubDao struct {
 
 var (
 	accSubInfoTN     = "accountSubject"
-	accSubInfoFields = []string{"subjectId", "subjectName", "subjectLevel"}
+	accSubInfoFields = []string{"subject_id", "subject_name", "subject_level"}
 	scanAccSubTask   = func(r DbScanner, st *model.AccSubject) error {
 		return r.Scan(&st.SubjectID, &st.SubjectName, &st.SubjectLevel)
 	}
 )
 
 func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strName string) (*model.AccSubject, error) {
-	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subjectName=?"
+	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_name=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByName] [sql: %s ,values: %s]", strSql, strName)
 	var accSub = &model.AccSubject{}
 	start := time.Now()
@@ -43,7 +43,7 @@ func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strNam
 }
 
 func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectID int) (*model.AccSubject, error) {
-	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subjectId=?"
+	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_id=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %d]", strSql, subjectID)
 	var accSub = &model.AccSubject{}
 	start := time.Now()
@@ -96,7 +96,7 @@ func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSu
 }
 
 func (dao *AccSubDao) DeleteByName(ctx context.Context, do DbOperator, strName string) error {
-	strSql := "delete from " + accSubInfoTN + " where subjectName = ?"
+	strSql := "delete from " + accSubInfoTN + " where subject_name = ?"
 
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByName] [sql: %s, id: %s]", strSql, strName)
 	start := time.Now()
@@ -111,7 +111,7 @@ func (dao *AccSubDao) DeleteByName(ctx context.Context, do DbOperator, strName s
 }
 
 func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID int) error {
-	strSql := "delete from " + accSubInfoTN + " where subjectId = ?"
+	strSql := "delete from " + accSubInfoTN + " where subject_id = ?"
 
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByID] [sql: %s, id: %d]", strSql, subjectID)
 	start := time.Now()
@@ -181,7 +181,7 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 
 func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectID int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subjectId", "SubjectName": "subjectName", "SubjectLevel": "subjectLevel"}
+	var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
 	strSql := "update " + accSubInfoTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -199,7 +199,7 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 	if first {
 		return nil
 	}
-	strSql += " where subjectId = ?"
+	strSql += " where subject_id = ?"
 	values = append(values, subjectID)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateBySubID] [sql: %s, values: %v]", strSql, values)
@@ -214,7 +214,7 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 
 func (dao *AccSubDao) UpdateByName(ctx context.Context, do DbOperator, strSubName string,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subjectId", "SubjectName": "subjectName", "SubjectLevel": "subjectLevel"}
+	var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
 	strSql := "update " + accSubInfoTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -232,7 +232,7 @@ func (dao *AccSubDao) UpdateByName(ctx context.Context, do DbOperator, strSubNam
 	if first {
 		return nil
 	}
-	strSql += " where subjectName = ?"
+	strSql += " where subject_name = ?"
 	values = append(values, strSubName)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateByName] [sql: %s, values: %v]", strSql, values)

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"common/log"
 	"analysis-server/model"
+	"common/log"
 )
 
 type CompanyDao struct {
@@ -17,16 +17,16 @@ type CompanyDao struct {
 
 var (
 	companyInfoTN     = "companyInfo"
-	companyInfoFields = []string{"companyId", "companyName", "abbreviationName", "corporator", "phone", 
-								"e_mail", "companyAddr", "backup"}
-	scanCompanyInfo   = func(r DbScanner, st *model.CompanyInfo) error {
+	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
+		"e_mail", "company_ddr", "backup", "created_at", "updated_at"}
+	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-					 &st.Summary, &st.Email, &st.CompanyAddr, &st.Backup)
+			&st.Summary, &st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
 func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*model.CompanyInfo, error) {
-	strSql := "select " + strings.Join(companyInfoFields, ",") + " from " + companyInfoTN + " where companyId=?"
+	strSql := "select " + strings.Join(companyInfoFields, ",") + " from " + companyInfoTN + " where company_id=?"
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Get] [sql: %s ,values: %s]", strSql, companyId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
@@ -55,10 +55,10 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 // }
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
-	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") + 
-				") values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		                    st.Summary, st.Email,st.CompanyAddr,st.Backup}
+		st.Summary, st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -71,7 +71,7 @@ func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.Comp
 }
 
 func (dao *CompanyDao) Delete(ctx context.Context, do DbOperator, companyId int) error {
-	strSql := "delete from " + companyInfoTN + " where companyId = ?"
+	strSql := "delete from " + companyInfoTN + " where company_id = ?"
 
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Delete] [sql: %s, id: %s]", strSql, companyId)
 	start := time.Now()
@@ -133,10 +133,10 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 }
 
 func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
-	                          params map[string]interface{}) error {
-	var keyMap = map[string]string{"CompanyID": "companyId","CompanyName": "companyName", "AbbreviationName": "abbreviationName",
-							       "Corporator": "corporator", "Phone": "phone", "E_mail": "e_mail",
-							       "CompanyAddr": "companyAddr","Backup": "backup"}
+	params map[string]interface{}) error {
+	var keyMap = map[string]string{"CompanyID": "company_id", "CompanyName": "company_name", "AbbreviationName": "abbre_name",
+		"Corporator": "corporator", "Phone": "phone", "E_mail": "e_mail", "CompanyAddr": "company_ddr", "Backup": "backup",
+		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + companyInfoTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -154,7 +154,7 @@ func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	if first {
 		return nil
 	}
-	strSql += " where companyId = ?"
+	strSql += " where company_id = ?"
 	values = append(values, companyId)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Update] [sql: %s, values: %v]", strSql, values)

@@ -17,14 +17,14 @@ type VoucherInfoDao struct {
 
 var (
 	voucherInfoTN     = "voucherInfo_2020"
-	voucherInfoFields = []string{"voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate"}
+	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month", "voucher_date", "create_at", "update_at"}
 	scanVoucherInfo   = func(r DbScanner, st *model.VoucherInfo) error {
-		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherDate)
+		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherDate, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
 func (dao *VoucherInfoDao) Get(ctx context.Context, do DbOperator, voucherId int) (*model.VoucherInfo, error) {
-	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN + " where voucherId=?"
+	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN + " where voucher_id=?"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Get] [sql: %s ,values: %s]", strSql, voucherId)
 	var voucherInfo = &model.VoucherInfo{}
 	start := time.Now()
@@ -62,12 +62,10 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, fil
 	return c, err
 }
 
-//voucherID由数据库中的自增ID产生，所以此时就不用再对该字段进行赋值了。
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
 	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
-		") values (?, ?, ?, ?)"
-	//values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate}
-	values := []interface{}{st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate}
+		") values (?, ?, ?, ?, ? ,? ,?)"
+	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -79,7 +77,7 @@ func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.
 	return nil
 }
 func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId int) error {
-	strSql := "delete from " + voucherInfoTN + " where voucherId=?"
+	strSql := "delete from " + voucherInfoTN + " where voucher_id=?"
 
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, id: %s]", strSql, voucherId)
 	start := time.Now()
@@ -121,8 +119,8 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 
 func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucherId", "CompanyID": "companyId", "VoucherDate": "voucherDate",
-		"NumOfMonth": "numOfMonth", "VoucherMonth": "voucherMonth"}
+	var keyMap = map[string]string{"VoucherID": "voucher_id", "CompanyID": "company_id", "VoucherDate": "voucher_month",
+		"NumOfMonth": "num_of_month", "VoucherMonth": "voucher_date", "CreatedAt": "create_at", "UpdatedAt": "update_at"}
 	strSql := "update " + voucherInfoTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -140,7 +138,7 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId 
 	if first {
 		return nil
 	}
-	strSql += " where voucherId=?"
+	strSql += " where voucher_id=?"
 	values = append(values, voucherId)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Update] [sql: %s, values: %v]", strSql, values)
