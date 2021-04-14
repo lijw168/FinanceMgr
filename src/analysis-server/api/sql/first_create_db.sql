@@ -32,7 +32,7 @@ create table if not exists `finance_mgr_2021`.`accountSubject`
    `subjectName`          varchar(24) not null,
    `subjectLevel`         tinyint not null,
    primary key (subjectId),
-   UNIQUE KEY `subjectName` (`subjectName`),
+   UNIQUE KEY `subjectName` (`subjectName`)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -106,12 +106,13 @@ create table if not exists `finance_mgr_2021`.`companyInfo`
 /* voucherId：从501开始，设计的值的最大值，是int类型的最大值； */  
 /* recordId：从1001开始。设计的值的最大值，是int类型的最大值；*/
 /*==============================================================*/
+drop table if exists `finance_mgr_2021`.`idInfo`;
 create table if not exists `finance_mgr_2021`.`idInfo`
 (
    `companyId`            int not null,
    `subjectId`            int not null,
    `voucherId`            int not null,
-   `voucherRecordId`      int not null,
+   `voucherRecordId`      int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 
