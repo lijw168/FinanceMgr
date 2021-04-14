@@ -17,8 +17,8 @@ create table if not exists `finance_mgr_2021`.`companyInfo`
    `created_at`            datetime,
    `updated_at`            datetime,
    primary key (company_id),
-   UNIQUE KEY `companyName` (`companyName`),
-   UNIQUE KEY `abbreName` (`abbreName`)
+   UNIQUE KEY `company_name` (`company_name`),
+   UNIQUE KEY `abbre_name` (`abbre_name`)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -115,6 +115,6 @@ create table if not exists `finance_mgr_2021`.`idInfo`
    `voucher_record_id`      int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
---insert into idInfo (companyId,subjectId,voucherId,voucherRecordId) value(100,101,501,1001);
+--insert into idInfo (company_id,subject_id,voucher_id,voucher_record_id) value(100,101,501,1001);
 
 
