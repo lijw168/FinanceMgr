@@ -27,7 +27,6 @@ func (c *Company) CreateCompany(opts *options.CreateCompanyOptions) (*model.Comp
 		CompanyAddr: &opts.CompanyAddr,
 		Corporator:  &opts.Corporator,
 		Email:       &opts.Email,
-		Summary:     &opts.Summary,
 	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {
@@ -90,7 +89,6 @@ func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {
 		CompanyAddr: &opts.CompanyAddr,
 		Corporator:  &opts.Corporator,
 		Email:       &opts.Email,
-		Summary:     &opts.Summary,
 	}
 	_, err := util.DoRequest(action, param)
 	return err

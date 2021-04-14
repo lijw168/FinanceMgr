@@ -28,7 +28,6 @@ type ModifyCompanyOptions struct {
 	AbbrevName  string
 	Corporator  string
 	Phone       string
-	Summary     string
 	Email       string
 	CompanyAddr string
 	Backup      string

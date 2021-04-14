@@ -43,7 +43,6 @@ type CreateCompanyParams struct {
 	AbbrevName  *string `json:"abbreviationName"`
 	Corporator  *string `json:"corporator"`
 	Phone       *string `json:"phone"`
-	Summary     *string `json:"summary"`
 	Email       *string `json:"e_mail"`
 	CompanyAddr *string `json:"companyAddr"`
 	Backup      *string `json:"backup"`

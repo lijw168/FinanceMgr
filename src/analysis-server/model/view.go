@@ -19,15 +19,16 @@ type AccSubjectView struct {
 }
 
 type CompanyView struct {
-	CompanyID   int    `json:"companyId"`
-	CompanyName string `json:"companyName"`
-	AbbrevName  string `json:"abbreviationName"`
-	Corporator  string `json:"corporator"`
-	Phone       string `json:"phone"`
-	Summary     string `json:"summary"`
-	Email       string `json:"e_mail"`
-	CompanyAddr string `json:"companyAddr"`
-	Backup      string `json:"backup"`
+	CompanyID   int       `json:"companyId"`
+	CompanyName string    `json:"companyName"`
+	AbbrevName  string    `json:"abbreviationName"`
+	Corporator  string    `json:"corporator"`
+	Phone       string    `json:"phone"`
+	Email       string    `json:"e_mail"`
+	CompanyAddr string    `json:"companyAddr"`
+	Backup      string    `json:"backup"`
+	CreatedAt   time.Time `json:"CreatedAt"`
+	UpdatedAt   time.Time `json:"UpdatedAt"`
 }
 
 type OperatorInfoView struct {

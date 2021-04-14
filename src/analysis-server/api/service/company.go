@@ -52,7 +52,6 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.AbbrevName = *params.AbbrevName
 	comInfo.Corporator = *params.Corporator
 	comInfo.Phone = *params.Phone
-	comInfo.Summary = *params.Summary
 	comInfo.Email = *params.Email
 	comInfo.CompanyAddr = *params.CompanyAddr
 	comInfo.Backup = *params.Backup
@@ -79,11 +78,12 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	comView.AbbrevName = comInfo.AbbrevName
 	comView.Corporator = comInfo.Corporator
 	comView.Phone = comInfo.Phone
-	comView.Summary = comInfo.Summary
 	comView.Email = comInfo.Email
 	comView.CompanyAddr = comInfo.CompanyAddr
 	comView.Backup = comInfo.Backup
 	comView.CompanyID = comInfo.CompanyID
+	comView.CreatedAt = comInfo.CreatedAt
+	comView.UpdatedAt = comInfo.UpdatedAt
 	return comView
 }
 
