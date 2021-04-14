@@ -1,6 +1,27 @@
 CREATE DATABASE IF NOT EXISTS `finance_mgr_2021` DEFAULT CHARACTER SET utf8;
 
 /*==============================================================*/
+/* Table: companyInfo                                           */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`companyInfo`;
+create table if not exists `finance_mgr_2021`.`companyInfo`
+(
+   `companyId`            int not null,
+   `companyName`          varchar(64),
+   `abbreName`            varchar(24),
+   `corporator`           varchar(16),
+   `phone`                varchar(13),
+   `e_mail`               varchar(32),
+   `companyAddr`          varchar(128),
+   `backup`               varchar(32),
+   `create_at`            datetime,
+   `update_at`            datetime,
+   primary key (companyId),
+   UNIQUE KEY `companyName` (`companyName`),
+   UNIQUE KEY `abbreName` (`abbreName`)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+/*==============================================================*/
 /* Table: operatorInfo                                          */
 /*==============================================================*/
 drop table if exists `finance_mgr_2021`.`operatorInfo`;
@@ -18,9 +39,9 @@ create table if not exists `finance_mgr_2021`.`operatorInfo`
    primary key (name)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
--- use  finance_mgr_2021;
--- alter table operatorInfo add constraint FK_Reference_1 foreign key (companyId)  
---       references companyInfo (companyId) on delete restrict on update restrict;
+use  finance_mgr_2021;
+alter table operatorInfo add constraint FK_Reference_1 foreign key (companyId)  
+      references companyInfo (companyId) on delete restrict on update restrict;
 
 /*==============================================================*/
 /* 会计科目表 Table: accountSubject                              */
@@ -34,6 +55,25 @@ create table if not exists `finance_mgr_2021`.`accountSubject`
    primary key (subjectId),
    UNIQUE KEY `subjectName` (`subjectName`)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+/*==============================================================*/
+/* 凭证信息表 Table: VoucherInfo                                 */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`voucherInfo`;
+create table if not exists `finance_mgr_2021`.`voucherInfo`
+(
+   `voucherId`            int not null,
+   `companyId`            int not null,   
+   `voucherMonth`         int not null COMMENT '制证月份',
+   `numOfMonth`           int not null COMMENT '本月第几次记录凭证',
+   `voucherDate`          date not null COMMENT '制证日期',
+   `create_at`            datetime,
+   `update_at`            datetime,
+   primary key (voucherId)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+alter table voucherInfo add constraint FK_Reference_3 foreign key (companyId)
+      references companyInfo (companyId) on delete restrict on update restrict;
 
 /*==============================================================*/
 /* 凭证信息表 Table: voucherRecordInfo                               */
@@ -57,48 +97,8 @@ create table  if not exists `finance_mgr_2021`.`voucherRecordInfo`
    primary key (recordId)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
--- alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucherId)
---       references voucherInfo (voucherId) on delete restrict on update restrict;
-
-/*==============================================================*/
-/* 凭证信息表 Table: VoucherInfo                                 */
-/*==============================================================*/
-drop table if exists `finance_mgr_2021`.`voucherInfo`;
-create table if not exists `finance_mgr_2021`.`voucherInfo`
-(
-   `voucherId`            int not null,
-   `companyId`            int not null,   
-   `voucherMonth`         int not null COMMENT '制证月份',
-   `numOfMonth`           int not null COMMENT '本月第几次记录凭证',
-   `voucherDate`          date not null COMMENT '制证日期',
-   `create_at`            datetime,
-   `update_at`            datetime,
-   primary key (voucherId)
-)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-
--- alter table voucherInfo add constraint FK_Reference_3 foreign key (companyId)
---       references companyInfo (companyId) on delete restrict on update restrict;
-
-/*==============================================================*/
-/* Table: companyInfo                                           */
-/*==============================================================*/
-drop table if exists `finance_mgr_2021`.`companyInfo`;
-create table if not exists `finance_mgr_2021`.`companyInfo`
-(
-   `companyId`            int not null,
-   `companyName`          varchar(64),
-   `abbreName`            varchar(24),
-   `corporator`           varchar(16),
-   `phone`                varchar(13),
-   `e_mail`               varchar(32),
-   `companyAddr`          varchar(128),
-   `backup`               varchar(32),
-   `create_at`            datetime,
-   `update_at`            datetime,
-   primary key (companyId),
-   UNIQUE KEY `companyName` (`companyName`),
-   UNIQUE KEY `abbreName` (`abbreName`)
-)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucherId)
+      references voucherInfo (voucherId) on delete restrict on update restrict;
 
 /*==============================================================*/
 /* Table: IDInfo                                           */
