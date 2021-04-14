@@ -17,11 +17,11 @@ type CompanyDao struct {
 
 var (
 	companyInfoTN     = "companyInfo"
-	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone", "summary",
+	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
 		"e_mail", "company_addr", "backup", "created_at", "updated_at"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-			&st.Summary, &st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt)
+			&st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -56,9 +56,9 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
 	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		st.Summary, st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt}
+		st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -135,7 +135,7 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	params map[string]interface{}) error {
 	var keyMap = map[string]string{"CompanyID": "company_id", "CompanyName": "company_name", "AbbreviationName": "abbre_name",
-		"Corporator": "corporator", "Phone": "phone", "Summary": "summary", "E_mail": "e_mail", "CompanyAddr": "company_addr", "Backup": "backup",
+		"Corporator": "corporator", "Phone": "phone", "E_mail": "e_mail", "CompanyAddr": "company_addr", "Backup": "backup",
 		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + companyInfoTN + " set "
 	var values []interface{}
