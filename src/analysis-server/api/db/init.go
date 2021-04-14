@@ -59,7 +59,8 @@ func clause(fields map[string]string, clause map[string]interface{}, sep string)
 
 //filterNo,the var type is float64, int and string
 func transferCountSqlWithNo(table string, filter map[string]interface{}, filterNo map[string]interface{}) (string, []interface{}) {
-	strSql := "select count(id) from " + table
+	//strSql := "select count(id) from " + table
+	strSql := "select count(*) from " + table
 	var fk []string
 	var fv []interface{}
 
@@ -138,7 +139,8 @@ func transferCountSqlWithNo(table string, filter map[string]interface{}, filterN
 	return strSql, fv
 }
 func transferCountSql(table string, filter map[string]interface{}) (string, []interface{}) {
-	strSql := "select count(id) from " + table
+	//strSql := "select count(id) from " + table
+	strSql := "select count(*) from " + table
 	var fk []string
 	var fv []interface{}
 
@@ -199,7 +201,8 @@ func transferCountSql(table string, filter map[string]interface{}) (string, []in
 }
 
 func transferCountSqlWithFuzzyMatch(table string, filter map[string]interface{}, fuzzyMatchFilter map[string]string) (string, []interface{}) {
-	strSql := "select count(id) from " + table
+	//strSql := "select count(id) from " + table
+	strSql := "select count(*) from " + table
 	var fk []string
 	var fv []interface{}
 

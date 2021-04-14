@@ -79,7 +79,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 
 	optViews, count, ccErr := oh.OptInfoService.ListOperators(r.Context(), params)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[operatorInfo/ListOperatorInfo/ServeHTTP] [OptInfoService.DescribeOperators: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[operatorInfo/ListOperatorInfo/ServerHTTP] [OptInfoService.DescribeOperators: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -106,7 +106,7 @@ func (oh *OperatorInfoHandlers) GetOperatorInfo(w http.ResponseWriter, r *http.R
 	requestId := oh.GetTraceId(r)
 	optView, ccErr := oh.OptInfoService.GetOperatorInfoByName(r.Context(), *params.Name, requestId)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[operatorInfo/GetOperatorInfo/ServeHTTP] [OptInfoService.GetOperatorInfoByName: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[operatorInfo/GetOperatorInfo/ServerHTTP] [OptInfoService.GetOperatorInfoByName: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -153,7 +153,7 @@ func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Re
 	volumeView, ccErr := oh.OptInfoService.CreateOptInfo(r.Context(), params, requestId)
 	oh.Logger.InfoContext(r.Context(), "CreateOptInfo in CreateOperator.")
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[operatorInfo/CreateOperator/ServeHTTP] [OptInfoService.CreateOptInfo: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[operatorInfo/CreateOperator/ServerHTTP] [OptInfoService.CreateOptInfo: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -194,7 +194,7 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 		requestId := oh.GetTraceId(r)
 		comView, ccErr := oh.ComService.GetCompanyById(r.Context(), *params.CompanyID, requestId)
 		if comView == nil || ccErr != nil {
-			oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServeHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
+			oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
 			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 			return
 		}
@@ -219,7 +219,7 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 	}
 	ccErr := oh.OptInfoService.UpdateOperator(r.Context(), *params.Name, updateFields)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServeHTTP] [OptInfoService.UpdateOperator: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [OptInfoService.UpdateOperator: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -244,7 +244,7 @@ func (oh *OperatorInfoHandlers) DeleteOperator(w http.ResponseWriter, r *http.Re
 	requestId := oh.GetTraceId(r)
 	ccErr := oh.OptInfoService.DeleteOperatorInfoByName(r.Context(), *params.Name, requestId)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[opreator/DeleteOperator/ServeHTTP] [OptInfoService.DeleteOperatorInfoByName: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[opreator/DeleteOperator/ServerHTTP] [OptInfoService.DeleteOperatorInfoByName: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}

@@ -61,7 +61,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 
 	accSubViews, count, ccErr := ah.AccSubService.ListAccSub(r.Context(), params)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/ListAccSub/ServeHTTP] [AccSubService.ListAccSub: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[accSub/ListAccSub/ServerHTTP] [AccSubService.ListAccSub: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -89,7 +89,7 @@ func (ah *AccountSubHandlers) GetAccSub(w http.ResponseWriter, r *http.Request) 
 
 	accSubView, ccErr := ah.AccSubService.GetAccSubById(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/GetAccSub/ServeHTTP] [AccSubService.GetAccSubById: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[accSub/GetAccSub/ServerHTTP] [AccSubService.GetAccSubById: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -127,7 +127,7 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 	accSubView, ccErr := ah.AccSubService.CreateAccSub(r.Context(), params, requestId)
 	ah.Logger.InfoContext(r.Context(), "AccSubService.CreateAccSub in CreateAccSub.")
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/CreateAccSub/ServeHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[accSub/CreateAccSub/ServerHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -170,7 +170,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	}
 	ccErr := ah.AccSubService.UpdateAccSubById(r.Context(), *params.SubjectID, updateFields)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/AccountSubHandlers/ServeHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -195,7 +195,7 @@ func (ah *AccountSubHandlers) DeleteAccSub(w http.ResponseWriter, r *http.Reques
 	requestId := ah.GetTraceId(r)
 	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/DeleteAccSub/ServeHTTP] [AccSubService.DeleteaccSubByName: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteaccSubByName: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}

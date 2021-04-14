@@ -75,7 +75,7 @@ func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
 
 	comViews, count, ccErr := ch.ComService.ListCompany(r.Context(), params)
 	if ccErr != nil {
-		ch.Logger.WarnContext(r.Context(), "[company/ListCompany/ServeHTTP] [ComService.ListCompany: %s]", ccErr.Detail())
+		ch.Logger.WarnContext(r.Context(), "[company/ListCompany/ServerHTTP] [ComService.ListCompany: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
@@ -103,7 +103,7 @@ func (ch *CompanyHandlers) GetCompany(w http.ResponseWriter, r *http.Request) {
 
 	comView, ccErr := ch.ComService.GetCompanyById(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ch.Logger.WarnContext(r.Context(), "[company/GetCompanyById/ServeHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
+		ch.Logger.WarnContext(r.Context(), "[company/GetCompanyById/ServerHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
@@ -136,7 +136,7 @@ func (ch *CompanyHandlers) CreateCompany(w http.ResponseWriter, r *http.Request)
 	comView, ccErr := ch.ComService.CreateCompany(r.Context(), params, requestId)
 	ch.Logger.InfoContext(r.Context(), "CreateCompany in CreateCompany.")
 	if ccErr != nil {
-		ch.Logger.WarnContext(r.Context(), "[company/CreateCompany/ServeHTTP] [ComService.CreateCompany: %s]", ccErr.Detail())
+		ch.Logger.WarnContext(r.Context(), "[company/CreateCompany/ServerHTTP] [ComService.CreateCompany: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
@@ -204,7 +204,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	}
 	ccErr := ch.ComService.UpdateCompanyById(r.Context(), *params.CompanyID, updateFields)
 	if ccErr != nil {
-		ch.Logger.WarnContext(r.Context(), "[company/UpdateCompany/ServeHTTP] [ComService.UpdateCompanyById: %s]", ccErr.Detail())
+		ch.Logger.WarnContext(r.Context(), "[company/UpdateCompany/ServerHTTP] [ComService.UpdateCompanyById: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
@@ -228,7 +228,7 @@ func (ch *CompanyHandlers) DeleteCompany(w http.ResponseWriter, r *http.Request)
 	requestId := ch.GetTraceId(r)
 	ccErr := ch.ComService.DeleteCompanyByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ch.Logger.WarnContext(r.Context(), "[company/DeleteCompany/ServeHTTP] [ComService.DeleteCompanyByID: %s]", ccErr.Detail())
+		ch.Logger.WarnContext(r.Context(), "[company/DeleteCompany/ServerHTTP] [ComService.DeleteCompanyByID: %s]", ccErr.Detail())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}

@@ -76,7 +76,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	vouInfoViews, count, ccErr := vh.Vis.ListVoucherInfo(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherInfo/ServeHTTP] [VoucherInfoService.ListVoucherInfo: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherInfo/ServerHTTP] [VoucherInfoService.ListVoucherInfo: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -146,7 +146,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 
 	vouRecordViews, count, ccErr := vh.Vrs.ListVoucherRecords(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherRecords/ServeHTTP] [VoucherRecordService.ListVoucherRecords: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherRecords/ServerHTTP] [VoucherRecordService.ListVoucherRecords: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -173,7 +173,7 @@ func (vh *VoucherHandlers) GetVoucherInfo(w http.ResponseWriter, r *http.Request
 	requestId := vh.GetTraceId(r)
 	voucherView, ccErr := vh.Vis.GetVoucherInfoByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucherInfo/ServeHTTP] [Vis.GetVoucherInfoByID: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucherInfo/ServerHTTP] [Vis.GetVoucherInfoByID: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -199,7 +199,7 @@ func (vh *VoucherHandlers) GetVoucher(w http.ResponseWriter, r *http.Request) {
 	requestId := vh.GetTraceId(r)
 	voucherView, ccErr := vh.Vs.GetVoucherByVoucherID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucher/ServeHTTP] [Vs.GetVoucherByVoucherID: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucher/ServerHTTP] [Vs.GetVoucherByVoucherID: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -248,7 +248,7 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 
 	IdSlice, ccErr := vh.Vs.CreateVoucher(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucher/ServeHTTP] [Vs.CreateVoucher: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucher/ServerHTTP] [Vs.CreateVoucher: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -274,7 +274,7 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 	requestId := vh.GetTraceId(r)
 	ccErr := vh.Vs.DeleteVoucher(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucher/ServeHTTP] [Vs.DeleteVoucher: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucher/ServerHTTP] [Vs.DeleteVoucher: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -323,7 +323,7 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 
 	IdSlice, ccErr := vh.Vrs.CreateVoucherRecords(r.Context(), recordsParams, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucherRecords/ServeHTTP] [Vrs.CreateVoucherRecords: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucherRecords/ServerHTTP] [Vrs.CreateVoucherRecords: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -386,7 +386,7 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 	}
 	ccErr := vh.Vrs.UpdateVoucherRecord(r.Context(), *params.VouRecordID, updateFields)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/UpdateVoucherRecord/ServeHTTP] [Vrs.UpdateVoucherRecord: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucher/UpdateVoucherRecord/ServerHTTP] [Vrs.UpdateVoucherRecord: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -411,7 +411,7 @@ func (vh *VoucherHandlers) DeleteVoucherRecord(w http.ResponseWriter, r *http.Re
 	requestId := vh.GetTraceId(r)
 	ccErr := vh.Vrs.DeleteVoucherRecordByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServeHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
+		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServerHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
