@@ -206,7 +206,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
 	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)
 	httpRouter.RegisterFunc("GetCompany", comHandlers.GetCompany)
-	httpRouter.RegisterFunc("Listcompany", comHandlers.Listcompany)
+	httpRouter.RegisterFunc("ListCompany", comHandlers.ListCompany)
 	httpRouter.RegisterFunc("UpdateCompany", comHandlers.UpdateCompany)
 
 	httpRouter.RegisterFunc("CreateOperator", optInfoHandlers.CreateOperator)

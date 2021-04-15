@@ -17,7 +17,7 @@ type CompanyHandlers struct {
 	ComService *service.CompanyService
 }
 
-func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
+func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.ListCompanyParams)
 	err := ch.HttpRequestParse(r, params)
 	if err != nil {
