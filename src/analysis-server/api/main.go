@@ -103,6 +103,7 @@ func main() {
 		fmt.Println("[Init] Handler registe error: ", err)
 		return
 	}
+	gIdInfoService = new(service.IDInfoService)
 	interceptSignal()
 	if err = startServer(httpRouter, apiServerConf.ServerConf); err != nil {
 		fmt.Println("[Init] http server exit, error: ", err)
