@@ -14,6 +14,9 @@ import (
 	"common/tag"
 	"common/url"
 	"common/utils"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"analysis-server/api/cfg"
 	"analysis-server/api/db"
@@ -22,6 +25,44 @@ import (
 	aUtils "analysis-server/api/utils"
 )
 
+var (
+	gGenSubIdInfo    *aUtils.GenIdInfo
+	gGenComIdInfo    *aUtils.GenIdInfo
+	gGenVouIdInfo    *aUtils.GenIdInfo
+	gGenVouRecIdInfo *aUtils.GenIdInfo
+	gIdInfoService   *service.IDInfoService
+	exitCh           = make(chan bool)
+)
+
+func updateIdInfo() {
+	subId := gGenSubIdInfo.GetId()
+	comId := gGenComIdInfo.GetId()
+	vouId := gGenVouIdInfo.GetId()
+	vouRecId := gGenVouRecIdInfo.GetId()
+	updateFields := make(map[string]interface{})
+	updateFields["SubjectID"] = subId
+	updateFields["CompanyID"] = comId
+	updateFields["VoucherID"] = vouId
+	updateFields["VoucherRecordID"] = vouRecId
+	gIdInfoService.UpdateIdInfo(updateFields)
+}
+func interceptSignal() {
+	daemonExitCh := make(chan os.Signal)
+	signal.Notify(daemonExitCh, syscall.SIGTERM, syscall.SIGKILL,
+		syscall.SIGQUIT, syscall.SIGINT, syscall.SIGHUP)
+	go func() {
+		for {
+			<-daemonExitCh
+			updateIdInfo()
+			break
+		}
+		exitCh <- true
+	}()
+}
+
+func waitDaemonExit() {
+	<-exitCh
+}
 func main() {
 
 	if utils.SetLimit() != nil {
@@ -62,10 +103,11 @@ func main() {
 		fmt.Println("[Init] Handler registe error: ", err)
 		return
 	}
-
+	interceptSignal()
 	if err = startServer(httpRouter, apiServerConf.ServerConf); err != nil {
 		fmt.Println("[Init] http server exit, error: ", err)
 	}
+	waitDaemonExit()
 	logger.Close()
 	return
 }
@@ -109,6 +151,9 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	optInfoDao := &db.OperatorInfoDao{Logger: logger}
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
+	gIdInfoService.Logger = logger
+	gIdInfoService.IdInfoDao = idInfoDao
+	gIdInfoService.Db = _db
 	/*service*/
 	idInfoService := &service.IDInfoService{Logger: logger, IdInfoDao: idInfoDao, Db: _db}
 	idInfoView, err2 := idInfoService.GetIdInfo()
@@ -116,34 +161,34 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		fmt.Println("[Init] GetIdInfo failed,error: ", err2.Error())
 		return err2
 	}
-	genSubIdInfo, err := aUtils.NewGenIdInfo(idInfoView.SubjectID)
+	gGenSubIdInfo, err = aUtils.NewGenIdInfo(idInfoView.SubjectID)
 	if err != nil {
 		fmt.Println("[Init] initialize subjectID ,failed. error: ", err)
 		return err
 	}
-	genComIdInfo, err := aUtils.NewGenIdInfo(idInfoView.CompanyID)
+	gGenComIdInfo, err = aUtils.NewGenIdInfo(idInfoView.CompanyID)
 	if err != nil {
 		fmt.Println("[Init] initialize companyID ,failed. error: ", err)
 		return err
 	}
-	genVouIdInfo, err := aUtils.NewGenIdInfo(idInfoView.VoucherID)
+	gGenVouIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherID)
 	if err != nil {
 		fmt.Println("[Init] initialize voucherID ,failed. error: ", err)
 		return err
 	}
-	genVouRecIdInfo, err := aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
+	gGenVouRecIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
 	if err != nil {
 		fmt.Println("[Init] initialize voucherRecordID ,failed. error: ", err)
 		return err
 	}
 
-	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: genSubIdInfo}
-	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: genComIdInfo}
+	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: gGenSubIdInfo}
+	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: gGenComIdInfo}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao,
-		GenRecordId: genVouRecIdInfo, GenVoucherId: genVouIdInfo, Db: _db}
-	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, GenRecordId: genVouRecIdInfo, Db: _db}
+		GenRecordId: gGenVouRecIdInfo, GenVoucherId: gGenVouIdInfo, Db: _db}
+	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, GenRecordId: gGenVouRecIdInfo, Db: _db}
 	//handlers
 	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}

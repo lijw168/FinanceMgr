@@ -57,7 +57,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.Backup = *params.Backup
 	comInfo.UpdatedAt = time.Now()
 	//>100,as subjectId
-	comInfo.CompanyID = cs.GenComId.GetId()
+	comInfo.CompanyID = cs.GenComId.GetNextId()
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [CompanyDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

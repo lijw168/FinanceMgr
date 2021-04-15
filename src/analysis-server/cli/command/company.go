@@ -19,7 +19,7 @@ func NewCompanyCommand(cmd *cobra.Command) {
 func newCompanyCreateCmd() *cobra.Command {
 	var opts options.CreateCompanyOptions
 	cmd := &cobra.Command{
-		Use:   "company-create [OPTIONS] company_name phone",
+		Use:   "company-create [OPTIONS] company_name abbre_name phone",
 		Short: "Create a company",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -28,6 +28,7 @@ func newCompanyCreateCmd() *cobra.Command {
 			}
 			opts.CompanyName = args[0]
 			opts.Phone = args[1]
+			opts.AbbrevName = args[2]
 
 			if hv, err := Sdk.CreateCompany(&opts); err != nil {
 				util.FormatErrorOutput(err)

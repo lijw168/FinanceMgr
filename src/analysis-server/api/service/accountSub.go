@@ -50,7 +50,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
-	accSub.SubjectID = as.GenSubId.GetId()
+	accSub.SubjectID = as.GenSubId.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

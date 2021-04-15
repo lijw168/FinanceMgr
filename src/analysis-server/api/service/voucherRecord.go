@@ -26,7 +26,7 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 
 	FuncName := "VoucherRecordService/CreateVoucherRecord"
 	vRecord := new(model.VoucherRecord)
-	vRecord.RecordID = vs.GenRecordId.GetId()
+	vRecord.RecordID = vs.GenRecordId.GetNextId()
 	vRecord.VoucherID = *params.VoucherID
 	vRecord.SubjectName = *params.SubjectName
 	vRecord.DebitMoney = *params.DebitMoney
@@ -62,7 +62,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 	var IdValSli []int
 	for _, itemParam := range recordsParams {
 		vRecord := new(model.VoucherRecord)
-		vRecord.RecordID = vs.GenRecordId.GetId()
+		vRecord.RecordID = vs.GenRecordId.GetNextId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = *itemParam.VoucherID
 		vRecord.SubjectName = *itemParam.SubjectName

@@ -23,9 +23,15 @@ func NewGenIdInfo(initId int) (*GenIdInfo, error) {
 	return &GenIdInfo{uid: initId}, nil
 }
 
-func (info *GenIdInfo) GetId() int {
+func (info *GenIdInfo) GetNextId() int {
 	info.mu.Lock()
 	defer info.mu.Unlock()
 	info.uid = info.uid + 1
+	return info.uid
+}
+
+func (info *GenIdInfo) GetId() int {
+	info.mu.Lock()
+	defer info.mu.Unlock()
 	return info.uid
 }
