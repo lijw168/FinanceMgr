@@ -47,7 +47,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
+			case "voucher_id", "company_id", "voucher_month", "num_of_month", "voucher_date":
 				filterFields[*f.Field] = f.Value
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)

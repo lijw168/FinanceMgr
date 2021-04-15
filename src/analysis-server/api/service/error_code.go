@@ -11,6 +11,7 @@ const (
 	ErrOperator    = "operator"
 	ErrVoucherInfo = "voucherInfo"
 	ErrVoucher     = "voucher"
+	ErrOrder       = "order"
 )
 
 const (

@@ -4,6 +4,7 @@ import (
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
 	"common/log"
 	"net/http"
 )
@@ -32,38 +33,36 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucher_id"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucher_month"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["num_of_month"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucher_date"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
 	}
-	// if (params.Order != nil) && (len(params.Order) > 0) {
-	// 	switch *params.Order[0].Field {
-	// 	case "create_time":
-	// 		*params.Order[0].Field = "created_at"
-	// 	case "update_time":
-	// 		*params.Order[0].Field = "updated_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// 	switch *params.Order[0].Direction {
-	// 	case cons.Order_Asc, cons.Order_Desc:
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// }
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "create_time":
+			*params.Order[0].Field = "created_at"
+		case "update_time":
+			*params.Order[0].Field = "updated_at"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
@@ -96,43 +95,39 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["voucher_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["record_id"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["subject_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["subId1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subId2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subId3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["sub_id1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["sub_id2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["sub_id3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["sub_id4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
 	}
-	// if (params.Order != nil) && (len(params.Order) > 0) {
-	// 	switch *params.Order[0].Field {
-	// 	case "create_time":
-	// 		*params.Order[0].Field = "created_at"
-	// 	case "update_time":
-	// 		*params.Order[0].Field = "updated_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// 	switch *params.Order[0].Direction {
-	// 	case cons.Order_Asc, cons.Order_Desc:
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// }
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "create_time":
+			*params.Order[0].Field = "created_at"
+		case "update_time":
+			*params.Order[0].Field = "updated_at"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)

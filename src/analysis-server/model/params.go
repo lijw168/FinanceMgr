@@ -35,7 +35,10 @@ type DescribeIdParams struct {
 }
 
 type ListSubjectParams struct {
-	Filter []*FilterItem `json:"filter"`
+	Filter     []*FilterItem `json:"filter"`
+	Order      []*OrderItem  `json:"orders"`
+	DescOffset *int          `json:"desc_offset"`
+	DescLimit  *int          `json:"desc_limit"`
 }
 
 type CreateCompanyParams struct {

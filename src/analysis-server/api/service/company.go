@@ -165,9 +165,9 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 			// case "fuzzy_name":
 			// 	volName := "%" + f.Value.(string) + "%"
 			// 	fuzzyMatchFields["volume_name"] = volName
-			case "companyId", "companyName", "abbreviationName", "corporator":
+			case "company_id", "company_name", "abbre_name", "corporator":
 				filterFields[*f.Field] = f.Value
-			case "phone", "e_mail", "companyAddr", "backup":
+			case "phone", "e_mail", "company_addr", "backup":
 				filterFields[*f.Field] = f.Value
 			default:
 				return comViewSlice, 0, NewError(ErrCompany, ErrUnsupported, ErrField, *f.Field)

@@ -53,7 +53,7 @@ func interceptSignal() {
 	go func() {
 		for {
 			sig := <-daemonExitCh
-			fmt.Printf("the sig is %s", sig.String())
+			fmt.Printf("the sig is %s\n", sig.String())
 			updateIdInfo()
 			break
 		}

@@ -62,7 +62,7 @@ func (c *Company) GetCompany(opts *options.BaseOptions) (*model.CompanyView, err
 }
 
 func (c *Company) ListCompany(opts *options.ListOptions) (int64, []*model.CompanyView, error) {
-	action := "Listcompany"
+	action := "ListCompany"
 	var ret []*model.CompanyView
 	desc, err := ListOpsResources(action, opts)
 	if err != nil {

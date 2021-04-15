@@ -7,6 +7,7 @@ import (
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
 	"common/log"
 )
 
@@ -27,13 +28,13 @@ func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["companyName"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["abbreviationName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["company_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["abbre_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["corporator"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["phone"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["e_mail"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["companyAddr"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["company_addr"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["backup"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrCompany, service.ErrValue, service.ErrField, service.ErrNull)
@@ -41,27 +42,25 @@ func (ch *CompanyHandlers) Listcompany(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// if (params.Order != nil) && (len(params.Order) > 0) {
-	// 	switch *params.Order[0].Field {
-	// 	case "create_time":
-	// 		*params.Order[0].Field = "created_at"
-	// 	case "update_time":
-	// 		*params.Order[0].Field = "updated_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-	// 		ch.Response(r.Context(), ch.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// 	switch *params.Order[0].Direction {
-	// 	case cons.Order_Asc, cons.Order_Desc:
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-	// 		ch.Response(r.Context(), ch.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// }
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "create_time":
+			*params.Order[0].Field = "created_at"
+		case "update_time":
+			*params.Order[0].Field = "updated_at"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			ch.Response(r.Context(), ch.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ch.Response(r.Context(), ch.Logger, w, ce, nil)
+			return
+		}
+	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrCompany, service.ErrInvalid, service.ErrOffset, service.ErrNull)
 		ch.Response(r.Context(), ch.Logger, w, ce, nil)

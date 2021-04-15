@@ -28,37 +28,32 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subject_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subject_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["subject_level"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
 			return
 		}
 	}
-	// if (params.Order != nil) && (len(params.Order) > 0) {
-	// 	switch *params.Order[0].Field {
-	// 	case "create_time":
-	// 		*params.Order[0].Field = "created_at"
-	// 	case "update_time":
-	// 		*params.Order[0].Field = "updated_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-	// 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// 	switch *params.Order[0].Direction {
-	// 	case cons.Order_Asc, cons.Order_Desc:
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-	// 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// }
-
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "subject_id":
+			*params.Order[0].Field = "subject_id"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			return
+		}
+	}
 	accSubViews, count, ccErr := ah.AccSubService.ListAccSub(r.Context(), params)
 	if ccErr != nil {
 		ah.Logger.WarnContext(r.Context(), "[accSub/ListAccSub/ServerHTTP] [AccSubService.ListAccSub: %s]", ccErr.Detail())

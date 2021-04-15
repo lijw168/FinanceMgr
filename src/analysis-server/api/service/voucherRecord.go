@@ -119,7 +119,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 			// case "fuzzy_name":
 			// 	volName := "%" + f.Value.(string) + "%"
 			// 	fuzzyMatchFields["volume_name"] = volName
-			case "recordId", "voucherId", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
+			case "record_id", "voucher_id", "subject_name", "summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4":
 				filterFields[*f.Field] = f.Value
 			default:
 				return recordViewSlice, 0, NewError(ErrVoucher, ErrUnsupported, ErrField, *f.Field)

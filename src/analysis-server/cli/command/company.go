@@ -65,7 +65,8 @@ func newCompanyDeleteCmd() *cobra.Command {
 }
 
 func newCompanyListCmd() *cobra.Command {
-	defCs := []string{"Id", "CompanyName", "AbbrevName", "Corporator", "Phone", "Summary", "Email", "CompanyAddr", "Backup"}
+	defCs := []string{"CompanyID", "CompanyName", "AbbrevName", "Corporator", "Phone",
+		"Email", "CompanyAddr", "Backup", "CreatedAt", "UpdatedAt"}
 	cmd := &cobra.Command{
 		Use:   "company-list ",
 		Short: "List company Support Filter",
@@ -76,8 +77,8 @@ func newCompanyListCmd() *cobra.Command {
 		opts.Limit = -1
 		opts.Offset = 0
 		//for test
-		//opts.Filter = make(map[string]interface{})
-		//opts.Filter["status"] = "creating|available|in-use"
+		opts.Filter = make(map[string]interface{})
+		opts.Filter["backup"] = "test"
 		if _, views, err := Sdk.ListCompany(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {

@@ -7,6 +7,7 @@ import (
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
+	cons "common/constant"
 	"common/log"
 )
 
@@ -33,7 +34,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["companyId"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["company_id"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["job"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["department"] = utils.Attribute{Type: utils.T_String, Val: nil}
@@ -45,27 +46,25 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 			return
 		}
 	}
-	// if (params.Order != nil) && (len(params.Order) > 0) {
-	// 	switch *params.Order[0].Field {
-	// 	case "create_time":
-	// 		*params.Order[0].Field = "created_at"
-	// 	case "update_time":
-	// 		*params.Order[0].Field = "updated_at"
-	// 	case "delete_time":
-	// 		*params.Order[0].Field = "deleted_at"
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-	// 		oh.Response(r.Context(), oh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// 	switch *params.Order[0].Direction {
-	// 	case cons.Order_Asc, cons.Order_Desc:
-	// 	default:
-	// 		ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-	// 		oh.Response(r.Context(), oh.Logger, w, ce, nil)
-	// 		return
-	// 	}
-	// }
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "create_time":
+			*params.Order[0].Field = "created_at"
+		case "update_time":
+			*params.Order[0].Field = "updated_at"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			oh.Response(r.Context(), oh.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			oh.Response(r.Context(), oh.Logger, w, ce, nil)
+			return
+		}
+	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrOperator, service.ErrInvalid, service.ErrOffset, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ce, nil)

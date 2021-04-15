@@ -197,28 +197,25 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			// case "fuzzy_name":
-			// 	volName := "%" + f.Value.(string) + "%"
-			// 	fuzzyMatchFields["volume_name"] = volName
-			case "subjectId", "subjectName", "subjectLevel":
+			case "subject_id", "subject_name", "subject_level":
 				filterFields[*f.Field] = f.Value
 			default:
 				return accSubViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
-	// if params.DescLimit != nil {
-	// 	limit = *params.DescLimit
-	// 	if params.DescOffset != nil {
-	// 		offset = *params.DescOffset
-	// 	}
-	// }
+	if params.DescLimit != nil {
+		limit = *params.DescLimit
+		if params.DescOffset != nil {
+			offset = *params.DescOffset
+		}
+	}
 	orderField := ""
 	orderDirection := 0
-	// if params.Order != nil {
-	// 	orderField = *params.Order[0].Field
-	// 	orderDirection = *params.Order[0].Direction
-	// }
+	if params.Order != nil {
+		orderField = *params.Order[0].Field
+		orderDirection = *params.Order[0].Direction
+	}
 	accSubInfos, err := as.AccSubDao.List(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
