@@ -94,16 +94,15 @@ func main() {
 		fmt.Println("[Init] new logger err: ", err)
 		return
 	}
-
+	gIdInfoService = new(service.IDInfoService)
 	url.InitCommonUrlRouter(logger, nil)
-
 	httpRouter := url.NewUrlRouter(logger)
 	err = handlerInit(httpRouter, logger, apiServerConf)
 	if err != nil {
 		fmt.Println("[Init] Handler registe error: ", err)
 		return
 	}
-	gIdInfoService = new(service.IDInfoService)
+
 	interceptSignal()
 	if err = startServer(httpRouter, apiServerConf.ServerConf); err != nil {
 		fmt.Println("[Init] http server exit, error: ", err)
