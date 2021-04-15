@@ -27,8 +27,8 @@ func newCompanyCreateCmd() *cobra.Command {
 				return
 			}
 			opts.CompanyName = args[0]
-			opts.Phone = args[1]
-			opts.AbbrevName = args[2]
+			opts.AbbrevName = args[1]
+			opts.Phone = args[2]
 
 			if hv, err := Sdk.CreateCompany(&opts); err != nil {
 				util.FormatErrorOutput(err)
