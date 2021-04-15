@@ -57,8 +57,8 @@ func newOperatorCreateCmd() *cobra.Command {
 func newOperatorDeleteCmd() *cobra.Command {
 	var opts options.NameOptions
 	cmd := &cobra.Command{
-		Use:   "company-delete [OPTIONS] name",
-		Short: "Delete a company",
+		Use:   "operator-delete [OPTIONS] name",
+		Short: "Delete a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
@@ -121,7 +121,7 @@ func newOperatorShowCmd() *cobra.Command {
 func newOperatorUpdateCmd() *cobra.Command {
 	var opts options.OperatorInfoOptions
 	cmd := &cobra.Command{
-		Use:   "operator update [OPTIONS] companyId name ",
+		Use:   "operator-update [OPTIONS] companyId name ",
 		Short: "update a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {

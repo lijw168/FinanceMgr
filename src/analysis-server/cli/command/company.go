@@ -117,7 +117,7 @@ func newCompanyShowCmd() *cobra.Command {
 func newCompanyUpdateCmd() *cobra.Command {
 	var opts options.ModifyCompanyOptions
 	cmd := &cobra.Command{
-		Use:   "company update [OPTIONS] companyId companyName ",
+		Use:   "company-update [OPTIONS] companyId companyName ",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {

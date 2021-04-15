@@ -128,7 +128,7 @@ func newAccSubShowCmd() *cobra.Command {
 func newAccSubUpdateCmd() *cobra.Command {
 	var opts options.ModifySubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub update [OPTIONS] subjectID subject_name subject_level ",
+		Use:   "accSub-update [OPTIONS] subjectID subject_name subject_level ",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
