@@ -52,7 +52,8 @@ func interceptSignal() {
 		syscall.SIGQUIT, syscall.SIGINT, syscall.SIGHUP)
 	go func() {
 		for {
-			<-daemonExitCh
+			sig := <-daemonExitCh
+			fmt.Println("the sig is %s", sig.String())
 			updateIdInfo()
 			break
 		}
@@ -102,23 +103,24 @@ func main() {
 		fmt.Println("[Init] Handler registe error: ", err)
 		return
 	}
-
 	interceptSignal()
-	if err = startServer(httpRouter, apiServerConf.ServerConf); err != nil {
-		fmt.Println("[Init] http server exit, error: ", err)
-	}
+	startServer(httpRouter, apiServerConf.ServerConf)
 	waitDaemonExit()
 	logger.Close()
 	return
 }
 
-func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) error {
+func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 
 	runtime.GOMAXPROCS(serverConf.Cores)
 
 	http.Handle(serverConf.BaseUrl, router)
-
-	return http.ListenAndServe(":"+strconv.Itoa(serverConf.Port), nil)
+	go func() {
+		if err := http.ListenAndServe(":"+strconv.Itoa(serverConf.Port), nil); err != nil {
+			fmt.Println("[Init] http server exit, error: ", err)
+		}
+	}()
+	return
 }
 
 func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *cfg.ApiServerConf) error {
