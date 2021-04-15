@@ -117,7 +117,7 @@ func newCompanyShowCmd() *cobra.Command {
 func newCompanyUpdateCmd() *cobra.Command {
 	var opts options.ModifyCompanyOptions
 	cmd := &cobra.Command{
-		Use:   "company-update [OPTIONS] companyId companyName ",
+		Use:   "company-update [OPTIONS] companyId CompanyName",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -136,10 +136,11 @@ func newCompanyUpdateCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().StringVar(&opts.AbbrevName, "abbrevName", "test", "AbbrevName")
-	cmd.Flags().StringVar(&opts.CompanyAddr, "comAddr", "test", "CompanyAddr")
-	cmd.Flags().StringVar(&opts.Corporator, "corporator", "test", "Corporator")
-	cmd.Flags().StringVar(&opts.Email, "email", "test", "Email")
-	cmd.Flags().StringVar(&opts.Backup, "bc", "test", "backup")
+	// cmd.Flags().StringVar(&opts.CompanyName, "comName", "test", "CompanyName")
+	// cmd.Flags().StringVar(&opts.AbbrevName, "abbrevName", "test", "AbbrevName")
+	// cmd.Flags().StringVar(&opts.CompanyAddr, "comAddr", "test", "CompanyAddr")
+	// cmd.Flags().StringVar(&opts.Corporator, "corporator", "test", "Corporator")
+	// cmd.Flags().StringVar(&opts.Email, "email", "test", "Email")
+	// cmd.Flags().StringVar(&opts.Backup, "bc", "test", "backup")
 	return cmd
 }

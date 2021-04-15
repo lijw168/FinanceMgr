@@ -134,7 +134,7 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 
 func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"CompanyID": "company_id", "CompanyName": "company_name", "AbbreviationName": "abbre_name",
+	var keyMap = map[string]string{"CompanyID": "company_id", "CompanyName": "company_name", "AbbrevName": "abbre_name",
 		"Corporator": "corporator", "Phone": "phone", "E_mail": "e_mail", "CompanyAddr": "company_addr", "Backup": "backup",
 		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + companyInfoTN + " set "

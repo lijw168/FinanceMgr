@@ -55,7 +55,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.Email = *params.Email
 	comInfo.CompanyAddr = *params.CompanyAddr
 	comInfo.Backup = *params.Backup
-	comInfo.UpdatedAt = time.Now()
+	comInfo.CreatedAt = time.Now()
 	//>100,as subjectId
 	comInfo.CompanyID = cs.GenComId.GetNextId()
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
@@ -132,7 +132,7 @@ func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, 
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, cs.Logger, FuncName, tx)
-	//insure the volume exist
+	//insure the company exist
 	_, err = cs.CompanyDao.Get(ctx, tx, companyId)
 	switch err {
 	case nil:

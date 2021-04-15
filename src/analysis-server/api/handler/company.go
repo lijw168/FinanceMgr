@@ -161,11 +161,6 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 
 	updateFields := make(map[string]interface{})
 	if params.CompanyName != nil {
-		if *params.CompanyName == "" {
-			ccErr := service.NewError(service.ErrCompany, service.ErrNotAllowed, service.ErrEmpty, service.ErrNull)
-			ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
-			return
-		}
 		if utf8.RuneCountInString(*params.CompanyName) > NameMaxLen || !utils.VerStrP(*params.CompanyName) {
 			ccErr := service.NewError(service.ErrCompany, service.ErrInvalid, service.ErrName, service.ErrNull)
 			ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
@@ -179,7 +174,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 			ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 			return
 		}
-		updateFields["AbbreviationName"] = *params.AbbrevName
+		updateFields["AbbrevName"] = *params.AbbrevName
 	}
 	if params.Corporator != nil {
 		updateFields["Corporator"] = *params.Corporator
