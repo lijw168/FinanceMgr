@@ -27,7 +27,7 @@ var (
 
 func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*model.CompanyInfo, error) {
 	strSql := "select " + strings.Join(companyInfoFields, ",") + " from " + companyInfoTN + " where company_id=?"
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Get] [sql: %s ,values: %s]", strSql, companyId)
+	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Get] [sql: %s ,values: %d]", strSql, companyId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
 	defer func() {

@@ -26,14 +26,14 @@ var (
 func (dao *OperatorInfoDao) Get(ctx context.Context, do DbOperator, strName string) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where name=?"
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Get] [sql: %s ,values: %s]", strSql, strName)
-	var opInfoTask = &model.OperatorInfo{}
+	var optInfo = &model.OperatorInfo{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, strName), opInfoTask); err {
+	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, strName), optInfo); err {
 	case nil:
-		return opInfoTask, nil
+		return optInfo, nil
 	case sql.ErrNoRows:
 		return nil, err
 	default:

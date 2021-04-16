@@ -32,12 +32,15 @@ type CompanyView struct {
 }
 
 type OperatorInfoView struct {
-	CompanyID  int    `json:"companyId"`
-	Name       string `json:"name"`
-	Job        string `json:"job"`
-	Department string `json:"department"`
-	Status     int    `json:"Status"`
-	Role       int    `json:"role"`
+	CompanyID  int       `json:"companyId"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Job        string    `json:"job"`
+	Department string    `json:"department"`
+	Status     int       `json:"Status"`
+	Role       int       `json:"role"`
+	CreatedAt  time.Time `json:"CreatedAt"`
+	UpdatedAt  time.Time `json:"UpdatedAt"`
 }
 
 type VoucherInfoView struct {

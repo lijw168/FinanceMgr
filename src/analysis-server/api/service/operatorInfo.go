@@ -110,12 +110,14 @@ func (ps *OperatorInfoService) ListOperators(ctx context.Context,
 func (ps *OperatorInfoService) OperateInfoMdelToView(optInfo *model.OperatorInfo) *model.OperatorInfoView {
 	optView := new(model.OperatorInfoView)
 	optView.Name = optInfo.Name
-	//optView.Password = optInfo.Password
+	optView.Password = optInfo.Password
 	optView.CompanyID = optInfo.CompanyID
 	optView.Job = optInfo.Job
 	optView.Department = optInfo.Department
 	optView.Status = optInfo.Status
 	optView.Role = optInfo.Role
+	optView.CreatedAt = optInfo.CreatedAt
+	optView.UpdatedAt = optInfo.UpdatedAt
 	return optView
 }
 

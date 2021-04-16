@@ -98,7 +98,7 @@ func newOperatorListCmd() *cobra.Command {
 
 func newOperatorShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "operator-show [OPTIONS] companyId",
+		Use:   "operator-show [OPTIONS] operatorName",
 		Short: "Show operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {

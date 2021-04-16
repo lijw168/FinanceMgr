@@ -34,7 +34,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["company_id"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["job"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["department"] = utils.Attribute{Type: utils.T_String, Val: nil}

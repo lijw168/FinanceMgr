@@ -61,12 +61,12 @@ func (or *Operator) GetOperatorInfo(opts *options.NameOptions) (*model.OperatorI
 		return nil, errors.New("Name is required")
 	}
 	params := model.DescribeNameParams{Name: &opts.Name}
-	opt, err := util.DoRequest(action, params)
+	result, err := util.DoRequest(action, params)
 	if err != nil {
 		return nil, err
 	}
 	view := &model.OperatorInfoView{}
-	err = util.FormatView(opt, view)
+	err = util.FormatView(result.Data, view)
 	if err != nil {
 		return nil, err
 	}
