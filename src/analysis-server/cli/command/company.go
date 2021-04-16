@@ -41,27 +41,7 @@ func newCompanyCreateCmd() *cobra.Command {
 }
 
 func newCompanyDeleteCmd() *cobra.Command {
-	var opts options.BaseOptions
-	cmd := &cobra.Command{
-		Use:   "company-delete [OPTIONS] ID",
-		Short: "Delete a company",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.ID = id
-			}
-			if err := Sdk.DeleteCompany(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	return cmd
+	return deleteCmd(resource_type_company, Sdk.DeleteCompany)
 }
 
 func newCompanyListCmd() *cobra.Command {

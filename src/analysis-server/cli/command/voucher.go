@@ -67,26 +67,7 @@ func newVoucherCreateCmd() *cobra.Command {
 }
 
 func newVoucherDeleteCmd() *cobra.Command {
-	var opts options.BaseOptions
-	cmd := &cobra.Command{
-		Use:   "voucher-delete [OPTIONS] name",
-		Short: "Delete a voucher",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.ID = id
-			}
-			if err := Sdk.DeleteVoucher(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	return cmd
+	return deleteCmd(resource_type_voucher_info, Sdk.DeleteVoucher)
 }
 
 func newVoucherShowCmd() *cobra.Command {
@@ -154,26 +135,7 @@ func newVoucherRecordCreateCmd() *cobra.Command {
 }
 
 func newVoucherRecordDeleteCmd() *cobra.Command {
-	var opts options.BaseOptions
-	cmd := &cobra.Command{
-		Use:   "vouRecord-delete [OPTIONS] voucherRecordID",
-		Short: "Delete a voucher record",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.ID = id
-			}
-			if err := Sdk.DeleteVoucherRecord(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	return cmd
+	return deleteCmd(resource_type_voucher_record, Sdk.DeleteVoucherRecord)
 }
 
 func newVoucherRecordListCmd() *cobra.Command {
@@ -203,7 +165,7 @@ func newVoucherRecordListCmd() *cobra.Command {
 func newVoucherRecordUpdateCmd() *cobra.Command {
 	var opts options.ModifyVoucherRecordOptions
 	cmd := &cobra.Command{
-		Use:   "vouRecord-update [OPTIONS] vouRecordId ",
+		Use:   "vouRecord-update [OPTIONS] vouRecordId summary",
 		Short: "update a voucher record",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -215,20 +177,21 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 			} else {
 				opts.VouRecordID = id
 			}
+			opts.Summary = args[1]
 			if err := Sdk.UpdateVoucherRecord(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},
 	}
-	cmd.Flags().StringVar(&opts.SubjectName, "subName", "test_update", "subjectName")
-	cmd.Flags().StringVar(&opts.Summary, "summary", "test_update", "summary")
-	var dm, cm int
-	cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
-	cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
-	opts.DebitMoney = float64(dm)
-	opts.CreditMoney = float64(cm)
-	cmd.Flags().IntVar(&opts.SubID1, "sub1", 1, "SubID1")
-	cmd.Flags().IntVar(&opts.SubID2, "sub2", 2, "SubID2")
+	// cmd.Flags().StringVar(&opts.SubjectName, "subName", "test_update", "subjectName")
+	// cmd.Flags().StringVar(&opts.Summary, "summary", "test_update", "summary")
+	// var dm, cm int
+	// cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
+	// cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
+	// opts.DebitMoney = float64(dm)
+	// opts.CreditMoney = float64(cm)
+	// cmd.Flags().IntVar(&opts.SubID1, "sub1", 1, "SubID1")
+	// cmd.Flags().IntVar(&opts.SubID2, "sub2", 2, "SubID2")
 	return cmd
 }
 

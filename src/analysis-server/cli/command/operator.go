@@ -140,10 +140,10 @@ func newOperatorUpdateCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().StringVar(&opts.Password, "passwd", "test", "password")
-	cmd.Flags().StringVar(&opts.Department, "department", "test", "department")
-	cmd.Flags().StringVar(&opts.Job, "job", "test", "job")
-	cmd.Flags().IntVar(&opts.Role, "role", 1, "role")
-	cmd.Flags().IntVar(&opts.Status, "status", 1, "status")
+	// cmd.Flags().StringVar(&opts.Password, "passwd", "test", "password")
+	// cmd.Flags().StringVar(&opts.Department, "department", "test", "department")
+	// cmd.Flags().StringVar(&opts.Job, "job", "test", "job")
+	// cmd.Flags().IntVar(&opts.Role, "role", 1, "role")
+	// cmd.Flags().IntVar(&opts.Status, "status", 1, "status")
 	return cmd
 }

@@ -51,27 +51,7 @@ func newAccSubCreateCmd() *cobra.Command {
 }
 
 func newAccSubDeleteCmd() *cobra.Command {
-	var opts options.BaseOptions
-	cmd := &cobra.Command{
-		Use:   "accSub-delete [OPTIONS] ID",
-		Short: "Delete a accountSubject",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.ID = id
-			}
-
-			if err := Sdk.DeleteAccSub(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	return cmd
+	return deleteCmd(resource_type_account_sub, Sdk.DeleteAccSub)	
 }
 
 func newAccSubListCmd() *cobra.Command {
