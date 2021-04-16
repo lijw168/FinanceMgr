@@ -57,8 +57,8 @@ func newCompanyListCmd() *cobra.Command {
 		opts.Limit = -1
 		opts.Offset = 0
 		//for test
-		opts.Filter = make(map[string]interface{})
-		opts.Filter["backup"] = "test"
+		// opts.Filter = make(map[string]interface{})
+		// opts.Filter["backup"] = "test"
 		if _, views, err := Sdk.ListCompany(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {

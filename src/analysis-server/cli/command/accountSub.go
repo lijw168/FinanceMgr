@@ -51,11 +51,11 @@ func newAccSubCreateCmd() *cobra.Command {
 }
 
 func newAccSubDeleteCmd() *cobra.Command {
-	return deleteCmd(resource_type_account_sub, Sdk.DeleteAccSub)	
+	return deleteCmd(resource_type_account_sub, Sdk.DeleteAccSub)
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"Id", "subject_name", "subject_level"}
+	defCs := []string{"SubjectId", "SubjectName", "SubjectLevel"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list",
 		Short: "List account subjects Support Filter",
@@ -68,8 +68,8 @@ func newAccSubListCmd() *cobra.Command {
 		opts.Limit = -1
 		opts.Offset = 0
 		//for test
-		//opts.Filter = make(map[string]interface{})
-		//opts.Filter["status"] = "creating|available|in-use"
+		opts.Filter = make(map[string]interface{})
+		opts.Filter["subject_id"] = int(102)
 		if _, accSubViews, err := Sdk.ListAccSub(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
