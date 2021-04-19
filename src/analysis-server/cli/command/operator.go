@@ -99,7 +99,7 @@ func newOperatorListCmd() *cobra.Command {
 func newOperatorShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "operator-show [OPTIONS] operatorName",
-		Short: "Show operator",
+		Short: "Show a operator information",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
@@ -121,19 +121,20 @@ func newOperatorShowCmd() *cobra.Command {
 func newOperatorUpdateCmd() *cobra.Command {
 	var opts options.OperatorInfoOptions
 	cmd := &cobra.Command{
-		Use:   "operator-update [OPTIONS] companyId name ",
+		Use:   "operator-update [OPTIONS] name companyId",
 		Short: "update a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
+			opts.Name = args[0]
+			//for test
+			if id, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.CompanyID = id
 			}
-			opts.Name = args[1]
 
 			if err := Sdk.UpdateOperator(&opts); err != nil {
 				util.FormatErrorOutput(err)

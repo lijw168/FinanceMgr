@@ -189,14 +189,14 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 		updateFields["Password"] = *params.Password
 	}
 	if params.CompanyID != nil {
-		//要判断companyID是否存在
-		requestId := oh.GetTraceId(r)
-		comView, ccErr := oh.ComService.GetCompanyById(r.Context(), *params.CompanyID, requestId)
-		if comView == nil || ccErr != nil {
-			oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
-			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
-			return
-		}
+		//要判断companyID是否存在, 这步操作只有在用户登录时，才有用。
+		// requestId := oh.GetTraceId(r)
+		// comView, ccErr := oh.ComService.GetCompanyById(r.Context(), *params.CompanyID, requestId)
+		// if comView == nil || ccErr != nil {
+		// 	oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
+		// 	oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+		// 	return
+		// }
 		updateFields["CompanyId"] = *params.CompanyID
 	}
 	if params.Job != nil {
