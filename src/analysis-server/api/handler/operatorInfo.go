@@ -149,14 +149,14 @@ func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Re
 	}
 	requestId := oh.GetTraceId(r)
 
-	volumeView, ccErr := oh.OptInfoService.CreateOptInfo(r.Context(), params, requestId)
+	optInfoView, ccErr := oh.OptInfoService.CreateOptInfo(r.Context(), params, requestId)
 	oh.Logger.InfoContext(r.Context(), "CreateOptInfo in CreateOperator.")
 	if ccErr != nil {
 		oh.Logger.WarnContext(r.Context(), "[operatorInfo/CreateOperator/ServerHTTP] [OptInfoService.CreateOptInfo: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
-	oh.Response(r.Context(), oh.Logger, w, nil, volumeView)
+	oh.Response(r.Context(), oh.Logger, w, nil, optInfoView)
 	return
 }
 

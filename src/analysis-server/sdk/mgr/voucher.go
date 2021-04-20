@@ -11,7 +11,7 @@ import (
 type Voucher struct {
 }
 
-func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.VoucherView, error) {
+func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData, error) {
 	action := "CreateVoucher"
 	switch {
 	case opts.InfoOptions.CompanyID <= 0:
@@ -45,9 +45,11 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.VoucherVi
 	if err != nil {
 		return nil, err
 	}
-	view := &model.VoucherView{}
-	util.FormatView(result.Data, &view)
-	return view, nil
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
+		return nil, err
+	}
+	return desc, nil
 }
 
 func (vr *Voucher) DeleteVoucher(opts *options.BaseOptions) error {
@@ -74,7 +76,7 @@ func (vr *Voucher) GetVoucher(opts *options.BaseOptions) (*model.VoucherView, er
 	return view, nil
 }
 
-func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOptions) ([]int, error) {
+func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOptions) (*model.DescData, error) {
 	action := "CreateVoucherRecords"
 	switch {
 	case len(opts) == 0:
@@ -96,16 +98,15 @@ func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOption
 		}
 		recordParamSlice = append(recordParamSlice, &recordParam)
 	}
-	opt, err := util.DoRequest(action, recordParamSlice)
+	result, err := util.DoRequest(action, recordParamSlice)
 	if err != nil {
 		return nil, err
 	}
-	view := []int{}
-	err = util.FormatView(opt, view)
-	if err != nil {
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
 		return nil, err
 	}
-	return view, nil
+	return desc, nil
 }
 
 func (vr *Voucher) DeleteVoucherRecord(opts *options.BaseOptions) error {

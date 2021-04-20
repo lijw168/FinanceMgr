@@ -32,15 +32,15 @@ func FormatViewOutput(v interface{}) {
 	}
 	sort.Strings(header)
 	for _, h := range header {
+		if m[h] == nil {
+			fmt.Printf("please check program code,the h is %v, m[h] is nil\n", h)
+			continue
+		}
 		switch reflect.TypeOf(m[h]).Kind() {
 		case reflect.Slice, reflect.Map:
 			bt, _ = json.Marshal(m[h])
 			table.Append([]string{h, string(bt)})
 		default:
-			if m[h] == nil {
-				fmt.Printf("the h is %v, m[h] is nil", h)
-				continue
-			}
 			table.Append([]string{h, fmt.Sprintf("%v", m[h])})
 		}
 	}
