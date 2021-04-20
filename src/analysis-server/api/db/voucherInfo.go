@@ -17,7 +17,7 @@ type VoucherInfoDao struct {
 
 var (
 	voucherInfoTN     = "voucherInfo"
-	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month", "voucher_date", "create_at", "update_at"}
+	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month", "voucher_date", "created_at", "updated_at"}
 	scanVoucherInfo   = func(r DbScanner, st *model.VoucherInfo) error {
 		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherDate, &st.CreatedAt, &st.UpdatedAt)
 	}
