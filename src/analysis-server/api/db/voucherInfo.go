@@ -79,7 +79,7 @@ func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.
 func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId int) error {
 	strSql := "delete from " + voucherInfoTN + " where voucher_id=?"
 
-	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, id: %s]", strSql, voucherId)
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, id: %d]", strSql, voucherId)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))

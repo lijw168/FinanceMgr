@@ -58,7 +58,7 @@ func (vr *Voucher) DeleteVoucher(opts *options.BaseOptions) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("DeleteVoucher succeed")
+	//fmt.Printf("DeleteVoucher succeed\n")
 	return nil
 }
 
@@ -86,6 +86,7 @@ func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOption
 	for _, val := range opts {
 		recordItem := val
 		recordParam := model.CreateVoucherRecordParams{
+			VoucherID:   &recordItem.VoucherID,
 			SubjectName: &recordItem.SubjectName,
 			Summary:     &recordItem.Summary,
 			BillCount:   &recordItem.BillCount,
@@ -146,9 +147,9 @@ func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.V
 	return desc.Tc, ret, nil
 }
 
-func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*model.VoucherInfoView, error) {
-	action := "ListVoucherInfo"
-	var ret []*model.VoucherInfoView
+func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*model.VoucherRecordView, error) {
+	action := "ListVoucherRecords"
+	var ret []*model.VoucherRecordView
 	desc, err := ListOpsResources(action, opts)
 	if err != nil {
 		return -1, nil, err

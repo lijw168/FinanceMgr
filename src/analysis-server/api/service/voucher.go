@@ -114,13 +114,11 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
-
-	err = vs.VInfoDao.Delete(ctx, tx, voucherID)
+	err = vs.VRecordDao.DeleteByVoucherId(ctx, vs.Db, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-
-	err = vs.VRecordDao.DeleteByVoucherId(ctx, vs.Db, voucherID)
+	err = vs.VInfoDao.Delete(ctx, tx, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}

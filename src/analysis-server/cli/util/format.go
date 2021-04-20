@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"sort"
+	//"sort"
 	"time"
 )
 
@@ -30,7 +30,7 @@ func FormatViewOutput(v interface{}) {
 	for k := range m {
 		header = append(header, k)
 	}
-	sort.Strings(header)
+	//sort.Strings(header)
 	for _, h := range header {
 		if m[h] == nil {
 			fmt.Printf("please check program code,the h is %v, m[h] is nil\n", h)

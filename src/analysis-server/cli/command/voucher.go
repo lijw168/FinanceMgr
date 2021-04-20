@@ -67,7 +67,7 @@ func newVoucherCreateCmd() *cobra.Command {
 }
 
 func newVoucherDeleteCmd() *cobra.Command {
-	return deleteCmd(resource_type_voucher_info, Sdk.DeleteVoucher)
+	return deleteCmd(resource_type_voucher, Sdk.DeleteVoucher)
 }
 
 func newVoucherShowCmd() *cobra.Command {
@@ -198,7 +198,7 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 func newVoucherInfoShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vouInfo-show [OPTIONS] voucherID",
-		Short: "Show a voucher",
+		Short: "Show a voucher information",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
@@ -235,7 +235,7 @@ func newVoucherInfoListCmd() *cobra.Command {
 		//for test
 		//opts.Filter = make(map[string]interface{})
 		//opts.Filter["status"] = "creating|available|in-use"
-		if _, views, err := Sdk.ListOperatorInfo(&opts); err != nil {
+		if _, views, err := Sdk.ListVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
 			util.FormatListOutput(*columns, views)
