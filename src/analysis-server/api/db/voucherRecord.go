@@ -16,7 +16,7 @@ type VoucherRecordDao struct {
 }
 
 var (
-	voucherRecordTN     = "voucherRecordInfo_2020"
+	voucherRecordTN     = "voucherRecordInfo"
 	voucherRecordFields = []string{"record_id", "voucher_id", "subject_name", "debit_money", "credit_money",
 		"summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4", "bill_count", "created_at", "updated_at"}
 	scanVoucherRecord = func(r DbScanner, st *model.VoucherRecord) error {
