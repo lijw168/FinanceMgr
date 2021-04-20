@@ -1,11 +1,11 @@
 package util
 
 import (
+	"analysis-server/cli/tbase"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"analysis-server/cli/tbase"
 	"os"
 	"reflect"
 	"sort"
@@ -37,6 +37,10 @@ func FormatViewOutput(v interface{}) {
 			bt, _ = json.Marshal(m[h])
 			table.Append([]string{h, string(bt)})
 		default:
+			if m[h] == nil {
+				fmt.Printf("the h is %v, m[h] is nil", h)
+				continue
+			}
 			table.Append([]string{h, fmt.Sprintf("%v", m[h])})
 		}
 	}
