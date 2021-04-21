@@ -55,7 +55,7 @@ func newAccSubDeleteCmd() *cobra.Command {
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"SubjectId", "SubjectName", "SubjectLevel"}
+	defCs := []string{"SubjectID", "SubjectName", "SubjectLevel"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list",
 		Short: "List account subjects Support Filter",
