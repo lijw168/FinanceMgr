@@ -23,8 +23,17 @@ func validate_bool(d interface{}) bool {
 	return true
 }
 
+//由于从json串中转过来的number类型，只有float，
+//所以为了判断是否是传过来的整形类型数据，就增加了是否float类型的判断。
 func validate_int(d interface{}) bool {
 	if _, ok := d.(int); !ok {
+		validate_float64(d)
+	}
+	return true
+}
+
+func validate_float64(d interface{}) bool {
+	if _, ok := d.(float64); !ok {
 		return false
 	}
 	return true
@@ -72,6 +81,10 @@ func ValiFilter(attrs map[string]Attribute, filter []*model.FilterItem) bool {
 			switch attr.Type {
 			case T_Int:
 				if !validate_int(f.Value) {
+					return false
+				}
+			case T_Float64:
+				if !validate_float64(f.Value) {
 					return false
 				}
 			case T_String:

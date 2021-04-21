@@ -279,7 +279,7 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 
 func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.Request) {
 	var recordsParams []*model.CreateVoucherRecordParams
-	err := vh.HttpRequestParse(r, recordsParams)
+	err := vh.HttpRequestParse(r, &recordsParams)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucher/CreateVoucherRecords] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())

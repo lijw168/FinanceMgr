@@ -13,6 +13,7 @@ import (
 const (
 	T_String = iota
 	T_Int
+	T_Float64
 	T_Bool
 	T_Uuid
 	T_Struct
