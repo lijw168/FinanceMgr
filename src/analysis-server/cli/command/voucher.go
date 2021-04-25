@@ -165,7 +165,7 @@ func newVoucherRecordListCmd() *cobra.Command {
 func newVoucherRecordUpdateCmd() *cobra.Command {
 	var opts options.ModifyVoucherRecordOptions
 	cmd := &cobra.Command{
-		Use:   "vouRecord-update [OPTIONS] vouRecordId summary",
+		Use:   "vouRecord-update [OPTIONS] vouRecordId summary ",
 		Short: "update a voucher record",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -178,6 +178,9 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 				opts.VouRecordID = id
 			}
 			opts.Summary = args[1]
+			opts.BillCount = -1
+			opts.CreditMoney = -1
+			opts.DebitMoney = -1
 			if err := Sdk.UpdateVoucherRecord(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}

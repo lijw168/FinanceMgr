@@ -94,15 +94,28 @@ func (or *Operator) UpdateOperator(opts *options.OperatorInfoOptions) error {
 	case opts.Name == "":
 		return errors.New("Name is required")
 	}
-	params := model.OperatorInfoParams{
-		CompanyID:  &opts.CompanyID,
-		Name:       &opts.Name,
-		Password:   &opts.Password,
-		Department: &opts.Department,
-		Job:        &opts.Job,
-		Role:       &opts.Role,
-		Status:     &opts.Status,
+	param := model.OperatorInfoParams{}
+	if opts.CompanyID != 0 {
+		param.CompanyID = &opts.CompanyID
 	}
-	_, err := util.DoRequest(action, params)
+	if opts.Name != "" {
+		param.Name = &opts.Name
+	}
+	if opts.Password != "" {
+		param.Password = &opts.Password
+	}
+	if opts.Department != "" {
+		param.Department = &opts.Department
+	}
+	if opts.Job != "" {
+		param.Job = &opts.Job
+	}
+	if opts.Role != 0 {
+		param.Role = &opts.Role
+	}
+	if opts.Status != 0 {
+		param.Status = &opts.Status
+	}
+	_, err := util.DoRequest(action, param)
 	return err
 }

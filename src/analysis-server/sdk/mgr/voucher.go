@@ -166,18 +166,37 @@ func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions)
 	case opts.VouRecordID <= 0:
 		return errors.New("VouRecordID is required")
 	}
-	params := model.ModifyVoucherRecordParams{
-		VouRecordID: &opts.VouRecordID,
-		Summary:     &opts.Summary,
-		SubjectName: &opts.SubjectName,
-		BillCount:   &opts.BillCount,
-		CreditMoney: &opts.CreditMoney,
-		DebitMoney:  &opts.DebitMoney,
-		SubID1:      &opts.SubID1,
-		SubID2:      &opts.SubID2,
-		SubID3:      &opts.SubID3,
-		SubID4:      &opts.SubID4,
+	param := model.ModifyVoucherRecordParams{}
+	if opts.VouRecordID != 0 {
+		param.VouRecordID = &opts.VouRecordID
 	}
-	_, err := util.DoRequest(action, params)
+	if opts.Summary != "" {
+		param.Summary = &opts.Summary
+	}
+	if opts.SubjectName != "" {
+		param.SubjectName = &opts.SubjectName
+	}
+	if opts.BillCount != -1 {
+		param.BillCount = &opts.BillCount
+	}
+	if opts.CreditMoney != -1 {
+		param.CreditMoney = &opts.CreditMoney
+	}
+	if opts.DebitMoney != -1 {
+		param.DebitMoney = &opts.DebitMoney
+	}
+	if opts.SubID1 != 0 {
+		param.SubID1 = &opts.SubID1
+	}
+	if opts.SubID2 != 0 {
+		param.SubID2 = &opts.SubID2
+	}
+	if opts.SubID3 != 0 {
+		param.SubID3 = &opts.SubID3
+	}
+	if opts.SubID4 != 0 {
+		param.SubID4 = &opts.SubID4
+	}
+	_, err := util.DoRequest(action, param)
 	return err
 }

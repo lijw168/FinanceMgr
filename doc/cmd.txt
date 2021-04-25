@@ -95,10 +95,11 @@ analysis_cli vouRecord-create 510 test3
 analysis_cli vouRecord-delete 1002
 //update a voucher record
 analysis_cli vouRecord-update
-curl -H "Content-Type:application/json" -X POST --data '{"vouRecordId":1003,"SubjectName":"test2"}' http://127.0.0.1:7500/analysis_server?Action=UpdateVoucherRecord
+curl -H "Content-Type:application/json" -X POST --data '{"vouRecordId":1003,"SubjectName":"test6"}' http://127.0.0.1:7500/analysis_server?Action=UpdateVoucherRecord
 //list voucher records  
 analysis_cli vouRecord-list
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_name","value":"test"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"voucher_id","value":510}],"orders":[{"field":"record_id","direction":1}],"desc_offset":100,"desc_limit":107}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
 
 
 

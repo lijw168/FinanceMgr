@@ -76,10 +76,15 @@ func (as *AccSub) UpdateAccSub(opts *options.ModifySubjectOptions) error {
 	case opts.SubjectID <= 0:
 		return errors.New("SubjectID are required")
 	}
-	param := &model.ModifySubjectParams{
-		SubjectID:    &opts.SubjectID,
-		SubjectLevel: &opts.SubjectLevel,
-		SubjectName:  &opts.SubjectName,
+	param := &model.ModifySubjectParams{}
+	if opts.SubjectID != 0 {
+		param.SubjectID = &opts.SubjectID
+	}
+	if opts.SubjectLevel != 0 {
+		param.SubjectLevel = &opts.SubjectLevel
+	}
+	if opts.SubjectName != "" {
+		param.SubjectName = &opts.SubjectName
 	}
 	_, err := util.DoRequest(action, param)
 	return err

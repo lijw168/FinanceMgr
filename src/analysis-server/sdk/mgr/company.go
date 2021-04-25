@@ -80,15 +80,31 @@ func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {
 	case opts.CompanyID <= 0:
 		return errors.New("CompanyID are required")
 	}
-	param := &model.ModifyCompanyParams{
-		CompanyID:   &opts.CompanyID,
-		CompanyName: &opts.CompanyName,
-		Phone:       &opts.Phone,
-		AbbrevName:  &opts.AbbrevName,
-		Backup:      &opts.Backup,
-		CompanyAddr: &opts.CompanyAddr,
-		Corporator:  &opts.Corporator,
-		Email:       &opts.Email,
+	param := &model.ModifyCompanyParams{}
+	if opts.CompanyID != 0 {
+		param.CompanyID = &opts.CompanyID
+	}
+	if opts.CompanyName != "" {
+		param.CompanyName = &opts.CompanyName
+	}
+	if opts.Phone != "" {
+		param.Phone = &opts.Phone
+	}
+	if opts.AbbrevName != "" {
+		param.AbbrevName = &opts.AbbrevName
+	}
+	if opts.Backup != "" {
+		param.Backup = &opts.Backup
+	}
+
+	if opts.CompanyAddr != "" {
+		param.CompanyAddr = &opts.CompanyAddr
+	}
+	if opts.Corporator != "" {
+		param.Corporator = &opts.Corporator
+	}
+	if opts.Email != "" {
+		param.Email = &opts.Email
 	}
 	_, err := util.DoRequest(action, param)
 	return err
