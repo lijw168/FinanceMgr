@@ -1,0 +1,104 @@
+
+//获取版本号
+curl -X  POST http://127.0.0.1:7500/common?action=version
+./analysis_cli -v=true 也可以。
+
+//***********************company**************************//
+//create
+analysis_cli company-create 中科网威 中科 13581682742
+curl -H "Content-Type:application/json" -X POST --data '{"companyName":"好管家","abbreviationName":"管家","corporator":"lijw","phone":"15637198690","e_mail":"362718007@qq.com","companyAddr":"zhengzhou","backup":"test"}' http://127.0.0.1:7500/analysis_server?Action=CreateCompany
+
+//list
+analysis_cli company-list
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"phone","value":"15637198690"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListCompany
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"company_id","value":109}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListCompany
+
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListCompany
+
+//describe company 
+analysis_cli company-show
+
+//update
+analysis_cli company-update
+curl -H "Content-Type:application/json" -X POST --data '{"companyId":108,"companyName":"管家婆mn","abbreviationName":"abcd","corporator":"","phone":"","e_mail":"","companyAddr":"","backup":""}' http://127.0.0.1:7500/analysis_server?Action=UpdateCompany
+
+//delete
+analysis_cli company-delete
+
+
+
+//*************************accountSub*****************************//
+
+//create
+analysis_cli accSub-create  差旅费 1
+curl -H "Content-Type:application/json" -X POST --data '{"companyName":"好管家","abbreviationName":"管家","corporator":"lijw","phone":"15637198690","e_mail":"362718007@qq.com","companyAddr":"zhengzhou","backup":"test"}' http://127.0.0.1:7500/analysis_server?Action=CreateCompany
+
+//list
+analysis_cli accSub-list
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":103}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
+
+//describe  
+analysis_cli accSub-show
+
+//update
+analysis_cli accSub-update
+curl -H "Content-Type:application/json" -X POST --data '{"subjectId":103,"subjectName":"出租车票啊","subjectLevel":5}' http://127.0.0.1:7500/analysis_server?Action=UpdateAccSub
+
+//delete
+analysis_cli accSub-delete
+
+//*************************operator*****************************//
+
+//create
+analysis_cli operator-create 104 juan 614720
+curl -H "Content-Type:application/json" -X POST --data '{"companyId":105,"name":"wei","password":"614720","job":"accounting","department":"caiwubu","Status":1,"role":2}' http://127.0.0.1:7500/analysis_server?Action=CreateOperator
+
+//list
+analysis_cli operator-list 
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"company_id","value":109}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListOperatorInfo
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListOperatorInfo
+
+//describe  
+analysis_cli operator-show
+
+//update
+analysis_cli operator-update
+curl -H "Content-Type:application/json" -X POST --data '{"name":"lijunwei","companyId":108}' http://127.0.0.1:7500/analysis_server?Action=UpdateOperator
+
+//delete
+analysis_cli operator-delete
+
+//*************************voucher*****************************//
+
+//create voucher
+analysis_cli voucher-create 105 7
+
+curl -H "Content-Type:application/json" -X POST --data '{"infoParams":{"companyId":105,"voucherMonth":6},"recordsParams":[{"voucherId":null,"subjectName":"test","debitMoney":1,"creditMoney":1,"summary":"test","subId1":1,"subId2":2,"subId3":0,"subId4":0,"billCount":0},{"voucherId":null,"subjectName":"test2","debitMoney":2,"creditMoney":2,"summary":"test2","subId1":2,"subId2":2,"subId3":0,"subId4":0,"billCount":2}]}' http://127.0.0.1:7500/analysis_server?Action=CreateVoucher
+
+//describe  a voucher
+analysis_cli voucher-show 510   需要测试voucherRecord 超过100条的场景，已经测试通过
+// delete a voucher
+analysis_cli voucher-delete 503
+
+//*************************voucherInfo*****************************//
+//describe a voucher information
+analysis_cli vouInfo-show 510
+//list voucher information 
+analysis_cli vouInfo-list
+
+
+//*************************voucherRecord*****************************//
+//create a voucher record
+analysis_cli vouRecord-create 510 test3 
+//delete a voucher record
+analysis_cli vouRecord-delete 1002
+//update a voucher record
+analysis_cli vouRecord-update
+curl -H "Content-Type:application/json" -X POST --data '{"vouRecordId":1003,"SubjectName":"test2"}' http://127.0.0.1:7500/analysis_server?Action=UpdateVoucherRecord
+//list voucher records  
+analysis_cli vouRecord-list
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_name","value":"test"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
+
+
+

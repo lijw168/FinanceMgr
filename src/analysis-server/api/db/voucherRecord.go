@@ -55,14 +55,14 @@ func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator) (int64, e
 }
 
 //list count by filter
-// func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
-// 	var c int64
-// 	strSql, values := transferCountSql(voucherRecordTN, filter)
-// 	start := time.Now()
-// 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
-// 	d.Logger.InfoContext(ctx, "[VoucherRecord/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
-// 	return c, err
-// }
+func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
+	var c int64
+	strSql, values := transferCountSql(voucherRecordTN, filter)
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
+	d.Logger.InfoContext(ctx, "[VoucherRecord/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	return c, err
+}
 
 func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *model.VoucherRecord) error {
 	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") +
@@ -139,22 +139,21 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map
 
 func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucher_id", "SubjectName": "subject_name", "DebitMoney": "debit_money",
-		"CreditMoney": "credit_money", "Summary": "summary", "SubID1": "sub_id1", "SubID2": "sub_id2",
-		"SubID3": "sub_id3", "SubID4": "sub_id4", "RecordID": "record_id"}
+	// var keyMap = map[string]string{"VoucherID": "voucher_id", "SubjectName": "subject_name", "DebitMoney": "debit_money",
+	// 	"CreditMoney": "credit_money", "Summary": "summary", "SubID1": "sub_id1", "SubID2": "sub_id2",
+	// 	"SubID3": "sub_id3", "SubID4": "sub_id4", "RecordID": "record_id"}
 	strSql := "update " + voucherRecordTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil

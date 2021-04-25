@@ -46,9 +46,9 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "create_time":
+		case "created_at":
 			*params.Order[0].Field = "created_at"
-		case "update_time":
+		case "updated_at":
 			*params.Order[0].Field = "updated_at"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
@@ -111,10 +111,12 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "create_time":
+		case "created_at":
 			*params.Order[0].Field = "created_at"
-		case "update_time":
+		case "updated_at":
 			*params.Order[0].Field = "updated_at"
+		case "record_id":
+			*params.Order[0].Field = "record_id"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)

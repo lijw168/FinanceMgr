@@ -13,6 +13,11 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+//默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
+const (
+	MaxRecordLimit = 100
+)
+
 type VoucherService struct {
 	Logger       *log.Logger
 	VInfoDao     *db.VoucherInfoDao
@@ -141,7 +146,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
-
+	//get voucher information
 	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID)
 	switch err {
 	case nil:
@@ -154,26 +159,28 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	voucherView.VouInfoView = *(VoucherInfoModelToView(vInfo))
 	recordViewSlice := make([]model.VoucherRecordView, 0)
 	filterFields := make(map[string]interface{})
-	limit, offset := -1, 0
+	//获取一个voucherID 所对应的所有的voucher records count
 	filterFields["voucherId"] = voucherID
+	count, err := vs.VRecordDao.CountByFilter(ctx, tx, filterFields)
+	if err != nil {
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	limit, offset := -1, 0
+	if count > MaxRecordLimit {
+		limit = MaxRecordLimit
+	}
 	orderField := "recordId"
 	orderDirection := cons.Order_Asc
-
 	voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	//默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
-	limit = 100
-	for index, vouRecord := range voucherRecords {
-		if index >= 100 {
-			break
-		}
+	for _, vouRecord := range voucherRecords {
 		vouRecordView := *(VoucherRecordModelToView(vouRecord))
 		recordViewSlice = append(recordViewSlice, vouRecordView)
 	}
-	voucherView.VouRecordTotalCount = len(voucherRecords)
+	voucherView.VouRecordTotalCount = int(count)
 	voucherView.VouRecordViewSli = append(voucherView.VouRecordViewSli, recordViewSlice...)
 
 	if err = tx.Commit(); err != nil {
