@@ -122,12 +122,14 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
-		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
+		if params.Order[0].Direction != nil {
+			switch *params.Order[0].Direction {
+			case cons.Order_Asc, cons.Order_Desc:
+			default:
+				ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+				vh.Response(r.Context(), vh.Logger, w, ce, nil)
+				return
+			}
 		}
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
