@@ -188,7 +188,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: gGenSubIdInfo}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: gGenComIdInfo}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
-	loginInfoService := &service.LoginInfoService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
+	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao,
 		GenRecordId: gGenVouRecIdInfo, GenVoucherId: gGenVouIdInfo, Db: _db}
@@ -198,7 +198,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
 	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
 	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
-	authHandlers := &handler.AuthenHandlers{Logger: logger, LoginInfoService: loginInfoService, ComService: comService, OptInfoService: optInfoService}
+	authHandlers := &handler.AuthenHandlers{Logger: logger, AuthService: authService, ComService: comService, OptInfoService: optInfoService}
 
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)

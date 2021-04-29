@@ -13,10 +13,10 @@ import (
 
 type AuthenHandlers struct {
 	CCHandler
-	Logger           *log.Logger
-	LoginInfoService *service.LoginInfoService
-	ComService       *service.CompanyService
-	OptInfoService   *service.OperatorInfoService
+	Logger         *log.Logger
+	AuthService    *service.AuthenService
+	ComService     *service.CompanyService
+	OptInfoService *service.OperatorInfoService
 }
 
 func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) {
@@ -69,9 +69,9 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	optViews, count, ccErr := ah.LoginInfoService.ListLoginInfo(r.Context(), params)
+	optViews, count, ccErr := ah.AuthService.ListLoginInfo(r.Context(), params)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[loginInfo/ListLoginInfo/ServerHTTP] [LoginInfoService.ListLoginInfo: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[loginInfo/ListLoginInfo/ServerHTTP] [AuthService.ListLoginInfo: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -96,9 +96,9 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 // 		return
 // 	}
 // 	requestId := ah.GetTraceId(r)
-// 	optView, ccErr := ah.LoginInfoService.GetLoginInfoByName(r.Context(), *params.Name, requestId)
+// 	optView, ccErr := ah.AuthService.GetLoginInfoByName(r.Context(), *params.Name, requestId)
 // 	if ccErr != nil {
-// 		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [LoginInfoService.GetLoginInfoByName: %s]", ccErr.Detail())
+// 		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [AuthService.GetLoginInfoByName: %s]", ccErr.Detail())
 // 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 // 		return
 // 	}
@@ -160,10 +160,10 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	loginInfo.Role = &optView.Role
 	clientAddr := (strings.Split(r.RemoteAddr, ":"))[0]
 	loginInfo.ClientIp = &clientAddr
-	optInfoView, ccErr := ah.LoginInfoService.CreateLoginInfo(r.Context(), &loginInfo, requestId)
+	optInfoView, ccErr := ah.AuthService.Login(r.Context(), &loginInfo, requestId)
 	ah.Logger.InfoContext(r.Context(), "CreateLoginInfo in login.")
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[login/CreateLoginInfo/ServerHTTP] [LoginInfoService.CreateLoginInfo: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[login/CreateLoginInfo/ServerHTTP] [AuthService.CreateLoginInfo: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -188,9 +188,9 @@ func (ah *AuthenHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 	updateFields := make(map[string]interface{})
 	updateFields["EndedAt"] = time.Now()
 
-	ccErr := ah.LoginInfoService.UpdateLoginInfo(r.Context(), *params.Name, updateFields)
+	ccErr := ah.AuthService.Logout(r.Context(), *params.Name, updateFields)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[opreator/Logout/ServerHTTP] [LoginInfoService.UpdateLoginInfo: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[opreator/Logout/ServerHTTP] [AuthService.UpdateLoginInfo: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
