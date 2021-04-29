@@ -26,7 +26,7 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, ps.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, ps.Logger, FuncName, tx)
 
 	filterFields := make(map[string]interface{})
 	filterFields["name"] = *params.Name
@@ -150,7 +150,7 @@ func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName st
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, ps.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, ps.Logger, FuncName, tx)
 	_, err = ps.OptInfoDao.Get(ctx, tx, strOptName)
 	switch err {
 	case nil:

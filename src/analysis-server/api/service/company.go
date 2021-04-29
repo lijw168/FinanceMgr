@@ -30,7 +30,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, cs.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, cs.Logger, FuncName, tx)
 	filterFields := make(map[string]interface{})
 	filterFields["companyName"] = *params.CompanyName
 	conflictCount, err := cs.CompanyDao.CountByFilter(ctx, tx, filterFields)
@@ -124,7 +124,7 @@ func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, 
 		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, cs.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, cs.Logger, FuncName, tx)
 	//insure the company exist
 	_, err = cs.CompanyDao.Get(ctx, tx, companyId)
 	switch err {

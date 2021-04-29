@@ -58,7 +58,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
 	var IdValSli []int
 	for _, itemParam := range recordsParams {
 		vRecord := new(model.VoucherRecord)
@@ -116,9 +116,6 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			// case "fuzzy_name":
-			// 	volName := "%" + f.Value.(string) + "%"
-			// 	fuzzyMatchFields["volume_name"] = volName
 			case "record_id", "voucher_id", "subject_name", "summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4":
 				filterFields[*f.Field] = f.Value
 			default:
@@ -149,10 +146,6 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 		recordViewSlice = append(recordViewSlice, vouRecordView)
 	}
 	vouRecordCount := len(voucherRecords)
-	//volumeCount, CcErr := vs.CountByFilter(ctx, vs.Db, filterFields)
-	// if CcErr != nil {
-	// 	return nil, 0, CcErr
-	// }
 	return recordViewSlice, vouRecordCount, nil
 }
 
@@ -187,7 +180,7 @@ func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordI
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
 	_, err = vs.VRecordDao.Get(ctx, tx, recordID)
 	switch err {
 	case nil:

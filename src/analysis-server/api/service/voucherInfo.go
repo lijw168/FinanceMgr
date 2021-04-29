@@ -16,16 +16,6 @@ type VoucherInfoService struct {
 	Db       *sql.DB
 }
 
-func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
-	vInfoView := new(model.VoucherInfoView)
-	vInfoView.VoucherID = vInfo.VoucherID
-	vInfoView.CompanyID = vInfo.CompanyID
-	vInfoView.VoucherDate = vInfo.VoucherDate
-	vInfoView.VoucherMonth = vInfo.VoucherMonth
-	vInfoView.NumOfMonth = vInfo.NumOfMonth
-	return vInfoView
-}
-
 func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID int,
 	requestId string) (*model.VoucherInfoView, CcError) {
 	vInfo, err := vs.VInfoDao.Get(ctx, vs.Db, voucherID)
@@ -77,9 +67,15 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 		vouInfoViewSlice = append(vouInfoViewSlice, vouInfoView)
 	}
 	vouRecordCount := len(voucherInfos)
-	//volumeCount, CcErr := vs.CountByFilter(ctx, vs.Db, filterFields)
-	// if CcErr != nil {
-	// 	return nil, 0, CcErr
-	// }
 	return vouInfoViewSlice, vouRecordCount, nil
+}
+
+func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
+	vInfoView := new(model.VoucherInfoView)
+	vInfoView.VoucherID = vInfo.VoucherID
+	vInfoView.CompanyID = vInfo.CompanyID
+	vInfoView.VoucherDate = vInfo.VoucherDate
+	vInfoView.VoucherMonth = vInfo.VoucherMonth
+	vInfoView.NumOfMonth = vInfo.NumOfMonth
+	return vInfoView
 }

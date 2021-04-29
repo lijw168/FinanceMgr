@@ -145,7 +145,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
 	//get voucher information
 	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID)
 	switch err {

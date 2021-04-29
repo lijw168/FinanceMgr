@@ -188,7 +188,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: gGenSubIdInfo}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: gGenComIdInfo}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
-	loginInfoService := &service.LoginInfoService{Logger: logger, LogInfoDao: loginInfoDao, Db: _db}
+	loginInfoService := &service.LoginInfoService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao,
 		GenRecordId: gGenVouRecIdInfo, GenVoucherId: gGenVouIdInfo, Db: _db}
@@ -220,7 +220,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 
 	httpRouter.RegisterFunc("Login", authHandlers.Login)
 	httpRouter.RegisterFunc("Logout", authHandlers.Logout)
-	httpRouter.RegisterFunc("GetLoginInfo", authHandlers.GetLoginInfo)
+	//httpRouter.RegisterFunc("GetLoginInfo", authHandlers.GetLoginInfo)
 	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
 
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)

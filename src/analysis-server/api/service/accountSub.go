@@ -29,7 +29,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, as.Logger, FuncName, tx)
 
 	filterFields := make(map[string]interface{})
 	filterFields["subjectName"] = *params.SubjectName
@@ -40,12 +40,6 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	if conflictCount > 0 {
 		return nil, NewError(ErrAccSub, ErrConflict, ErrNull, ErrRecordExist)
 	}
-	//get the count of the table accountSubject
-	// var accSubCount int
-	// accSubCount, err = as.AccSubDao.Count(ctx, tx)
-	// if err != nil {
-	// 	return nil, NewError(ErrSystem, ErrError,ErrNull, err.Error())
-	// }
 	//generate account subject
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
@@ -105,13 +99,6 @@ func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 func (as *AccountSubService) DeleteAccSubByName(ctx context.Context, strSubName string,
 	requestId string) CcError {
 	as.Logger.InfoContext(ctx, "DeleteAccSubByName method begin, "+"subjectName:%s", strSubName)
-	// FuncName := "AccountSubService/accountSub/DeleteAccSubByName"
-	// tx, err := as.Db.Begin()
-	// if err != nil {
-	// 	as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-	// 	return nil, NewError(ErrSystem, ErrError,ErrNull, "tx begin error")
-	// }
-	//defer RollbackLog(ctx, as.Logger, FuncName, tx)
 	err := as.AccSubDao.DeleteByName(ctx, as.Db, strSubName)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
@@ -138,7 +125,7 @@ func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName 
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, as.Logger, FuncName, tx)
 	_, err = as.AccSubDao.GetAccSubByName(ctx, tx, strSubName)
 	switch err {
 	case nil:
@@ -167,7 +154,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	//defer RollbackLog(ctx, as.Logger, FuncName, tx)
 	_, err = as.AccSubDao.GetAccSubByID(ctx, tx, subjectID)
 	switch err {
 	case nil:

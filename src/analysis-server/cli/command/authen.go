@@ -26,8 +26,8 @@ func newLoginCmd() *cobra.Command {
 				return
 			}
 			opts.Name = args[0]
-			opts.Password = args[2]
-			if id, err := strconv.Atoi(args[3]); err != nil {
+			opts.Password = args[1]
+			if id, err := strconv.Atoi(args[2]); err != nil {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.CompanyID = id
@@ -82,24 +82,29 @@ func newLoginListCmd() *cobra.Command {
 	return cmd
 }
 
+//由于一个用户，可能有多条loginInfo记录，所以该函数通过list函数获取相应的数据。
 func newLoginShowCmd() *cobra.Command {
+	defCs := []string{"Name", "Role", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
 		Use:   "loginInfo-show [OPTIONS] username",
 		Short: "Show the information of logined user",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			var opts options.NameOptions
-			opts.Name = args[0]
-			view, err := Sdk.GetLoginInfo(&opts)
-			if err != nil {
-				util.FormatErrorOutput(err)
-			} else {
-				util.FormatViewOutput(view)
-			}
-		},
+	}
+	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
+		var opts options.ListOptions
+		opts.Limit = -1
+		opts.Offset = 0
+		opts.Filter = make(map[string]interface{})
+		opts.Filter["name"] = args[0]
+		if _, views, err := Sdk.ListLoginInfo(&opts); err != nil {
+			util.FormatErrorOutput(err)
+		} else {
+			util.FormatListOutput(*columns, views)
+		}
 	}
 	return cmd
 }

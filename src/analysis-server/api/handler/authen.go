@@ -1,15 +1,14 @@
 package handler
 
 import (
-	"net/http"
-	"time"
-	//"unicode/utf8"
-
 	"analysis-server/api/service"
 	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	"net/http"
+	"strings"
+	"time"
 )
 
 type AuthenHandlers struct {
@@ -81,31 +80,31 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 	return
 }
 
-func (ah *AuthenHandlers) GetLoginInfo(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DescribeNameParams)
-	err := ah.HttpRequestParse(r, params)
-	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[loginInfo/GetLoginInfo] [HttpRequestParse: %v]", err)
-		ccErr := service.NewError(service.ErrLogin, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-		return
-	}
+// func (ah *AuthenHandlers) GetLoginInfo(w http.ResponseWriter, r *http.Request) {
+// 	var params = new(model.DescribeNameParams)
+// 	err := ah.HttpRequestParse(r, params)
+// 	if err != nil {
+// 		ah.Logger.ErrorContext(r.Context(), "[loginInfo/GetLoginInfo] [HttpRequestParse: %v]", err)
+// 		ccErr := service.NewError(service.ErrLogin, service.ErrMalformed, service.ErrNull, err.Error())
+// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		return
+// 	}
 
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrName, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-		return
-	}
-	requestId := ah.GetTraceId(r)
-	optView, ccErr := ah.LoginInfoService.GetLoginInfoByName(r.Context(), *params.Name, requestId)
-	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [LoginInfoService.GetLoginInfoByName: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-		return
-	}
-	ah.Response(r.Context(), ah.Logger, w, nil, optView)
-	return
-}
+// 	if params.Name == nil || *params.Name == "" {
+// 		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrName, service.ErrNull)
+// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		return
+// 	}
+// 	requestId := ah.GetTraceId(r)
+// 	optView, ccErr := ah.LoginInfoService.GetLoginInfoByName(r.Context(), *params.Name, requestId)
+// 	if ccErr != nil {
+// 		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [LoginInfoService.GetLoginInfoByName: %s]", ccErr.Detail())
+// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		return
+// 	}
+// 	ah.Response(r.Context(), ah.Logger, w, nil, optView)
+// 	return
+// }
 
 func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.AuthenInfoParams)
@@ -158,8 +157,9 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	//generate login information
 	var loginInfo model.LoginInfoParams
 	loginInfo.Name = params.Name
-	*loginInfo.Role = optView.Role
-	*loginInfo.ClientIp = r.Host
+	loginInfo.Role = &optView.Role
+	clientAddr := (strings.Split(r.RemoteAddr, ":"))[0]
+	loginInfo.ClientIp = &clientAddr
 	optInfoView, ccErr := ah.LoginInfoService.CreateLoginInfo(r.Context(), &loginInfo, requestId)
 	ah.Logger.InfoContext(r.Context(), "CreateLoginInfo in login.")
 	if ccErr != nil {
