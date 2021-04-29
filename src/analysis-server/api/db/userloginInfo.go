@@ -22,24 +22,24 @@ var (
 	}
 )
 
-// func (dao *LoginInfoDao) Get(ctx context.Context, do DbOperator, strName string) (*model.LoginInfo, error) {
-// 	strSql := "select " + strings.Join(loginInfoFields, ",") + " from " + loginInfoTN + " where name=?"
-// 	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Get] [sql: %s ,values: %s]", strSql, strName)
-// 	var optInfo = &model.LoginInfo{}
-// 	start := time.Now()
-// 	defer func() {
-// 		dao.Logger.InfoContext(ctx, "[LoginInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
-// 	}()
-// 	switch err := scanloginInfo(do.QueryRowContext(ctx, strSql, strName), optInfo); err {
-// 	case nil:
-// 		return optInfo, nil
-// 	case sql.ErrNoRows:
-// 		return nil, err
-// 	default:
-// 		dao.Logger.ErrorContext(ctx, "[LoginInfo/db/Get] [scanloginInfo: %s]", err.Error())
-// 		return nil, err
-// 	}
-// }
+func (dao *LoginInfoDao) Get(ctx context.Context, do DbOperator, strName string) (*model.LoginInfo, error) {
+	strSql := "select " + strings.Join(loginInfoFields, ",") + " from " + loginInfoTN + " where name=?"
+	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Get] [sql: %s ,values: %s]", strSql, strName)
+	var optInfo = &model.LoginInfo{}
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[LoginInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
+	}()
+	switch err := scanloginInfo(do.QueryRowContext(ctx, strSql, strName), optInfo); err {
+	case nil:
+		return optInfo, nil
+	case sql.ErrNoRows:
+		return nil, err
+	default:
+		dao.Logger.ErrorContext(ctx, "[LoginInfo/db/Get] [scanloginInfo: %s]", err.Error())
+		return nil, err
+	}
+}
 
 //list count by filter
 func (dao *LoginInfoDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {

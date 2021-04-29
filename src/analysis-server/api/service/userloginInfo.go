@@ -42,7 +42,7 @@ func (ls *LoginInfoService) CreateLoginInfo(ctx context.Context, params *model.L
 	loginView := ls.LoginInfoMdelToView(loginInfo)
 	ls.Logger.InfoContext(ctx, "CreateLoginInfo method end,login name:%s", *params.Name)
 	//update the operator information
-	var updateParams map[string]interface{}
+	updateParams := make(map[string]interface{}, 2)
 	updateParams["UpdatedAt"] = time.Now()
 	updateParams["Status"] = utils.UserOnline
 	err = ls.OptInfoDao.Update(ctx, tx, *params.Name, updateParams)
