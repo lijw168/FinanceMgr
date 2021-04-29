@@ -11,7 +11,7 @@ import (
 type Operator struct {
 }
 
-func (or *Operator) CreateOperator(opts *options.OperatorInfoOptions) (*model.OperatorInfoView, error) {
+func (or *Operator) CreateOperator(opts *options.CreateOptInfoOptions) (*model.OperatorInfoView, error) {
 	action := "CreateOperator"
 	switch {
 	case opts.CompanyID <= 0:
@@ -21,7 +21,7 @@ func (or *Operator) CreateOperator(opts *options.OperatorInfoOptions) (*model.Op
 	case opts.Password == "":
 		return nil, errors.New("Password is required")
 	}
-	params := model.OperatorInfoParams{
+	params := model.CreateOptInfoParams{
 		CompanyID:  &opts.CompanyID,
 		Name:       &opts.Name,
 		Password:   &opts.Password,
@@ -86,18 +86,12 @@ func (or *Operator) ListOperatorInfo(opts *options.ListOptions) (int64, []*model
 	return desc.Tc, ret, nil
 }
 
-func (or *Operator) UpdateOperator(opts *options.OperatorInfoOptions) error {
+func (or *Operator) UpdateOperator(opts *options.ModifyOptInfoOptions) error {
 	action := "UpdateOperator"
-	switch {
-	case opts.CompanyID <= 0:
-		return errors.New("CompanyID is required")
-	case opts.Name == "":
+	if opts.Name == "" {
 		return errors.New("Name is required")
 	}
-	param := model.OperatorInfoParams{}
-	if opts.CompanyID != 0 {
-		param.CompanyID = &opts.CompanyID
-	}
+	param := model.ModifyOptInfoParams{}
 	if opts.Name != "" {
 		param.Name = &opts.Name
 	}

@@ -40,12 +40,6 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	if conflictCount > 0 {
 		return nil, NewError(ErrCompany, ErrConflict, ErrNull, ErrRecordExist)
 	}
-	//get the count of the table company
-	// var comCount int
-	// comCount, err = cs.CompanyDao.Count(ctx, tx)
-	// if err != nil {
-	// 	return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	// }
 	//generate company
 	comInfo := new(model.CompanyInfo)
 	comInfo.CompanyName = *params.CompanyName
@@ -56,7 +50,6 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.CompanyAddr = *params.CompanyAddr
 	comInfo.Backup = *params.Backup
 	comInfo.CreatedAt = time.Now()
-	//>100,as subjectId
 	comInfo.CompanyID = cs.GenComId.GetNextId()
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [CompanyDao.Create: %s]", FuncName, err.Error())

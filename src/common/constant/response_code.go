@@ -31,6 +31,8 @@ const (
 //operator information
 const (
 	CodeOptInfoNotExist = -301
+	CodeUserNameWrong   = -302
+	CodePasswdWrong     = -303
 )
 
 //voucher information

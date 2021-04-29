@@ -19,6 +19,7 @@ type CcSdk struct {
 	mgr.Company
 	mgr.Operator
 	mgr.Voucher
+	mgr.Authen
 }
 
 func (c *CcSdk) Setup() {

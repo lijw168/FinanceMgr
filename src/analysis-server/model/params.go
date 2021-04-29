@@ -73,8 +73,29 @@ type ModifyCompanyParams struct {
 	Backup      *string `json:"backup"`
 }
 
-type OperatorInfoParams struct {
+type AuthenInfoParams struct {
+	Name      *string `json:"name"`
+	Password  *string `json:"password"`
+	CompanyID *int    `json:"companyId"`
+}
+
+type LoginInfoParams struct {
+	Name     *string `json:"name"`
+	Role     *int    `json:"role"`
+	ClientIp *string `json:"clientIp"`
+}
+
+type CreateOptInfoParams struct {
 	CompanyID  *int    `json:"companyId"`
+	Name       *string `json:"name"`
+	Password   *string `json:"password"`
+	Job        *string `json:"job"`
+	Department *string `json:"department"`
+	Status     *int    `json:"Status"`
+	Role       *int    `json:"role"`
+}
+
+type ModifyOptInfoParams struct {
 	Name       *string `json:"name"`
 	Password   *string `json:"password"`
 	Job        *string `json:"job"`

@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"strings"
 
-	"common/log"
-	"analysis-server/model"
 	"analysis-server/api/service"
+	"analysis-server/model"
+	"common/log"
 )
 
 type DescData struct {
@@ -24,7 +24,7 @@ type CCHandler struct{}
 func (h *CCHandler) Response(ctx context.Context, logger log.ILog, w http.ResponseWriter, ce service.CcError, data interface{}) {
 	rsp := model.CommResp{Code: 0, Data: data}
 	if ce != nil {
-		rsp.Code = ce.Code()
+		rsp.Code = ce.GetCode()
 		rsp.Message = ce.Error()
 		rsp.Detail = ce.Detail()
 	}

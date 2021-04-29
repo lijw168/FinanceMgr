@@ -114,7 +114,7 @@ func (oh *OperatorInfoHandlers) GetOperatorInfo(w http.ResponseWriter, r *http.R
 }
 
 func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.OperatorInfoParams)
+	var params = new(model.CreateOptInfoParams)
 	err := oh.HttpRequestParse(r, params)
 	if err != nil {
 		oh.Logger.ErrorContext(r.Context(), "[operatorInfo/CreateOperator] [HttpRequestParse: %v]", err)
@@ -161,10 +161,10 @@ func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Re
 }
 
 func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.OperatorInfoParams)
+	var params = new(model.ModifyOptInfoParams)
 	err := oh.HttpRequestParse(r, params)
 	if err != nil {
-		oh.Logger.ErrorContext(r.Context(), "[volumes/UpdateOperator] [HttpRequestParse: %v]", err)
+		oh.Logger.ErrorContext(r.Context(), "[operator/UpdateOperator] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrOperator, service.ErrMalformed, service.ErrNull, err.Error())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
@@ -187,17 +187,6 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 			return
 		}
 		updateFields["Password"] = *params.Password
-	}
-	if params.CompanyID != nil {
-		//要判断companyID是否存在, 这步操作只有在用户登录时，才有用。
-		// requestId := oh.GetTraceId(r)
-		// comView, ccErr := oh.ComService.GetCompanyById(r.Context(), *params.CompanyID, requestId)
-		// if comView == nil || ccErr != nil {
-		// 	oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [ComService.GetCompanyById: %s]", ccErr.Detail())
-		// 	oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
-		// 	return
-		// }
-		updateFields["CompanyId"] = *params.CompanyID
 	}
 	if params.Job != nil {
 		updateFields["Job"] = *params.Job

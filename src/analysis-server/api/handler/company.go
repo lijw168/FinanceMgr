@@ -147,7 +147,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	var params = new(model.ModifyCompanyParams)
 	err := ch.HttpRequestParse(r, params)
 	if err != nil {
-		ch.Logger.ErrorContext(r.Context(), "[volumes/UpdateCompany] [HttpRequestParse: %v]", err)
+		ch.Logger.ErrorContext(r.Context(), "[company/UpdateCompany] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrCompany, service.ErrMalformed, service.ErrNull, err.Error())
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return

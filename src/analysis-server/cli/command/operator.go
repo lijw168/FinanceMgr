@@ -23,7 +23,7 @@ func NewOperatorCommand(cmd *cobra.Command) {
 }
 
 func newOperatorCreateCmd() *cobra.Command {
-	var opts options.OperatorInfoOptions
+	var opts options.CreateOptInfoOptions
 	cmd := &cobra.Command{
 		Use:   "operator-create [OPTIONS] companyID name password",
 		Short: "Create a operator",
@@ -119,9 +119,9 @@ func newOperatorShowCmd() *cobra.Command {
 }
 
 func newOperatorUpdateCmd() *cobra.Command {
-	var opts options.OperatorInfoOptions
+	var opts options.ModifyOptInfoOptions
 	cmd := &cobra.Command{
-		Use:   "operator-update [OPTIONS] name companyId",
+		Use:   "operator-update [OPTIONS] name job",
 		Short: "update a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -130,21 +130,11 @@ func newOperatorUpdateCmd() *cobra.Command {
 			}
 			opts.Name = args[0]
 			//for test
-			if id, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.CompanyID = id
-			}
-
+			opts.Job = args[1]
 			if err := Sdk.UpdateOperator(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},
 	}
-	// cmd.Flags().StringVar(&opts.Password, "passwd", "test", "password")
-	// cmd.Flags().StringVar(&opts.Department, "department", "test", "department")
-	// cmd.Flags().StringVar(&opts.Job, "job", "test", "job")
-	// cmd.Flags().IntVar(&opts.Role, "role", 1, "role")
-	// cmd.Flags().IntVar(&opts.Status, "status", 1, "status")
 	return cmd
 }

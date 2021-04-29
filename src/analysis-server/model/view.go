@@ -31,6 +31,15 @@ type CompanyView struct {
 	UpdatedAt   time.Time `json:"UpdatedAt"`
 }
 
+//LoginInfoView ...
+type LoginInfoView struct {
+	Name      string    `json:"name"`
+	Role      int       `json:"role"`
+	ClientIp  string    `json:"clientIp"`
+	BeginedAt time.Time `json:"beginedAt"`
+	EndedAt   time.Time `json:"endedAt"`
+}
+
 type OperatorInfoView struct {
 	CompanyID  int       `json:"companyId"`
 	Name       string    `json:"name"`

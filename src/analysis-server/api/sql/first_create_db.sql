@@ -117,4 +117,18 @@ create table if not exists `finance_mgr_2021`.`idInfo`
 
 --insert into idInfo (company_id,subject_id,voucher_id,voucher_record_id) value(100,101,501,1001);
 
+/*==============================================================*/
+/* Table: userLoginInfo                                         */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`userLoginInfo`;
+create table if not exists `finance_mgr_2021`.`userLoginInfo`
+(
+   `id`                   int primary key AUTO_INCREMENT,
+   `name`                 varchar(10) not null ,
+   `role`                 int COMMENT '角色 ：1：记账，2：审核，3：出纳，4：制单',
+   `client_ip`            varchar(16),
+   `begined_at`           datetime,
+   `ended_at`             datetime
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
 

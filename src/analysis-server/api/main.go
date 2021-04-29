@@ -151,6 +151,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	companyDao := &db.CompanyDao{Logger: logger}
 	accSubDao := &db.AccSubDao{Logger: logger}
 	optInfoDao := &db.OperatorInfoDao{Logger: logger}
+	loginInfoDao := &db.LoginInfoDao{Logger: logger}
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
 	gIdInfoService.Logger = logger
@@ -187,6 +188,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: gGenSubIdInfo}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: gGenComIdInfo}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
+	loginInfoService := &service.LoginInfoService{Logger: logger, LogInfoDao: loginInfoDao, Db: _db}
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao,
 		GenRecordId: gGenVouRecIdInfo, GenVoucherId: gGenVouIdInfo, Db: _db}
@@ -196,6 +198,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
 	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
 	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
+	authHandlers := &handler.AuthenHandlers{Logger: logger, LoginInfoService: loginInfoService, ComService: comService, OptInfoService: optInfoService}
 
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
@@ -214,6 +217,11 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("GetOperatorInfo", optInfoHandlers.GetOperatorInfo)
 	httpRouter.RegisterFunc("ListOperatorInfo", optInfoHandlers.ListOperatorInfo)
 	httpRouter.RegisterFunc("UpdateOperator", optInfoHandlers.UpdateOperator)
+
+	httpRouter.RegisterFunc("Login", authHandlers.Login)
+	httpRouter.RegisterFunc("Logout", authHandlers.Logout)
+	httpRouter.RegisterFunc("GetLoginInfo", authHandlers.GetLoginInfo)
+	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
 
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
 	httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)

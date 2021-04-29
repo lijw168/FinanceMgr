@@ -4,6 +4,15 @@ import (
 	"time"
 )
 
+//LoginInfo ...
+type LoginInfo struct {
+	Name      string
+	Role      int
+	ClientIp  string
+	BeginedAt time.Time
+	EndedAt   time.Time
+}
+
 //OperatorInfo ...
 type OperatorInfo struct {
 	CompanyID  int

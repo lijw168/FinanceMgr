@@ -16,7 +16,7 @@ type OperatorInfoService struct {
 	Db         *sql.DB
 }
 
-func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.OperatorInfoParams,
+func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.CreateOptInfoParams,
 	requestId string) (*model.OperatorInfoView, CcError) {
 	ps.Logger.InfoContext(ctx, "CreateOptInfo method start, "+"operator Name:%s", *params.Name)
 
@@ -70,9 +70,6 @@ func (ps *OperatorInfoService) ListOperators(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			// case "fuzzy_name":
-			// 	volName := "%" + f.Value.(string) + "%"
-			// 	fuzzyMatchFields["volume_name"] = volName
 			case "name", "company_id", "job", "department", "status", "role":
 				filterFields[*f.Field] = f.Value
 			default:
@@ -145,17 +142,6 @@ func (ps *OperatorInfoService) DeleteOperatorInfoByName(ctx context.Context, str
 	ps.Logger.InfoContext(ctx, "DeleteOperatorInfoByName method end, "+"operator Name:%s", strOperatorName)
 	return nil
 }
-
-// func (ps *OperatorInfoService) DeleteCompanyByID(ctx context.Context, companyID int,
-// 												requestId string) CcError {
-// 	ps.Logger.InfoContext(ctx, "DeleteCompanyByID method begin, "+"company ID:%s", companyID)
-// 	err := ps.DeleteByID(ctx, ps.Db, companyID)
-// 	if err != nil {
-// 		return NewError(ErrSystem, ErrError,ErrNull, "Delete failed")
-// 	}
-// 	ps.Logger.InfoContext(ctx, "DeleteCompanyByID method end, "+"company ID:%s", companyID)
-// 	return nil
-// }
 
 func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName string, params map[string]interface{}) CcError {
 	FuncName := "OperatorInfoService/UpdateOperator"

@@ -12,6 +12,7 @@ const (
 	ErrVoucherInfo = "voucherInfo"
 	ErrVoucher     = "voucher"
 	ErrOrder       = "order"
+	ErrLogin       = "login"
 )
 
 const (
@@ -79,7 +80,8 @@ type CcErrObj struct {
 type CcError interface {
 	Error() string
 	Detail() string
-	Code() int
+	GetCode() int
+	SetCode(errCode int)
 }
 
 func (e *CcErrObj) Error() string {
@@ -94,8 +96,13 @@ func (e *CcErrObj) Detail() string {
 	return e.D
 }
 
-func (e *CcErrObj) Code() int {
+func (e *CcErrObj) GetCode() int {
 	return e.C
+}
+
+func (e *CcErrObj) SetCode(errCode int) {
+	e.C = errCode
+	return
 }
 
 func NewError(r, t, p, d string) CcError {
