@@ -31,7 +31,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	//generate login information
 	loginInfo := new(model.LoginInfo)
 	loginInfo.Name = *params.Name
-	loginInfo.Role = *params.Role
+	loginInfo.Status = *params.Status
 	loginInfo.ClientIp = *params.ClientIp
 	loginInfo.BeginedAt = time.Now()
 
@@ -55,6 +55,47 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	}
 	as.Logger.InfoContext(ctx, "the OptInfoDao.Update end, login name:%s", *params.Name)
 	return loginView, nil
+}
+
+func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError {
+	FuncName := "AuthenService/Logout"
+	tx, err := as.Db.Begin()
+	if err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	_, err = as.LogInfoDao.Get(ctx, tx, strUserName)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return NewCcError(cons.CodeUserNameWrong, ErrOperator, ErrNotFound, ErrNull, "the logining user is not exist")
+	default:
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	//generate login information
+	filterFields := make(map[string]interface{})
+	filterFields["Name"] = strUserName
+	filterFields["Status"] = utils.UserOnline
+	updateFields := make(map[string]interface{})
+	updateFields["EndedAt"] = time.Now()
+	err = as.LogInfoDao.Update(ctx, tx, filterFields, updateFields)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	//update the operator information
+	delete(updateFields, "EndedAt")
+	updateFields["UpdatedAt"] = time.Now()
+	updateFields["Status"] = utils.UserOffline
+	err = as.OptInfoDao.Update(ctx, tx, strUserName, updateFields)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	return nil
 }
 
 func (as *AuthenService) ListLoginInfo(ctx context.Context,
@@ -103,7 +144,7 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 	loginView := new(model.LoginInfoView)
 	loginView.Name = loginInfo.Name
 	loginView.ClientIp = loginInfo.ClientIp
-	loginView.Role = loginInfo.Role
+	loginView.Status = loginInfo.Status
 	loginView.BeginedAt = loginInfo.BeginedAt
 	loginView.EndedAt = loginInfo.EndedAt
 	return loginView
@@ -122,39 +163,3 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 // 	optInfoView := as.LoginInfoMdelToView(optInfo)
 // 	return optInfoView, nil
 // }
-
-func (as *AuthenService) Logout(ctx context.Context, strUserName string, params map[string]interface{}) CcError {
-	FuncName := "AuthenService/Logout"
-	tx, err := as.Db.Begin()
-	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
-	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
-	_, err = as.LogInfoDao.Get(ctx, tx, strUserName)
-	switch err {
-	case nil:
-	case sql.ErrNoRows:
-		return NewCcError(cons.CodeUserNameWrong, ErrOperator, ErrNotFound, ErrNull, "the logining user is not exist")
-	default:
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	//generate login information
-	err = as.LogInfoDao.Update(ctx, tx, strUserName, params)
-	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	//update the operator information
-	updateParams := make(map[string]interface{}, 2)
-	updateParams["UpdatedAt"] = time.Now()
-	updateParams["Status"] = utils.UserOnline
-	err = as.OptInfoDao.Update(ctx, tx, strUserName, updateParams)
-	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	return nil
-}

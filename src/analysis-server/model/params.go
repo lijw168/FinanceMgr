@@ -81,7 +81,7 @@ type AuthenInfoParams struct {
 
 type LoginInfoParams struct {
 	Name     *string `json:"name"`
-	Role     *int    `json:"role"`
+	Status   *int    `json:"status"`
 	ClientIp *string `json:"clientIp"`
 }
 

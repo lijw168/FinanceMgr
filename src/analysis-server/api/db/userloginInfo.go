@@ -16,9 +16,9 @@ type LoginInfoDao struct {
 
 var (
 	loginInfoTN     = "userLoginInfo"
-	loginInfoFields = []string{"name", "role", "client_ip", "begined_at", "ended_at"}
+	loginInfoFields = []string{"name", "status", "client_ip", "begined_at", "ended_at"}
 	scanloginInfo   = func(r DbScanner, st *model.LoginInfo) error {
-		return r.Scan(&st.Name, &st.Role, &st.ClientIp, &st.BeginedAt, &st.EndedAt)
+		return r.Scan(&st.Name, &st.Status, &st.ClientIp, &st.BeginedAt, &st.EndedAt)
 	}
 )
 
@@ -53,7 +53,7 @@ func (dao *LoginInfoDao) CountByFilter(ctx context.Context, do DbOperator, filte
 
 func (dao *LoginInfoDao) Create(ctx context.Context, do DbOperator, st *model.LoginInfo) error {
 	strSql := "insert into " + loginInfoTN + " (" + strings.Join(loginInfoFields, ",") + ") values (?, ?, ?, ?, ?)"
-	values := []interface{}{st.Name, st.Role, st.ClientIp, st.BeginedAt, st.EndedAt}
+	values := []interface{}{st.Name, st.Status, st.ClientIp, st.BeginedAt, st.EndedAt}
 	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -107,28 +107,12 @@ func (dao *LoginInfoDao) List(ctx context.Context, do DbOperator, filter map[str
 	return LoginInfoSlice, nil
 }
 
-func (dao *LoginInfoDao) Update(ctx context.Context, do DbOperator, strName string,
-	params map[string]interface{}) error {
-	strSql := "update " + loginInfoTN + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where name = ?"
-	values = append(values, strName)
+//由于该表不能靠name字段，就可以确定一条记录，需要多个字段来确定一条记录，所以才有如下的实现方式。
+func (dao *LoginInfoDao) Update(ctx context.Context, do DbOperator, filter map[string]interface{},
+	updateField map[string]interface{}) error {
+	strSql, values := transferUpdateSql(loginInfoTN, filter, updateField)
+	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Update] sql %s with values %v", strSql, values)
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
 	dao.Logger.InfoContext(ctx, "[LoginInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {

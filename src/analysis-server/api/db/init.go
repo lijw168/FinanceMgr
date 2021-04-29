@@ -452,6 +452,7 @@ func transferListSqlWithNo(table string, filter map[string]interface{}, filterNo
 	}
 	return strSql, fv
 }
+
 func transferListSql(table string, filter map[string]interface{}, field []string, limit int, offset int, order string, od int) (string, []interface{}) {
 	fields := strings.Join(field, ",")
 	strSql := "select " + fields + " from " + table
@@ -539,6 +540,92 @@ func transferListSql(table string, filter map[string]interface{}, field []string
 		}
 	}
 	return strSql, fv
+}
+
+func transferUpdateSql(table string, filter map[string]interface{}, updateField map[string]interface{}) (string, []interface{}) {
+	strSql := "update " + table + " set "
+	var values []interface{}
+	var first bool = true
+	for key, value := range updateField {
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
+		}
+		values = append(values, value)
+	}
+	if first {
+		return "", nil
+	}
+	var fk []string
+	//var fv []interface{}
+	handleArrFilter := func(arr []interface{}, s *string) (values []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else {
+				*s += ", ?"
+			}
+			values = append(values, ki)
+		}
+		return
+	}
+
+	for k, v := range filter {
+		tmpK := camelToUnix(k)
+		switch v.(type) {
+		case float64, int:
+			fk = append(fk, tmpK+" = ?")
+			values = append(values, v)
+		case string:
+			tempS := strings.TrimSpace(v.(string))
+			if strings.HasPrefix(tempS, ">") || strings.HasPrefix(tempS, "<") {
+				operator := string(tempS[0])
+				val := tempS[1:]
+				fk = append(fk, fmt.Sprintf("%s %s ?", tmpK, operator))
+				values = append(values, val)
+			} else {
+				fk = append(fk, tmpK+" = ?")
+				values = append(values, v)
+			}
+		case []int:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]int); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			values = append(values, tmpFv...)
+			fk = append(fk, tmpK)
+		case []string:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]string); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			values = append(values, tmpFv...)
+			fk = append(fk, tmpK)
+		case []interface{}:
+			tmpK += " IN ("
+			tmpFv := handleArrFilter(v.([]interface{}), &tmpK)
+			tmpK += ")"
+			values = append(values, tmpFv...)
+			fk = append(fk, tmpK)
+		}
+	}
+	if len(filter) > 0 {
+		strSql += " where " + strings.Join(fk, " and ")
+	}
+	return strSql, values
 }
 
 func camelToUnix(s string) string {

@@ -32,7 +32,7 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 		filterMap := map[string]utils.Attribute{}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["clientIp"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["role"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["status"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrLogin, service.ErrInvalid, service.ErrField, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
@@ -157,7 +157,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	//generate login information
 	var loginInfo model.LoginInfoParams
 	loginInfo.Name = params.Name
-	loginInfo.Role = &optView.Role
+	loginInfo.Status = &optView.Status
 	clientAddr := (strings.Split(r.RemoteAddr, ":"))[0]
 	loginInfo.ClientIp = &clientAddr
 	optInfoView, ccErr := ah.AuthService.Login(r.Context(), &loginInfo, requestId)
@@ -185,10 +185,7 @@ func (ah *AuthenHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	updateFields := make(map[string]interface{})
-	updateFields["EndedAt"] = time.Now()
-
-	ccErr := ah.AuthService.Logout(r.Context(), *params.Name, updateFields)
+	ccErr := ah.AuthService.Logout(r.Context(), *params.Name)
 	if ccErr != nil {
 		ah.Logger.WarnContext(r.Context(), "[opreator/Logout/ServerHTTP] [AuthService.UpdateLoginInfo: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)

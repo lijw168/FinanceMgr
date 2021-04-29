@@ -125,7 +125,7 @@ create table if not exists `finance_mgr_2021`.`userLoginInfo`
 (
    `id`                   int primary key AUTO_INCREMENT,
    `name`                 varchar(10) not null ,
-   `role`                 int COMMENT '角色 ：1：记账，2：审核，3：出纳，4：制单',
+   `status`               int COMMENT '状态 ：1:offline;2:online;3:invalid user',
    `client_ip`            varchar(16),
    `begined_at`           datetime,
    `ended_at`             datetime

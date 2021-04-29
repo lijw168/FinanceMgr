@@ -63,7 +63,7 @@ func newLogoutCmd() *cobra.Command {
 }
 
 func newLoginListCmd() *cobra.Command {
-	defCs := []string{"Name", "Role", "ClientIp", "BeginedAt", "EndedAt"}
+	defCs := []string{"Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
 		Use:   "loginInfo-list ",
 		Short: "List operators Support Filter",
@@ -84,7 +84,7 @@ func newLoginListCmd() *cobra.Command {
 
 //由于一个用户，可能有多条loginInfo记录，所以该函数通过list函数获取相应的数据。
 func newLoginShowCmd() *cobra.Command {
-	defCs := []string{"Name", "Role", "ClientIp", "BeginedAt", "EndedAt"}
+	defCs := []string{"Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
 		Use:   "loginInfo-show [OPTIONS] username",
 		Short: "Show the information of logined user",

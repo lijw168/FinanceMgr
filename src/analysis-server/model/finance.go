@@ -7,7 +7,7 @@ import (
 //LoginInfo ...
 type LoginInfo struct {
 	Name      string
-	Role      int
+	Status    int
 	ClientIp  string
 	BeginedAt time.Time
 	EndedAt   time.Time
