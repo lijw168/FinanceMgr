@@ -8,7 +8,7 @@ import (
 	"common/log"
 	"net/http"
 	"strings"
-	"time"
+	//"time"
 )
 
 type AuthenHandlers struct {

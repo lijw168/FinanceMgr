@@ -76,7 +76,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	//generate login information
 	filterFields := make(map[string]interface{})
 	filterFields["Name"] = strUserName
-	filterFields["Status"] = utils.UserOnline
+	filterFields["Status"] = utils.UserOffline
 	updateFields := make(map[string]interface{})
 	updateFields["EndedAt"] = time.Now()
 	err = as.LogInfoDao.Update(ctx, tx, filterFields, updateFields)
