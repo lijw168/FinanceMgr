@@ -157,7 +157,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	//generate login information
 	var loginInfo model.LoginInfoParams
 	loginInfo.Name = params.Name
-	loginInfo.Status = &optView.Status
+	//loginInfo.Status = &optView.Status
 	clientAddr := (strings.Split(r.RemoteAddr, ":"))[0]
 	loginInfo.ClientIp = &clientAddr
 	optInfoView, ccErr := ah.AuthService.Login(r.Context(), &loginInfo, requestId)

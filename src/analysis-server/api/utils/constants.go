@@ -1,7 +1,7 @@
 package utils
 
 const (
-	UserOffline = 0 // user logout
 	UserOnline  = 1 // user login
-	InvalidUser = 2
+	UserOffline = 2 // user logout
+	InvalidUser = 3
 )

@@ -69,6 +69,18 @@ curl -H "Content-Type:application/json" -X POST --data '{"name":"lijunwei","comp
 //delete
 analysis_cli operator-delete
 
+//*************************loginInfo*****************************//
+//login
+analysis_cli login wei 614720 109
+//logout
+analysis_cli logout wei
+//list
+analysis_cli loginInfo-list
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"name","value":"wei"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListLoginInfo
+
+//show  该命令可以获取一个用户的多条记录
+analysis_cli loginInfo-show wei
+
 //*************************voucher*****************************//
 
 //create voucher

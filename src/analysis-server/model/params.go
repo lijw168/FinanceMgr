@@ -80,8 +80,8 @@ type AuthenInfoParams struct {
 }
 
 type LoginInfoParams struct {
-	Name     *string `json:"name"`
-	Status   *int    `json:"status"`
+	Name *string `json:"name"`
+	//Status   *int    `json:"status"`
 	ClientIp *string `json:"clientIp"`
 }
 

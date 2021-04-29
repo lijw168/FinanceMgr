@@ -31,7 +31,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	//generate login information
 	loginInfo := new(model.LoginInfo)
 	loginInfo.Name = *params.Name
-	loginInfo.Status = *params.Status
+	loginInfo.Status = utils.UserOnline
 	loginInfo.ClientIp = *params.ClientIp
 	loginInfo.BeginedAt = time.Now()
 
@@ -76,9 +76,10 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	//generate login information
 	filterFields := make(map[string]interface{})
 	filterFields["Name"] = strUserName
-	filterFields["Status"] = utils.UserOffline
+	filterFields["Status"] = utils.UserOnline
 	updateFields := make(map[string]interface{})
 	updateFields["EndedAt"] = time.Now()
+	updateFields["Status"] = utils.UserOffline
 	err = as.LogInfoDao.Update(ctx, tx, filterFields, updateFields)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -86,7 +87,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	//update the operator information
 	delete(updateFields, "EndedAt")
 	updateFields["UpdatedAt"] = time.Now()
-	updateFields["Status"] = utils.UserOffline
+	//updateFields["Status"] = utils.UserOffline
 	err = as.OptInfoDao.Update(ctx, tx, strUserName, updateFields)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
