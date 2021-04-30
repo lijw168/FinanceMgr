@@ -36,7 +36,6 @@ const (
 	ErrEmpty         = "empty"
 	ErrMaintenance   = "maintenance"
 	ErrDismatch      = "dismatch"
-	ErrBusy          = "busy"
 )
 
 const (

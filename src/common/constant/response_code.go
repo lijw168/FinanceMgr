@@ -3,18 +3,13 @@ package constant
 /* for api response code
  0:success
 -1:
--2~-100:volume error
--101~-200:snapshot error
+-2~-100:common error
+-101~-200:account subject error
 */
 
-//volume
+//common
 const (
-	CodeVolNotExist    = -2
-	CodeVolBusy        = -3
-	CodeVolNotEnough   = -4
-	CodeVolInvalType   = -5
-	CodeVolInvalSize   = -6
-	CodeVolInvalResize = -7
+	CodeNoLogin = -2
 )
 
 //account subject

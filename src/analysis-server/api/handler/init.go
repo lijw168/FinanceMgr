@@ -14,6 +14,8 @@ import (
 	"common/log"
 )
 
+var tokenToNameMap = make(map[string]string)
+
 type DescData struct {
 	Tc       int64       `json:"total_count"`
 	Elements interface{} `json:"elements"`

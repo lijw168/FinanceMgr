@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
-	//"common/constant"
+	cons "common/constant"
 	"common/log"
 	"common/message"
 	"common/utils"
+	"encoding/json"
 )
 
 func NewUrlRouter(l *log.Logger) *UrlRouter {
@@ -24,11 +25,14 @@ func NewUrlRouter(l *log.Logger) *UrlRouter {
 	}
 }
 
+type CheckoutHandle func(action string, r *http.Request) (bool, error)
+
 type UrlRouter struct {
-	Handler  map[string]http.Handler
-	HF       map[string]http.HandlerFunc
-	Logger   *log.Logger
-	hostname string
+	Handler      map[string]http.Handler
+	HF           map[string]http.HandlerFunc
+	Logger       *log.Logger
+	hostname     string
+	CheckoutCall CheckoutHandle
 }
 
 func (p *UrlRouter) RegisterFunc(action string, handler http.HandlerFunc) *UrlRouter {
@@ -95,12 +99,24 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		if action == "SetLogLevel" {
-			p.SetLogLevel(w, r)
-			return
+	if p.CheckoutCall != nil {
+		bIsPass, err := p.CheckoutCall(action, r)
+		rsp := message.ResponseParam{}
+		if err == nil && !bIsPass {
+			rsp.Code = cons.CodeNoLogin
+			rsp.Message = "please login first."
+		} else {
+			rsp.Code = -1
+			rsp.Message = err.Error()
 		}
-	*/
+		jsonRsp, err := json.Marshal(&rsp)
+		if err != nil {
+			p.Logger.ErrorContext(ctx, "[UrlRouter/ServeHTTP] [Marshal,failed, error: %s]", err.Error())
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonRsp)
+		return
+	}
 
 	var Ihandler http.Handler
 	var IhandlerFunc http.HandlerFunc
