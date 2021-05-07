@@ -233,6 +233,6 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
 	httpRouter.RegisterFunc("UpdateVoucherRecord", voucherHandlers.UpdateVoucherRecord)
 	//检查是否登录
-	httpRouter.CheckoutCall = handler.Checkout
+	httpRouter.CheckoutCall = handler.AccessToken.Checkout
 	return nil
 }

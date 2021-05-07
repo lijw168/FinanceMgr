@@ -6,6 +6,7 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	comUtils "common/utils"
 	"context"
 	"database/sql"
 	"time"
@@ -148,6 +149,7 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 	loginView.Status = loginInfo.Status
 	loginView.BeginedAt = loginInfo.BeginedAt
 	loginView.EndedAt = loginInfo.EndedAt
+	loginView.AccessToken = comUtils.Uuid()
 	return loginView
 }
 

@@ -13,6 +13,7 @@ const (
 	ErrVoucher     = "voucher"
 	ErrOrder       = "order"
 	ErrLogin       = "login"
+	ErrLogout      = "logout"
 )
 
 const (
@@ -42,6 +43,7 @@ const (
 	ErrId            = "id"
 	ErrIds           = "ids"
 	ErrName          = "name"
+	ErrCookie        = "cookie"
 	ErrPasswd        = "password"
 	ErrVouMon        = "voucher_month"
 	ErrVouRecSub     = "voucher_record_subject"

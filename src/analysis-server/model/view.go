@@ -33,11 +33,12 @@ type CompanyView struct {
 
 //LoginInfoView ...
 type LoginInfoView struct {
-	Name      string    `json:"name"`
-	Status    int       `json:"status"`
-	ClientIp  string    `json:"clientIp"`
-	BeginedAt time.Time `json:"beginedAt"`
-	EndedAt   time.Time `json:"endedAt"`
+	Name        string    `json:"name"`
+	Status      int       `json:"status"`
+	ClientIp    string    `json:"clientIp"`
+	BeginedAt   time.Time `json:"beginedAt"`
+	EndedAt     time.Time `json:"endedAt"`
+	AccessToken string    `json:"accessToken"`
 }
 
 type OperatorInfoView struct {

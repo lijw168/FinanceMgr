@@ -14,7 +14,7 @@ import (
 	"common/log"
 )
 
-var tokenToNameMap = make(map[string]string)
+var AccessToken = NewAccessTokenHandler()
 
 type DescData struct {
 	Tc       int64       `json:"total_count"`
