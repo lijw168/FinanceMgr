@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -41,6 +42,10 @@ func (at *AccessTokenHandler) Checkout(action string, r *http.Request) (bool, er
 	bIsPass := false
 	cookie, err := r.Cookie("access_token")
 	if err != nil {
+		strErrMsg := err.Error()
+		if action == "Login" && strings.Contains(strErrMsg, "http: named cookie not present") {
+			return true, nil
+		}
 		return bIsPass, err
 	}
 	accessToken := cookie.String()
@@ -48,16 +53,9 @@ func (at *AccessTokenHandler) Checkout(action string, r *http.Request) (bool, er
 	defer at.mu.RUnlock()
 	if _, ok := at.tokenToNameMap[accessToken]; ok {
 		if action == "Login" {
-			bIsPass = false
 			err = errors.New("the user has been to login,please logout the user.")
 		} else {
 			bIsPass = true
-		}
-	} else {
-		if action == "Login" {
-			bIsPass = true
-		} else {
-			bIsPass = false
 		}
 	}
 	return bIsPass, err

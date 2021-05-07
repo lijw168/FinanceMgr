@@ -101,21 +101,23 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if p.CheckoutCall != nil {
 		bIsPass, err := p.CheckoutCall(action, r)
-		rsp := message.ResponseParam{}
-		if err == nil && !bIsPass {
-			rsp.Code = cons.CodeNoLogin
-			rsp.Message = "please login first."
-		} else {
-			rsp.Code = -1
-			rsp.Message = err.Error()
+		if !bIsPass {
+			rsp := message.ResponseParam{}
+			if err == nil {
+				rsp.Code = cons.CodeNoLogin
+				rsp.Message = "please login first."
+			} else {
+				rsp.Code = -1
+				rsp.Message = err.Error()
+			}
+			jsonRsp, err := json.Marshal(&rsp)
+			if err != nil {
+				p.Logger.ErrorContext(ctx, "[UrlRouter/ServeHTTP] [Marshal,failed, error: %s]", err.Error())
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(jsonRsp)
+			return
 		}
-		jsonRsp, err := json.Marshal(&rsp)
-		if err != nil {
-			p.Logger.ErrorContext(ctx, "[UrlRouter/ServeHTTP] [Marshal,failed, error: %s]", err.Error())
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(jsonRsp)
-		return
 	}
 
 	var Ihandler http.Handler
