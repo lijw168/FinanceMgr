@@ -13,9 +13,10 @@ var (
 	Admin   bool
 	Domain  string
 	//Tenant  string
-	Sdk     *sdk.CcSdk
-	Help    bool
-	Timeout uint64
+	Sdk         *sdk.CcSdk
+	Help        bool
+	Timeout     uint64
+	AccessToken string
 )
 
 func NewCcCli() *cobra.Command {
@@ -36,6 +37,7 @@ func NewCcCli() *cobra.Command {
 	//cmd.PersistentFlags().StringVar(&Tenant, "tenant-id", "", "Tenant ID used to call api")
 	cmd.PersistentFlags().BoolVarP(&Help, "help", "h", false, "Type for help")
 	cmd.PersistentFlags().Uint64Var(&Timeout, "timeout", 0, "network timeout (ms)")
+	cmd.PersistentFlags().StringVar(&AccessToken, "token", "", "access token")
 
 	al := len(os.Args)
 	for i := 0; i < al; i++ {
@@ -71,6 +73,11 @@ func NewCcCli() *cobra.Command {
 		case "--timeout":
 			t, _ := strconv.ParseUint(os.Args[i+1], 10, 64)
 			Timeout = t
+		case "--token":
+			if i < al-1 {
+				AccessToken = os.Args[i+1]
+				i++
+			}
 		}
 	}
 	// add command

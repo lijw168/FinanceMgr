@@ -15,6 +15,7 @@ type CcSdk struct {
 	Admin   bool
 	TraceId string
 	Timeout uint64
+	//AccessToken string
 	mgr.AccSub
 	mgr.Company
 	mgr.Operator
@@ -33,7 +34,7 @@ func (c *CcSdk) Setup() {
 }
 
 func (c *CcSdk) SetAccessToken(accessToken string) {
-	util.TokenMutex.Lock()
-	defer util.TokenMutex.Unlock()
-	util.AccessToken = accessToken	
+	// util.TokenMutex.Lock()
+	// defer util.TokenMutex.Unlock()
+	util.AccessToken = accessToken
 }

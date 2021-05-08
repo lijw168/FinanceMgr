@@ -10,7 +10,7 @@ import (
 
 	"analysis-server/model"
 	"common/utils"
-	"sync"
+	//"sync"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	Client      *http.Client
 	TraceId     string
 	AccessToken string
-	TokenMutex  sync.RWMutex
+	//TokenMutex  sync.RWMutex
 )
 
 type DescData struct {
@@ -45,8 +45,8 @@ func genCurl(req *http.Request, body []byte) string {
 }
 
 func DoRequest(action string, params interface{}) (*model.CommResp, error) {
-	TokenMutex.Lock()
-	defer TokenMutex.Unlock()
+	// TokenMutex.Lock()
+	// defer TokenMutex.Unlock()
 	return DoRequestwithToken(AccessToken, action, params)
 }
 

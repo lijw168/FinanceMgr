@@ -41,5 +41,6 @@ func main() {
 	command.Sdk.Admin = command.Admin
 	command.Sdk.Timeout = command.Timeout
 	command.Sdk.Setup()
+	command.Sdk.SetAccessToken(command.AccessToken)
 	cmd.Execute()
 }
