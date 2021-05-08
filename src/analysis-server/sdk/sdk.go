@@ -24,10 +24,16 @@ type CcSdk struct {
 
 func (c *CcSdk) Setup() {
 	util.Domain = c.Domain
-	//util.Tenant = c.Tenant
+	util.AccessToken = ""
 	util.Verbose = c.Verbose
 	util.Admin = c.Admin
 	util.Client = new(http.Client)
 	util.Client.Timeout = time.Duration(c.Timeout) * time.Millisecond
 	util.TraceId = c.TraceId
+}
+
+func (c *CcSdk) SetAccessToken(accessToken string) {
+	util.TokenMutex.Lock()
+	defer util.TokenMutex.Unlock()
+	util.AccessToken = accessToken	
 }

@@ -45,9 +45,9 @@ func newLoginCmd() *cobra.Command {
 }
 
 func newLogoutCmd() *cobra.Command {
-	var opts options.LogoutOptions
+	var opts options.NameOptions
 	cmd := &cobra.Command{
-		Use:   "logout [OPTIONS] name access_token",
+		Use:   "logout [OPTIONS] name",
 		Short: "user logout",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -55,7 +55,6 @@ func newLogoutCmd() *cobra.Command {
 				return
 			}
 			opts.Name = args[0]
-			opts.AccessToken = args[1]
 			if err := Sdk.Logout(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}

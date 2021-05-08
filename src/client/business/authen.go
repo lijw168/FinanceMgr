@@ -50,6 +50,7 @@ func (auth *Authen) UserLogin(param []byte) int {
 	} else {
 		logger.Debug("Login succeed;view:%v", view)
 		auth.setAuthenInfo(opts.Name, view.AccessToken, util.Online)
+		cSdk.SetAccessToken(view.AccessToken)
 	}
 	logger.LogInfo("userLogin end")
 	return errCode
@@ -58,15 +59,15 @@ func (auth *Authen) UserLogin(param []byte) int {
 func (auth *Authen) Logout() int {
 	logger.LogInfo("logout,begin")
 	errCode := util.ErrNull
-	var opts options.LogoutOptions
+	var opts options.NameOptions
 	opts.Name = auth.strUserName
-	opts.AccessToken = auth.strAccessToken
 	if err := cSdk.Logout(&opts); err != nil {
 		errCode = util.ErrUserLogoutFailed
 		logger.Error("the Logout failed,err:%v", err.Error())
 	} else {
 		logger.Debug("logout succeed")
 		auth.setAuthenInfo("", "", util.Offline)
+		cSdk.SetAccessToken("")
 	}
 	logger.LogInfo("logout,end")
 	return errCode
@@ -83,6 +84,7 @@ func (auth *Authen) OnlineCheck() int {
 		//userStatus = view.Status
 		if auth.GetUserStatus() != view.Status {
 			auth.setAuthenInfo("", "", view.Status)
+			cSdk.SetAccessToken("")
 			logger.Debug("OnlineCheck succeed;but the user status has been to change,the new user status is:%v", view)
 		}
 	}

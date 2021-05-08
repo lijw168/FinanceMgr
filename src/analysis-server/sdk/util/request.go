@@ -10,15 +10,18 @@ import (
 
 	"analysis-server/model"
 	"common/utils"
+	"sync"
 )
 
 var (
-	Domain  string
-	Tenant  string
-	Verbose bool
-	Admin   bool
-	Client  *http.Client
-	TraceId string
+	Domain      string
+	Tenant      string
+	Verbose     bool
+	Admin       bool
+	Client      *http.Client
+	TraceId     string
+	AccessToken string
+	TokenMutex  sync.RWMutex
 )
 
 type DescData struct {
@@ -42,7 +45,9 @@ func genCurl(req *http.Request, body []byte) string {
 }
 
 func DoRequest(action string, params interface{}) (*model.CommResp, error) {
-	return DoRequestwithToken("", action, params)
+	TokenMutex.Lock()
+	defer TokenMutex.Unlock()
+	return DoRequestwithToken(AccessToken, action, params)
 }
 
 func addCookie(request *http.Request, cookieName, cookieVal string) {

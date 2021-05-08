@@ -35,16 +35,13 @@ func (au *Authen) Login(opts *options.AuthenInfoOptions) (*model.LoginInfoView, 
 	return view, nil
 }
 
-func (au *Authen) Logout(opts *options.LogoutOptions) error {
+func (au *Authen) Logout(opts *options.NameOptions) error {
 	action := "Logout"
 	if opts.Name == "" {
 		return errors.New("Name is required")
 	}
-	if opts.AccessToken == "" {
-		return errors.New("AccessToken is required")
-	}
 	params := model.DescribeNameParams{Name: &opts.Name}
-	_, err := util.DoRequestwithToken(opts.AccessToken, action, params)
+	_, err := util.DoRequest(action, params)
 	return err
 }
 
