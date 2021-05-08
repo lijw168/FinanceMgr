@@ -1,3 +1,4 @@
+下面的cli命令要添加上--token 4c3bqpmc63  这个参数。
 
 //获取版本号
 curl -X  POST http://127.0.0.1:7500/common?action=version
@@ -38,6 +39,8 @@ analysis_cli accSub-list
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":103}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
 
+curl -H "Content-Type:application/json" -H "Cookie: access_token=gft863skno" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
+
 //describe  
 analysis_cli accSub-show
 
@@ -73,9 +76,10 @@ analysis_cli operator-delete
 //login
 analysis_cli login wei 614720 109
 //logout
-analysis_cli logout wei
+analysis_cli logout wei --token 4c3bqpmc63
+curl -H "Content-Type:application/json"  -H "Cookie: access_token=gft863skno" -X POST --data '{"name":"wei"}' http://127.0.0.1:7500/analysis_server?Action=Logout
 //list
-analysis_cli loginInfo-list
+analysis_cli loginInfo-list --token 4c3bqpmc63
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"name","value":"wei"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListLoginInfo
 
 //show  该命令可以获取一个用户的多条记录
