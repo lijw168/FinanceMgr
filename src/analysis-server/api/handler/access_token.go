@@ -32,7 +32,7 @@ func (at *AccessTokenHandler) delElem(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	accessToken := cookie.String()
+	accessToken := cookie.Value
 	delete(at.tokenToNameMap, accessToken)
 	return nil
 }
@@ -48,7 +48,7 @@ func (at *AccessTokenHandler) Checkout(action string, r *http.Request) (bool, er
 		}
 		return bIsPass, err
 	}
-	accessToken := cookie.String()
+	accessToken := cookie.Value
 	at.mu.RLock()
 	defer at.mu.RUnlock()
 	if _, ok := at.tokenToNameMap[accessToken]; ok {
