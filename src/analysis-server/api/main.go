@@ -220,7 +220,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 
 	httpRouter.RegisterFunc("Login", authHandlers.Login)
 	httpRouter.RegisterFunc("Logout", authHandlers.Logout)
-	//httpRouter.RegisterFunc("GetLoginInfo", authHandlers.GetLoginInfo)
+	httpRouter.RegisterFunc("StatusCheckout", authHandlers.StatusCheckout)
 	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
 
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)

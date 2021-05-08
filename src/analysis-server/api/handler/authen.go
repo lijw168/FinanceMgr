@@ -80,31 +80,31 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 	return
 }
 
-// func (ah *AuthenHandlers) GetLoginInfo(w http.ResponseWriter, r *http.Request) {
-// 	var params = new(model.DescribeNameParams)
-// 	err := ah.HttpRequestParse(r, params)
-// 	if err != nil {
-// 		ah.Logger.ErrorContext(r.Context(), "[loginInfo/GetLoginInfo] [HttpRequestParse: %v]", err)
-// 		ccErr := service.NewError(service.ErrLogin, service.ErrMalformed, service.ErrNull, err.Error())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-// 		return
-// 	}
+func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeNameParams)
+	err := ah.HttpRequestParse(r, params)
+	if err != nil {
+		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/StatusCheckout] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrNull, service.ErrMalformed, service.ErrNull, err.Error())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
 
-// 	if params.Name == nil || *params.Name == "" {
-// 		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrName, service.ErrNull)
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-// 		return
-// 	}
-// 	requestId := ah.GetTraceId(r)
-// 	optView, ccErr := ah.AuthService.GetLoginInfoByName(r.Context(), *params.Name, requestId)
-// 	if ccErr != nil {
-// 		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [AuthService.GetLoginInfoByName: %s]", ccErr.Detail())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-// 		return
-// 	}
-// 	ah.Response(r.Context(), ah.Logger, w, nil, optView)
-// 	return
-// }
+	if params.Name == nil || *params.Name == "" {
+		ccErr := service.NewError(service.ErrNull, service.ErrMiss, service.ErrName, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := ah.GetTraceId(r)
+	stCheckoutView, ccErr := ah.AuthService.StatusCheckout(r.Context(), *params.Name, requestId)
+	if ccErr != nil {
+		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [AuthService.GetLoginInfoByName: %s]", ccErr.Detail())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	ah.Response(r.Context(), ah.Logger, w, nil, stCheckoutView)
+	return
+}
 
 func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.AuthenInfoParams)

@@ -35,18 +35,21 @@ func (au *Authen) Login(opts *options.AuthenInfoOptions) (*model.LoginInfoView, 
 	return view, nil
 }
 
-func (au *Authen) Logout(opts *options.NameOptions) error {
+func (au *Authen) Logout(opts *options.LogoutOptions) error {
 	action := "Logout"
 	if opts.Name == "" {
 		return errors.New("Name is required")
 	}
+	if opts.AccessToken == "" {
+		return errors.New("AccessToken is required")
+	}
 	params := model.DescribeNameParams{Name: &opts.Name}
-	_, err := util.DoRequest(action, params)
+	_, err := util.DoRequestwithToken(opts.AccessToken, action, params)
 	return err
 }
 
-func (au *Authen) GetLoginInfo(opts *options.NameOptions) (*model.LoginInfoView, error) {
-	action := "GetLoginInfo"
+func (au *Authen) StatusCheckout(opts *options.NameOptions) (*model.StatusCheckoutView, error) {
+	action := "StatusCheckout"
 	switch {
 	case opts.Name == "":
 		return nil, errors.New("Name is required")
@@ -56,8 +59,8 @@ func (au *Authen) GetLoginInfo(opts *options.NameOptions) (*model.LoginInfoView,
 	if err != nil {
 		return nil, err
 	}
-	view := &model.LoginInfoView{}
-	err = util.FormatView(result.Data, view)
+	view := &model.StatusCheckoutView{}
+	err = util.FormatView(result.Data, &view)
 	if err != nil {
 		return nil, err
 	}

@@ -32,7 +32,7 @@ create table if not exists `finance_mgr_2021`.`operatorInfo`
    `company_id`           int not null,
    `job`                  varchar(32),
    `department`           varchar(64),
-   `status`               int COMMENT '状态 ：1:offline;2:online;3:invalid user',
+   `status`               int COMMENT '状态 ：1:offline;2:online;3:invalid status',
    `role`                 int COMMENT '角色 ：1：记账，2：审核，3：出纳，4：制单',
    `created_at`           datetime,
    `updated_at`           datetime,

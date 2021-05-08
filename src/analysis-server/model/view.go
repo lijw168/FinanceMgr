@@ -41,6 +41,11 @@ type LoginInfoView struct {
 	AccessToken string    `json:"accessToken"`
 }
 
+type StatusCheckoutView struct {
+	Name   string `json:"name"`
+	Status int    `json:"status"`
+}
+
 type OperatorInfoView struct {
 	CompanyID  int       `json:"companyId"`
 	Name       string    `json:"name"`

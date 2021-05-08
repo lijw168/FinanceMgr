@@ -32,7 +32,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	//generate login information
 	loginInfo := new(model.LoginInfo)
 	loginInfo.Name = *params.Name
-	loginInfo.Status = utils.UserOnline
+	loginInfo.Status = utils.Online
 	loginInfo.ClientIp = *params.ClientIp
 	loginInfo.BeginedAt = time.Now()
 
@@ -45,7 +45,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	//update the operator information
 	updateParams := make(map[string]interface{}, 2)
 	updateParams["UpdatedAt"] = time.Now()
-	updateParams["Status"] = utils.UserOnline
+	updateParams["Status"] = utils.Online
 	err = as.OptInfoDao.Update(ctx, tx, *params.Name, updateParams)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -77,10 +77,10 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	//generate login information
 	filterFields := make(map[string]interface{})
 	filterFields["Name"] = strUserName
-	filterFields["Status"] = utils.UserOnline
+	filterFields["Status"] = utils.Online
 	updateFields := make(map[string]interface{})
 	updateFields["EndedAt"] = time.Now()
-	updateFields["Status"] = utils.UserOffline
+	updateFields["Status"] = utils.Offline
 	err = as.LogInfoDao.Update(ctx, tx, filterFields, updateFields)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -88,7 +88,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	//update the operator information
 	delete(updateFields, "EndedAt")
 	updateFields["UpdatedAt"] = time.Now()
-	//updateFields["Status"] = utils.UserOffline
+	//updateFields["Status"] = utils.Offline
 	err = as.OptInfoDao.Update(ctx, tx, strUserName, updateFields)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -153,16 +153,17 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 	return loginView
 }
 
-// func (as*AuthenService) GetLoginInfoByName(ctx context.Context, strUserName string,
-// 	requestId string) (*model.LoginInfoView, CcError) {
-// 	optInfo, err := as.LogInfoDao.Get(ctx, as.Db, strUserName)
-// 	switch err {
-// 	case nil:
-// 	case sql.ErrNoRows:
-// 		return nil, NewCcError(cons.CodeUserNameWrong, ErrOperator, ErrNotFound, ErrNull, "the user name is not exist")
-// 	default:
-// 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	optInfoView := as.LoginInfoMdelToView(optInfo)
-// 	return optInfoView, nil
-// }
+func (as *AuthenService) StatusCheckout(ctx context.Context, strUserName string, requestId string) (*model.StatusCheckoutView, CcError) {
+	optInfo, err := as.OptInfoDao.Get(ctx, as.Db, strUserName)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return nil, NewCcError(cons.CodeOptInfoNotExist, ErrOperator, ErrNotFound, ErrNull, "the operator information is not exist")
+	default:
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	stCheckoutView := new(model.StatusCheckoutView)
+	stCheckoutView.Name = optInfo.Name
+	stCheckoutView.Status = optInfo.Status
+	return stCheckoutView, nil
+}

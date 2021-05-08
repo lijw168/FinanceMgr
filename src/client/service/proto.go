@@ -10,25 +10,6 @@ import (
 	"time"
 )
 
-// func NewConn(ipaddr string) (*net.TCPConn, error) {
-// 	tcpAddr, err := net.ResolveTCPAddr("tcp4", ipaddr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	c, err := net.DialTCP("tcp", nil, tcpAddr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	c.SetKeepAlive(true)
-// 	c.SetLinger(10)
-
-// 	return c, nil
-// }
-
-//the split token within internal keys
-
 const (
 	SSLVpnMagic     = 0xF8
 	HeaderLength    = 8

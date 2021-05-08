@@ -53,7 +53,7 @@ func main() {
 	}
 	logger.LogInfo("login service is beginning")
 	proxy := service.Proxy{}
-	proxy.Init(*pListenPort, *pTimeout, *pServerPort, *pStrServerHost, logger)
+	proxy.Init(*pListenPort, *pServerPort, *pStrServerHost, *pTimeout, logger)
 	proxy.StartTcpService()
 	logger.LogInfo("login quit")
 }

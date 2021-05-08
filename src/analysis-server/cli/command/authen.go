@@ -13,6 +13,7 @@ func NewAuthenCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newLogoutCmd())
 	cmd.AddCommand(newLoginListCmd())
 	cmd.AddCommand(newLoginShowCmd())
+	cmd.AddCommand(newStatusCheckoutCmd())
 }
 
 func newLoginCmd() *cobra.Command {
@@ -44,9 +45,9 @@ func newLoginCmd() *cobra.Command {
 }
 
 func newLogoutCmd() *cobra.Command {
-	var opts options.NameOptions
+	var opts options.LogoutOptions
 	cmd := &cobra.Command{
-		Use:   "logout [OPTIONS] name ",
+		Use:   "logout [OPTIONS] name access_token",
 		Short: "user logout",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -54,6 +55,7 @@ func newLogoutCmd() *cobra.Command {
 				return
 			}
 			opts.Name = args[0]
+			opts.AccessToken = args[1]
 			if err := Sdk.Logout(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
@@ -101,6 +103,29 @@ func newLoginShowCmd() *cobra.Command {
 		opts.Filter = make(map[string]interface{})
 		opts.Filter["name"] = args[0]
 		if _, views, err := Sdk.ListLoginInfo(&opts); err != nil {
+			util.FormatErrorOutput(err)
+		} else {
+			util.FormatListOutput(*columns, views)
+		}
+	}
+	return cmd
+}
+
+func newStatusCheckoutCmd() *cobra.Command {
+	defCs := []string{"Name", "Status"}
+	cmd := &cobra.Command{
+		Use:   "status-checkout [OPTIONS] username",
+		Short: "checkout the user status",
+	}
+	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
+		var opts options.NameOptions
+		opts.Name = args[0]
+		if views, err := Sdk.StatusCheckout(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
 			util.FormatListOutput(*columns, views)

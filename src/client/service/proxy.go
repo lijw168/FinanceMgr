@@ -65,7 +65,7 @@ type Proxy struct {
 }
 
 //Init ...
-func (proxy *Proxy) Init(iListenPort, iServerPort int, uTimeout uint64, strServerHost string, logger *log.Logger) {
+func (proxy *Proxy) Init(iListenPort, iServerPort int, strServerHost string, uTimeout uint64, logger *log.Logger) {
 	proxy.iListenPort = iListenPort
 	// proxy.strServerPort = strconv.Itoa(iServerPort)
 	// proxy.strHost = strServerHost
@@ -74,7 +74,7 @@ func (proxy *Proxy) Init(iListenPort, iServerPort int, uTimeout uint64, strServe
 	verbose := true
 	business.InitBusiness(logger, verbose, domain, uTimeout)
 	proxy.logger = logger
-	//proxy.userStatus = util.UserOffline
+	//proxy.userStatus = util.Offline
 	proxy.quitCheckCh = make(chan bool, 1)
 	proxy.listenCon = nil
 	proxy.profPort = "20000"
@@ -151,9 +151,14 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 			os.Exit(0)
 			break
 		case util.Heartbeat:
-			proxy.respHeartbeatInfo(conn, pk, util.ErrNull)
+			proxy.respHeartbeatInfo(conn, pk)
 			break
 		default:
+			if pk.OpCode != util.UserLogin {
+				if proxy.auth.GetUserStatus() != util.Online {
+					proxy.respOptResWithoutData(conn, pk, util.ErrOffline)
+				}
+			}
 			if pk.OpCode >= util.UserLogin && pk.OpCode <= util.OperatorUpdate {
 				proxy.processOperator(conn, pk)
 			} else if pk.OpCode >= util.CompanyCreate && pk.OpCode <= util.CompanyUpdate {
@@ -330,14 +335,12 @@ func (proxy *Proxy) quitApp(pk *Packet) int {
 // 	proxy.strPasswd = ""
 // 	proxy.strShareData = ""
 // 	proxy.strAccessToken = ""
-// 	proxy.userStatus = util.UserOffline
+// 	proxy.userStatus = util.Offline
 // 	return
 // }
 
 //login/logout information;user status + errCode
 func (proxy *Proxy) respAuthResInfo(conn net.Conn, reqPk *Packet, errCode int) (err error) {
-	//userStatus := proxy.auth.GetUserStatus()
-	//reqPk.Size = int32(unsafe.Sizeof(errCode) + unsafe.Sizeof(userStatus))
 	reqPk.Size = 8
 	reqPk.Buf = reqPk.Buf[0:0]
 	reqPk.Buf = make([]byte, 8)
@@ -378,7 +381,7 @@ func (proxy *Proxy) respOptResWithData(conn net.Conn, reqPk *Packet, errCode int
 }
 
 //user status
-func (proxy *Proxy) respHeartbeatInfo(conn net.Conn, reqPk *Packet, errCode int) (err error) {
+func (proxy *Proxy) respHeartbeatInfo(conn net.Conn, reqPk *Packet) (err error) {
 	reqPk.Size = 4
 	reqPk.Buf = reqPk.Buf[0:0]
 	reqPk.Buf = make([]byte, 4)
@@ -398,11 +401,12 @@ func (proxy *Proxy) onLineLoopCheck() {
 		case <-proxy.quitCheckCh:
 			goto end
 		case <-time.Tick(time.Second * 10):
-			//proxy.userOnlineCheck()
+			if proxy.auth.GetUserStatus() == util.Online {
+				proxy.auth.OnlineCheck()
+			}
 		}
 	}
 end:
-	//fmt.Printf("onLineLoopCheck,end \r\n")
 	proxy.logger.LogInfo("onLineLoopCheck,end")
 	return
 }

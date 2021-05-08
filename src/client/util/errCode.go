@@ -11,7 +11,7 @@ const (
 	ErrLackUserNameOrPasswd = 7  // lack user name or password
 	ErrUserLoginFailed      = 8  //user login ,failed
 	ErrUserLogoutFailed     = 9  //user logout ,failed
-	ErrUserOffLine          = 10 //user is off line
+	ErrOffline              = 10 //user is off line
 	ErrModifyPasswdFailed   = 11 //modify passwd failed
 	ErrMarshalFailed        = 12 //marsh ,failed
 	ErrInvalidParam         = 13 //invalid parameter

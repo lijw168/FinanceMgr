@@ -25,11 +25,11 @@ type AuthenInfoOptions struct {
 	CompanyID int
 }
 
-// type LoginInfoOptions struct {
-// 	Name     *string `json:"name"`
-// 	Role     *int    `json:"role"`
-// 	ClientIp *string `json:"clientIp"`
-// }
+type LogoutOptions struct {
+	Name        string
+	AccessToken string
+}
+
 //operator information
 type CreateOptInfoOptions struct {
 	CompanyID  int

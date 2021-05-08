@@ -45,7 +45,17 @@ func DoRequest(action string, params interface{}) (*model.CommResp, error) {
 	return DoRequestwithToken("", action, params)
 }
 
-func DoRequestwithToken(clientToken, action string,
+func addCookie(request *http.Request, cookieName, cookieVal string) {
+	cookie := &http.Cookie{
+		Name:     cookieName,
+		Value:    cookieVal,
+		HttpOnly: false,
+		MaxAge:   0,
+	}
+	request.AddCookie(cookie)
+}
+
+func DoRequestwithToken(accessToken, action string,
 	params interface{}) (*model.CommResp, error) {
 	input, _ := json.Marshal(params)
 	url := Domain + "?Action=" + action
@@ -62,8 +72,8 @@ func DoRequestwithToken(clientToken, action string,
 	if Admin {
 		req.Header.Set("Secret-Id", "MgrClientSecretId")
 	}
-	if clientToken != "" {
-		req.Header.Set("Client-Token", clientToken)
+	if accessToken != "" {
+		addCookie(req, "access_token", accessToken)
 	}
 	if Verbose {
 		fmt.Println("Request:")
