@@ -24,31 +24,31 @@ import (
 	//"unsafe"
 )
 
-type vpnUserInfo struct {
-	UserName   string `json:"user"`
-	Passed     string `json:"passed"`
-	SessionVal string `json:"session"`
-	UserGroup  string `json:"usergroup"`
-	Ip         string `json:"ip"`
-	Port       int    `json:"port"`
-	EncryptAlg string `json:"encrypt"`
-	HashAlg    string `json:"authenticate"`
-	ResCount   int    `json:"res-number"`
-	Total      int    `json:"total"`
-}
+// type vpnUserInfo struct {
+// 	UserName   string `json:"user"`
+// 	Passed     string `json:"passed"`
+// 	SessionVal string `json:"session"`
+// 	UserGroup  string `json:"usergroup"`
+// 	Ip         string `json:"ip"`
+// 	Port       int    `json:"port"`
+// 	EncryptAlg string `json:"encrypt"`
+// 	HashAlg    string `json:"authenticate"`
+// 	ResCount   int    `json:"res-number"`
+// 	Total      int    `json:"total"`
+// }
 
-type respData struct {
-	VpnInfo vpnUserInfo `json:"data"`
-	Result  int         `json:"result"`
-	Call_by string      `json:"call by"`
-	ErrMsg  string      `json:"errmsg"`
-}
+// type respData struct {
+// 	VpnInfo vpnUserInfo `json:"data"`
+// 	Result  int         `json:"result"`
+// 	Call_by string      `json:"call by"`
+// 	ErrMsg  string      `json:"errmsg"`
+// }
 
-type modifyUserPasswdInfo struct {
-	UserName  *string `json:"user"`
-	OldPasswd *string `json:"oldpasswd"`
-	NewPasswd *string `json:"newpasswd"`
-}
+// type modifyUserPasswdInfo struct {
+// 	UserName  *string `json:"user"`
+// 	OldPasswd *string `json:"oldpasswd"`
+// 	NewPasswd *string `json:"newpasswd"`
+// }
 
 type Proxy struct {
 	iListenPort int
@@ -99,7 +99,6 @@ func (proxy *Proxy) StartTcpService() {
 	var err error
 	proxy.listenCon, err = net.Listen("tcp", address)
 	if err != nil {
-		//fmt.Println("listen error:", err)
 		proxy.logger.LogError("listen error:", err.Error())
 		return
 	}
@@ -107,14 +106,12 @@ func (proxy *Proxy) StartTcpService() {
 	for {
 		conn, err := proxy.listenCon.Accept()
 		if err != nil {
-			//fmt.Println("accept error:", err)
 			proxy.logger.LogError("accept error:", err.Error())
 			break
 		}
 		// start a new goroutine to handle
 		// the new connection.
 		go proxy.handleConn(conn)
-		//proxy.processResWg.Add(1)
 	}
 	if proxy.listenCon != nil {
 		proxy.listenCon.Close()
@@ -183,10 +180,12 @@ func (proxy *Proxy) processOperator(conn net.Conn, reqPk *Packet) {
 	case util.UserLogin:
 		errCode := proxy.auth.UserLogin(reqPk.Buf)
 		proxy.respAuthResInfo(conn, reqPk, errCode)
+		go proxy.onLineLoopCheck()
 		break
 	case util.UserLogout:
 		errCode := proxy.auth.Logout()
 		proxy.respAuthResInfo(conn, reqPk, errCode)
+		proxy.quitCheckCh <- true
 		break
 	case util.OperatorCreate:
 		resData, errCode := optGate.CreateOperator(reqPk.Buf)
@@ -394,7 +393,6 @@ func (proxy *Proxy) respHeartbeatInfo(conn net.Conn, reqPk *Packet) (err error) 
 }
 
 func (proxy *Proxy) onLineLoopCheck() {
-	//fmt.Printf("onLineLoopCheck,begin \r\n")
 	proxy.logger.LogInfo("onLineLoopCheck,begin")
 	for {
 		select {
@@ -403,6 +401,9 @@ func (proxy *Proxy) onLineLoopCheck() {
 		case <-time.Tick(time.Second * 10):
 			if proxy.auth.GetUserStatus() == util.Online {
 				proxy.auth.OnlineCheck()
+			} else {
+				proxy.logger.LogInfo("It's going to quit onLineLoopCheck,because the user status is offline")
+				goto end
 			}
 		}
 	}

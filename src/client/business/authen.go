@@ -72,20 +72,21 @@ func (auth *Authen) Logout() int {
 	logger.LogInfo("logout,end")
 	return errCode
 }
+
 func (auth *Authen) OnlineCheck() int {
 	errCode := util.ErrNull
 	//userStatus := util.InvalidStatus
 	var opts options.NameOptions
 	opts.Name = auth.strUserName
 	if view, err := cSdk.StatusCheckout(&opts); err != nil {
-		errCode = util.ErrUserLogoutFailed
+		errCode = util.ErrOnlineCheckout
 		logger.Error("OnlineCheck failed,err:%v", err.Error())
 	} else {
 		//userStatus = view.Status
 		if auth.GetUserStatus() != view.Status {
 			auth.setAuthenInfo("", "", view.Status)
 			cSdk.SetAccessToken("")
-			logger.Debug("OnlineCheck succeed;but the user status has been to change,the new user status is:%v", view)
+			logger.Debug("OnlineCheck succeed;the user status has been to convert to the %v", view)
 		}
 	}
 	return errCode

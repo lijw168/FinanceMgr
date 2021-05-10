@@ -51,9 +51,9 @@ func main() {
 		fmt.Printf("Init logger err: %v \r\n", err.Error())
 		return
 	}
-	logger.LogInfo("login service is beginning")
+	logger.LogInfo("proxy service is beginning")
 	proxy := service.Proxy{}
 	proxy.Init(*pListenPort, *pServerPort, *pStrServerHost, *pTimeout, logger)
 	proxy.StartTcpService()
-	logger.LogInfo("login quit")
+	logger.LogInfo("the proxy service has been to end")
 }

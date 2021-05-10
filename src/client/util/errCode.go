@@ -20,4 +20,5 @@ const (
 	ErrDeleteFailed         = 16 //delete  failed
 	ErrCreateFailed         = 17 //create failed
 	ErrListFailed           = 18 //list failed
+	ErrOnlineCheckout       = 19 //online checkout, failed
 )
