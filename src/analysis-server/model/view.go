@@ -27,8 +27,8 @@ type CompanyView struct {
 	Email       string    `json:"e_mail"`
 	CompanyAddr string    `json:"companyAddr"`
 	Backup      string    `json:"backup"`
-	CreatedAt   time.Time `json:"CreatedAt"`
-	UpdatedAt   time.Time `json:"UpdatedAt"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 //LoginInfoView ...
