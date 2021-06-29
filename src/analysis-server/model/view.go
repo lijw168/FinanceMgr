@@ -52,10 +52,10 @@ type OperatorInfoView struct {
 	Password   string    `json:"password"`
 	Job        string    `json:"job"`
 	Department string    `json:"department"`
-	Status     int       `json:"Status"`
+	Status     int       `json:"status"`
 	Role       int       `json:"role"`
-	CreatedAt  time.Time `json:"CreatedAt"`
-	UpdatedAt  time.Time `json:"UpdatedAt"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type VoucherInfoView struct {
