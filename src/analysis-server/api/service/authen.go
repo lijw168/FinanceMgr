@@ -108,7 +108,7 @@ func (as *AuthenService) ListLoginInfo(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "name", "clientIp", "beginedAt", "endedAt", "role":
+			case "name", "clientIp", "beginedAt", "endedAt", "status":
 				filterFields[*f.Field] = f.Value
 			default:
 				return OptViewSlice, 0, NewError(ErrOperator, ErrUnsupported, ErrField, *f.Field)
