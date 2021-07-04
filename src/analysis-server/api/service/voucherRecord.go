@@ -53,12 +53,18 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 	//create
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method start, "+"requestId:%s", requestId)
 	FuncName := "VoucherRecordService/CreateVoucherRecords"
+	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
+
 	var IdValSli []int
 	for _, itemParam := range recordsParams {
 		vRecord := new(model.VoucherRecord)
@@ -87,6 +93,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	//vRecordView := vs.VoucherRecordModelToView(vRecord)
 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method end ")
 	return IdValSli, nil
@@ -175,12 +182,17 @@ func (vs *VoucherRecordService) GetVoucherRecordByID(ctx context.Context, record
 
 func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordID int, params map[string]interface{}) CcError {
 	FuncName := "VoucherRecordService/UpdateVoucherRecord"
+	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 	_, err = vs.VRecordDao.Get(ctx, tx, recordID)
 	switch err {
 	case nil:
@@ -199,5 +211,6 @@ func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordI
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	return nil
 }

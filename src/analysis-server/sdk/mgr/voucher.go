@@ -18,8 +18,8 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 		return nil, errors.New("CompanyID is required")
 	case opts.InfoOptions.VoucherMonth <= 0:
 		return nil, errors.New("VoucherMonth is required")
-	case len(opts.RecordsOptions) == 0:
-		return nil, errors.New("VoucherRecords is required")
+		// case len(opts.RecordsOptions) == 0:
+		// 	return nil, errors.New("VoucherRecords is required")
 	}
 	params := model.VoucherParams{}
 	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID), VoucherMonth: &(opts.InfoOptions.VoucherMonth)}
@@ -41,6 +41,26 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 		recordParamSlice = append(recordParamSlice, &recordParam)
 	}
 	params.RecordsParams = append(params.RecordsParams, recordParamSlice...)
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return nil, err
+	}
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
+		return nil, err
+	}
+	return desc, nil
+}
+
+//该参数直接就是相应的json格式的数据。所以不需要转换了。
+func (vr *Voucher) CreateVoucher_json(params *model.VoucherParams) (*model.DescData, error) {
+	action := "CreateVoucher"
+	switch {
+	case *(params.InfoParams.CompanyID) <= 0:
+		return nil, errors.New("CompanyID is required")
+	case *(params.InfoParams.VoucherMonth) <= 0:
+		return nil, errors.New("VoucherMonth is required")
+	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {
 		return nil, err
@@ -74,6 +94,23 @@ func (vr *Voucher) GetVoucher(opts *options.BaseOptions) (*model.VoucherView, er
 		return nil, err
 	}
 	return view, nil
+}
+
+func (vr *Voucher) CreateVoucherRecords_json(recordParamSlice []*model.CreateVoucherRecordParams) (*model.DescData, error) {
+	action := "CreateVoucherRecords"
+	switch {
+	case len(recordParamSlice) == 0:
+		return nil, errors.New("voucher records is required")
+	}
+	result, err := util.DoRequest(action, recordParamSlice)
+	if err != nil {
+		return nil, err
+	}
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
+		return nil, err
+	}
+	return desc, nil
 }
 
 func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOptions) (*model.DescData, error) {
@@ -147,6 +184,20 @@ func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.V
 	return desc.Tc, ret, nil
 }
 
+func (vr *Voucher) ListVoucherInfo_json(params []byte) ([]byte, error) {
+	action := "ListVoucherInfo"
+	return ListOpsResources_json(action, params)
+	// var ret []*model.VoucherInfoView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
+}
+
 func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*model.VoucherRecordView, error) {
 	action := "ListVoucherRecords"
 	var ret []*model.VoucherRecordView
@@ -158,6 +209,20 @@ func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*mode
 		return -1, nil, err
 	}
 	return desc.Tc, ret, nil
+}
+
+func (vr *Voucher) ListVoucherRecords_json(params []byte) ([]byte, error) {
+	action := "ListVoucherRecords"
+	return ListOpsResources_json(action, params)
+	// var ret []*model.VoucherRecordView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
 }
 
 func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions) error {
@@ -198,5 +263,11 @@ func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions)
 		param.SubID4 = &opts.SubID4
 	}
 	_, err := util.DoRequest(action, param)
+	return err
+}
+
+func (vr *Voucher) UpdateVoucherRecord_json(params []byte) error {
+	action := "UpdateVoucherRecord"
+	_, err := util.DoRequest_json(action, params)
 	return err
 }

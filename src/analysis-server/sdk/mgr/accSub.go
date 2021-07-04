@@ -33,6 +33,17 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 	return view, nil
 }
 
+func (as *AccSub) CreateAccSub_json(params []byte) (*model.AccSubjectView, error) {
+	action := "CreateAccSub"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	view := &model.AccSubjectView{}
+	util.FormatView(result.Data, &view)
+	return view, nil
+}
+
 func (as *AccSub) DeleteAccSub(opts *options.BaseOptions) error {
 	action := "DeleteAccSub"
 	err := DeleteOpsResource(action, opts)
@@ -55,6 +66,20 @@ func (as *AccSub) GetAccSub(opts *options.BaseOptions) (*model.AccSubjectView, e
 		return nil, err
 	}
 	return view, nil
+}
+func (as *AccSub) ListAccSub_json(params []byte) ([]byte, error) {
+	//func (as *AccSub) ListAccSub_json(params []byte) (int64, []*model.AccSubjectView, error) {
+	action := "ListAccSub"
+	return ListOpsResources_json(action, params)
+	// var ret []*model.AccSubjectView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
 }
 
 func (as *AccSub) ListAccSub(opts *options.ListOptions) (int64, []*model.AccSubjectView, error) {
@@ -87,5 +112,11 @@ func (as *AccSub) UpdateAccSub(opts *options.ModifySubjectOptions) error {
 		param.SubjectName = &opts.SubjectName
 	}
 	_, err := util.DoRequest(action, param)
+	return err
+}
+
+func (as *AccSub) UpdateAccSub_json(params []byte) error {
+	action := "UpdateAccSub"
+	_, err := util.DoRequest_json(action, params)
 	return err
 }

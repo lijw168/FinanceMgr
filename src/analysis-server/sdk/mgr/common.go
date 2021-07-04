@@ -6,6 +6,7 @@ import (
 	"analysis-server/model"
 	"analysis-server/sdk/options"
 	"analysis-server/sdk/util"
+	"encoding/json"
 )
 
 // func DescribeTenantResource(action string, opts *options.BaseOptions) (interface{}, error) {
@@ -79,6 +80,20 @@ func ListOpsResources(action string, opts *options.ListOptions) (*model.DescData
 		return nil, err
 	}
 	return desc, nil
+}
+
+func ListOpsResources_json(action string, params []byte) ([]byte, error) {
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+
+	// desc := &(model.DescData{})
+	// if err := util.FormatView(result.Data, desc); err != nil {
+	// 	return nil, err
+	// }
+	//return b, nil
 }
 
 func DeleteOpsResource(action string, opts *options.BaseOptions) error {

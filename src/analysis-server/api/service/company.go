@@ -24,13 +24,19 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	//create
 	cs.Logger.InfoContext(ctx, "CreateCompany method start, "+"companyName:%s", *params.CompanyName)
 	FuncName := "CompanyService/Company/CreateCompany"
+	bIsRollBack := true
 	// Begin transaction
 	tx, err := cs.Db.Begin()
 	if err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, cs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, cs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
+
 	filterFields := make(map[string]interface{})
 	filterFields["companyName"] = *params.CompanyName
 	conflictCount, err := cs.CompanyDao.CountByFilter(ctx, tx, filterFields)
@@ -59,6 +65,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 		cs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	comView := cs.CompanyModelToView(comInfo)
 	cs.Logger.InfoContext(ctx, "CreateCompany method end, "+"companyName:%s", *params.CompanyName)
 	return comView, nil
@@ -118,13 +125,18 @@ func (cs *CompanyService) DeleteCompanyByID(ctx context.Context, companyID int,
 
 func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, params map[string]interface{}) CcError {
 	FuncName := "CompanyService/Company/UpdateCompanyById"
+	bIsRollBack := true
 	// Begin transaction
 	tx, err := cs.Db.Begin()
 	if err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, cs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, cs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 	//insure the company exist
 	_, err = cs.CompanyDao.Get(ctx, tx, companyId)
 	switch err {
@@ -144,6 +156,7 @@ func (cs *CompanyService) UpdateCompanyById(ctx context.Context, companyId int, 
 		cs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	return nil
 }
 

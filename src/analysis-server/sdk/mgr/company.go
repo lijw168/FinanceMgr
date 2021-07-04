@@ -37,6 +37,17 @@ func (c *Company) CreateCompany(opts *options.CreateCompanyOptions) (*model.Comp
 	return view, nil
 }
 
+func (c *Company) CreateCompany_json(params []byte) (*model.CompanyView, error) {
+	action := "CreateCompany"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	view := &model.CompanyView{}
+	util.FormatView(result.Data, &view)
+	return view, nil
+}
+
 func (c *Company) DeleteCompany(opts *options.BaseOptions) error {
 	action := "DeleteCompany"
 	err := DeleteOpsResource(action, opts)
@@ -74,6 +85,20 @@ func (c *Company) ListCompany(opts *options.ListOptions) (int64, []*model.Compan
 	return desc.Tc, ret, nil
 }
 
+func (c *Company) ListCompany_json(params []byte) ([]byte, error) {
+	action := "ListCompany"
+	return ListOpsResources_json(action, params)
+	// var ret []*model.CompanyView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
+}
+
 func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {
 	action := "UpdateCompany"
 	switch {
@@ -107,5 +132,11 @@ func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {
 		param.Email = &opts.Email
 	}
 	_, err := util.DoRequest(action, param)
+	return err
+}
+
+func (c *Company) UpdateCompany_json(param []byte) error {
+	action := "UpdateCompany"
+	_, err := util.DoRequest_json(action, param)
 	return err
 }

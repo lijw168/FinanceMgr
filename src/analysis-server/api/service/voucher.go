@@ -37,13 +37,19 @@ func IsDuplicateKeyError(err error) bool {
 func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.VoucherParams,
 	requestId string) ([]int, CcError) {
 	FuncName := "VoucherService/service/CreateVoucher"
+	bIsRollBack := true
 	// Begin transaction
 	tx, err := vs.Db.Begin()
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
+
 	infoParams := params.InfoParams
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
@@ -95,6 +101,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	vs.Logger.InfoContext(ctx, "CreateVoucher method end ")
 	return IdValSli, nil
 }
@@ -111,6 +118,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 
 func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requestId string) CcError {
 	FuncName := "VoucherService/service/DeleteVoucher"
+	bIsRollBack := true
 	vs.Logger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%d", voucherID)
 	// Begin transaction
 	tx, err := vs.Db.Begin()
@@ -118,7 +126,11 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 	err = vs.VRecordDao.DeleteByVoucherId(ctx, vs.Db, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
@@ -131,6 +143,7 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	vs.Logger.InfoContext(ctx, "DeleteVoucher method end, "+"voucher ID:%d", voucherID)
 	return nil
 }
@@ -138,6 +151,7 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID int,
 	requestId string) (*model.VoucherView, CcError) {
 	FuncName := "VoucherService/service/GetVoucherByVoucherID"
+	bIsRollBack := true
 	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method begin, "+"voucher ID:%d", voucherID)
 	//Begin transaction
 	tx, err := vs.Db.Begin()
@@ -145,7 +159,11 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, vs.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 	//get voucher information
 	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID)
 	switch err {
@@ -187,6 +205,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method end, "+"voucher ID:%d", voucherID)
 	return voucherView, nil
 }

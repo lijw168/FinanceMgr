@@ -39,6 +39,17 @@ func (or *Operator) CreateOperator(opts *options.CreateOptInfoOptions) (*model.O
 	return view, nil
 }
 
+func (or *Operator) CreateOperator_json(params []byte) (*model.OperatorInfoView, error) {
+	action := "CreateOperator"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	view := &model.OperatorInfoView{}
+	util.FormatView(result.Data, &view)
+	return view, nil
+}
+
 func (or *Operator) DeleteOperator(opts *options.NameOptions) error {
 	action := "DeleteOperator"
 	switch {
@@ -86,6 +97,20 @@ func (or *Operator) ListOperatorInfo(opts *options.ListOptions) (int64, []*model
 	return desc.Tc, ret, nil
 }
 
+func (or *Operator) ListOperatorInfo_json(params []byte) ([]byte, error) {
+	action := "ListOperatorInfo"
+	return ListOpsResources_json(action, params)
+	// var ret []*model.OperatorInfoView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
+}
+
 func (or *Operator) UpdateOperator(opts *options.ModifyOptInfoOptions) error {
 	action := "UpdateOperator"
 	if opts.Name == "" {
@@ -111,5 +136,11 @@ func (or *Operator) UpdateOperator(opts *options.ModifyOptInfoOptions) error {
 		param.Status = &opts.Status
 	}
 	_, err := util.DoRequest(action, param)
+	return err
+}
+
+func (or *Operator) UpdateOperator_json(param []byte) error {
+	action := "UpdateOperator"
+	_, err := util.DoRequest_json(action, param)
 	return err
 }

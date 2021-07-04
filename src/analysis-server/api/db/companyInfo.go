@@ -73,7 +73,7 @@ func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.Comp
 func (dao *CompanyDao) Delete(ctx context.Context, do DbOperator, companyId int) error {
 	strSql := "delete from " + companyInfoTN + " where company_id = ?"
 
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Delete] [sql: %s, id: %s]", strSql, companyId)
+	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Delete] [sql: %s, id: %d]", strSql, companyId)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))

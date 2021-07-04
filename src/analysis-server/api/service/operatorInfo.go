@@ -21,12 +21,17 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 	ps.Logger.InfoContext(ctx, "CreateOptInfo method start, "+"operator Name:%s", *params.Name)
 
 	FuncName := "OperatorInfoService/operater/CreateOptInfo"
+	bIsRollBack := true
 	tx, err := ps.Db.Begin()
 	if err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, ps.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, ps.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 
 	filterFields := make(map[string]interface{})
 	filterFields["name"] = *params.Name
@@ -56,6 +61,7 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	optView := ps.OperateInfoMdelToView(optInfo)
 	ps.Logger.InfoContext(ctx, "CreateOptInfo method end, "+"operator Name:%s", *params.Name)
 	return optView, nil
@@ -145,12 +151,17 @@ func (ps *OperatorInfoService) DeleteOperatorInfoByName(ctx context.Context, str
 
 func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName string, params map[string]interface{}) CcError {
 	FuncName := "OperatorInfoService/UpdateOperator"
+	bIsRollBack := true
 	tx, err := ps.Db.Begin()
 	if err != nil {
 		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	//defer RollbackLog(ctx, ps.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, ps.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
 	_, err = ps.OptInfoDao.Get(ctx, tx, strOptName)
 	switch err {
 	case nil:
@@ -169,5 +180,6 @@ func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, strOptName st
 		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	return nil
 }

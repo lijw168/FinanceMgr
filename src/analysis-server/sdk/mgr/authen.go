@@ -35,6 +35,17 @@ func (au *Authen) Login(opts *options.AuthenInfoOptions) (*model.LoginInfoView, 
 	return view, nil
 }
 
+func (au *Authen) Login_json(params []byte) (*model.LoginInfoView, error) {
+	action := "Login"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	view := &model.LoginInfoView{}
+	util.FormatView(result.Data, &view)
+	return view, nil
+}
+
 func (au *Authen) Logout(opts *options.NameOptions) error {
 	action := "Logout"
 	if opts.Name == "" {
@@ -75,4 +86,18 @@ func (au *Authen) ListLoginInfo(opts *options.ListOptions) (int64, []*model.Logi
 		return -1, nil, err
 	}
 	return desc.Tc, ret, nil
+}
+
+func (au *Authen) ListLoginInfo_json(params []byte) ([]byte, error) {
+	action := "ListLoginInfo"
+	return ListOpsResources_json(action, params)
+	//var ret []*model.LoginInfoView
+	// desc, err := ListOpsResources_json(action, params)
+	// if err != nil {
+	// 	return -1, nil, err
+	// }
+	// if err := util.FormatView(desc.Elements, &ret); err != nil {
+	// 	return -1, nil, err
+	// }
+	// return desc.Tc, ret, nil
 }

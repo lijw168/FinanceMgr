@@ -23,12 +23,18 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	requestId string) (*model.LoginInfoView, CcError) {
 	as.Logger.InfoContext(ctx, "Login method start, "+"login name:%s", *params.Name)
 	FuncName := "AuthenService/login"
+	bIsRollBack := true
 	tx, err := as.Db.Begin()
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, as.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
+
 	//generate login information
 	loginInfo := new(model.LoginInfo)
 	loginInfo.Name = *params.Name
@@ -54,18 +60,25 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	as.Logger.InfoContext(ctx, "the OptInfoDao.Update end, login name:%s", *params.Name)
 	return loginView, nil
 }
 
 func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError {
 	FuncName := "AuthenService/Logout"
+	bIsRollBack := true
 	tx, err := as.Db.Begin()
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer RollbackLog(ctx, as.Logger, FuncName, tx)
+	defer func(bRollBack bool) {
+		if bRollBack {
+			RollbackLog(ctx, as.Logger, FuncName, tx)
+		}
+	}(bIsRollBack)
+
 	_, err = as.LogInfoDao.Get(ctx, tx, strUserName)
 	switch err {
 	case nil:
@@ -97,6 +110,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	return nil
 }
 
