@@ -202,7 +202,7 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "subject_id", "subject_name", "subject_level":
+			case "subjectId", "subjectName", "subjectLevel":
 				filterFields[*f.Field] = f.Value
 			default:
 				return accSubViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)

@@ -27,7 +27,7 @@ var (
 
 func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId int) (*model.VoucherRecord, error) {
 	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " + voucherRecordTN + " where record_id=?"
-	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Get] [sql: %s ,values: %s]", strSql, recordId)
+	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Get] [sql: %s ,values: %d]", strSql, recordId)
 	var recInfo = &model.VoucherRecord{}
 	start := time.Now()
 	defer func() {

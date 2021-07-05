@@ -100,15 +100,6 @@ func (or *Operator) ListOperatorInfo(opts *options.ListOptions) (int64, []*model
 func (or *Operator) ListOperatorInfo_json(params []byte) ([]byte, error) {
 	action := "ListOperatorInfo"
 	return ListOpsResources_json(action, params)
-	// var ret []*model.OperatorInfoView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }
 
 func (or *Operator) UpdateOperator(opts *options.ModifyOptInfoOptions) error {

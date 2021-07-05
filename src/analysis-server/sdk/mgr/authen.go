@@ -91,13 +91,4 @@ func (au *Authen) ListLoginInfo(opts *options.ListOptions) (int64, []*model.Logi
 func (au *Authen) ListLoginInfo_json(params []byte) ([]byte, error) {
 	action := "ListLoginInfo"
 	return ListOpsResources_json(action, params)
-	//var ret []*model.LoginInfoView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }

@@ -1,9 +1,10 @@
 package business
 
 import (
+	//"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
-	"encoding/json"
+	//"encoding/json"
 	"sync"
 )
 
@@ -35,21 +36,36 @@ func (auth *Authen) setUserStatus(status int) {
 	auth.userStatus = status
 }
 
+// func (auth *Authen) UserLogin(param []byte) int {
+// 	logger.LogInfo("userLogin begin")
+// 	errCode := util.ErrNull
+// 	var opts options.AuthenInfoOptions
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return errCode
+// 	}
+// 	if view, err := cSdk.Login(&opts); err != nil {
+// 		errCode = util.ErrUserLoginFailed
+// 		logger.Error("the Login failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("Login succeed;view:%v", view)
+// 		auth.setAuthenInfo(opts.Name, view.AccessToken, util.Online)
+// 		cSdk.SetAccessToken(view.AccessToken)
+// 	}
+// 	logger.LogInfo("userLogin end")
+// 	return errCode
+// }
+
 func (auth *Authen) UserLogin(param []byte) int {
 	logger.LogInfo("userLogin begin")
 	errCode := util.ErrNull
-	var opts options.AuthenInfoOptions
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return errCode
-	}
-	if view, err := cSdk.Login(&opts); err != nil {
+	if view, err := cSdk.Login_json(param); err != nil {
 		errCode = util.ErrUserLoginFailed
 		logger.Error("the Login failed,err:%v", err.Error())
 	} else {
 		logger.Debug("Login succeed;view:%v", view)
-		auth.setAuthenInfo(opts.Name, view.AccessToken, util.Online)
+		auth.setAuthenInfo(view.Name, view.AccessToken, view.Status)
 		cSdk.SetAccessToken(view.AccessToken)
 	}
 	logger.LogInfo("userLogin end")
@@ -90,4 +106,8 @@ func (auth *Authen) OnlineCheck() int {
 		}
 	}
 	return errCode
+}
+
+func (auth *Authen) ListLoginInfo(param []byte) (resData []byte, errCode int) {
+	return listCmdJson(resource_type_login_info, param, cSdk.ListLoginInfo_json)
 }

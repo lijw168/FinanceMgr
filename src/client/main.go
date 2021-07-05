@@ -36,8 +36,9 @@ func main() {
 	var logFileSize = flag.Int("s", 20480, "log file size")
 	//server information
 	var pServerPort = flag.Int("p", 7500, "gateway server port")
-	var pStrServerHost = flag.String("h", "127.0.0.1", "gateway server host")
-	var pTimeout = flag.Uint64("p", 30, "timeout")
+	var pServerHost = flag.String("a", "47.100.210.38", "gateway server host")
+	//var pServerHost = flag.String("a", "192.168.148.190", "gateway server host")
+	var pTimeout = flag.Uint64("t", 1000, "timeout")
 	//tcp server information
 	var pListenPort = flag.Int("l", 9999, "tcp listen port")
 	flag.Parse()
@@ -53,7 +54,7 @@ func main() {
 	}
 	logger.LogInfo("proxy service is beginning")
 	proxy := service.Proxy{}
-	proxy.Init(*pListenPort, *pServerPort, *pStrServerHost, *pTimeout, logger)
+	proxy.Init(*pListenPort, *pServerPort, *pServerHost, *pTimeout, logger)
 	proxy.StartTcpService()
 	logger.LogInfo("the proxy service has been to end")
 }

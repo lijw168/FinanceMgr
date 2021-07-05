@@ -28,13 +28,13 @@ func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["company_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["abbre_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["abbreName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["corporator"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["phone"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["e_mail"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["company_addr"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["companyAddr"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["backup"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrCompany, service.ErrValue, service.ErrField, service.ErrNull)
@@ -44,10 +44,10 @@ func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "created_at":
-			*params.Order[0].Field = "created_at"
-		case "updated_at":
-			*params.Order[0].Field = "updated_at"
+		case "createdAt":
+			*params.Order[0].Field = "createdAt"
+		case "updatedAt":
+			*params.Order[0].Field = "updatedAt"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			ch.Response(r.Context(), ch.Logger, w, ce, nil)

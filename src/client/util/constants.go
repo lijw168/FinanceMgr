@@ -7,6 +7,7 @@ const (
 	QuitApp = 1 + iota
 	Heartbeat
 	UserLogin
+	LoginInfoList
 	UserLogout
 	OperatorCreate
 	OperatorList

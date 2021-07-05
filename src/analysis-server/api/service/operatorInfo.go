@@ -76,7 +76,7 @@ func (ps *OperatorInfoService) ListOperators(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "name", "company_id", "job", "department", "status", "role":
+			case "name", "companyId", "job", "department", "status", "role":
 				filterFields[*f.Field] = f.Value
 			default:
 				return OptViewSlice, 0, NewError(ErrOperator, ErrUnsupported, ErrField, *f.Field)

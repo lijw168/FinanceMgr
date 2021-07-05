@@ -88,15 +88,6 @@ func (c *Company) ListCompany(opts *options.ListOptions) (int64, []*model.Compan
 func (c *Company) ListCompany_json(params []byte) ([]byte, error) {
 	action := "ListCompany"
 	return ListOpsResources_json(action, params)
-	// var ret []*model.CompanyView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }
 
 func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {

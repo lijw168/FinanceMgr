@@ -33,11 +33,14 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucher_id"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucher_month"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["num_of_month"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucher_date"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//先暂时修改为一个值，如果以后确实需要，再进行添加。
+		//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["num_ofMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
@@ -46,10 +49,10 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "created_at":
-			*params.Order[0].Field = "created_at"
-		case "updated_at":
-			*params.Order[0].Field = "updated_at"
+		case "createdAt":
+			*params.Order[0].Field = "createdAt"
+		case "updatedAt":
+			*params.Order[0].Field = "updatedAt"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
@@ -95,14 +98,16 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucher_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["record_id"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["subject_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//先暂时修改为一个值，如果以后确实需要，再进行添加。
+		//filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["recordId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["sub_id1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["sub_id2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["sub_id3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["sub_id4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
@@ -367,16 +372,16 @@ func (vh *VoucherHandlers) UpdateVoucherRecord(w http.ResponseWriter, r *http.Re
 		updateFields["DebitMoney"] = *params.DebitMoney
 	}
 	if params.SubID1 != nil {
-		updateFields["SubID1"] = *params.SubID1
+		updateFields["SubId1"] = *params.SubID1
 	}
 	if params.SubID2 != nil {
-		updateFields["SubID2"] = *params.SubID2
+		updateFields["SubId2"] = *params.SubID2
 	}
 	if params.SubID3 != nil {
-		updateFields["SubID3"] = *params.SubID3
+		updateFields["SubId3"] = *params.SubID3
 	}
 	if params.SubID4 != nil {
-		updateFields["SubID4"] = *params.SubID4
+		updateFields["SubId4"] = *params.SubID4
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrChangeContent, service.ErrNull)

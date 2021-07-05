@@ -18,8 +18,6 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 		return nil, errors.New("CompanyID is required")
 	case opts.InfoOptions.VoucherMonth <= 0:
 		return nil, errors.New("VoucherMonth is required")
-		// case len(opts.RecordsOptions) == 0:
-		// 	return nil, errors.New("VoucherRecords is required")
 	}
 	params := model.VoucherParams{}
 	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID), VoucherMonth: &(opts.InfoOptions.VoucherMonth)}
@@ -78,7 +76,7 @@ func (vr *Voucher) DeleteVoucher(opts *options.BaseOptions) error {
 	if err != nil {
 		return err
 	}
-	//fmt.Printf("DeleteVoucher succeed\n")
+	fmt.Printf("DeleteVoucher succeed\n")
 	return nil
 }
 
@@ -187,15 +185,6 @@ func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.V
 func (vr *Voucher) ListVoucherInfo_json(params []byte) ([]byte, error) {
 	action := "ListVoucherInfo"
 	return ListOpsResources_json(action, params)
-	// var ret []*model.VoucherInfoView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }
 
 func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*model.VoucherRecordView, error) {
@@ -214,15 +203,6 @@ func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*mode
 func (vr *Voucher) ListVoucherRecords_json(params []byte) ([]byte, error) {
 	action := "ListVoucherRecords"
 	return ListOpsResources_json(action, params)
-	// var ret []*model.VoucherRecordView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }
 
 func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions) error {

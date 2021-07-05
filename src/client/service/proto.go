@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	SSLVpnMagic     = 0xF8
+	FinanceMgrMagic = 0xF8
 	HeaderLength    = 8
 	Int32BytesCount = 4
 )
@@ -31,7 +31,7 @@ type Packet struct {
 
 func NewPacket() *Packet {
 	pkt := new(Packet)
-	pkt.Magic = SSLVpnMagic
+	pkt.Magic = FinanceMgrMagic
 	pkt.Version = 0x01
 	return pkt
 }
@@ -56,7 +56,7 @@ func (p *Packet) marshalHeader() (out []byte) {
 
 func (p *Packet) unmarshalHeader(in []byte) (err error) {
 	p.Magic = in[0]
-	if p.Magic != SSLVpnMagic {
+	if p.Magic != FinanceMgrMagic {
 		return errors.New("BadMagic:" + strconv.Itoa(int(p.Magic)))
 	}
 	p.Version = in[1]

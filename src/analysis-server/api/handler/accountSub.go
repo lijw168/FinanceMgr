@@ -28,9 +28,9 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["subject_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subject_name"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["subject_level"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
@@ -39,8 +39,8 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "subject_id":
-			*params.Order[0].Field = "subject_id"
+		case "subjectId":
+			*params.Order[0].Field = "subjectId"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)

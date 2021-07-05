@@ -123,7 +123,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "record_id", "voucher_id", "subject_name", "summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4":
+			case "recordId", "voucherId", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
 			default:
 				return recordViewSlice, 0, NewError(ErrVoucher, ErrUnsupported, ErrField, *f.Field)

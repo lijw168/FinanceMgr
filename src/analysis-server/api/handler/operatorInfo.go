@@ -34,7 +34,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["company_id"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["job"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["department"] = utils.Attribute{Type: utils.T_String, Val: nil}
@@ -48,10 +48,10 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "created_at":
-			*params.Order[0].Field = "created_at"
-		case "updated_at":
-			*params.Order[0].Field = "updated_at"
+		case "createdAt":
+			*params.Order[0].Field = "createdAt"
+		case "updatedAt":
+			*params.Order[0].Field = "updatedAt"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			oh.Response(r.Context(), oh.Logger, w, ce, nil)

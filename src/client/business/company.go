@@ -1,7 +1,7 @@
 package business
 
 import (
-	"analysis-server/model"
+	//"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
 	"encoding/binary"
@@ -11,28 +11,32 @@ import (
 type CompanyGateway struct {
 }
 
+// func (cg *CompanyGateway) ListCompany(param []byte) (resData []byte, errCode int) {
+// 	var opts options.ListOptions
+// 	errCode = util.ErrNull
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return nil, errCode
+// 	}
+// 	if count, views, err := cSdk.ListCompany(&opts); err != nil {
+// 		logger.Error("the ListCompany failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("ListCompany succeed;count:%d,views:%v", count, views)
+// 		desc := &(model.DescData{})
+// 		desc.Tc = count
+// 		desc.Elements = views
+// 		resData, err = json.Marshal(desc)
+// 		if err != nil {
+// 			errCode = util.ErrMarshalFailed
+// 			logger.Error("the Marshal failed,err:%v", err.Error())
+// 		}
+// 	}
+// 	return resData, errCode
+// }
+
 func (cg *CompanyGateway) ListCompany(param []byte) (resData []byte, errCode int) {
-	var opts options.ListOptions
-	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-	if count, views, err := cSdk.ListCompany(&opts); err != nil {
-		logger.Error("the ListCompany failed,err:%v", err.Error())
-	} else {
-		logger.Debug("ListCompany succeed;count:%d,views:%v", count, views)
-		desc := &(model.DescData{})
-		desc.Tc = count
-		desc.Elements = views
-		resData, err = json.Marshal(desc)
-		if err != nil {
-			errCode = util.ErrMarshalFailed
-			logger.Error("the Marshal failed,err:%v", err.Error())
-		}
-	}
-	return resData, errCode
+	return listCmdJson(resource_type_company, param, cSdk.ListCompany_json)
 }
 
 func (cg *CompanyGateway) GetCompany(param []byte) (resData []byte, errCode int) {
@@ -60,37 +64,63 @@ func (cg *CompanyGateway) GetCompany(param []byte) (resData []byte, errCode int)
 	return resData, errCode
 }
 
+// func (cg *CompanyGateway) CreateCompany(param []byte) (resData []byte, errCode int) {
+// 	var opts options.CreateCompanyOptions
+// 	errCode = util.ErrNull
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return nil, errCode
+// 	}
+// 	if views, err := cSdk.CreateCompany(&opts); err != nil {
+// 		errCode = util.ErrCreateFailed
+// 		logger.Error("the CreateCompany failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("CreateCompany succeed;views:%v", views)
+// 		resData = make([]byte, 4)
+// 		binary.LittleEndian.PutUint32(resData, uint32(views.CompanyID))
+// 		// resData, err = json.Marshal(views)
+// 		// if err != nil {
+// 		// 	errCode = util.ErrMarshalFailed
+// 		// 	logger.Error("the Marshal failed,err:%v", err.Error())
+// 		// }
+// 	}
+// 	return resData, errCode
+// }
+
 func (cg *CompanyGateway) CreateCompany(param []byte) (resData []byte, errCode int) {
-	var opts options.CreateCompanyOptions
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-	if views, err := cSdk.CreateCompany(&opts); err != nil {
+	if views, err := cSdk.CreateCompany_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateCompany failed,err:%v", err.Error())
 	} else {
 		logger.Debug("CreateCompany succeed;views:%v", views)
-		resData, err = json.Marshal(views)
-		if err != nil {
-			errCode = util.ErrMarshalFailed
-			logger.Error("the Marshal failed,err:%v", err.Error())
-		}
+		resData = make([]byte, 4)
+		binary.LittleEndian.PutUint32(resData, uint32(views.CompanyID))
 	}
 	return resData, errCode
 }
 
+// func (cg *CompanyGateway) UpdateCompany(param []byte) (errCode int) {
+// 	var opts options.ModifyCompanyOptions
+// 	errCode = util.ErrNull
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return errCode
+// 	}
+// 	if err := cSdk.UpdateCompany(&opts); err != nil {
+// 		errCode = util.ErrUpdateFailed
+// 		logger.Error("the UpdateCompany failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("UpdateCompany succeed")
+// 	}
+// 	return errCode
+// }
+
 func (cg *CompanyGateway) UpdateCompany(param []byte) (errCode int) {
-	var opts options.ModifyCompanyOptions
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return errCode
-	}
-	if err := cSdk.UpdateCompany(&opts); err != nil {
+	if err := cSdk.UpdateCompany_json(param); err != nil {
 		errCode = util.ErrUpdateFailed
 		logger.Error("the UpdateCompany failed,err:%v", err.Error())
 	} else {

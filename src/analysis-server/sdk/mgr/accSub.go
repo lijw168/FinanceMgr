@@ -68,18 +68,8 @@ func (as *AccSub) GetAccSub(opts *options.BaseOptions) (*model.AccSubjectView, e
 	return view, nil
 }
 func (as *AccSub) ListAccSub_json(params []byte) ([]byte, error) {
-	//func (as *AccSub) ListAccSub_json(params []byte) (int64, []*model.AccSubjectView, error) {
 	action := "ListAccSub"
 	return ListOpsResources_json(action, params)
-	// var ret []*model.AccSubjectView
-	// desc, err := ListOpsResources_json(action, params)
-	// if err != nil {
-	// 	return -1, nil, err
-	// }
-	// if err := util.FormatView(desc.Elements, &ret); err != nil {
-	// 	return -1, nil, err
-	// }
-	// return desc.Tc, ret, nil
 }
 
 func (as *AccSub) ListAccSub(opts *options.ListOptions) (int64, []*model.AccSubjectView, error) {

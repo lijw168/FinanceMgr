@@ -24,32 +24,6 @@ import (
 	//"unsafe"
 )
 
-// type vpnUserInfo struct {
-// 	UserName   string `json:"user"`
-// 	Passed     string `json:"passed"`
-// 	SessionVal string `json:"session"`
-// 	UserGroup  string `json:"usergroup"`
-// 	Ip         string `json:"ip"`
-// 	Port       int    `json:"port"`
-// 	EncryptAlg string `json:"encrypt"`
-// 	HashAlg    string `json:"authenticate"`
-// 	ResCount   int    `json:"res-number"`
-// 	Total      int    `json:"total"`
-// }
-
-// type respData struct {
-// 	VpnInfo vpnUserInfo `json:"data"`
-// 	Result  int         `json:"result"`
-// 	Call_by string      `json:"call by"`
-// 	ErrMsg  string      `json:"errmsg"`
-// }
-
-// type modifyUserPasswdInfo struct {
-// 	UserName  *string `json:"user"`
-// 	OldPasswd *string `json:"oldpasswd"`
-// 	NewPasswd *string `json:"newpasswd"`
-// }
-
 type Proxy struct {
 	iListenPort int
 	// strServerPort string
@@ -182,14 +156,18 @@ func (proxy *Proxy) processOperator(conn net.Conn, reqPk *Packet) {
 		proxy.respAuthResInfo(conn, reqPk, errCode)
 		go proxy.onLineLoopCheck()
 		break
+	case util.LoginInfoList:
+		resData, errCode := proxy.auth.ListLoginInfo(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
 	case util.UserLogout:
 		errCode := proxy.auth.Logout()
 		proxy.respAuthResInfo(conn, reqPk, errCode)
 		proxy.quitCheckCh <- true
 		break
 	case util.OperatorCreate:
-		resData, errCode := optGate.CreateOperator(reqPk.Buf)
-		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		errCode := optGate.CreateOperator(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
 	case util.OperatorList:
 		resData, errCode := optGate.ListOperatorInfo(reqPk.Buf)
@@ -343,8 +321,8 @@ func (proxy *Proxy) respAuthResInfo(conn net.Conn, reqPk *Packet, errCode int) (
 	reqPk.Size = 8
 	reqPk.Buf = reqPk.Buf[0:0]
 	reqPk.Buf = make([]byte, 8)
-	binary.LittleEndian.PutUint32(reqPk.Buf[0:4], uint32(proxy.auth.GetUserStatus()))
-	binary.LittleEndian.PutUint32(reqPk.Buf[4:], uint32(errCode))
+	binary.LittleEndian.PutUint32(reqPk.Buf[0:4], uint32(errCode))
+	binary.LittleEndian.PutUint32(reqPk.Buf[4:], uint32(proxy.auth.GetUserStatus()))
 	err = reqPk.WriteToConn(conn)
 	if err != nil {
 		proxy.logger.LogError("respAuthResInfo,failed,err:", err.Error())
@@ -398,11 +376,11 @@ func (proxy *Proxy) onLineLoopCheck() {
 		select {
 		case <-proxy.quitCheckCh:
 			goto end
-		case <-time.Tick(time.Second * 10):
+		case <-time.Tick(time.Second * 30):
 			if proxy.auth.GetUserStatus() == util.Online {
 				proxy.auth.OnlineCheck()
 			} else {
-				proxy.logger.LogInfo("It's going to quit onLineLoopCheck,because the user status is offline")
+				proxy.logger.LogInfo("It's going to quit onLineLoopCheck,because the user status is not online")
 				goto end
 			}
 		}

@@ -1,7 +1,7 @@
 package business
 
 import (
-	"analysis-server/model"
+	//"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
 	"encoding/json"
@@ -11,27 +11,7 @@ type OperatorGateway struct {
 }
 
 func (og *OperatorGateway) ListOperatorInfo(param []byte) (resData []byte, errCode int) {
-	var opts options.ListOptions
-	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-	if count, views, err := cSdk.ListOperatorInfo(&opts); err != nil {
-		logger.Error("the ListOperatorInfo failed,err:%v", err.Error())
-	} else {
-		logger.Debug("ListOperatorInfo succeed;count:%d,views:%v", count, views)
-		desc := &(model.DescData{})
-		desc.Tc = count
-		desc.Elements = views
-		resData, err = json.Marshal(desc)
-		if err != nil {
-			errCode = util.ErrMarshalFailed
-			logger.Error("the Marshal failed,err:%v", err.Error())
-		}
-	}
-	return resData, errCode
+	return listCmdJson(resource_type_operator, param, cSdk.ListOperatorInfo_json)
 }
 
 func (og *OperatorGateway) GetOperatorInfo(param []byte) (resData []byte, errCode int) {
@@ -59,37 +39,59 @@ func (og *OperatorGateway) GetOperatorInfo(param []byte) (resData []byte, errCod
 	return resData, errCode
 }
 
-func (og *OperatorGateway) CreateOperator(param []byte) (resData []byte, errCode int) {
-	var opts options.CreateOptInfoOptions
+// func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
+// 	var opts options.CreateOptInfoOptions
+// 	errCode = util.ErrNull
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return errCode
+// 	}
+// 	if views, err := cSdk.CreateOperator(&opts); err != nil {
+// 		errCode = util.ErrCreateFailed
+// 		logger.Error("the CreateOperator failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("CreateOperator succeed;views:%v", views)
+// 		// resData, err = json.Marshal(views)
+// 		// if err != nil {
+// 		// 	errCode = util.ErrMarshalFailed
+// 		// 	logger.Error("the Marshal failed,err:%v", err.Error())
+// 		// }
+// 	}
+// 	return errCode
+// }
+
+func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-	if views, err := cSdk.CreateOperator(&opts); err != nil {
+	if views, err := cSdk.CreateOperator_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateOperator failed,err:%v", err.Error())
 	} else {
 		logger.Debug("CreateOperator succeed;views:%v", views)
-		resData, err = json.Marshal(views)
-		if err != nil {
-			errCode = util.ErrMarshalFailed
-			logger.Error("the Marshal failed,err:%v", err.Error())
-		}
 	}
-	return resData, errCode
+	return errCode
 }
 
+// func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
+// 	var opts options.ModifyOptInfoOptions
+// 	errCode = util.ErrNull
+// 	if err := json.Unmarshal(param, &opts); err != nil {
+// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
+// 		errCode = util.ErrUnmarshalFailed
+// 		return errCode
+// 	}
+// 	if err := cSdk.UpdateOperator(&opts); err != nil {
+// 		errCode = util.ErrUpdateFailed
+// 		logger.Error("the UpdateOperator failed,err:%v", err.Error())
+// 	} else {
+// 		logger.Debug("UpdateOperator succeed")
+// 	}
+// 	return errCode
+// }
+
 func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
-	var opts options.ModifyOptInfoOptions
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &opts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return errCode
-	}
-	if err := cSdk.UpdateOperator(&opts); err != nil {
+	if err := cSdk.UpdateOperator_json(param); err != nil {
 		errCode = util.ErrUpdateFailed
 		logger.Error("the UpdateOperator failed,err:%v", err.Error())
 	} else {
