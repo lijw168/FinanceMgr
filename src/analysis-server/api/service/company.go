@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"analysis-server/api/db"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -16,7 +16,7 @@ type CompanyService struct {
 	Logger     *log.Logger
 	CompanyDao *db.CompanyDao
 	Db         *sql.DB
-	GenComId   *utils.GenIdInfo
+	//GenComId   *utils.GenIdInfo
 }
 
 func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.CreateCompanyParams,
@@ -56,7 +56,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.CompanyAddr = *params.CompanyAddr
 	comInfo.Backup = *params.Backup
 	comInfo.CreatedAt = time.Now()
-	comInfo.CompanyID = cs.GenComId.GetNextId()
+	comInfo.CompanyID = GIdInfoService.genComIdInfo.GetNextId()
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [CompanyDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

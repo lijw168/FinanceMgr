@@ -11,11 +11,6 @@ import (
 	"common/log"
 )
 
-var (
-	DescriptionMaxlen = 256
-	NameMaxLen        = 32
-)
-
 type OperatorInfoHandlers struct {
 	CCHandler
 	Logger         *log.Logger

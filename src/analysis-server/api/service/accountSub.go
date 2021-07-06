@@ -2,7 +2,7 @@ package service
 
 import (
 	"analysis-server/api/db"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -14,7 +14,7 @@ type AccountSubService struct {
 	Logger    *log.Logger
 	AccSubDao *db.AccSubDao
 	Db        *sql.DB
-	GenSubId  *utils.GenIdInfo
+	//GenSubId  *utils.GenIdInfo
 }
 
 func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.CreateSubjectParams,
@@ -48,7 +48,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
-	accSub.SubjectID = as.GenSubId.GetNextId()
+	accSub.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

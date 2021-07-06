@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"analysis-server/api/db"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -19,12 +19,12 @@ const (
 )
 
 type VoucherService struct {
-	Logger       *log.Logger
-	VInfoDao     *db.VoucherInfoDao
-	VRecordDao   *db.VoucherRecordDao
-	Db           *sql.DB
-	GenVoucherId *utils.GenIdInfo
-	GenRecordId  *utils.GenIdInfo
+	Logger     *log.Logger
+	VInfoDao   *db.VoucherInfoDao
+	VRecordDao *db.VoucherRecordDao
+	Db         *sql.DB
+	//GenVoucherId *utils.GenIdInfo
+	//GenRecordId  *utils.GenIdInfo
 }
 
 func IsDuplicateKeyError(err error) bool {
@@ -67,7 +67,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.VoucherDate = time.Now()
 	vInfo.CreatedAt = time.Now()
-	vInfo.VoucherID = vs.GenVoucherId.GetNextId()
+	vInfo.VoucherID = GIdInfoService.genVouIdInfo.GetNextId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
 	if err = vs.VInfoDao.Create(ctx, tx, vInfo); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [VInfoDao.Create: %s]", FuncName, err.Error())
@@ -76,7 +76,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	//create voucherRecord
 	vRecord := new(model.VoucherRecord)
 	for _, recParam := range params.RecordsParams {
-		vRecord.RecordID = vs.GenRecordId.GetNextId()
+		vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = vInfo.VoucherID
 		vRecord.SubjectName = *recParam.SubjectName

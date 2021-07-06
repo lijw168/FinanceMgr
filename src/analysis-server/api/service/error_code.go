@@ -14,6 +14,7 @@ const (
 	ErrOrder       = "order"
 	ErrLogin       = "login"
 	ErrLogout      = "logout"
+	ErrIdInfo      = "IdInfo"
 )
 
 const (

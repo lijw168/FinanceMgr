@@ -128,6 +128,7 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 			if pk.OpCode != util.UserLogin {
 				if proxy.auth.GetUserStatus() != util.Online {
 					proxy.respOptResWithoutData(conn, pk, util.ErrOffline)
+					break
 				}
 			}
 			if pk.OpCode >= util.UserLogin && pk.OpCode <= util.OperatorUpdate {

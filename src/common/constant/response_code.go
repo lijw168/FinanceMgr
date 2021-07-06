@@ -39,3 +39,8 @@ const (
 const (
 	CodeVoucherRecordNotExist = -501
 )
+
+//IdInfo
+const (
+	CodeIdInfoNotExist = -601
+)

@@ -14,7 +14,7 @@ import (
 	"common/log"
 )
 
-var AccessToken = NewAccessTokenHandler()
+var GAccessTokenH = NewAccessTokenHandler()
 
 type DescData struct {
 	Tc       int64       `json:"total_count"`

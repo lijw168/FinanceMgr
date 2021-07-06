@@ -7,6 +7,8 @@ import (
 	"common/log"
 )
 
+var GIdInfoService = NewIDInfoService()
+
 //RollbackLog ...
 func RollbackLog(ctx context.Context, l *log.Logger, funcName string, tx *sql.Tx) {
 	if err := tx.Rollback(); err != nil {

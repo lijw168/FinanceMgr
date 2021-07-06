@@ -22,30 +22,14 @@ import (
 	"analysis-server/api/db"
 	"analysis-server/api/handler"
 	"analysis-server/api/service"
-	aUtils "analysis-server/api/utils"
+	//aUtils "analysis-server/api/utils"
 )
 
 var (
-	gGenSubIdInfo    *aUtils.GenIdInfo
-	gGenComIdInfo    *aUtils.GenIdInfo
-	gGenVouIdInfo    *aUtils.GenIdInfo
-	gGenVouRecIdInfo *aUtils.GenIdInfo
-	gIdInfoService   *service.IDInfoService
-	exitCh           = make(chan bool)
+	gIdInfoService *service.IDInfoService
+	exitCh         = make(chan bool)
 )
 
-func updateIdInfo() {
-	subId := gGenSubIdInfo.GetId()
-	comId := gGenComIdInfo.GetId()
-	vouId := gGenVouIdInfo.GetId()
-	vouRecId := gGenVouRecIdInfo.GetId()
-	updateFields := make(map[string]interface{})
-	updateFields["SubjectID"] = subId
-	updateFields["CompanyID"] = comId
-	updateFields["VoucherID"] = vouId
-	updateFields["VoucherRecordID"] = vouRecId
-	gIdInfoService.UpdateIdInfo(updateFields)
-}
 func interceptSignal() {
 	daemonExitCh := make(chan os.Signal)
 	signal.Notify(daemonExitCh, syscall.SIGTERM, syscall.SIGKILL,
@@ -54,16 +38,28 @@ func interceptSignal() {
 		for {
 			sig := <-daemonExitCh
 			fmt.Printf("the sig is %s\n", sig.String())
-			updateIdInfo()
 			break
 		}
 		exitCh <- true
 	}()
 }
 
+func saveIdResource() {
+	ccErr := gIdInfoService.WriteIdResourceToDb()
+	if ccErr != nil {
+		ccErr := gIdInfoService.WriteIdResourceToDb()
+		if ccErr != nil {
+			fmt.Printf("WriteIdResourceToDb,it is twice to fail,ErrInfo:%s", ccErr.Error())
+		}
+	}
+}
+
 func waitDaemonExit() {
+	saveIdResource()
+	handler.GAccessTokenH.QuitExpirationCheckService()
 	<-exitCh
 }
+
 func main() {
 
 	if utils.SetLimit() != nil {
@@ -95,7 +91,7 @@ func main() {
 		fmt.Println("[Init] new logger err: ", err)
 		return
 	}
-	gIdInfoService = new(service.IDInfoService)
+	//gIdInfoService = new(service.IDInfoService)
 	url.InitCommonUrlRouter(logger, nil)
 	httpRouter := url.NewUrlRouter(logger)
 	err = handlerInit(httpRouter, logger, apiServerConf)
@@ -154,45 +150,20 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	loginInfoDao := &db.LoginInfoDao{Logger: logger}
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
-	gIdInfoService.Logger = logger
-	gIdInfoService.IdInfoDao = idInfoDao
-	gIdInfoService.Db = _db
+	//初始化ID Resource
+	gIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
+	ccErr := gIdInfoService.InitIdResource()
+	if ccErr != nil {
+		return ccErr
+	}
 	/*service*/
-	idInfoService := &service.IDInfoService{Logger: logger, IdInfoDao: idInfoDao, Db: _db}
-	idInfoView, err2 := idInfoService.GetIdInfo()
-	if err2 != nil {
-		fmt.Println("[Init] GetIdInfo failed,error: ", err2.Error())
-		return err2
-	}
-	gGenSubIdInfo, err = aUtils.NewGenIdInfo(idInfoView.SubjectID)
-	if err != nil {
-		fmt.Println("[Init] initialize subjectID ,failed. error: ", err)
-		return err
-	}
-	gGenComIdInfo, err = aUtils.NewGenIdInfo(idInfoView.CompanyID)
-	if err != nil {
-		fmt.Println("[Init] initialize companyID ,failed. error: ", err)
-		return err
-	}
-	gGenVouIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherID)
-	if err != nil {
-		fmt.Println("[Init] initialize voucherID ,failed. error: ", err)
-		return err
-	}
-	gGenVouRecIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
-	if err != nil {
-		fmt.Println("[Init] initialize voucherRecordID ,failed. error: ", err)
-		return err
-	}
-
-	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db, GenSubId: gGenSubIdInfo}
-	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db, GenComId: gGenComIdInfo}
+	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db}
+	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
 	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
-	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao,
-		GenRecordId: gGenVouRecIdInfo, GenVoucherId: gGenVouIdInfo, Db: _db}
-	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, GenRecordId: gGenVouRecIdInfo, Db: _db}
+	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, Db: _db}
+	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, Db: _db}
 	//handlers
 	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
@@ -233,6 +204,9 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
 	httpRouter.RegisterFunc("UpdateVoucherRecord", voucherHandlers.UpdateVoucherRecord)
 	//检查是否登录
-	httpRouter.CheckoutCall = handler.AccessToken.Checkout
+	handler.GAccessTokenH.InitAccessTokenHandler(authService, logger)
+	httpRouter.CheckoutCall = handler.GAccessTokenH.LoginCheck
+	//用户登录的过期检查服务
+	go handler.GAccessTokenH.ExpirationCheck()
 	return nil
 }

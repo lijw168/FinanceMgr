@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"analysis-server/api/db"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -13,10 +13,10 @@ import (
 )
 
 type VoucherRecordService struct {
-	Logger      *log.Logger
-	VRecordDao  *db.VoucherRecordDao
-	Db          *sql.DB
-	GenRecordId *utils.GenIdInfo
+	Logger     *log.Logger
+	VRecordDao *db.VoucherRecordDao
+	Db         *sql.DB
+	//GenRecordId *utils.GenIdInfo
 }
 
 func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params *model.CreateVoucherRecordParams,
@@ -26,7 +26,7 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 
 	FuncName := "VoucherRecordService/CreateVoucherRecord"
 	vRecord := new(model.VoucherRecord)
-	vRecord.RecordID = vs.GenRecordId.GetNextId()
+	vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
 	vRecord.VoucherID = *params.VoucherID
 	vRecord.SubjectName = *params.SubjectName
 	vRecord.DebitMoney = *params.DebitMoney
@@ -68,7 +68,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 	var IdValSli []int
 	for _, itemParam := range recordsParams {
 		vRecord := new(model.VoucherRecord)
-		vRecord.RecordID = vs.GenRecordId.GetNextId()
+		vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = *itemParam.VoucherID
 		vRecord.SubjectName = *itemParam.SubjectName

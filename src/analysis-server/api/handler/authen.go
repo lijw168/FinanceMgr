@@ -98,11 +98,18 @@ func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request)
 	requestId := ah.GetTraceId(r)
 	stCheckoutView, ccErr := ah.AuthService.StatusCheckout(r.Context(), *params.Name, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[loginInfo/GetLoginInfo/ServerHTTP] [AuthService.GetLoginInfoByName: %s]", ccErr.Detail())
+		ah.Logger.WarnContext(r.Context(), "[AuthenHandlers/StatusCheckout] [AuthService.StatusCheckout: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
 	ah.Response(r.Context(), ah.Logger, w, nil, stCheckoutView)
+	cookie, err := r.Cookie("access_token")
+	if err != nil {
+		ah.Logger.ErrorContext(r.Context(),
+			"[AuthenHandlers/StatusCheckout] :get cookie access_token,failed.err: %v]", err)
+		return
+	}
+	GAccessTokenH.modifyTokenExpiredTime(cookie.Value)
 	return
 }
 
@@ -167,7 +174,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ah.Logger.InfoContext(r.Context(), "login succeed.")
-	AccessToken.insertElem(logInfoView.AccessToken, logInfoView.Name)
+	GAccessTokenH.insertToken(logInfoView.AccessToken, logInfoView.Name)
 	ah.Response(r.Context(), ah.Logger, w, nil, logInfoView)
 	return
 }
@@ -192,13 +199,14 @@ func (ah *AuthenHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	err = AccessToken.delElem(r)
+	cookie, err := r.Cookie("access_token")
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/Logout/ServerHTTP] [AccessToken.delElem: %v]", err)
+		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/Logout/ServerHTTP] [Get AccessToken,failed: %v]", err)
 		ccErr := service.NewError(service.ErrLogout, service.ErrMiss, service.ErrCookie, err.Error())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	GAccessTokenH.delToken(cookie.Value)
 	ah.Logger.InfoContext(r.Context(), "logout succeed.")
 	ah.Response(r.Context(), ah.Logger, w, nil, nil)
 	return
