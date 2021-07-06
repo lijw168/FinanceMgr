@@ -37,6 +37,8 @@ func interceptSignal() {
 		for {
 			sig := <-daemonExitCh
 			fmt.Printf("the sig is %s\n", sig.String())
+			saveIdResource()
+			handler.GAccessTokenH.QuitExpirationCheckService()
 			break
 		}
 		exitCh <- true
@@ -54,8 +56,6 @@ func saveIdResource() {
 }
 
 func waitDaemonExit() {
-	saveIdResource()
-	handler.GAccessTokenH.QuitExpirationCheckService()
 	<-exitCh
 }
 
