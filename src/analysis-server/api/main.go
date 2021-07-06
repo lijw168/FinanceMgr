@@ -26,8 +26,7 @@ import (
 )
 
 var (
-	gIdInfoService *service.IDInfoService
-	exitCh         = make(chan bool)
+	exitCh = make(chan bool)
 )
 
 func interceptSignal() {
@@ -45,9 +44,9 @@ func interceptSignal() {
 }
 
 func saveIdResource() {
-	ccErr := gIdInfoService.WriteIdResourceToDb()
+	ccErr := service.GIdInfoService.WriteIdResourceToDb()
 	if ccErr != nil {
-		ccErr := gIdInfoService.WriteIdResourceToDb()
+		ccErr := service.GIdInfoService.WriteIdResourceToDb()
 		if ccErr != nil {
 			fmt.Printf("WriteIdResourceToDb,it is twice to fail,ErrInfo:%s", ccErr.Error())
 		}
@@ -91,7 +90,6 @@ func main() {
 		fmt.Println("[Init] new logger err: ", err)
 		return
 	}
-	//gIdInfoService = new(service.IDInfoService)
 	url.InitCommonUrlRouter(logger, nil)
 	httpRouter := url.NewUrlRouter(logger)
 	err = handlerInit(httpRouter, logger, apiServerConf)
@@ -151,8 +149,8 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
 	//初始化ID Resource
-	gIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
-	ccErr := gIdInfoService.InitIdResource()
+	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
+	ccErr := service.GIdInfoService.InitIdResource()
 	if ccErr != nil {
 		return ccErr
 	}
