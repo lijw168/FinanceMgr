@@ -82,7 +82,7 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 }
 
 func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSubject) error {
-	strSql := "insert into " + accSubInfoTN + " (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?)"
+	strSql := "insert into " + accSubInfoTN + " (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?)"
 	values := []interface{}{st.SubjectID, st.SubjectName, st.SubjectLevel}
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
