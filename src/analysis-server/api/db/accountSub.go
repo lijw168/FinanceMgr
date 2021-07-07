@@ -17,9 +17,9 @@ type AccSubDao struct {
 
 var (
 	accSubInfoTN     = "accountSubject"
-	accSubInfoFields = []string{"subject_id", "subject_name", "subject_level"}
+	accSubInfoFields = []string{"subject_id", "common_id", "subject_name", "subject_level"}
 	scanAccSubTask   = func(r DbScanner, st *model.AccSubject) error {
-		return r.Scan(&st.SubjectID, &st.SubjectName, &st.SubjectLevel)
+		return r.Scan(&st.SubjectID, &st.CommonID, &st.SubjectName, &st.SubjectLevel)
 	}
 )
 
@@ -181,20 +181,19 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 
 func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectID int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
+	//var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
 	strSql := "update " + accSubInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil
@@ -214,20 +213,19 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 
 func (dao *AccSubDao) UpdateByName(ctx context.Context, do DbOperator, strSubName string,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
+	//var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
 	strSql := "update " + accSubInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil

@@ -30,6 +30,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		filterMap := map[string]utils.Attribute{}
 		filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["commonId"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
@@ -111,6 +112,16 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	if params.CommonID == nil || *params.CommonID == "" {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrCommonId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	if utf8.RuneCountInString(*params.CommonID) > 10 || !utils.VerCommonIdP(*params.CommonID) {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCommonId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
 
 	if params.SubjectLevel == nil || *params.SubjectLevel > 4 {
 		ccErr := service.NewCcError(cons.CodeInvalAccSubLevel, service.ErrAccSub, service.ErrInvalid, service.ErrSubLevel, service.ErrNull)
@@ -154,6 +165,14 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		updateFields["SubjectName"] = *params.SubjectName
+	}
+	if params.CommonID != nil {
+		if utf8.RuneCountInString(*params.CommonID) > 10 || !utils.VerCommonIdP(*params.CommonID) {
+			ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCommonId, service.ErrNull)
+			ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+			return
+		}
+		updateFields["CommonId"] = *params.CommonID
 	}
 	if params.SubjectLevel != nil {
 		updateFields["SubjectLevel"] = *params.SubjectLevel

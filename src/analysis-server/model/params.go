@@ -16,6 +16,7 @@ type BaseParams struct {
 
 // CreateSubjectParams ...
 type CreateSubjectParams struct {
+	CommonID     *string `json:"commonId"`
 	SubjectName  *string `json:"subjectName"`
 	SubjectLevel *int    `json:"subjectLevel"`
 }

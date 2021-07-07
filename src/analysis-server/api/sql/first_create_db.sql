@@ -50,10 +50,12 @@ drop table if exists `finance_mgr_2021`.`accountSubject`;
 create table if not exists `finance_mgr_2021`.`accountSubject`
 (
    `subject_id`            int not null,
+   `common_id`             varchar(10) not null,   '该ID是操作用户添加的，该行业习惯用的ID'
    `subject_name`          varchar(24) not null,
    `subject_level`         tinyint not null,
    primary key (subject_id),
-   UNIQUE KEY `subject_name` (`subject_name`)
+   unique key `subjectName` (`subject_name`)
+   unique key `commonId` (`common_id`);
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/

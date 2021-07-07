@@ -46,6 +46,7 @@ type VoucherRecord struct {
 //AccSubject ...
 type AccSubject struct {
 	SubjectID    int
+	CommonID     string
 	SubjectName  string
 	SubjectLevel int
 }

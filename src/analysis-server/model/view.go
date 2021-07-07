@@ -14,6 +14,7 @@ type DescData struct {
 //AccSubjectView ...
 type AccSubjectView struct {
 	SubjectID    int    `json:"subjectId"`
+	CommonID     string `json:"commonId"`
 	SubjectName  string `json:"subjectName"`
 	SubjectLevel int    `json:"subjectLevel"`
 }

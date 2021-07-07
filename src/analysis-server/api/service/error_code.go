@@ -44,6 +44,7 @@ const (
 	ErrId            = "id"
 	ErrIds           = "ids"
 	ErrName          = "name"
+	ErrCommonId      = "commonId"
 	ErrCookie        = "cookie"
 	ErrPasswd        = "password"
 	ErrVouMon        = "voucher_month"

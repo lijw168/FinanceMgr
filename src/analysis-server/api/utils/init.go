@@ -6,5 +6,6 @@ import (
 
 func init() {
 	strParaRe = regexp.MustCompile(strParaPattern)
-	hnParaRe = regexp.MustCompile(hnParaPattern)
+	//hnParaRe = regexp.MustCompile(hnParaPattern)
+	commonIdParaRe = regexp.MustCompile(CommonIdParaPattern)
 }

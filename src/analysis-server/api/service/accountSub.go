@@ -35,19 +35,20 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 		}
 	}()
 
-	filterFields := make(map[string]interface{})
-	filterFields["subjectName"] = *params.SubjectName
-	conflictCount, err := as.AccSubDao.CountByFilter(ctx, tx, filterFields)
-	if err != nil {
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	if conflictCount > 0 {
-		return nil, NewError(ErrAccSub, ErrConflict, ErrNull, ErrRecordExist)
-	}
+	// filterFields := make(map[string]interface{})
+	// filterFields["subjectName"] = *params.SubjectName
+	// conflictCount, err := as.AccSubDao.CountByFilter(ctx, tx, filterFields)
+	// if err != nil {
+	// 	return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	// }
+	// if conflictCount > 0 {
+	// 	return nil, NewError(ErrAccSub, ErrConflict, ErrNull, ErrRecordExist)
+	// }
 	//generate account subject
 	accSub := new(model.AccSubject)
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
+	accSub.CommonID = *params.CommonID
 	accSub.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
@@ -70,6 +71,7 @@ func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.A
 	accSubView.SubjectID = accSub.SubjectID
 	accSubView.SubjectName = accSub.SubjectName
 	accSubView.SubjectLevel = accSub.SubjectLevel
+	accSubView.CommonID = accSub.CommonID
 	return accSubView
 }
 
@@ -202,7 +204,7 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "subjectId", "subjectName", "subjectLevel":
+			case "subjectId", "subjectName", "subjectLevel", "commonId":
 				filterFields[*f.Field] = f.Value
 			default:
 				return accSubViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)
