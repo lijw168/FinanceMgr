@@ -121,12 +121,14 @@ type ModifyCompanyOptions struct {
 
 // account subject option ...
 type CreateSubjectOptions struct {
+	CommonID     string
 	SubjectName  string
 	SubjectLevel int
 }
 
 type ModifySubjectOptions struct {
 	SubjectID    int
+	CommonID     string
 	SubjectName  string
 	SubjectLevel int
 }

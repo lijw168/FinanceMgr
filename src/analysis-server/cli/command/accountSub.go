@@ -21,7 +21,7 @@ func NewAccSubCommand(cmd *cobra.Command) {
 func newAccSubCreateCmd() *cobra.Command {
 	var opts options.CreateSubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-create [OPTIONS] subject_name subject_level",
+		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -33,10 +33,11 @@ func newAccSubCreateCmd() *cobra.Command {
 				subLevel int
 			)
 
-			opts.SubjectName = args[0]
+			opts.CommonID = args[0]
+			opts.SubjectName = args[1]
 
-			if subLevel, err = strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
+			if subLevel, err = strconv.Atoi(args[2]); err != nil {
+				fmt.Println("change to int fail", args[2])
 			}
 			opts.SubjectLevel = subLevel
 
@@ -55,7 +56,7 @@ func newAccSubDeleteCmd() *cobra.Command {
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"SubjectID", "SubjectName", "SubjectLevel"}
+	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list",
 		Short: "List account subjects Support Filter",
@@ -108,7 +109,7 @@ func newAccSubShowCmd() *cobra.Command {
 func newAccSubUpdateCmd() *cobra.Command {
 	var opts options.ModifySubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-update [OPTIONS] subjectID subject_name subject_level ",
+		Use:   "accSub-update [OPTIONS] subjectID commonID subject_name subject_level ",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -120,10 +121,11 @@ func newAccSubUpdateCmd() *cobra.Command {
 			} else {
 				opts.SubjectID = id
 			}
-			opts.SubjectName = args[1]
+			opts.CommonID = args[1]
+			opts.SubjectName = args[2]
 
-			if subLevel, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
+			if subLevel, err := strconv.Atoi(args[3]); err != nil {
+				fmt.Println("change to int fail", args[3])
 			} else {
 				opts.SubjectLevel = subLevel
 			}

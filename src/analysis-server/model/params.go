@@ -23,6 +23,7 @@ type CreateSubjectParams struct {
 
 type ModifySubjectParams struct {
 	SubjectID    *int    `json:"subjectId"`
+	CommonID     *string `json:"commonId"`
 	SubjectName  *string `json:"subjectName"`
 	SubjectLevel *int    `json:"subjectLevel"`
 }

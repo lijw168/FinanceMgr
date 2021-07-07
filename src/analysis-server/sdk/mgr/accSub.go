@@ -16,11 +16,14 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 	switch {
 	case opts.SubjectName == "":
 		return nil, errors.New("SubjectName is required")
+	case opts.CommonID == "":
+		return nil, errors.New("CommonID is required")
 	case opts.SubjectLevel <= 0:
 		return nil, errors.New("SubjectLevel is required")
 	}
 	params := model.CreateSubjectParams{
 		SubjectName:  &opts.SubjectName,
+		CommonID:     &opts.CommonID,
 		SubjectLevel: &opts.SubjectLevel,
 	}
 
@@ -100,6 +103,9 @@ func (as *AccSub) UpdateAccSub(opts *options.ModifySubjectOptions) error {
 	}
 	if opts.SubjectName != "" {
 		param.SubjectName = &opts.SubjectName
+	}
+	if opts.CommonID != "" {
+		param.CommonID = &opts.CommonID
 	}
 	_, err := util.DoRequest(action, param)
 	return err
