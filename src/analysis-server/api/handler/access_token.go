@@ -24,6 +24,8 @@ type AccessTokenHandler struct {
 func NewAccessTokenHandler() *AccessTokenHandler {
 	accTokenHandler := AccessTokenHandler{}
 	accTokenHandler.tokenToNameMap = make(map[string]string)
+	accTokenHandler.tokenToTimeMap = make(map[string]int64)
+	accTokenHandler.quitCheckCh = make(chan bool, 1)
 	return &accTokenHandler
 }
 
@@ -135,5 +137,6 @@ end:
 }
 
 func (at *AccessTokenHandler) QuitExpirationCheckService() {
-	at.quitCheckCh <- true
+	//at.quitCheckCh <- true
+	close(at.quitCheckCh)
 }
