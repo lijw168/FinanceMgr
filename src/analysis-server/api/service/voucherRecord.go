@@ -59,11 +59,11 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	var IdValSli []int
 	for _, itemParam := range recordsParams {
@@ -188,11 +188,11 @@ func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordI
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 	_, err = vs.VRecordDao.Get(ctx, tx, recordID)
 	switch err {
 	case nil:

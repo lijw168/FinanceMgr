@@ -44,11 +44,11 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	infoParams := params.InfoParams
 	filterFields := make(map[string]interface{})
@@ -126,11 +126,11 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 	err = vs.VRecordDao.DeleteByVoucherId(ctx, vs.Db, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
@@ -159,11 +159,11 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 	//get voucher information
 	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID)
 	switch err {

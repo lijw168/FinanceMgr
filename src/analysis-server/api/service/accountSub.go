@@ -29,11 +29,11 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	filterFields := make(map[string]interface{})
 	filterFields["subjectName"] = *params.SubjectName
@@ -131,11 +131,11 @@ func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName 
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 	_, err = as.AccSubDao.GetAccSubByName(ctx, tx, strSubName)
 	switch err {
 	case nil:
@@ -166,11 +166,11 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	_, err = as.AccSubDao.GetAccSubByID(ctx, tx, subjectID)
 	switch err {

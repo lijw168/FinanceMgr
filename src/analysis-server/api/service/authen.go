@@ -29,11 +29,11 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	//generate login information
 	loginInfo := new(model.LoginInfo)
@@ -73,11 +73,11 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
-	defer func(bRollBack bool) {
-		if bRollBack {
+	defer func() {
+		if bIsRollBack {
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
-	}(bIsRollBack)
+	}()
 
 	_, err = as.LogInfoDao.Get(ctx, tx, strUserName)
 	switch err {
