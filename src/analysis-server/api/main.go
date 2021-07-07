@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"time"
 
 	//_ "net/http/pprof"
 	"runtime"
@@ -57,6 +58,7 @@ func saveIdResource() {
 
 func waitDaemonExit() {
 	<-exitCh
+	time.Sleep(3 * time.Second)
 }
 
 func main() {

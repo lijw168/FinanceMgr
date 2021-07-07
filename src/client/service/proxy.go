@@ -115,7 +115,8 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 		case util.QuitApp:
 			errCode = proxy.quitApp(pk)
 			proxy.respOptResWithoutData(conn, pk, errCode)
-			proxy.quitCheckCh <- true
+			//proxy.quitCheckCh <- true
+			close(proxy.quitCheckCh)
 			proxy.listenCon.Close()
 			proxy.listenCon = nil
 			time.Sleep(3 * time.Second)

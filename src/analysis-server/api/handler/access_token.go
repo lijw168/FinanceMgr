@@ -94,7 +94,8 @@ func (at *AccessTokenHandler) LoginCheck(action string, r *http.Request) (bool, 
 	cookie, err := r.Cookie("access_token")
 	if err != nil {
 		strErrMsg := err.Error()
-		if action == "Login" && strings.Contains(strErrMsg, "http: lack the named cookie") {
+		//"http: named cookie not present",该错误信息，不能修改，该信息是http包里，返回的。
+		if action == "Login" && strings.Contains(strErrMsg, "http: named cookie not present") {
 			return true, nil
 		}
 		return bIsPass, err
@@ -104,7 +105,7 @@ func (at *AccessTokenHandler) LoginCheck(action string, r *http.Request) (bool, 
 	defer at.loginCheckMu.RUnlock()
 	if _, ok := at.tokenToNameMap[accessToken]; ok {
 		if action == "Login" {
-			err = errors.New("The user has been to login,please logout the user.")
+			err = errors.New("The user has been to login,please logout the user first.")
 		} else {
 			bIsPass = true
 		}
