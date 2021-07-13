@@ -92,21 +92,6 @@ func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model
 	return nil
 }
 
-// func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, strName string) error {
-// 	strSql := "delete from " + operatorInfoTN + " where name = ?"
-
-// 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %s]", strSql, strName)
-// 	start := time.Now()
-// 	defer func() {
-// 		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
-// 	}()
-// 	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
-// 		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Delete] [do.Exec: %s]", err.Error())
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, optID int) error {
 	strSql := "delete from " + operatorInfoTN + " where operator_id = ?"
 

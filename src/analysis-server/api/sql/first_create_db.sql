@@ -1,27 +1,6 @@
 CREATE DATABASE IF NOT EXISTS `finance_mgr_2021` DEFAULT CHARACTER SET utf8;
 
 /*==============================================================*/
-/* Table: companyInfo                                           */
-/*==============================================================*/
-drop table if exists `finance_mgr_2021`.`companyInfo`;
-create table if not exists `finance_mgr_2021`.`companyInfo`
-(
-   `company_id`            int not null,
-   `company_name`          varchar(64),
-   `abbre_name`            varchar(24),
-   `corporator`            varchar(16),
-   `phone`                 varchar(13),
-   `e_mail`                varchar(32),
-   `company_addr`          varchar(128),
-   `backup`                varchar(32),
-   `created_at`            datetime,
-   `updated_at`            datetime,
-   primary key (company_id),
-   UNIQUE KEY `company_name` (`company_name`),
-   UNIQUE KEY `abbre_name` (`abbre_name`)
-)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-
-/*==============================================================*/
 /* Table: operatorInfo  */
 /*role:第一个字节的数值是操作员权限；第二个字节的数值是管理员的权限。*/
 /*角色 ：1：制单, 2：出纳, 4：审核, 8：记账,16：查询, 32：增加，64：修改, 128:删除*/
@@ -143,4 +122,24 @@ create table if not exists `finance_mgr_2021`.`userLoginInfo`
    `ended_at`             datetime,
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
+/*==============================================================*/
+/* Table: companyInfo                                           */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`companyInfo`;
+create table if not exists `finance_mgr_2021`.`companyInfo`
+(
+   `company_id`            int not null,
+   `company_name`          varchar(64),
+   `abbre_name`            varchar(24),
+   `corporator`            varchar(16),
+   `phone`                 varchar(13),
+   `e_mail`                varchar(32),
+   `company_addr`          varchar(128),
+   `backup`                varchar(32),
+   `created_at`            datetime,
+   `updated_at`            datetime,
+   primary key (company_id),
+   UNIQUE KEY `company_name` (`company_name`),
+   UNIQUE KEY `abbre_name` (`abbre_name`)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
