@@ -16,21 +16,22 @@ type LoginInfoDao struct {
 
 var (
 	loginInfoTN     = "userLoginInfo"
-	loginInfoFields = []string{"name", "status", "client_ip", "begined_at", "ended_at"}
+	loginInfoFields = []string{"operator_id", "name", "status", "client_ip", "begined_at", "ended_at"}
 	scanloginInfo   = func(r DbScanner, st *model.LoginInfo) error {
-		return r.Scan(&st.Name, &st.Status, &st.ClientIp, &st.BeginedAt, &st.EndedAt)
+		return r.Scan(&st.OperatorID, &st.Name, &st.Status, &st.ClientIp, &st.BeginedAt, &st.EndedAt)
 	}
 )
 
-func (dao *LoginInfoDao) Get(ctx context.Context, do DbOperator, strName string) (*model.LoginInfo, error) {
-	strSql := "select " + strings.Join(loginInfoFields, ",") + " from " + loginInfoTN + " where name=?"
-	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Get] [sql: %s ,values: %s]", strSql, strName)
+func (dao *LoginInfoDao) Get(ctx context.Context, do DbOperator, optID int) (*model.LoginInfo, error) {
+	strSql := "select " + strings.Join(loginInfoFields, ",") + " from " +
+		loginInfoTN + " where operator_id=?"
+	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Get] [sql: %s ,values: %d]", strSql, optID)
 	var optInfo = &model.LoginInfo{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[LoginInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanloginInfo(do.QueryRowContext(ctx, strSql, strName), optInfo); err {
+	switch err := scanloginInfo(do.QueryRowContext(ctx, strSql, optID), optInfo); err {
 	case nil:
 		return optInfo, nil
 	case sql.ErrNoRows:
@@ -52,8 +53,9 @@ func (dao *LoginInfoDao) CountByFilter(ctx context.Context, do DbOperator, filte
 }
 
 func (dao *LoginInfoDao) Create(ctx context.Context, do DbOperator, st *model.LoginInfo) error {
-	strSql := "insert into " + loginInfoTN + " (" + strings.Join(loginInfoFields, ",") + ") values (?, ?, ?, ?, ?)"
-	values := []interface{}{st.Name, st.Status, st.ClientIp, st.BeginedAt, st.EndedAt}
+	strSql := "insert into " + loginInfoTN + " (" + strings.Join(loginInfoFields, ",") +
+		") values (?, ?, ?, ?, ?, ?)"
+	values := []interface{}{st.OperatorID, st.Name, st.Status, st.ClientIp, st.BeginedAt, st.EndedAt}
 	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -65,23 +67,23 @@ func (dao *LoginInfoDao) Create(ctx context.Context, do DbOperator, st *model.Lo
 	return nil
 }
 
-func (dao *LoginInfoDao) Delete(ctx context.Context, do DbOperator, strName string) error {
-	strSql := "delete from " + loginInfoTN + " where name = ?"
+func (dao *LoginInfoDao) Delete(ctx context.Context, do DbOperator, optID int) error {
+	strSql := "delete from " + loginInfoTN + " where operator_id = ?"
 
-	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Delete] [sql: %s, id: %s]", strSql, strName)
+	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Delete] [sql: %s, id: %s]", strSql, optID)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[LoginInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
-	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
+	if _, err := do.ExecContext(ctx, strSql, optID); err != nil {
 		dao.Logger.ErrorContext(ctx, "[LoginInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (dao *LoginInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
-	offset int, order string, od int) ([]*model.LoginInfo, error) {
+func (dao *LoginInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{},
+	limit int, offset int, order string, od int) ([]*model.LoginInfo, error) {
 	var LoginInfoSlice []*model.LoginInfo
 	strSql, values := transferListSql(loginInfoTN, filter, loginInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[LoginInfo/db/List] sql %s with values %v", strSql, values)
@@ -107,7 +109,7 @@ func (dao *LoginInfoDao) List(ctx context.Context, do DbOperator, filter map[str
 	return LoginInfoSlice, nil
 }
 
-//由于该表不能靠name字段，就可以确定一条记录，需要多个字段来确定一条记录，所以才有如下的实现方式。
+//由于该表不能靠表中的一个字段，就可以确定一条记录，需要多个字段来确定一条记录，所以才有如下的实现方式。
 func (dao *LoginInfoDao) Update(ctx context.Context, do DbOperator, filter map[string]interface{},
 	updateField map[string]interface{}) error {
 	strSql, values := transferUpdateSql(loginInfoTN, filter, updateField)

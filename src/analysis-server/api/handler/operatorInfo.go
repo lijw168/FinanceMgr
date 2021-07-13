@@ -29,6 +29,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
+		filterMap["operatorId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["job"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
@@ -83,7 +84,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 }
 
 func (oh *OperatorInfoHandlers) GetOperatorInfo(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DescribeNameParams)
+	var params = new(model.DescribeIdParams)
 	err := oh.HttpRequestParse(r, params)
 	if err != nil {
 		oh.Logger.ErrorContext(r.Context(), "[operatorInfo/GetOperatorInfo] [HttpRequestParse: %v]", err)
@@ -92,15 +93,16 @@ func (oh *OperatorInfoHandlers) GetOperatorInfo(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrName, service.ErrNull)
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrId, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
+
 	requestId := oh.GetTraceId(r)
-	optView, ccErr := oh.OptInfoService.GetOperatorInfoByName(r.Context(), *params.Name, requestId)
+	optView, ccErr := oh.OptInfoService.GetOperatorInfoByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[operatorInfo/GetOperatorInfo/ServerHTTP] [OptInfoService.GetOperatorInfoByName: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[operatorInfo/GetOperatorInfo/ServerHTTP] [OptInfoService.GetOperatorInfoByID: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -164,12 +166,25 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrName, service.ErrNull)
+	if params.OperatorID == nil || *params.OperatorID <= 0 {
+		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrId, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
 	updateFields := make(map[string]interface{})
+	if params.Name != nil {
+		if *params.Name == "" {
+			ccErr := service.NewError(service.ErrOperator, service.ErrNotAllowed, service.ErrEmpty, service.ErrNull)
+			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+			return
+		}
+		if utf8.RuneCountInString(*params.Name) > NameMaxLen || !utils.VerStrP(*params.Name) {
+			ccErr := service.NewError(service.ErrOperator, service.ErrInvalid, service.ErrName, service.ErrNull)
+			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+			return
+		}
+		updateFields["name"] = *params.Name
+	}
 	if params.Password != nil {
 		if *params.Password == "" {
 			ccErr := service.NewError(service.ErrOperator, service.ErrNotAllowed, service.ErrEmpty, service.ErrNull)
@@ -200,7 +215,7 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
-	ccErr := oh.OptInfoService.UpdateOperator(r.Context(), *params.Name, updateFields)
+	ccErr := oh.OptInfoService.UpdateOperator(r.Context(), *params.OperatorID, updateFields)
 	if ccErr != nil {
 		oh.Logger.WarnContext(r.Context(), "[opreator/UpdateOperator/ServerHTTP] [OptInfoService.UpdateOperator: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
@@ -211,7 +226,7 @@ func (oh *OperatorInfoHandlers) UpdateOperator(w http.ResponseWriter, r *http.Re
 }
 
 func (oh *OperatorInfoHandlers) DeleteOperator(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DeleteOperatorParams)
+	var params = new(model.DeleteIDParams)
 	err := oh.HttpRequestParse(r, params)
 	if err != nil {
 		oh.Logger.ErrorContext(r.Context(), "[opreator/DeleteOperator] [HttpRequestParse: %v]", err)
@@ -219,15 +234,15 @@ func (oh *OperatorInfoHandlers) DeleteOperator(w http.ResponseWriter, r *http.Re
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrName, service.ErrNull)
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrId, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
 	requestId := oh.GetTraceId(r)
-	ccErr := oh.OptInfoService.DeleteOperatorInfoByName(r.Context(), *params.Name, requestId)
+	ccErr := oh.OptInfoService.DeleteOperatorInfoByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[opreator/DeleteOperator/ServerHTTP] [OptInfoService.DeleteOperatorInfoByName: %s]", ccErr.Detail())
+		oh.Logger.WarnContext(r.Context(), "[opreator/DeleteOperator/ServerHTTP] [OptInfoService.DeleteOperatorInfoByID: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}

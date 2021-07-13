@@ -17,9 +17,9 @@ type IDInfoDao struct {
 
 var (
 	idInfoTN     = "idInfo"
-	idInfoFields = []string{"company_id", "subject_id", "voucher_id", "voucher_record_id"}
+	idInfoFields = []string{"company_id", "operator_id", "subject_id", "voucher_id", "voucher_record_id"}
 	scanIdInfo   = func(r DbScanner, st *model.IDInfo) error {
-		return r.Scan(&st.CompanyID, &st.SubjectID, &st.VoucherID, &st.VoucherRecordID)
+		return r.Scan(&st.CompanyID, &st.OperatorID, &st.SubjectID, &st.VoucherID, &st.VoucherRecordID)
 	}
 )
 
@@ -44,8 +44,8 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 
 func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") +
-		") values (?, ?, ?, ?)"
-	values := []interface{}{st.CompanyID, st.SubjectID, st.VoucherID, st.VoucherRecordID}
+		") values (?, ?, ?, ?, ?)"
+	values := []interface{}{st.CompanyID, st.OperatorID, st.SubjectID, st.VoucherID, st.VoucherRecordID}
 	dao.Logger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.Exec(strSql, values...)
@@ -83,20 +83,18 @@ func (dao *IDInfoDao) Count(do DbOperator) (int64, error) {
 }
 
 func (dao *IDInfoDao) Update(do DbOperator, params map[string]interface{}) error {
-	var keyMap = map[string]string{"SubjectID": "subject_id", "CompanyID": "company_id", "VoucherID": "voucher_id", "VoucherRecordID": "voucher_record_id"}
 	strSql := "update " + idInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil

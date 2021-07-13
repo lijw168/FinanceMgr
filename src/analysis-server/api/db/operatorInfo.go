@@ -17,27 +17,51 @@ type OperatorInfoDao struct {
 
 var (
 	operatorInfoTN     = "operatorInfo"
-	operatorInfoFields = []string{"company_id", "name", "password", "job", "department", "status", "role", "created_at", "updated_at"}
-	scanOperatorInfo   = func(r DbScanner, st *model.OperatorInfo) error {
-		return r.Scan(&st.CompanyID, &st.Name, &st.Password, &st.Job, &st.Department, &st.Status, &st.Role, &st.CreatedAt, &st.UpdatedAt)
+	operatorInfoFields = []string{"operator_id", "company_id", "name", "password", "job",
+		"department", "status", "role", "created_at", "updated_at"}
+	scanOperatorInfo = func(r DbScanner, st *model.OperatorInfo) error {
+		return r.Scan(&st.OperatorID, &st.CompanyID, &st.Name, &st.Password,
+			&st.Job, &st.Department, &st.Status, &st.Role, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
-func (dao *OperatorInfoDao) Get(ctx context.Context, do DbOperator, strName string) (*model.OperatorInfo, error) {
-	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where name=?"
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Get] [sql: %s ,values: %s]", strSql, strName)
+func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
+	strName string, iCompanyID int) (*model.OperatorInfo, error) {
+	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " +
+		operatorInfoTN + " where name=? and companyId=?"
+	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [sql: %s ,name: %s,icompanyId:%d]", strSql, strName, iCompanyID)
 	var optInfo = &model.OperatorInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
+		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, strName), optInfo); err {
+	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, strName, iCompanyID), optInfo); err {
 	case nil:
 		return optInfo, nil
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Get] [scanOperatorInfo: %s]", err.Error())
+		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [scanOperatorInfo: %s]", err.Error())
+		return nil, err
+	}
+}
+
+func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
+	optID int) (*model.OperatorInfo, error) {
+	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where operator_id=?"
+	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoById] [sql: %s ,values: %d]", strSql, optID)
+	var optInfo = &model.OperatorInfo{}
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoById] [SqlElapsed: %v]", time.Since(start))
+	}()
+	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, optID), optInfo); err {
+	case nil:
+		return optInfo, nil
+	case sql.ErrNoRows:
+		return nil, err
+	default:
+		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoById] [scanOperatorInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -53,8 +77,10 @@ func (dao *OperatorInfoDao) CountByFilter(ctx context.Context, do DbOperator, fi
 }
 
 func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model.OperatorInfo) error {
-	strSql := "insert into " + operatorInfoTN + " (" + strings.Join(operatorInfoFields, ",") + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	values := []interface{}{st.CompanyID, st.Name, st.Password, st.Job, st.Department, st.Status, st.Role, st.CreatedAt, st.UpdatedAt}
+	strSql := "insert into " + operatorInfoTN + " (" + strings.Join(operatorInfoFields, ",") +
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	values := []interface{}{st.OperatorID, st.CompanyID, st.Name, st.Password, st.Job,
+		st.Department, st.Status, st.Role, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -65,20 +91,37 @@ func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model
 	}
 	return nil
 }
-func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, strName string) error {
-	strSql := "delete from " + operatorInfoTN + " where name = ?"
 
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %s]", strSql, strName)
+// func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, strName string) error {
+// 	strSql := "delete from " + operatorInfoTN + " where name = ?"
+
+// 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %s]", strSql, strName)
+// 	start := time.Now()
+// 	defer func() {
+// 		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+// 	}()
+// 	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
+// 		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Delete] [do.Exec: %s]", err.Error())
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, optID int) error {
+	strSql := "delete from " + operatorInfoTN + " where operator_id = ?"
+
+	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %d]", strSql, optID)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
-	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
+	if _, err := do.ExecContext(ctx, strSql, optID); err != nil {
 		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
 }
+
 func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
 	offset int, order string, od int) ([]*model.OperatorInfo, error) {
 	var OperatorInfoSlice []*model.OperatorInfo
@@ -133,30 +176,26 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 // 	return OperatorInfoSlice, nil
 // }
 
-func (dao *OperatorInfoDao) Update(ctx context.Context, do DbOperator, strName string,
+func (dao *OperatorInfoDao) Update(ctx context.Context, do DbOperator, optID int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"CompanyId": "company_id", "Password": "password",
-		"Job": "job", "Department": "department", "Status": "status", "Role": "role",
-		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + operatorInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil
 	}
-	strSql += " where name = ?"
-	values = append(values, strName)
+	strSql += " where operator_id = ?"
+	values = append(values, optID)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

@@ -18,6 +18,7 @@ type IDInfoService struct {
 	genComIdInfo    *aUtils.GenIdInfo
 	genVouIdInfo    *aUtils.GenIdInfo
 	genVouRecIdInfo *aUtils.GenIdInfo
+	genOptIdInfo    *aUtils.GenIdInfo
 }
 
 func NewIDInfoService() *IDInfoService {
@@ -57,6 +58,11 @@ func (is *IDInfoService) InitIdResource() CcError {
 		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
+	is.genOptIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
+	if err != nil {
+		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
+	}
 	return nil
 }
 
@@ -66,6 +72,7 @@ func (is *IDInfoService) CreateIDInfo(params *model.IDInfoParams,
 	is.logger.Info("CreateIDInfo method start")
 	idInfo := new(model.IDInfo)
 	idInfo.CompanyID = *params.CompanyID
+	idInfo.OperatorID = *params.OperatorID
 	idInfo.SubjectID = *params.SubjectID
 	idInfo.VoucherID = *params.VoucherID
 	idInfo.VoucherRecordID = *params.VoucherRecordID
@@ -85,6 +92,7 @@ func (is *IDInfoService) IdInfoModelToView(idInfo *model.IDInfo) *model.IDInfoVi
 	idInfoView.SubjectID = idInfo.SubjectID
 	idInfoView.VoucherID = idInfo.VoucherID
 	idInfoView.VoucherRecordID = idInfo.VoucherRecordID
+	idInfoView.OperatorID = idInfo.OperatorID
 	return idInfoView
 }
 
@@ -124,14 +132,16 @@ func (is *IDInfoService) UpdateIdInfo(params map[string]interface{}) CcError {
 func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	is.logger.Info("WriteIdResourceToDb method begin")
 	subId := is.genSubIdInfo.GetId()
+	optId := is.genOptIdInfo.GetId()
 	comId := is.genComIdInfo.GetId()
 	vouId := is.genVouIdInfo.GetId()
 	vouRecId := is.genVouRecIdInfo.GetId()
 	updateFields := make(map[string]interface{})
-	updateFields["SubjectID"] = subId
-	updateFields["CompanyID"] = comId
-	updateFields["VoucherID"] = vouId
-	updateFields["VoucherRecordID"] = vouRecId
+	updateFields["subjectId"] = subId
+	updateFields["operatorId"] = optId
+	updateFields["companyId"] = comId
+	updateFields["voucherId"] = vouId
+	updateFields["voucherRecordId"] = vouRecId
 	ccErr := is.UpdateIdInfo(updateFields)
 	if ccErr != nil {
 		is.logger.Error("WriteIdResourceToDb failed,errInfo:%s", ccErr.Error())

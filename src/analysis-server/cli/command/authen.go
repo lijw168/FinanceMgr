@@ -45,16 +45,20 @@ func newLoginCmd() *cobra.Command {
 }
 
 func newLogoutCmd() *cobra.Command {
-	var opts options.NameOptions
 	cmd := &cobra.Command{
-		Use:   "logout [OPTIONS] name",
+		Use:   "logout [OPTIONS] operatorID",
 		Short: "user logout",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
 				return
 			}
-			opts.Name = args[0]
+			var opts options.BaseOptions
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.ID = id
+			}
 			if err := Sdk.Logout(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
@@ -64,7 +68,7 @@ func newLogoutCmd() *cobra.Command {
 }
 
 func newLoginListCmd() *cobra.Command {
-	defCs := []string{"Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
+	defCs := []string{"OperatorId", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
 		Use:   "loginInfo-list ",
 		Short: "List operators Support Filter",
@@ -85,9 +89,9 @@ func newLoginListCmd() *cobra.Command {
 
 //由于一个用户，可能有多条loginInfo记录，所以该函数通过list函数获取相应的数据。
 func newLoginShowCmd() *cobra.Command {
-	defCs := []string{"Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
+	defCs := []string{"OperatorID", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
-		Use:   "loginInfo-show [OPTIONS] username",
+		Use:   "loginInfo-show [OPTIONS] operatorID",
 		Short: "Show the information of logined user",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -100,7 +104,12 @@ func newLoginShowCmd() *cobra.Command {
 		opts.Limit = -1
 		opts.Offset = 0
 		opts.Filter = make(map[string]interface{})
-		opts.Filter["name"] = args[0]
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["operatorId"] = id
+		}
+
 		if _, views, err := Sdk.ListLoginInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
@@ -111,9 +120,9 @@ func newLoginShowCmd() *cobra.Command {
 }
 
 func newStatusCheckoutCmd() *cobra.Command {
-	defCs := []string{"Name", "Status"}
+	defCs := []string{"OperatorID", "Name", "Status"}
 	cmd := &cobra.Command{
-		Use:   "status-checkout [OPTIONS] username",
+		Use:   "status-checkout [OPTIONS] operatorID",
 		Short: "checkout the user status",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -122,8 +131,13 @@ func newStatusCheckoutCmd() *cobra.Command {
 			cmd.Help()
 			return
 		}
-		var opts options.NameOptions
-		opts.Name = args[0]
+		var opts options.BaseOptions
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.ID = id
+		}
+
 		if views, err := Sdk.StatusCheckout(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {

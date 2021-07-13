@@ -14,6 +14,7 @@ type DescData struct {
 //AccSubjectView ...
 type AccSubjectView struct {
 	SubjectID    int    `json:"subjectId"`
+	CompanyID    int    `json:"companyId"`
 	CommonID     string `json:"commonId"`
 	SubjectName  string `json:"subjectName"`
 	SubjectLevel int    `json:"subjectLevel"`
@@ -34,6 +35,7 @@ type CompanyView struct {
 
 //LoginInfoView ...
 type LoginInfoView struct {
+	OperatorID  int       `json:"operatorId"`
 	Name        string    `json:"name"`
 	Status      int       `json:"status"`
 	ClientIp    string    `json:"clientIp"`
@@ -43,11 +45,13 @@ type LoginInfoView struct {
 }
 
 type StatusCheckoutView struct {
-	Name   string `json:"name"`
-	Status int    `json:"status"`
+	OperatorID int    `json:"operatorId"`
+	Name       string `json:"name"`
+	Status     int    `json:"status"`
 }
 
 type OperatorInfoView struct {
+	OperatorID int       `json:"operatorId"`
 	CompanyID  int       `json:"companyId"`
 	Name       string    `json:"name"`
 	Password   string    `json:"password"`
@@ -90,8 +94,9 @@ type VoucherView struct {
 }
 
 type IDInfoView struct {
-	VoucherID       int `json:"voucherID"`
-	CompanyID       int `json:"companyID"`
-	SubjectID       int `json:"subjectID"`
-	VoucherRecordID int `json:"voucher_recordID"`
+	VoucherID       int `json:"voucherId"`
+	OperatorID      int `json:"operatorId"`
+	CompanyID       int `json:"companyId"`
+	SubjectID       int `json:"subjectId"`
+	VoucherRecordID int `json:"voucherRecordId"`
 }

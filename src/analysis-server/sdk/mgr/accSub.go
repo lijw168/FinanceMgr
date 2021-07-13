@@ -20,11 +20,14 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 		return nil, errors.New("CommonID is required")
 	case opts.SubjectLevel <= 0:
 		return nil, errors.New("SubjectLevel is required")
+	case opts.CompanyID <= 0:
+		return nil, errors.New("CompanyID is required")
 	}
 	params := model.CreateSubjectParams{
 		SubjectName:  &opts.SubjectName,
 		CommonID:     &opts.CommonID,
 		SubjectLevel: &opts.SubjectLevel,
+		CompanyID:    &opts.CompanyID,
 	}
 
 	result, err := util.DoRequest(action, params)
@@ -70,6 +73,7 @@ func (as *AccSub) GetAccSub(opts *options.BaseOptions) (*model.AccSubjectView, e
 	}
 	return view, nil
 }
+
 func (as *AccSub) ListAccSub_json(params []byte) ([]byte, error) {
 	action := "ListAccSub"
 	return ListOpsResources_json(action, params)
@@ -106,6 +110,9 @@ func (as *AccSub) UpdateAccSub(opts *options.ModifySubjectOptions) error {
 	}
 	if opts.CommonID != "" {
 		param.CommonID = &opts.CommonID
+	}
+	if opts.CompanyID > 0 {
+		param.CompanyID = &opts.CompanyID
 	}
 	_, err := util.DoRequest(action, param)
 	return err

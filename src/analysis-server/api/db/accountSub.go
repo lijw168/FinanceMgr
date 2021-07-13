@@ -17,30 +17,30 @@ type AccSubDao struct {
 
 var (
 	accSubInfoTN     = "accountSubject"
-	accSubInfoFields = []string{"subject_id", "common_id", "subject_name", "subject_level"}
+	accSubInfoFields = []string{"subject_id", "company_id", "common_id", "subject_name", "subject_level"}
 	scanAccSubTask   = func(r DbScanner, st *model.AccSubject) error {
-		return r.Scan(&st.SubjectID, &st.CommonID, &st.SubjectName, &st.SubjectLevel)
+		return r.Scan(&st.SubjectID, &st.CompanyID, &st.CommonID, &st.SubjectName, &st.SubjectLevel)
 	}
 )
 
-func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strName string) (*model.AccSubject, error) {
-	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_name=?"
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByName] [sql: %s ,values: %s]", strSql, strName)
-	var accSub = &model.AccSubject{}
-	start := time.Now()
-	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByName] [SqlElapsed: %v]", time.Since(start))
-	}()
-	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, strName), accSub); err {
-	case nil:
-		return accSub, nil
-	case sql.ErrNoRows:
-		return nil, err
-	default:
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByName] [scanAccSubTask: %s]", err.Error())
-		return nil, err
-	}
-}
+// func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strName string) (*model.AccSubject, error) {
+// 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_name=?"
+// 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByName] [sql: %s ,values: %s]", strSql, strName)
+// 	var accSub = &model.AccSubject{}
+// 	start := time.Now()
+// 	defer func() {
+// 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByName] [SqlElapsed: %v]", time.Since(start))
+// 	}()
+// 	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, strName), accSub); err {
+// 	case nil:
+// 		return accSub, nil
+// 	case sql.ErrNoRows:
+// 		return nil, err
+// 	default:
+// 		dao.Logger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByName] [scanAccSubTask: %s]", err.Error())
+// 		return nil, err
+// 	}
+// }
 
 func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectID int) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_id=?"
@@ -81,9 +81,20 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	return c, err
 }
 
+//检查在同一个company内是否subjectName和commonId是否有重复的记录
+func (dao *AccSubDao) CheckDuplication(ctx context.Context, do DbOperator, companyId int,
+	commonId, subjectName string) (int64, error) {
+	var c int64
+	strSql := "select count(1) from " + accSubInfoTN + "where company_id = ? and commonId = ? or subject_name = ?"
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql, companyId, commonId, subjectName).Scan(&c)
+	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	return c, err
+}
+
 func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSubject) error {
-	strSql := "insert into " + accSubInfoTN + " (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?)"
-	values := []interface{}{st.SubjectID, st.CommonID, st.SubjectName, st.SubjectLevel}
+	strSql := "insert into " + accSubInfoTN + " (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?, ?)"
+	values := []interface{}{st.SubjectID, st.CompanyID, st.CommonID, st.SubjectName, st.SubjectLevel}
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -95,20 +106,20 @@ func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSu
 	return nil
 }
 
-func (dao *AccSubDao) DeleteByName(ctx context.Context, do DbOperator, strName string) error {
-	strSql := "delete from " + accSubInfoTN + " where subject_name = ?"
+// func (dao *AccSubDao) DeleteByName(ctx context.Context, do DbOperator, strName string) error {
+// 	strSql := "delete from " + accSubInfoTN + " where subject_name = ?"
 
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByName] [sql: %s, id: %s]", strSql, strName)
-	start := time.Now()
-	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/DeleteByName] [SqlElapsed: %v]", time.Since(start))
-	}()
-	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/DeleteByName] [do.Exec: %s]", err.Error())
-		return err
-	}
-	return nil
-}
+// 	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByName] [sql: %s, id: %s]", strSql, strName)
+// 	start := time.Now()
+// 	defer func() {
+// 		dao.Logger.InfoContext(ctx, "[accountSubject/db/DeleteByName] [SqlElapsed: %v]", time.Since(start))
+// 	}()
+// 	if _, err := do.ExecContext(ctx, strSql, strName); err != nil {
+// 		dao.Logger.ErrorContext(ctx, "[accountSubject/db/DeleteByName] [do.Exec: %s]", err.Error())
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID int) error {
 	strSql := "delete from " + accSubInfoTN + " where subject_id = ?"
@@ -211,34 +222,34 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 	return nil
 }
 
-func (dao *AccSubDao) UpdateByName(ctx context.Context, do DbOperator, strSubName string,
-	params map[string]interface{}) error {
-	//var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
-	strSql := "update " + accSubInfoTN + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where subject_name = ?"
-	values = append(values, strSubName)
-	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateByName] [sql: %s, values: %v]", strSql, values)
-	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/UpdateByName] [SqlElapsed: %v]", time.Since(start))
-	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/UpdateByName] [do.Exec: %s]", err.Error())
-		return err
-	}
-	return nil
-}
+// func (dao *AccSubDao) UpdateByName(ctx context.Context, do DbOperator, strSubName string,
+// 	params map[string]interface{}) error {
+// 	//var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
+// 	strSql := "update " + accSubInfoTN + " set "
+// 	var values []interface{}
+// 	var first bool = true
+// 	for key, value := range params {
+// 		dbKey := camelToUnix(key)
+// 		if first {
+// 			strSql += dbKey + "=?"
+// 			first = false
+// 		} else {
+// 			strSql += "," + dbKey + "=?"
+// 		}
+// 		values = append(values, value)
+// 	}
+// 	if first {
+// 		return nil
+// 	}
+// 	strSql += " where subject_name = ?"
+// 	values = append(values, strSubName)
+// 	start := time.Now()
+// 	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateByName] [sql: %s, values: %v]", strSql, values)
+// 	_, err := do.ExecContext(ctx, strSql, values...)
+// 	dao.Logger.InfoContext(ctx, "[accountSubject/db/UpdateByName] [SqlElapsed: %v]", time.Since(start))
+// 	if err != nil {
+// 		dao.Logger.ErrorContext(ctx, "[accountSubject/db/UpdateByName] [do.Exec: %s]", err.Error())
+// 		return err
+// 	}
+// 	return nil
+// }

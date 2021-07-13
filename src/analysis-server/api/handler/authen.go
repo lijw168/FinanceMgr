@@ -30,6 +30,7 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
+		filterMap["operatorId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["name"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["clientIp"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["status"] = utils.Attribute{Type: utils.T_Int, Val: nil}
@@ -81,7 +82,7 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DescribeNameParams)
+	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
 		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/StatusCheckout] [HttpRequestParse: %v]", err)
@@ -90,13 +91,13 @@ func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrNull, service.ErrMiss, service.ErrName, service.ErrNull)
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrNull, service.ErrMiss, service.ErrId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
-	stCheckoutView, ccErr := ah.AuthService.StatusCheckout(r.Context(), *params.Name, requestId)
+	stCheckoutView, ccErr := ah.AuthService.StatusCheckout(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		ah.Logger.WarnContext(r.Context(), "[AuthenHandlers/StatusCheckout] [AuthService.StatusCheckout: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
@@ -123,18 +124,12 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if params.CompanyID == nil && *params.CompanyID <= 0 {
-		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrId, service.ErrNull)
+		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
 	//check out ,whether the company exists.
 	requestId := ah.GetTraceId(r)
-	comView, ccErr := ah.ComService.GetCompanyById(r.Context(), *params.CompanyID, requestId)
-	if comView == nil || ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[login] [the company is not exist. companyId:%d]", *params.CompanyID)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
-		return
-	}
 	if params.Name == nil && *params.Name == "" {
 		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrName, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
@@ -146,7 +141,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//authentication the user and password
-	optView, ccErr := ah.OptInfoService.GetOperatorInfoByName(r.Context(), *params.Name, requestId)
+	optView, ccErr := ah.OptInfoService.GetOperatorInfoByName(r.Context(), *params.Name, *params.CompanyID, requestId)
 	if ccErr != nil {
 		if ccErr.GetCode() == cons.CodeOptInfoNotExist {
 			ccErr.SetCode(cons.CodeUserNameWrong)
@@ -155,6 +150,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	//暂时先这样认证
 	if *params.Password != optView.Password {
 		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/login/ServerHTTP] [authentication failed. error: the password is wrong]")
 		ccErr := service.NewCcError(cons.CodePasswdWrong, service.ErrLogin, service.ErrInvalid, service.ErrPasswd, service.ErrNull)
@@ -164,7 +160,7 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	//generate login information
 	var loginInfo model.LoginInfoParams
 	loginInfo.Name = params.Name
-	//loginInfo.Status = &optView.Status
+	loginInfo.OperatorID = &(optView.OperatorID)
 	clientAddr := (strings.Split(r.RemoteAddr, ":"))[0]
 	loginInfo.ClientIp = &clientAddr
 	logInfoView, ccErr := ah.AuthService.Login(r.Context(), &loginInfo, requestId)
@@ -174,13 +170,13 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ah.Logger.InfoContext(r.Context(), "login succeed.")
-	GAccessTokenH.insertToken(logInfoView.AccessToken, logInfoView.Name)
+	GAccessTokenH.insertToken(logInfoView.AccessToken, logInfoView.OperatorID)
 	ah.Response(r.Context(), ah.Logger, w, nil, logInfoView)
 	return
 }
 
 func (ah *AuthenHandlers) Logout(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DescribeNameParams)
+	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
 		ah.Logger.ErrorContext(r.Context(), "[AuthenHandlers/Logout/ServerHTTP] [HttpRequestParse: %v]", err)
@@ -188,12 +184,12 @@ func (ah *AuthenHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	if params.Name == nil || *params.Name == "" {
-		ccErr := service.NewError(service.ErrLogout, service.ErrMiss, service.ErrName, service.ErrNull)
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrLogout, service.ErrMiss, service.ErrId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	ccErr := ah.AuthService.Logout(r.Context(), *params.Name)
+	ccErr := ah.AuthService.Logout(r.Context(), *params.ID)
 	if ccErr != nil {
 		ah.Logger.WarnContext(r.Context(), "[AuthenHandlers/Logout/ServerHTTP] [AuthService.Logout: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)

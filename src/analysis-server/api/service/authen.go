@@ -38,6 +38,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	//generate login information
 	loginInfo := new(model.LoginInfo)
 	loginInfo.Name = *params.Name
+	loginInfo.OperatorID = *params.OperatorID
 	loginInfo.Status = utils.Online
 	loginInfo.ClientIp = *params.ClientIp
 	loginInfo.BeginedAt = time.Now()
@@ -47,12 +48,13 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	loginView := as.LoginInfoMdelToView(loginInfo)
+
 	as.Logger.InfoContext(ctx, "CreateLoginInfo method end,login name:%s", *params.Name)
 	//update the operator information
 	updateParams := make(map[string]interface{}, 2)
 	updateParams["UpdatedAt"] = time.Now()
 	updateParams["Status"] = utils.Online
-	err = as.OptInfoDao.Update(ctx, tx, *params.Name, updateParams)
+	err = as.OptInfoDao.Update(ctx, tx, *params.OperatorID, updateParams)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -65,7 +67,7 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	return loginView, nil
 }
 
-func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError {
+func (as *AuthenService) Logout(ctx context.Context, optId int) CcError {
 	FuncName := "AuthenService/Logout"
 	bIsRollBack := true
 	tx, err := as.Db.Begin()
@@ -79,7 +81,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 		}
 	}()
 
-	_, err = as.LogInfoDao.Get(ctx, tx, strUserName)
+	_, err = as.LogInfoDao.Get(ctx, tx, optId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -89,7 +91,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	}
 	//generate login information
 	filterFields := make(map[string]interface{})
-	filterFields["Name"] = strUserName
+	filterFields["operator_id"] = optId
 	filterFields["Status"] = utils.Online
 	updateFields := make(map[string]interface{})
 	updateFields["EndedAt"] = time.Now()
@@ -102,7 +104,7 @@ func (as *AuthenService) Logout(ctx context.Context, strUserName string) CcError
 	delete(updateFields, "EndedAt")
 	updateFields["UpdatedAt"] = time.Now()
 	//updateFields["Status"] = utils.Offline
-	err = as.OptInfoDao.Update(ctx, tx, strUserName, updateFields)
+	err = as.OptInfoDao.Update(ctx, tx, optId, updateFields)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -122,7 +124,7 @@ func (as *AuthenService) ListLoginInfo(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "name", "clientIp", "beginedAt", "endedAt", "status":
+			case "operatorId", "name", "clientIp", "beginedAt", "endedAt", "status":
 				filterFields[*f.Field] = f.Value
 			default:
 				return OptViewSlice, 0, NewError(ErrOperator, ErrUnsupported, ErrField, *f.Field)
@@ -159,6 +161,7 @@ func (as *AuthenService) ListLoginInfo(ctx context.Context,
 func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.LoginInfoView {
 	loginView := new(model.LoginInfoView)
 	loginView.Name = loginInfo.Name
+	loginView.OperatorID = loginInfo.OperatorID
 	loginView.ClientIp = loginInfo.ClientIp
 	loginView.Status = loginInfo.Status
 	loginView.BeginedAt = loginInfo.BeginedAt
@@ -167,8 +170,8 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 	return loginView
 }
 
-func (as *AuthenService) StatusCheckout(ctx context.Context, strUserName string, requestId string) (*model.StatusCheckoutView, CcError) {
-	optInfo, err := as.OptInfoDao.Get(ctx, as.Db, strUserName)
+func (as *AuthenService) StatusCheckout(ctx context.Context, optId int, requestId string) (*model.StatusCheckoutView, CcError) {
+	optInfo, err := as.OptInfoDao.GetOptInfoById(ctx, as.Db, optId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -177,6 +180,7 @@ func (as *AuthenService) StatusCheckout(ctx context.Context, strUserName string,
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	stCheckoutView := new(model.StatusCheckoutView)
+	stCheckoutView.OperatorID = optInfo.OperatorID
 	stCheckoutView.Name = optInfo.Name
 	stCheckoutView.Status = optInfo.Status
 	return stCheckoutView, nil

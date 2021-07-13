@@ -6,15 +6,17 @@ import (
 
 //LoginInfo ...
 type LoginInfo struct {
-	Name      string
-	Status    int
-	ClientIp  string
-	BeginedAt time.Time
-	EndedAt   time.Time
+	OperatorID int
+	Name       string
+	Status     int
+	ClientIp   string
+	BeginedAt  time.Time
+	EndedAt    time.Time
 }
 
 //OperatorInfo ...
 type OperatorInfo struct {
+	OperatorID int
 	CompanyID  int
 	Name       string
 	Password   string
@@ -46,6 +48,7 @@ type VoucherRecord struct {
 //AccSubject ...
 type AccSubject struct {
 	SubjectID    int
+	CompanyID    int
 	CommonID     string
 	SubjectName  string
 	SubjectLevel int
@@ -79,6 +82,7 @@ type CompanyInfo struct {
 //IDInfo ...
 type IDInfo struct {
 	VoucherID       int
+	OperatorID      int
 	CompanyID       int
 	SubjectID       int
 	VoucherRecordID int

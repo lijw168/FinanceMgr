@@ -21,7 +21,7 @@ func NewAccSubCommand(cmd *cobra.Command) {
 func newAccSubCreateCmd() *cobra.Command {
 	var opts options.CreateSubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level",
+		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level companyId",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -29,8 +29,9 @@ func newAccSubCreateCmd() *cobra.Command {
 				return
 			}
 			var (
-				err      error
-				subLevel int
+				err       error
+				subLevel  int
+				companyID int
 			)
 
 			opts.CommonID = args[0]
@@ -40,6 +41,10 @@ func newAccSubCreateCmd() *cobra.Command {
 				fmt.Println("change to int fail", args[2])
 			}
 			opts.SubjectLevel = subLevel
+			if companyID, err = strconv.Atoi(args[3]); err != nil {
+				fmt.Println("change to int fail", args[3])
+			}
+			opts.CompanyID = companyID
 
 			if hv, err := Sdk.CreateAccSub(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -56,7 +61,7 @@ func newAccSubDeleteCmd() *cobra.Command {
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel"}
+	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list",
 		Short: "List account subjects Support Filter",
@@ -109,7 +114,7 @@ func newAccSubShowCmd() *cobra.Command {
 func newAccSubUpdateCmd() *cobra.Command {
 	var opts options.ModifySubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-update [OPTIONS] subjectID commonID subject_name subject_level ",
+		Use:   "accSub-update [OPTIONS] subjectID commonID subject_name subject_level company_id ",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -129,6 +134,12 @@ func newAccSubUpdateCmd() *cobra.Command {
 			} else {
 				opts.SubjectLevel = subLevel
 			}
+			if companyID, err := strconv.Atoi(args[4]); err != nil {
+				fmt.Println("change to int fail", args[4])
+			} else {
+				opts.CompanyID = companyID
+			}
+
 			if err := Sdk.UpdateAccSub(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}

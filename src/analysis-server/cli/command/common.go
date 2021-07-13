@@ -13,6 +13,7 @@ const (
 	resource_type_company
 	resource_type_voucher
 	resource_type_voucher_record
+	resource_type_operator
 )
 
 func deleteCmd(rsc int, handler func(*options.BaseOptions) error) *cobra.Command {
@@ -52,6 +53,8 @@ func getResourceCmdName(rsc int) string {
 		return "voucher"
 	case resource_type_voucher_record:
 		return "vouRecord"
+	case resource_type_operator:
+		return "operator"
 	default:
 		panic("Unsupport resource type")
 	}

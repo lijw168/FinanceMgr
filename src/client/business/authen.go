@@ -9,19 +9,20 @@ import (
 )
 
 type Authen struct {
-	strUserName string
-	//strPasswd      string
+	iOperatorID    int
+	strUserName    string
 	strAccessToken string
 	userStatus     int
 	mu             sync.Mutex
 }
 
-func (auth *Authen) setAuthenInfo(strUserName, strAccessToken string, userStatus int) {
+func (auth *Authen) setAuthenInfo(strUserName, strAccessToken string, iOperatorID, iUserStatus int) {
+	auth.iOperatorID = iOperatorID
 	auth.strUserName = strUserName
 	auth.strAccessToken = strAccessToken
-	auth.userStatus = userStatus
-	logger.LogInfo("authenInfo: {user name:", strUserName, ";access_token:", strAccessToken,
-		";userStatus:", userStatus, "}")
+	auth.userStatus = iUserStatus
+	logger.LogInfo("authenInfo: {operatorId:", iOperatorID, ";user name:", strUserName,
+		";access_token:", strAccessToken, ";userStatus:", iUserStatus, "}")
 }
 
 func (auth *Authen) GetUserStatus() int {
@@ -36,27 +37,6 @@ func (auth *Authen) setUserStatus(status int) {
 	auth.userStatus = status
 }
 
-// func (auth *Authen) UserLogin(param []byte) int {
-// 	logger.LogInfo("userLogin begin")
-// 	errCode := util.ErrNull
-// 	var opts options.AuthenInfoOptions
-// 	if err := json.Unmarshal(param, &opts); err != nil {
-// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
-// 		errCode = util.ErrUnmarshalFailed
-// 		return errCode
-// 	}
-// 	if view, err := cSdk.Login(&opts); err != nil {
-// 		errCode = util.ErrUserLoginFailed
-// 		logger.Error("the Login failed,err:%v", err.Error())
-// 	} else {
-// 		logger.Debug("Login succeed;view:%v", view)
-// 		auth.setAuthenInfo(opts.Name, view.AccessToken, util.Online)
-// 		cSdk.SetAccessToken(view.AccessToken)
-// 	}
-// 	logger.LogInfo("userLogin end")
-// 	return errCode
-// }
-
 func (auth *Authen) UserLogin(param []byte) int {
 	logger.LogInfo("userLogin begin")
 	errCode := util.ErrNull
@@ -65,7 +45,7 @@ func (auth *Authen) UserLogin(param []byte) int {
 		logger.Error("the Login failed,err:%v", err.Error())
 	} else {
 		logger.Debug("Login succeed;view:%v", view)
-		auth.setAuthenInfo(view.Name, view.AccessToken, view.Status)
+		auth.setAuthenInfo(view.Name, view.AccessToken, view.OperatorID, view.Status)
 		cSdk.SetAccessToken(view.AccessToken)
 	}
 	logger.LogInfo("userLogin end")
@@ -75,14 +55,14 @@ func (auth *Authen) UserLogin(param []byte) int {
 func (auth *Authen) Logout() int {
 	logger.LogInfo("logout,begin")
 	errCode := util.ErrNull
-	var opts options.NameOptions
-	opts.Name = auth.strUserName
+	var opts options.BaseOptions
+	opts.ID = auth.iOperatorID
 	if err := cSdk.Logout(&opts); err != nil {
 		errCode = util.ErrUserLogoutFailed
 		logger.Error("the Logout failed,err:%v", err.Error())
 	} else {
 		logger.Debug("logout succeed")
-		auth.setAuthenInfo("", "", util.Offline)
+		auth.setAuthenInfo("", "", 0, util.Offline)
 		cSdk.SetAccessToken("")
 	}
 	logger.LogInfo("logout,end")
@@ -91,16 +71,15 @@ func (auth *Authen) Logout() int {
 
 func (auth *Authen) OnlineCheck() int {
 	errCode := util.ErrNull
-	//userStatus := util.InvalidStatus
-	var opts options.NameOptions
-	opts.Name = auth.strUserName
+	var opts options.BaseOptions
+	opts.ID = auth.iOperatorID
 	if view, err := cSdk.StatusCheckout(&opts); err != nil {
 		errCode = util.ErrOnlineCheckout
 		logger.Error("OnlineCheck failed,err:%v", err.Error())
 	} else {
 		//userStatus = view.Status
 		if auth.GetUserStatus() != view.Status {
-			auth.setAuthenInfo("", "", view.Status)
+			auth.setAuthenInfo("", "", 0, view.Status)
 			cSdk.SetAccessToken("")
 			logger.Debug("OnlineCheck succeed;the user status has been to convert to the %v", view)
 		}

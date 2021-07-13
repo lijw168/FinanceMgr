@@ -29,6 +29,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["commonId"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
@@ -128,6 +129,11 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	if params.CompanyID == nil || *(params.CompanyID) <= 0 {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCompanyId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
 
 	requestId := ah.GetTraceId(r)
 	accSubView, ccErr := ah.AccSubService.CreateAccSub(r.Context(), params, requestId)
@@ -164,7 +170,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 			ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 			return
 		}
-		updateFields["SubjectName"] = *params.SubjectName
+		updateFields["subjectName"] = *params.SubjectName
 	}
 	if params.CommonID != nil {
 		if utf8.RuneCountInString(*params.CommonID) > 10 || !utils.VerCommonIdP(*params.CommonID) {
@@ -172,10 +178,13 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 			ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 			return
 		}
-		updateFields["CommonId"] = *params.CommonID
+		updateFields["commonId"] = *params.CommonID
 	}
 	if params.SubjectLevel != nil {
-		updateFields["SubjectLevel"] = *params.SubjectLevel
+		updateFields["subjectLevel"] = *params.SubjectLevel
+	}
+	if params.CompanyID != nil {
+		updateFields["companyId"] = *params.CompanyID
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrChangeContent, service.ErrNull)

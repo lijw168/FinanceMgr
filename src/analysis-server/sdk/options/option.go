@@ -42,6 +42,7 @@ type CreateOptInfoOptions struct {
 }
 
 type ModifyOptInfoOptions struct {
+	OperatorID int
 	Name       string
 	Password   string
 	Job        string
@@ -121,6 +122,7 @@ type ModifyCompanyOptions struct {
 
 // account subject option ...
 type CreateSubjectOptions struct {
+	CompanyID    int
 	CommonID     string
 	SubjectName  string
 	SubjectLevel int
@@ -128,6 +130,7 @@ type CreateSubjectOptions struct {
 
 type ModifySubjectOptions struct {
 	SubjectID    int
+	CompanyID    int
 	CommonID     string
 	SubjectName  string
 	SubjectLevel int

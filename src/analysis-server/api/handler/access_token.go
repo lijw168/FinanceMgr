@@ -13,7 +13,7 @@ import (
 
 type AccessTokenHandler struct {
 	loginCheckMu      sync.RWMutex
-	tokenToNameMap    map[string]string
+	tokenToNameMap    map[string]int
 	expirationCheckMu sync.RWMutex
 	tokenToTimeMap    map[string]int64
 	quitCheckCh       chan bool
@@ -23,7 +23,7 @@ type AccessTokenHandler struct {
 
 func NewAccessTokenHandler() *AccessTokenHandler {
 	accTokenHandler := AccessTokenHandler{}
-	accTokenHandler.tokenToNameMap = make(map[string]string)
+	accTokenHandler.tokenToNameMap = make(map[string]int)
 	accTokenHandler.tokenToTimeMap = make(map[string]int64)
 	accTokenHandler.quitCheckCh = make(chan bool, 1)
 	return &accTokenHandler
@@ -34,9 +34,9 @@ func (at *AccessTokenHandler) InitAccessTokenHandler(authService *service.Authen
 	at.logger = logger
 }
 
-func (at *AccessTokenHandler) insertToken(accessToken, userName string) {
+func (at *AccessTokenHandler) insertToken(accessToken string, iOptID int) {
 	at.loginCheckMu.Lock()
-	at.tokenToNameMap[accessToken] = userName
+	at.tokenToNameMap[accessToken] = iOptID
 	at.loginCheckMu.Unlock()
 	at.expirationCheckMu.Lock()
 	at.tokenToTimeMap[accessToken] = time.Now().Unix() + (int64)(keepOnlineTime)
@@ -58,10 +58,10 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 	if len(accessTokenSlice) == 0 {
 		return
 	}
-	var expiredUserName = []string{}
+	var expiredOptID = []int{}
 	at.loginCheckMu.Lock()
 	for _, token := range accessTokenSlice {
-		expiredUserName = append(expiredUserName, at.tokenToNameMap[token])
+		expiredOptID = append(expiredOptID, at.tokenToNameMap[token])
 		delete(at.tokenToNameMap, token)
 	}
 	at.loginCheckMu.Unlock()
@@ -72,8 +72,8 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 	at.expirationCheckMu.Unlock()
 	//call logout service
 	ctx := context.TODO()
-	for _, name := range expiredUserName {
-		ccErr := at.authService.Logout(ctx, name)
+	for _, optId := range expiredOptID {
+		ccErr := at.authService.Logout(ctx, optId)
 		if ccErr != nil {
 			at.logger.WarnContext(ctx, "[delBatchToken] [AuthService.Logout,failed,errInfo: %s]", ccErr.Detail())
 			return

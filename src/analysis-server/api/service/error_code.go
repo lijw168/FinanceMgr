@@ -45,6 +45,7 @@ const (
 	ErrIds           = "ids"
 	ErrName          = "name"
 	ErrCommonId      = "commonId"
+	ErrCompanyId     = "companyId"
 	ErrCookie        = "cookie"
 	ErrPasswd        = "password"
 	ErrVouMon        = "voucher_month"
@@ -62,7 +63,8 @@ const (
 )
 
 const (
-	ErrRecordExist = "该记录已存在"
+	ErrRecordExist    = "该记录已存在"
+	ErrFiledDuplicate = "存在重复的字段"
 )
 
 /*

@@ -55,26 +55,11 @@ func newOperatorCreateCmd() *cobra.Command {
 }
 
 func newOperatorDeleteCmd() *cobra.Command {
-	var opts options.NameOptions
-	cmd := &cobra.Command{
-		Use:   "operator-delete [OPTIONS] name",
-		Short: "Delete a operator",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			opts.Name = args[0]
-			if err := Sdk.DeleteOperator(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	return cmd
+	return deleteCmd(resource_type_operator, Sdk.DeleteOperator)
 }
 
 func newOperatorListCmd() *cobra.Command {
-	defCs := []string{"CompanyID", "Name", "Password", "Job", "Department", "Status", "Role"}
+	defCs := []string{"OperatorID", "CompanyID", "Name", "Password", "Job", "Department", "Status", "Role"}
 	cmd := &cobra.Command{
 		Use:   "operator-list ",
 		Short: "List operators Support Filter",
@@ -98,15 +83,19 @@ func newOperatorListCmd() *cobra.Command {
 
 func newOperatorShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "operator-show [OPTIONS] operatorName",
+		Use:   "operator-show [OPTIONS] operatorID",
 		Short: "Show a operator information",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
 				return
 			}
-			var opts options.NameOptions
-			opts.Name = args[0]
+			var opts options.BaseOptions
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.ID = id
+			}
 			view, err := Sdk.GetOperatorInfo(&opts)
 			if err != nil {
 				util.FormatErrorOutput(err)
@@ -121,14 +110,19 @@ func newOperatorShowCmd() *cobra.Command {
 func newOperatorUpdateCmd() *cobra.Command {
 	var opts options.ModifyOptInfoOptions
 	cmd := &cobra.Command{
-		Use:   "operator-update [OPTIONS] name job",
+		Use:   "operator-update [OPTIONS] operatorID job",
 		Short: "update a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				cmd.Help()
 				return
 			}
-			opts.Name = args[0]
+			//opts.Name = args[0]
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.OperatorID = id
+			}
 			//for test
 			opts.Job = args[1]
 			if err := Sdk.UpdateOperator(&opts); err != nil {

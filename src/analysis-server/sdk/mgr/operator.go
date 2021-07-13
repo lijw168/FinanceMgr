@@ -50,14 +50,9 @@ func (or *Operator) CreateOperator_json(params []byte) (*model.OperatorInfoView,
 	return view, nil
 }
 
-func (or *Operator) DeleteOperator(opts *options.NameOptions) error {
+func (or *Operator) DeleteOperator(opts *options.BaseOptions) error {
 	action := "DeleteOperator"
-	switch {
-	case opts.Name == "":
-		return errors.New("Name is required")
-	}
-	params := model.DeleteOperatorParams{Name: &opts.Name}
-	_, err := util.DoRequest(action, params)
+	err := DeleteOpsResource(action, opts)
 	if err != nil {
 		return err
 	}
@@ -65,19 +60,14 @@ func (or *Operator) DeleteOperator(opts *options.NameOptions) error {
 	return nil
 }
 
-func (or *Operator) GetOperatorInfo(opts *options.NameOptions) (*model.OperatorInfoView, error) {
+func (or *Operator) GetOperatorInfo(opts *options.BaseOptions) (*model.OperatorInfoView, error) {
 	action := "GetOperatorInfo"
-	switch {
-	case opts.Name == "":
-		return nil, errors.New("Name is required")
-	}
-	params := model.DescribeNameParams{Name: &opts.Name}
-	result, err := util.DoRequest(action, params)
+	dr, err := DescribeOpsResource(action, opts)
 	if err != nil {
 		return nil, err
 	}
 	view := &model.OperatorInfoView{}
-	err = util.FormatView(result.Data, view)
+	err = util.FormatView(dr, view)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +94,9 @@ func (or *Operator) ListOperatorInfo_json(params []byte) ([]byte, error) {
 
 func (or *Operator) UpdateOperator(opts *options.ModifyOptInfoOptions) error {
 	action := "UpdateOperator"
-	if opts.Name == "" {
-		return errors.New("Name is required")
+
+	if opts.OperatorID <= 0 {
+		return errors.New("OperatorID is required")
 	}
 	param := model.ModifyOptInfoParams{}
 	if opts.Name != "" {

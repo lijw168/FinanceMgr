@@ -4,6 +4,7 @@ import (
 	//"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
+	"encoding/binary"
 	"encoding/json"
 )
 
@@ -15,15 +16,15 @@ func (og *OperatorGateway) ListOperatorInfo(param []byte) (resData []byte, errCo
 }
 
 func (og *OperatorGateway) GetOperatorInfo(param []byte) (resData []byte, errCode int) {
-	strName := string(param)
 	errCode = util.ErrNull
-	var opts options.NameOptions
-	opts.Name = strName
-	if opts.Name == "" {
-		logger.Error("the name param is empty")
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
 		errCode = util.ErrInvalidParam
 		return nil, errCode
 	}
+	var opts options.BaseOptions
+	opts.ID = id
 	view, err := cSdk.GetOperatorInfo(&opts)
 	if err != nil {
 		errCode = util.ErrShowFailed
@@ -39,28 +40,6 @@ func (og *OperatorGateway) GetOperatorInfo(param []byte) (resData []byte, errCod
 	return resData, errCode
 }
 
-// func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
-// 	var opts options.CreateOptInfoOptions
-// 	errCode = util.ErrNull
-// 	if err := json.Unmarshal(param, &opts); err != nil {
-// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
-// 		errCode = util.ErrUnmarshalFailed
-// 		return errCode
-// 	}
-// 	if views, err := cSdk.CreateOperator(&opts); err != nil {
-// 		errCode = util.ErrCreateFailed
-// 		logger.Error("the CreateOperator failed,err:%v", err.Error())
-// 	} else {
-// 		logger.Debug("CreateOperator succeed;views:%v", views)
-// 		// resData, err = json.Marshal(views)
-// 		// if err != nil {
-// 		// 	errCode = util.ErrMarshalFailed
-// 		// 	logger.Error("the Marshal failed,err:%v", err.Error())
-// 		// }
-// 	}
-// 	return errCode
-// }
-
 func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
 	errCode = util.ErrNull
 	if views, err := cSdk.CreateOperator_json(param); err != nil {
@@ -71,23 +50,6 @@ func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
 	}
 	return errCode
 }
-
-// func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
-// 	var opts options.ModifyOptInfoOptions
-// 	errCode = util.ErrNull
-// 	if err := json.Unmarshal(param, &opts); err != nil {
-// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
-// 		errCode = util.ErrUnmarshalFailed
-// 		return errCode
-// 	}
-// 	if err := cSdk.UpdateOperator(&opts); err != nil {
-// 		errCode = util.ErrUpdateFailed
-// 		logger.Error("the UpdateOperator failed,err:%v", err.Error())
-// 	} else {
-// 		logger.Debug("UpdateOperator succeed")
-// 	}
-// 	return errCode
-// }
 
 func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
 	errCode = util.ErrNull
@@ -101,20 +63,6 @@ func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
 }
 
 func (og *OperatorGateway) DeleteOperator(param []byte) (errCode int) {
-	strName := string(param)
-	if strName == "" {
-		logger.Error("the name param is empty")
-		errCode = util.ErrInvalidParam
-		return errCode
-	}
-	errCode = util.ErrNull
-	var opts options.NameOptions
-	opts.Name = strName
-	if err := cSdk.DeleteOperator(&opts); err != nil {
-		errCode = util.ErrDeleteFailed
-		logger.Error("the DeleteOperator failed,err:%v", err.Error())
-	} else {
-		logger.Debug("DeleteOperator succeed;")
-	}
-	return errCode
+	id := int(binary.LittleEndian.Uint32(param))
+	return deleteCmd(resource_type_operator, id, cSdk.DeleteOperator)
 }

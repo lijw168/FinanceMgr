@@ -16,6 +16,7 @@ type BaseParams struct {
 
 // CreateSubjectParams ...
 type CreateSubjectParams struct {
+	CompanyID    *int    `json:"companyId"`
 	CommonID     *string `json:"commonId"`
 	SubjectName  *string `json:"subjectName"`
 	SubjectLevel *int    `json:"subjectLevel"`
@@ -23,6 +24,7 @@ type CreateSubjectParams struct {
 
 type ModifySubjectParams struct {
 	SubjectID    *int    `json:"subjectId"`
+	CompanyID    *int    `json:"companyId"`
 	CommonID     *string `json:"commonId"`
 	SubjectName  *string `json:"subjectName"`
 	SubjectLevel *int    `json:"subjectLevel"`
@@ -82,9 +84,9 @@ type AuthenInfoParams struct {
 }
 
 type LoginInfoParams struct {
-	Name *string `json:"name"`
-	//Status   *int    `json:"status"`
-	ClientIp *string `json:"clientIp"`
+	Name       *string `json:"name"`
+	OperatorID *int    `json:"operatorId"`
+	ClientIp   *string `json:"clientIp"`
 }
 
 type CreateOptInfoParams struct {
@@ -98,6 +100,7 @@ type CreateOptInfoParams struct {
 }
 
 type ModifyOptInfoParams struct {
+	OperatorID *int    `json:"operatorId"`
 	Name       *string `json:"name"`
 	Password   *string `json:"password"`
 	Job        *string `json:"job"`
@@ -178,7 +181,8 @@ type DeleteParams struct {
 
 type IDInfoParams struct {
 	VoucherID       *int `json:"voucherID"`
+	OperatorID      *int `json:"operatorId"`
 	CompanyID       *int `json:"companyID"`
 	SubjectID       *int `json:"subjectID"`
-	VoucherRecordID *int `json:"voucher_recordID"`
+	VoucherRecordID *int `json:"voucherRecordID"`
 }

@@ -46,23 +46,26 @@ func (au *Authen) Login_json(params []byte) (*model.LoginInfoView, error) {
 	return view, nil
 }
 
-func (au *Authen) Logout(opts *options.NameOptions) error {
+func (au *Authen) Logout(opts *options.BaseOptions) error {
 	action := "Logout"
-	if opts.Name == "" {
-		return errors.New("Name is required")
+	if opts.ID <= 0 {
+		return errors.New("operatorID is required")
 	}
-	params := model.DescribeNameParams{Name: &opts.Name}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
 	_, err := util.DoRequest(action, params)
 	return err
 }
 
-func (au *Authen) StatusCheckout(opts *options.NameOptions) (*model.StatusCheckoutView, error) {
+func (au *Authen) StatusCheckout(opts *options.BaseOptions) (*model.StatusCheckoutView, error) {
 	action := "StatusCheckout"
-	switch {
-	case opts.Name == "":
-		return nil, errors.New("Name is required")
+	if opts.ID <= 0 {
+		return nil, errors.New("operatorID is required")
 	}
-	params := model.DescribeNameParams{Name: &opts.Name}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {
 		return nil, err
