@@ -28,7 +28,7 @@ var (
 func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 	strName string, iCompanyID int) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " +
-		operatorInfoTN + " where name=? and companyId=?"
+		operatorInfoTN + " where name=? and company_id=?"
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [sql: %s ,name: %s,icompanyId:%d]", strSql, strName, iCompanyID)
 	var optInfo = &model.OperatorInfo{}
 	start := time.Now()
@@ -46,6 +46,7 @@ func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 	}
 }
 
+//GetOptInfoById ...
 func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
 	optID int) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where operator_id=?"

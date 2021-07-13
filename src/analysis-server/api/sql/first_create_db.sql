@@ -1,4 +1,26 @@
+drop DATABASE if exists `finance_mgr_2021`;
 CREATE DATABASE IF NOT EXISTS `finance_mgr_2021` DEFAULT CHARACTER SET utf8;
+
+/*==============================================================*/
+/* Table: companyInfo                                           */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`companyInfo`;
+create table if not exists `finance_mgr_2021`.`companyInfo`
+(
+   `company_id`            int not null,
+   `company_name`          varchar(64),
+   `abbre_name`            varchar(24),
+   `corporator`            varchar(16),
+   `phone`                 varchar(13),
+   `e_mail`                varchar(32),
+   `company_addr`          varchar(128),
+   `backup`                varchar(32),
+   `created_at`            datetime,
+   `updated_at`            datetime,
+   primary key (company_id),
+   UNIQUE KEY `company_name` (`company_name`),
+   UNIQUE KEY `abbre_name` (`abbre_name`)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
 /* Table: operatorInfo  */
@@ -105,8 +127,6 @@ create table if not exists `finance_mgr_2021`.`idInfo`
    `voucher_record_id`      int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
---insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id) value(1,101,501,1001,5001);
-
 /*==============================================================*/
 /* Table: userLoginInfo                                         */
 /*==============================================================*/
@@ -114,32 +134,14 @@ drop table if exists `finance_mgr_2021`.`userLoginInfo`;
 create table if not exists `finance_mgr_2021`.`userLoginInfo`
 (
    `id`                   int primary key AUTO_INCREMENT,
-   `operator_id`          int not null ,
+   `operator_id`          int not null,
    `name`                 varchar(10) not null ,
    `status`               int COMMENT '状态 ：1:offline;2:online;3:invalid user',
    `client_ip`            varchar(16),
    `begined_at`           datetime,
-   `ended_at`             datetime,
+   `ended_at`             datetime
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
-/*==============================================================*/
-/* Table: companyInfo                                           */
-/*==============================================================*/
-drop table if exists `finance_mgr_2021`.`companyInfo`;
-create table if not exists `finance_mgr_2021`.`companyInfo`
-(
-   `company_id`            int not null,
-   `company_name`          varchar(64),
-   `abbre_name`            varchar(24),
-   `corporator`            varchar(16),
-   `phone`                 varchar(13),
-   `e_mail`                varchar(32),
-   `company_addr`          varchar(128),
-   `backup`                varchar(32),
-   `created_at`            datetime,
-   `updated_at`            datetime,
-   primary key (company_id),
-   UNIQUE KEY `company_name` (`company_name`),
-   UNIQUE KEY `abbre_name` (`abbre_name`)
-)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-
+insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
+insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());
+insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id) value(2,102,501,1001,5001);

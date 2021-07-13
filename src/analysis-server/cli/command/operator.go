@@ -25,7 +25,7 @@ func NewOperatorCommand(cmd *cobra.Command) {
 func newOperatorCreateCmd() *cobra.Command {
 	var opts options.CreateOptInfoOptions
 	cmd := &cobra.Command{
-		Use:   "operator-create [OPTIONS] companyID name password",
+		Use:   "operator-create [OPTIONS] companyID name password,job,department,role",
 		Short: "Create a operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
@@ -39,6 +39,13 @@ func newOperatorCreateCmd() *cobra.Command {
 			}
 			opts.Name = args[1]
 			opts.Password = args[2]
+			opts.Job = args[3]
+			opts.Department = args[4]
+			if role, err := strconv.Atoi(args[5]); err != nil {
+				fmt.Println("change to int fail", args[5])
+			} else {
+				opts.Role = role
+			}
 
 			if view, err := Sdk.CreateOperator(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -47,9 +54,6 @@ func newOperatorCreateCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().StringVar(&opts.Department, "department", "test", "department")
-	cmd.Flags().StringVar(&opts.Job, "job", "test", "job")
-	cmd.Flags().IntVar(&opts.Role, "role", 1, "role")
 	cmd.Flags().IntVar(&opts.Status, "status", 1, "status")
 	return cmd
 }
