@@ -21,7 +21,7 @@ func NewAccSubCommand(cmd *cobra.Command) {
 func newAccSubCreateCmd() *cobra.Command {
 	var opts options.CreateSubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level companyId",
+		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level company_id",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {

@@ -46,6 +46,7 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	accSub.SubjectName = *params.SubjectName
 	accSub.SubjectLevel = *params.SubjectLevel
 	accSub.CommonID = *params.CommonID
+	accSub.CompanyID = *params.CompanyID
 	accSub.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())

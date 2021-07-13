@@ -23,25 +23,6 @@ var (
 	}
 )
 
-// func (dao *AccSubDao) GetAccSubByName(ctx context.Context, do DbOperator, strName string) (*model.AccSubject, error) {
-// 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_name=?"
-// 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByName] [sql: %s ,values: %s]", strSql, strName)
-// 	var accSub = &model.AccSubject{}
-// 	start := time.Now()
-// 	defer func() {
-// 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByName] [SqlElapsed: %v]", time.Since(start))
-// 	}()
-// 	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, strName), accSub); err {
-// 	case nil:
-// 		return accSub, nil
-// 	case sql.ErrNoRows:
-// 		return nil, err
-// 	default:
-// 		dao.Logger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByName] [scanAccSubTask: %s]", err.Error())
-// 		return nil, err
-// 	}
-// }
-
 func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectID int) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_id=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %d]", strSql, subjectID)
@@ -85,10 +66,16 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 func (dao *AccSubDao) CheckDuplication(ctx context.Context, do DbOperator, companyId int,
 	commonId, subjectName string) (int64, error) {
 	var c int64
-	strSql := "select count(1) from " + accSubInfoTN + "where company_id = ? and (commonId = ? or subject_name = ?)"
+	strSql := "select count(1) from " + accSubInfoTN + " where company_id = ? and (common_id = ? or subject_name = ?)"
+	dao.Logger.DebugContext(ctx, "[accountSubject/db/CheckDuplication] [sql:%s,company_id: %d,commonId:%d,subject_name:%s]",
+		strSql, companyId, commonId, subjectName)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, companyId, commonId, subjectName).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[accountSubject/db/CheckDuplication] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[accountSubject/db/CheckDuplication] [do.Exec: %s]", err.Error())
+		return 0, err
+	}
 	return c, err
 }
 

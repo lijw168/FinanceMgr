@@ -68,7 +68,7 @@ func newLogoutCmd() *cobra.Command {
 }
 
 func newLoginListCmd() *cobra.Command {
-	defCs := []string{"OperatorId", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
+	defCs := []string{"OperatorID", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
 		Use:   "loginInfo-list ",
 		Short: "List operators Support Filter",
