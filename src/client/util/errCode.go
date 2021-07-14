@@ -21,4 +21,6 @@ const (
 	ErrCreateFailed         = 17 //create failed
 	ErrListFailed           = 18 //list failed
 	ErrOnlineCheckout       = 19 //online checkout, failed
+	ErrGbkToUtf8Failed      = 20 //covert gbk to utf8 failed
+	ErrUtf8ToGbkFailed      = 21 //covert utf8 to gbk failed
 )

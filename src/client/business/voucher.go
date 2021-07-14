@@ -1,7 +1,7 @@
 package business
 
 import (
-	"analysis-server/model"
+	//"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
 	"encoding/binary"
@@ -12,41 +12,9 @@ type VoucherGateway struct {
 }
 
 //beigin voucher
-// func (vg *VoucherGateway) CreateVoucher(param []byte) (resData []byte, errCode int) {
-// 	//由于从界面进程传该操作的参数是json格式的，并且为了不修改cSdk里的函数代码，
-// 	//所以先需要通过VoucherParams获取相应的参数值。
-// 	var opts options.VoucherOptions
-// 	// var createRecOpt options.CreateVoucherRecordOptions
-// 	// opts.RecordsOptions = append(opts.RecordsOptions, createRecOpt)
-// 	errCode = util.ErrNull
-// 	if err := json.Unmarshal(param, &opts); err != nil {
-// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
-// 		errCode = util.ErrUnmarshalFailed
-// 		return nil, errCode
-// 	}
-// 	if descData, err := cSdk.CreateVoucher(&opts); err != nil {
-// 		errCode = util.ErrCreateFailed
-// 		logger.Error("the CreateVoucher failed,err:%v", err.Error())
-// 	} else {
-// 		logger.Debug("CreateVoucher succeed;views:%v", descData)
-// 		resData, err = json.Marshal(descData)
-// 		if err != nil {
-// 			errCode = util.ErrMarshalFailed
-// 			logger.Error("the Marshal failed,err:%v", err.Error())
-// 		}
-// 	}
-// 	return resData, errCode
-// }
-
 func (vg *VoucherGateway) CreateVoucher(param []byte) (resData []byte, errCode int) {
-	var paramsOpts model.VoucherParams
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &paramsOpts); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-	if descData, err := cSdk.CreateVoucher_json(&paramsOpts); err != nil {
+	if descData, err := cSdk.CreateVoucher_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateVoucher failed,err:%v", err.Error())
 	} else {
@@ -91,41 +59,11 @@ func (vg *VoucherGateway) GetVoucher(param []byte) (resData []byte, errCode int)
 }
 
 //end voucher;
+
 //beigin voucher records
-// func (vg *VoucherGateway) CreateVoucherRecords(param []byte) (resData []byte, errCode int) {
-// 	optSlice := []options.CreateVoucherRecordOptions{}
-// 	// var opts options.CreateVoucherRecordOptions
-// 	// optSlice = append(optSlice, opts)
-// 	errCode = util.ErrNull
-// 	if err := json.Unmarshal(param, &optSlice); err != nil {
-// 		logger.Error("the Unmarshal failed,err:%v", err.Error())
-// 		errCode = util.ErrUnmarshalFailed
-// 		return nil, errCode
-// 	}
-// 	if descData, err := cSdk.CreateVoucherRecords(optSlice); err != nil {
-// 		errCode = util.ErrCreateFailed
-// 		logger.Error("the CreateVoucherRecords failed,err:%v", err.Error())
-// 	} else {
-// 		logger.Debug("CreateVoucherRecords succeed;descData:%v", descData)
-// 		resData, err = json.Marshal(descData)
-// 		if err != nil {
-// 			errCode = util.ErrMarshalFailed
-// 			logger.Error("the Marshal failed,err:%v", err.Error())
-// 		}
-// 	}
-// 	return resData, errCode
-// }
-
 func (vg *VoucherGateway) CreateVoucherRecords(param []byte) (resData []byte, errCode int) {
-	recordParamSlice := []*model.CreateVoucherRecordParams{}
 	errCode = util.ErrNull
-	if err := json.Unmarshal(param, &recordParamSlice); err != nil {
-		logger.Error("the Unmarshal failed,err:%v", err.Error())
-		errCode = util.ErrUnmarshalFailed
-		return nil, errCode
-	}
-
-	if descData, err := cSdk.CreateVoucherRecords_json(recordParamSlice); err != nil {
+	if descData, err := cSdk.CreateVoucherRecords_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateVoucherRecords_json failed,err:%v", err.Error())
 	} else {

@@ -168,8 +168,9 @@ func (proxy *Proxy) processOperator(conn net.Conn, reqPk *Packet) {
 		proxy.quitCheckCh <- true
 		break
 	case util.OperatorCreate:
-		errCode := optGate.CreateOperator(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
+		resData, errCode := optGate.CreateOperator(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		//proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
 	case util.OperatorList:
 		resData, errCode := optGate.ListOperatorInfo(reqPk.Buf)
@@ -307,17 +308,6 @@ func (proxy *Proxy) quitApp(pk *Packet) int {
 	return util.ErrNull
 }
 
-// func (proxy *Proxy) clearAuthenInfo() {
-// 	//fmt.Println("logout,begin")
-// 	proxy.logger.LogInfo("clearAuthenInfo,begin")
-// 	proxy.strUserName = ""
-// 	proxy.strPasswd = ""
-// 	proxy.strShareData = ""
-// 	proxy.strAccessToken = ""
-// 	proxy.userStatus = util.Offline
-// 	return
-// }
-
 //login/logout information;user status + errCode
 func (proxy *Proxy) respAuthResInfo(conn net.Conn, reqPk *Packet, errCode int) (err error) {
 	reqPk.Size = 8
@@ -345,13 +335,51 @@ func (proxy *Proxy) respOptResWithoutData(conn net.Conn, reqPk *Packet, errCode 
 	return
 }
 
+func (proxy *Proxy) isConvertToGbk(reqPk *Packet) bool {
+	bRet := false
+	switch reqPk.OpCode {
+	case util.CompanyCreate:
+		fallthrough
+	case util.AccSubCreate:
+		fallthrough
+	case util.OperatorCreate:
+		break
+	default:
+		bRet = true
+		break
+	}
+	return bRet
+}
+
 //errCode + data
 func (proxy *Proxy) respOptResWithData(conn net.Conn, reqPk *Packet, errCode int, resData []byte) (err error) {
-	reqPk.Size = int32(4 + len(resData))
-	reqPk.Buf = reqPk.Buf[0:0]
-	reqPk.Buf = make([]byte, reqPk.Size)
-	binary.LittleEndian.PutUint32(reqPk.Buf[0:4], uint32(errCode))
-	copy(reqPk.Buf[4:], resData)
+	if proxy.isConvertToGbk(reqPk) {
+		tmpBuf := make([]byte, 0)
+		if errCode == util.ErrNull {
+			if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
+				errCode = util.ErrUtf8ToGbkFailed
+				tmpBuf = tmpBuf[0:0]
+			}
+		}
+		reqPk.Size = int32(4 + len(tmpBuf))
+		reqPk.Buf = reqPk.Buf[0:0]
+		reqPk.Buf = make([]byte, reqPk.Size)
+		binary.LittleEndian.PutUint32(reqPk.Buf[0:4], uint32(errCode))
+		if errCode == util.ErrNull {
+			copy(reqPk.Buf[4:], tmpBuf)
+		}
+	} else {
+		if errCode != util.ErrNull {
+			resData = resData[0:0]
+		}
+		reqPk.Size = int32(4 + len(resData))
+		reqPk.Buf = reqPk.Buf[0:0]
+		reqPk.Buf = make([]byte, reqPk.Size)
+		binary.LittleEndian.PutUint32(reqPk.Buf[0:4], uint32(errCode))
+		if errCode == util.ErrNull {
+			copy(reqPk.Buf[4:], resData)
+		}
+	}
 	err = reqPk.WriteToConn(conn)
 	if err != nil {
 		proxy.logger.LogError("respQuitAppResInfo,failed,err:", err.Error())

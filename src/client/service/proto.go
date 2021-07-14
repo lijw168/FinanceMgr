@@ -1,6 +1,7 @@
 package service
 
 import (
+	"client/util"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -71,31 +72,72 @@ func (p *Packet) WriteToConn(c net.Conn) (err error) {
 	//firstly the header
 	bufHdr := p.marshalHeader()
 	if _, err = c.Write(bufHdr); err != nil {
-		return err
+		return
 	}
 	if p.Size != 0 {
 		//then the body
 		if _, err = c.Write(p.Buf); err != nil {
-			return err
+			return
 		}
 	}
 	return
+}
+
+func (p *Packet) isConvertToUtf8() bool {
+	bRet := false
+	switch p.OpCode {
+	case util.AccSubShow:
+		fallthrough
+	case util.AccSubDel:
+		fallthrough
+	case util.UserLogout:
+		fallthrough
+	case util.CompanyDel:
+		fallthrough
+	case util.CompanyShow:
+		fallthrough
+	case util.OperatorShow:
+		fallthrough
+	case util.OperatorDel:
+		fallthrough
+	case util.VoucherDel:
+		fallthrough
+	case util.VoucherShow:
+		fallthrough
+	case util.VouRecordDel:
+		fallthrough
+	case util.VouInfoShow:
+		break
+	default:
+		bRet = true
+		break
+	}
+	return bRet
 }
 
 func (p *Packet) ReadFromConn(c net.Conn) (err error) {
 	bufHrd := make([]byte, HeaderLength)
 	p.RecvTime = time.Now()
 	if _, err = io.ReadFull(c, bufHrd); err != nil {
-		return err
+		return
 	}
-
 	if err = p.unmarshalHeader(bufHrd); err != nil {
-		return err
+		return
 	}
-	if p.Size != 0 {
-		p.Buf = make([]byte, p.Size)
-		if _, err = io.ReadFull(c, p.Buf); err != nil {
-			return err
+	if p.isConvertToUtf8() {
+		tmpBuf := make([]byte, p.Size)
+		if _, err = io.ReadFull(c, tmpBuf); err != nil {
+			return
+		}
+		if p.Buf, err = util.GBKToUTF8(tmpBuf); err != nil {
+			err = errors.New("covert gbk to utf8 failed")
+			return
+		}
+		p.Size = int32(len(p.Buf))
+	} else {
+		if p.Size != 0 {
+			p.Buf = make([]byte, p.Size)
+			_, err = io.ReadFull(c, p.Buf)
 		}
 	}
 	return

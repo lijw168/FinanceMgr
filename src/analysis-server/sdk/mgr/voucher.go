@@ -51,15 +51,9 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 }
 
 //该参数直接就是相应的json格式的数据。所以不需要转换了。
-func (vr *Voucher) CreateVoucher_json(params *model.VoucherParams) (*model.DescData, error) {
+func (vr *Voucher) CreateVoucher_json(params []byte) (*model.DescData, error) {
 	action := "CreateVoucher"
-	switch {
-	case *(params.InfoParams.CompanyID) <= 0:
-		return nil, errors.New("CompanyID is required")
-	case *(params.InfoParams.VoucherMonth) <= 0:
-		return nil, errors.New("VoucherMonth is required")
-	}
-	result, err := util.DoRequest(action, params)
+	result, err := util.DoRequest_json(action, params)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +63,25 @@ func (vr *Voucher) CreateVoucher_json(params *model.VoucherParams) (*model.DescD
 	}
 	return desc, nil
 }
+
+// func (vr *Voucher) CreateVoucher_json(params *model.VoucherParams) (*model.DescData, error) {
+// 	action := "CreateVoucher"
+// 	switch {
+// 	case *(params.InfoParams.CompanyID) <= 0:
+// 		return nil, errors.New("CompanyID is required")
+// 	case *(params.InfoParams.VoucherMonth) <= 0:
+// 		return nil, errors.New("VoucherMonth is required")
+// 	}
+// 	result, err := util.DoRequest(action, params)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	desc := &(model.DescData{})
+// 	if err := util.FormatView(result.Data, desc); err != nil {
+// 		return nil, err
+// 	}
+// 	return desc, nil
+// }
 
 func (vr *Voucher) DeleteVoucher(opts *options.BaseOptions) error {
 	action := "DeleteVoucher"
@@ -94,13 +107,10 @@ func (vr *Voucher) GetVoucher(opts *options.BaseOptions) (*model.VoucherView, er
 	return view, nil
 }
 
-func (vr *Voucher) CreateVoucherRecords_json(recordParamSlice []*model.CreateVoucherRecordParams) (*model.DescData, error) {
+//该参数直接就是相应的json格式的数据。所以不需要转换了。
+func (vr *Voucher) CreateVoucherRecords_json(params []byte) (*model.DescData, error) {
 	action := "CreateVoucherRecords"
-	switch {
-	case len(recordParamSlice) == 0:
-		return nil, errors.New("voucher records is required")
-	}
-	result, err := util.DoRequest(action, recordParamSlice)
+	result, err := util.DoRequest_json(action, params)
 	if err != nil {
 		return nil, err
 	}

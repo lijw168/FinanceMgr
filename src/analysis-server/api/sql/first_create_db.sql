@@ -136,7 +136,7 @@ create table if not exists `finance_mgr_2021`.`userLoginInfo`
    `id`                   int primary key AUTO_INCREMENT,
    `operator_id`          int not null,
    `name`                 varchar(10) not null ,
-   `status`               int COMMENT '状态 ：1:offline;2:online;3:invalid user',
+   `status`               int COMMENT '状态 ：0:invalid status;1:online;2:offline;',
    `client_ip`            varchar(16),
    `begined_at`           datetime,
    `ended_at`             datetime

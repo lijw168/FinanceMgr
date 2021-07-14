@@ -2,7 +2,9 @@ package main
 
 import (
 	"client/service"
+	//"client/util"
 	"common/log"
+	//"encoding/binary"
 	"flag"
 	"fmt"
 	"os"
@@ -24,6 +26,17 @@ func initLogger(fileName string, fileMaxSize, filCount int) (*log.Logger, error)
 }
 
 func main() {
+	// resData := make([]byte, 4)
+	// binary.LittleEndian.PutUint32(resData, uint32(508))
+	// var err error
+	// tmpBuf := make([]byte, 0)
+	// if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
+	// 	fmt.Printf("err:%s\n", err.Error())
+	// } else {
+	// 	fmt.Printf("tmpBuf:%v\n", tmpBuf)
+	// }
+	// return
+
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Printf("get file path,failed,err:%v\r\n", err.Error())
@@ -36,9 +49,9 @@ func main() {
 	var logFileSize = flag.Int("s", 20480, "log file size")
 	//server information
 	var pServerPort = flag.Int("p", 7500, "gateway server port")
-	var pServerHost = flag.String("a", "47.100.210.38", "gateway server host")
-	//var pServerHost = flag.String("a", "192.168.148.190", "gateway server host")
-	var pTimeout = flag.Uint64("t", 1000, "timeout")
+	//var pServerHost = flag.String("a", "47.100.210.38", "gateway server host")
+	var pServerHost = flag.String("a", "192.168.148.190", "gateway server host")
+	var pTimeout = flag.Uint64("t", 3000, "timeout")
 	//tcp server information
 	var pListenPort = flag.Int("l", 9999, "tcp listen port")
 	flag.Parse()

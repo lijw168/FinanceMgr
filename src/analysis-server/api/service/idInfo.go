@@ -58,7 +58,7 @@ func (is *IDInfoService) InitIdResource() CcError {
 		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
-	is.genOptIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
+	is.genOptIdInfo, err = aUtils.NewGenIdInfo(idInfoView.OperatorID)
 	if err != nil {
 		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())

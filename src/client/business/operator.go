@@ -40,15 +40,17 @@ func (og *OperatorGateway) GetOperatorInfo(param []byte) (resData []byte, errCod
 	return resData, errCode
 }
 
-func (og *OperatorGateway) CreateOperator(param []byte) (errCode int) {
+func (og *OperatorGateway) CreateOperator(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
 	if views, err := cSdk.CreateOperator_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateOperator failed,err:%v", err.Error())
 	} else {
 		logger.Debug("CreateOperator succeed;views:%v", views)
+		resData = make([]byte, 4)
+		binary.LittleEndian.PutUint32(resData, uint32(views.OperatorID))
 	}
-	return errCode
+	return
 }
 
 func (og *OperatorGateway) UpdateOperator(param []byte) (errCode int) {
