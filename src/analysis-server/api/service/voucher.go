@@ -106,16 +106,6 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	return IdValSli, nil
 }
 
-// func (vs *VoucherService) VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
-// 	vInfoView := new(model.VoucherInfoView)
-// 	vInfoView.VoucherID = vInfo.VoucherID
-// 	vInfoView.CompanyID = vInfo.CompanyID
-// 	vInfoView.VoucherDate = vInfo.VoucherDate
-// 	vInfoView.VoucherMonth = vInfo.VoucherMonth
-// 	vInfoView.NumOfMonth = vInfo.NumOfMonth
-// 	return vInfoView
-// }
-
 func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requestId string) CcError {
 	FuncName := "VoucherService/service/DeleteVoucher"
 	bIsRollBack := true

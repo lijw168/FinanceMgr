@@ -25,14 +25,16 @@ func NewUrlRouter(l *log.Logger) *UrlRouter {
 	}
 }
 
-type CheckoutHandle func(action string, r *http.Request) (bool, error)
+type LoginCheckHandle func(action string, r *http.Request) (bool, string, error)
+type InterfaceAuthorityCheckHandle func(action, accessToken string) (bool, error)
 
 type UrlRouter struct {
-	Handler      map[string]http.Handler
-	HF           map[string]http.HandlerFunc
-	Logger       *log.Logger
-	hostname     string
-	CheckoutCall CheckoutHandle
+	Handler                 map[string]http.Handler
+	HF                      map[string]http.HandlerFunc
+	Logger                  *log.Logger
+	hostname                string
+	LoginCheck              LoginCheckHandle
+	InterfaceAuthorityCheck InterfaceAuthorityCheckHandle
 }
 
 func (p *UrlRouter) RegisterFunc(action string, handler http.HandlerFunc) *UrlRouter {
@@ -49,6 +51,34 @@ func (p *UrlRouter) Register(action string, handler http.Handler) *UrlRouter {
 		p.hostname, _ = os.Hostname()
 	}
 	return p
+}
+
+func (p *UrlRouter) checkRequest(action string, r *http.Request) (bool, message.ResponseParam) {
+	rsp := message.ResponseParam{}
+	//login check
+	if p.LoginCheck != nil {
+		bIsPass, accessToken, err := p.LoginCheck(action, r)
+		if !bIsPass {
+			if err == nil {
+				rsp.Code = cons.CodeNoLogin
+				rsp.Message = "please login first."
+			} else {
+				rsp.Code = -1
+				rsp.Message = err.Error()
+			}
+			return bIsPass, rsp
+		}
+		//api interface authority check
+		if p.InterfaceAuthorityCheck != nil {
+			bIsPass, err = p.InterfaceAuthorityCheck(action, accessToken)
+			if !bIsPass {
+				rsp.Code = cons.CodeNoAuthority
+				rsp.Message = err.Error()
+				return bIsPass, rsp
+			}
+		}
+	}
+	return true, rsp
 }
 
 func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -99,25 +129,15 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p.CheckoutCall != nil {
-		bIsPass, err := p.CheckoutCall(action, r)
-		if !bIsPass {
-			rsp := message.ResponseParam{}
-			if err == nil {
-				rsp.Code = cons.CodeNoLogin
-				rsp.Message = "please login first."
-			} else {
-				rsp.Code = -1
-				rsp.Message = err.Error()
-			}
-			jsonRsp, err := json.Marshal(&rsp)
-			if err != nil {
-				p.Logger.ErrorContext(ctx, "[UrlRouter/ServeHTTP] [Marshal,failed, error: %s]", err.Error())
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(jsonRsp)
-			return
+	bIsPass, rsp := p.checkRequest(action, r)
+	if !bIsPass {
+		jsonRsp, err := json.Marshal(&rsp)
+		if err != nil {
+			p.Logger.ErrorContext(ctx, "[UrlRouter/ServeHTTP] [Marshal,failed, error: %s]", err.Error())
 		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonRsp)
+		return
 	}
 
 	var Ihandler http.Handler

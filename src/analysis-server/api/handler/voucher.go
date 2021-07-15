@@ -31,6 +31,12 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
+	if isLackBaseParams([]string{"voucherId", "companyId"}, params.Filter) {
+		vh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		return
+	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		//先暂时修改为一个值，如果以后确实需要，再进行添加。
@@ -94,6 +100,12 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherRecords] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if isLackBaseParams([]string{"voucherId", "recordId"}, params.Filter) {
+		vh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
 	if params.Filter != nil {

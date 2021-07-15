@@ -15,6 +15,7 @@ import (
 )
 
 var GAccessTokenH = NewAccessTokenHandler()
+var GAuthManaged = NewAuthorityManaged()
 
 type DescData struct {
 	Tc       int64       `json:"total_count"`

@@ -60,6 +60,9 @@ const (
 	ErrSize          = "size"
 	ErrOffset        = "offset"
 	ErrSubjectName   = "subjectName"
+	ErrRole          = "role"
+	ErrStatus        = "status"
+	ErrNoAuthority   = "no authority"
 )
 
 const (
@@ -69,7 +72,7 @@ const (
 
 /*
  * C: Error Code
- * R: Resource Type (vpc, subnet)
+ * R: Resource Type
  * T: Error Type (invalid, notfound)
  * P: Parameter (name, cidr)
  * D: Detail

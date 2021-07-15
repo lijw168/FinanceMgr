@@ -61,7 +61,7 @@ create table if not exists `finance_mgr_2021`.`accountSubject`
    `subject_level`         tinyint not null,
    primary key (subject_id)
    /*unique key `subjectName` (`subject_name`),*/
-  /* unique key `commonId` (`common_id`)*/
+   /*unique key `commonId` (`common_id`)*/
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 alter table accountSubject add constraint FK_Reference_2 foreign key (company_id)
@@ -113,9 +113,10 @@ alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucher
 
 /*==============================================================*/
 /* Table: IDInfo                                           */
-/* companyId：从1开始，设计的值是到100； subjectId：从101开始，设计的值是到500；*/
-/* voucherId：从501开始，设计的值的最大值，是int类型的最大值； */  
-/* recordId：从1001开始。设计的值的最大值，是int类型的最大值；*/
+/* companyId：从1开始，设计的值是到100；operator_id:从101开始*/
+/* subjectId：从501开始，设计的值是到1000；*/
+/* voucherId：从1001开始，设计的值的最大值，是int类型的最大值； */  
+/* recordId：从5001开始。设计的值的最大值，是int类型的最大值；*/
 /*==============================================================*/
 drop table if exists `finance_mgr_2021`.`idInfo`;
 create table if not exists `finance_mgr_2021`.`idInfo`

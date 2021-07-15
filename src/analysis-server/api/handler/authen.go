@@ -28,6 +28,15 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	if isLackBaseParams([]string{"operatorId"}, params.Filter) {
+		if !GAccessTokenH.isRootRequest(r) {
+			ah.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+			ce := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrId, service.ErrNull)
+			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			return
+		}
+	}
+	//todo:通过operatorId，在operatorInfo表里获取所有属于该公司的所有操作员的登录信息。
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["operatorId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
@@ -128,7 +137,6 @@ func (ah *AuthenHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	//check out ,whether the company exists.
 	requestId := ah.GetTraceId(r)
 	if params.Name == nil && *params.Name == "" {
 		ccErr := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrName, service.ErrNull)

@@ -27,6 +27,12 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
+	if isLackBaseParams([]string{"operatorId", "companyId"}, params.Filter) {
+		oh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		ce := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrField, service.ErrNull)
+		oh.Response(r.Context(), oh.Logger, w, ce, nil)
+		return
+	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["operatorId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
@@ -74,7 +80,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 
 	optViews, count, ccErr := oh.OptInfoService.ListOperators(r.Context(), params)
 	if ccErr != nil {
-		oh.Logger.WarnContext(r.Context(), "[operatorInfo/ListOperatorInfo/ServerHTTP] [OptInfoService.DescribeOperators: %s]", ccErr.Detail())
+		oh.Logger.ErrorContext(r.Context(), "[operatorInfo/ListOperatorInfo/ServerHTTP] [OptInfoService.ListOperators: %s]", ccErr.Detail())
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
 	}
@@ -110,6 +116,12 @@ func (oh *OperatorInfoHandlers) GetOperatorInfo(w http.ResponseWriter, r *http.R
 	return
 }
 
+func (oh *OperatorInfoHandlers) isCreateAdmin(iRole int) bool {
+	if (0xF0 & iRole) > 0 {
+		return true
+	}
+	return false
+}
 func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CreateOptInfoParams)
 	err := oh.HttpRequestParse(r, params)
@@ -143,6 +155,18 @@ func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Re
 		ccErr := service.NewError(service.ErrOperator, service.ErrInvalid, service.ErrPasswd, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 		return
+	}
+	if params.Role == nil || *params.Role <= 0 {
+		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrRole, service.ErrNull)
+		oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+		return
+	}
+	if oh.isCreateAdmin(*params.Role) {
+		if !GAccessTokenH.isRootRequest(r) {
+			ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrNull, service.ErrNoAuthority)
+			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
+			return
+		}
 	}
 	requestId := oh.GetTraceId(r)
 

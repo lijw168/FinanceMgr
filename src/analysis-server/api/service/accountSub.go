@@ -74,20 +74,6 @@ func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.A
 	return accSubView
 }
 
-// func (as *AccountSubService) GetAccSubByName(ctx context.Context, strSubName string,
-// 	requestId string) (*model.AccSubjectView, CcError) {
-// 	accSubject, err := as.AccSubDao.GetAccSubByName(ctx, as.Db, strSubName)
-// 	switch err {
-// 	case nil:
-// 	case sql.ErrNoRows:
-// 		return nil, NewCcError(cons.CodeAccSubNotExist, ErrAccSub, ErrNotFound, ErrNull, "the account subject is not exist")
-// 	default:
-// 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	accSubView := as.AccSubMdelToView(accSubject)
-// 	return accSubView, nil
-// }
-
 func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 	requestId string) (*model.AccSubjectView, CcError) {
 	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, subjectID)
@@ -102,17 +88,6 @@ func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 	return accSubView, nil
 }
 
-// func (as *AccountSubService) DeleteAccSubByName(ctx context.Context, strSubName string,
-// 	requestId string) CcError {
-// 	as.Logger.InfoContext(ctx, "DeleteAccSubByName method begin, "+"subjectName:%s", strSubName)
-// 	err := as.AccSubDao.DeleteByName(ctx, as.Db, strSubName)
-// 	if err != nil {
-// 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
-// 	}
-// 	as.Logger.InfoContext(ctx, "DeleteAccSubByName method end, "+"subjectName:%s", strSubName)
-// 	return nil
-// }
-
 func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int,
 	requestId string) CcError {
 	as.Logger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%d", subjectID)
@@ -123,41 +98,6 @@ func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int
 	as.Logger.InfoContext(ctx, "DeleteAccSubByID method end, "+"subject:%d", subjectID)
 	return nil
 }
-
-// func (as *AccountSubService) UpdateAccSubByName(ctx context.Context, strSubName string, params map[string]interface{}) CcError {
-// 	FuncName := "AccountSubService/accountSub/UpdateAccSubByName"
-// 	bIsRollBack := true
-// 	tx, err := as.Db.Begin()
-// 	if err != nil {
-// 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-// 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
-// 	}
-// 	defer func() {
-// 		if bIsRollBack {
-// 			RollbackLog(ctx, as.Logger, FuncName, tx)
-// 		}
-// 	}()
-// 	_, err = as.AccSubDao.GetAccSubByName(ctx, tx, strSubName)
-// 	switch err {
-// 	case nil:
-// 	case sql.ErrNoRows:
-// 		return NewCcError(cons.CodeAccSubNotExist, ErrAccSub, ErrNotFound, ErrNull, "the account subject is not exist")
-// 	default:
-// 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	//update info
-// 	//params["UpdatedAt"] = time.Now()
-// 	err = as.AccSubDao.UpdateByName(ctx, tx, strSubName, params)
-// 	if err != nil {
-// 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	if err = tx.Commit(); err != nil {
-// 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-// 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	bIsRollBack = false
-// 	return nil
-// }
 
 func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int, params map[string]interface{}) CcError {
 	FuncName := "AccountSubService/accountSub/UpdateAccSubById"

@@ -9,7 +9,8 @@ package constant
 
 //common
 const (
-	CodeNoLogin = -2
+	CodeNoLogin     = -2
+	CodeNoAuthority = -3
 )
 
 //account subject
