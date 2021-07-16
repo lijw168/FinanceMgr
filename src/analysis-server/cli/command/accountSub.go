@@ -82,7 +82,7 @@ func newAccSubListCmd() *cobra.Command {
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
 		} else {
-			opts.Filter["company_id"] = id
+			opts.Filter["companyId"] = id
 		}
 
 		if _, accSubViews, err := Sdk.ListAccSub(&opts); err != nil {

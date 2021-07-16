@@ -158,7 +158,7 @@ func newVoucherRecordListCmd() *cobra.Command {
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
 		} else {
-			opts.Filter["voucher_id"] = id
+			opts.Filter["voucherId"] = id
 		}
 		if _, views, err := Sdk.ListVoucherRecords(&opts); err != nil {
 			util.FormatErrorOutput(err)
@@ -250,7 +250,7 @@ func newVoucherInfoListCmd() *cobra.Command {
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
 		} else {
-			opts.Filter["company_id"] = id
+			opts.Filter["companyId"] = id
 		}
 		if _, views, err := Sdk.ListVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)

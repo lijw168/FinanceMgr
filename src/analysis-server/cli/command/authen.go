@@ -70,14 +70,25 @@ func newLogoutCmd() *cobra.Command {
 func newLoginListCmd() *cobra.Command {
 	defCs := []string{"OperatorID", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
-		Use:   "loginInfo-list ",
+		Use:   "loginInfo-list companyId",
 		Short: "List operators Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
+		//for test
+		opts.Filter = make(map[string]interface{})
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["companyId"] = id
+		}
 		if _, views, err := Sdk.ListLoginInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
