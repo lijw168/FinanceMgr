@@ -65,7 +65,7 @@ func newOperatorDeleteCmd() *cobra.Command {
 func newOperatorListCmd() *cobra.Command {
 	defCs := []string{"OperatorID", "CompanyID", "Name", "Password", "Job", "Department", "Status", "Role"}
 	cmd := &cobra.Command{
-		Use:   "operator-list ",
+		Use:   "operator-list companyId",
 		Short: "List operators Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -73,9 +73,12 @@ func newOperatorListCmd() *cobra.Command {
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
-		//for test
-		//opts.Filter = make(map[string]interface{})
-		//opts.Filter["status"] = "creating|available|in-use"
+		opts.Filter = make(map[string]interface{})
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["company_id"] = id
+		}
 		if _, views, err := Sdk.ListOperatorInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {

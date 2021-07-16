@@ -63,7 +63,7 @@ func newAccSubDeleteCmd() *cobra.Command {
 func newAccSubListCmd() *cobra.Command {
 	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID"}
 	cmd := &cobra.Command{
-		Use:   "accSub-list",
+		Use:   "accSub-list companyId",
 		Short: "List account subjects Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -74,8 +74,13 @@ func newAccSubListCmd() *cobra.Command {
 		opts.Limit = -1
 		opts.Offset = 0
 		//for test
-		// opts.Filter = make(map[string]interface{})
-		// opts.Filter["subject_id"] = int(102)
+		opts.Filter = make(map[string]interface{})
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["company_id"] = id
+		}
+
 		if _, accSubViews, err := Sdk.ListAccSub(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {

@@ -142,7 +142,7 @@ func newVoucherRecordListCmd() *cobra.Command {
 	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary",
 		"SubID1", "SubID2", "SubID3", "SubID4", "BillCount"}
 	cmd := &cobra.Command{
-		Use:   "vouRecord-list ",
+		Use:   "vouRecord-list voucherId",
 		Short: "List voucher records Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -150,9 +150,12 @@ func newVoucherRecordListCmd() *cobra.Command {
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
-		//for test
-		//opts.Filter = make(map[string]interface{})
-		//opts.Filter["status"] = "creating|available|in-use"
+		opts.Filter = make(map[string]interface{})
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["voucher_id"] = id
+		}
 		if _, views, err := Sdk.ListVoucherRecords(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
@@ -227,7 +230,7 @@ func newVoucherInfoShowCmd() *cobra.Command {
 func newVoucherInfoListCmd() *cobra.Command {
 	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate"}
 	cmd := &cobra.Command{
-		Use:   "vouInfo-list ",
+		Use:   "vouInfo-list companyId",
 		Short: "List voucherInfo Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -235,9 +238,12 @@ func newVoucherInfoListCmd() *cobra.Command {
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
-		//for test
-		//opts.Filter = make(map[string]interface{})
-		//opts.Filter["status"] = "creating|available|in-use"
+		opts.Filter = make(map[string]interface{})
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["company_id"] = id
+		}
 		if _, views, err := Sdk.ListVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
