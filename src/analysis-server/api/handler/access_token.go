@@ -35,8 +35,10 @@ func NewAccessTokenHandler() *AccessTokenHandler {
 	return &accTokenHandler
 }
 
-func (at *AccessTokenHandler) InitAccessTokenHandler(authService *service.AuthenService, logger *log.Logger) {
+func (at *AccessTokenHandler) InitAccessTokenHandler(authService *service.AuthenService,
+	optInfoService *service.OperatorInfoService, logger *log.Logger) {
 	at.authService = authService
+	at.optInfoService = optInfoService
 	at.logger = logger
 }
 
