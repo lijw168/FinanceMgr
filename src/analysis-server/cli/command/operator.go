@@ -28,7 +28,7 @@ func newOperatorCreateCmd() *cobra.Command {
 		Use:   "operator-create [OPTIONS] companyID name password,job,department,role",
 		Short: "Create a operator",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 6 {
 				cmd.Help()
 				return
 			}
@@ -70,6 +70,10 @@ func newOperatorListCmd() *cobra.Command {
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0

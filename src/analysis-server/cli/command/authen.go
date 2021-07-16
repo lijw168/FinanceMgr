@@ -22,7 +22,7 @@ func newLoginCmd() *cobra.Command {
 		Use:   "login [OPTIONS] name password companyID",
 		Short: "user login",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 3 {
 				cmd.Help()
 				return
 			}

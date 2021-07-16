@@ -31,7 +31,7 @@ func newVoucherCreateCmd() *cobra.Command {
 		Use:   "voucher-create [OPTIONS] companyID voucherMonth",
 		Short: "Create a voucher",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
@@ -147,6 +147,10 @@ func newVoucherRecordListCmd() *cobra.Command {
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
@@ -171,7 +175,7 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 		Use:   "vouRecord-update [OPTIONS] vouRecordId summary ",
 		Short: "update a voucher record",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
@@ -235,6 +239,10 @@ func newVoucherInfoListCmd() *cobra.Command {
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0

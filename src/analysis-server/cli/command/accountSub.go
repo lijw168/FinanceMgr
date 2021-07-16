@@ -24,7 +24,7 @@ func newAccSubCreateCmd() *cobra.Command {
 		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level company_id",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 4 {
 				cmd.Help()
 				return
 			}
@@ -70,6 +70,10 @@ func newAccSubListCmd() *cobra.Command {
 	//var volumeType string
 	//cmd.Flags().StringVar(&volumeType, "name", "", "the type name of volume")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
@@ -122,7 +126,7 @@ func newAccSubUpdateCmd() *cobra.Command {
 		Use:   "accSub-update [OPTIONS] subjectID commonID subject_name subject_level company_id ",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 5 {
 				cmd.Help()
 				return
 			}
