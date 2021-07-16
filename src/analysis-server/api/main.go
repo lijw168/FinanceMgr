@@ -203,6 +203,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
 	httpRouter.RegisterFunc("UpdateVoucherRecord", voucherHandlers.UpdateVoucherRecord)
+	httpRouter.RegisterFunc("VoucherAudit", voucherHandlers.VoucherAudit)
 	//检查是否登录
 	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService, logger)
 	httpRouter.LoginCheck = handler.GAccessTokenH.LoginCheck

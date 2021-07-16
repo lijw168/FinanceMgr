@@ -64,6 +64,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	vInfo := new(model.VoucherInfo)
 	vInfo.CompanyID = *infoParams.CompanyID
 	vInfo.VoucherMonth = *infoParams.VoucherMonth
+	vInfo.VoucherFiller = *infoParams.VoucherFiller
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.VoucherDate = time.Now()
 	vInfo.CreatedAt = time.Now()
@@ -200,21 +201,49 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	return voucherView, nil
 }
 
-// func (vs *VoucherService) UpdateVoucherInfo(ctx context.Context, voucherID int, params map[string]interface{}) service.CcError {
-// 	//insure the volume exist
-// 	volume, err := vs.VInfoDao.Get(ctx, vs.Db, voucherID)
-// 	switch err {
-// 	case nil:
-// 	case sql.ErrNoRows:
-// 		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
-// 	default:
-// 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	}
-// 	//update info
-// 	// params["DeletedAt"] = time.Now()
-// 	// err = vs.VInfoDao.Update(ctx, vs.Db, voucherID, params)
-// 	// if err != nil {
-// 	// 	return service.NewError(service.ErrSystem, service.ErrError, service.ErrNull, err.Error())
-// 	// }
-// 	return nil
-// }
+//VoucherAudit  该函数用于审核和取消审核 ...
+func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
+	params map[string]interface{}, requestID string) CcError {
+	FuncName := "VoucherInfoService/VoucherAudit"
+	bIsRollBack := true
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	//insure the voucherInfo exist
+	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+	default:
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	voucherParams := make(map[string]interface{}, 2)
+	voucherParams["voucherAuditor"] = params["voucherAuditor"]
+	voucherParams["updatedAt"] = time.Now()
+	//update voucher information
+	err = vs.VInfoDao.Update(ctx, tx, voucherID, voucherParams)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	//update voucher record
+	delete(voucherParams, "voucherAuditor")
+	voucherParams["status"] = params["status"]
+	err = vs.VRecordDao.UpdateByVoucherId(ctx, tx, voucherID, params)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	return nil
+}

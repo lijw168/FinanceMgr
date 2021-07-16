@@ -41,6 +41,7 @@ type VoucherRecord struct {
 	SubID3      int
 	SubID4      int
 	BillCount   int
+	Status      int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -56,13 +57,15 @@ type AccSubject struct {
 
 //VoucherInfo ...
 type VoucherInfo struct {
-	VoucherID    int
-	CompanyID    int
-	VoucherMonth int
-	NumOfMonth   int
-	VoucherDate  time.Time
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	VoucherID      int
+	CompanyID      int
+	VoucherMonth   int
+	NumOfMonth     int
+	VoucherDate    time.Time
+	VoucherFiller  string
+	VoucherAuditor string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 //CompanyInfo ...

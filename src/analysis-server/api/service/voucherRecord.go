@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"analysis-server/api/db"
-	//"analysis-server/api/utils"
+	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -33,6 +33,7 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 	vRecord.CreditMoney = *params.CreditMoney
 	vRecord.Summary = *params.Summary
 	vRecord.BillCount = *params.BillCount
+	vRecord.Status = utils.NoAudit
 	vRecord.SubID1 = *params.SubID1
 	vRecord.SubID2 = *params.SubID2
 	vRecord.SubID3 = *params.SubID3
@@ -76,6 +77,7 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vRecord.CreditMoney = *itemParam.CreditMoney
 		vRecord.Summary = *itemParam.Summary
 		vRecord.BillCount = *itemParam.BillCount
+		vRecord.Status = utils.NoAudit
 		vRecord.SubID1 = *itemParam.SubID1
 		vRecord.SubID2 = *itemParam.SubID2
 		vRecord.SubID3 = *itemParam.SubID3
@@ -108,6 +110,7 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 	vRecordView.CreditMoney = vRecord.CreditMoney
 	vRecordView.Summary = vRecord.Summary
 	vRecordView.BillCount = vRecord.BillCount
+	vRecordView.Status = vRecord.Status
 	vRecordView.SubID1 = vRecord.SubID1
 	vRecordView.SubID2 = vRecord.SubID2
 	vRecordView.SubID3 = vRecord.SubID3
@@ -123,7 +126,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "recordId", "voucherId", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
+			case "recordId", "voucherId", "status", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
 			default:
 				return recordViewSlice, 0, NewError(ErrVoucher, ErrUnsupported, ErrField, *f.Field)
@@ -202,8 +205,8 @@ func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordI
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//update voucher record
-	params["UpdatedAt"] = time.Now()
-	err = vs.VRecordDao.Update(ctx, tx, recordID, params)
+	params["updatedAt"] = time.Now()
+	err = vs.VRecordDao.UpdateByRecordId(ctx, tx, recordID, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

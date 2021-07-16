@@ -163,7 +163,7 @@ func (oh *OperatorInfoHandlers) CreateOperator(w http.ResponseWriter, r *http.Re
 	}
 	if oh.isCreateAdmin(*params.Role) {
 		if !GAccessTokenH.isRootRequest(r) {
-			ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrNull, service.ErrNoAuthority)
+			ccErr := service.NewError(service.ErrOperator, service.ErrUnsupported, service.ErrNull, service.ErrNoAuthority)
 			oh.Response(r.Context(), oh.Logger, w, ccErr, nil)
 			return
 		}

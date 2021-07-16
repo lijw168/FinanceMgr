@@ -49,6 +49,8 @@ const (
 	ErrCookie        = "cookie"
 	ErrPasswd        = "password"
 	ErrVouMon        = "voucher_month"
+	ErrVouFiller     = "voucher_filler"
+	ErrVouAuditor    = "voucher_auditor"
 	ErrVouRecSub     = "voucher_record_subject"
 	ErrVouRecDebit   = "voucher_record_debit"
 	ErrVouRecCredit  = "voucher_record_crebit"

@@ -64,11 +64,13 @@ type OperatorInfoView struct {
 }
 
 type VoucherInfoView struct {
-	VoucherID    int       `json:"voucherId"`
-	CompanyID    int       `json:"companyId"`
-	VoucherMonth int       `json:"voucherMonth"`
-	NumOfMonth   int       `json:"numOfMonth"`
-	VoucherDate  time.Time `json:"voucherDate"`
+	VoucherID      int       `json:"voucherId"`
+	CompanyID      int       `json:"companyId"`
+	VoucherMonth   int       `json:"voucherMonth"`
+	NumOfMonth     int       `json:"numOfMonth"`
+	VoucherDate    time.Time `json:"voucherDate"`
+	VoucherFiller  string    `json:"voucherFiller"`
+	VoucherAuditor string    `json:"voucherAuditor"`
 }
 
 //VoucherRecordView ...
@@ -84,6 +86,7 @@ type VoucherRecordView struct {
 	SubID3      int     `json:"subId3"`
 	SubID4      int     `json:"subId4"`
 	BillCount   int     `json:"billCount"`
+	Status      int     `json:"status"`
 }
 
 //表示符合条件的voucher records的总数，通过该变量，客户端用于判断，是否再次获取voucher records

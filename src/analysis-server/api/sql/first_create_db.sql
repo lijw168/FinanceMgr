@@ -78,6 +78,8 @@ create table if not exists `finance_mgr_2021`.`voucherInfo`
    `voucher_month`         int not null COMMENT '制证月份',
    `num_of_month`          int not null COMMENT '本月第几次记录凭证',
    `voucher_date`          date not null COMMENT '制证日期',
+   `voucher_filler`        varchar(10) COMMENT '制证者',
+   `voucher_auditor`       varchar(10) COMMENT '审核者',
    `created_at`            datetime,
    `updated_at`            datetime,
    primary key (voucher_id)
@@ -103,6 +105,7 @@ create table  if not exists `finance_mgr_2021`.`voucherRecordInfo`
    `sub_id3`               int COMMENT '三级会计科目ID',
    `sub_id4`               int COMMENT '四级会计科目ID',
    `bill_count`            int COMMENT '该凭证记录的单据个数',
+   `status`                int COMMENT '1:未审核；2：已审核；3：已删除 ...',
    `created_at`            datetime,
    `updated_at`            datetime,
    primary key (record_id)

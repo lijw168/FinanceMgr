@@ -17,9 +17,11 @@ type VoucherInfoDao struct {
 
 var (
 	voucherInfoTN     = "voucherInfo"
-	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month", "voucher_date", "created_at", "updated_at"}
-	scanVoucherInfo   = func(r DbScanner, st *model.VoucherInfo) error {
-		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherDate, &st.CreatedAt, &st.UpdatedAt)
+	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month",
+		"voucher_filler", "voucher_auditor", "voucher_date", "created_at", "updated_at"}
+	scanVoucherInfo = func(r DbScanner, st *model.VoucherInfo) error {
+		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherDate,
+			&st.VoucherFiller, &st.VoucherAuditor, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -64,8 +66,9 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, fil
 
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
 	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
-		") values (?, ?, ?, ?, ? ,? ,?)"
-	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate, st.CreatedAt, st.UpdatedAt}
+		") values (?, ?, ?, ?, ? ,? ,?, ?, ?)"
+	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherDate,
+		st.VoucherFiller, st.VoucherAuditor, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -119,21 +122,20 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 
 func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"VoucherID": "voucher_id", "CompanyID": "company_id", "VoucherDate": "voucher_month",
-		"NumOfMonth": "num_of_month", "VoucherMonth": "voucher_date", "CreatedAt": "create_at", "UpdatedAt": "update_at"}
+	// var keyMap = map[string]string{"VoucherID": "voucher_id", "CompanyID": "company_id", "VoucherDate": "voucher_month",
+	// 	"NumOfMonth": "num_of_month", "VoucherMonth": "voucher_date", "CreatedAt": "create_at", "UpdatedAt": "update_at"}
 	strSql := "update " + voucherInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil

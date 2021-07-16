@@ -8,6 +8,7 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	"time"
 )
 
 type VoucherInfoService struct {
@@ -37,7 +38,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
 				filterFields[*f.Field] = f.Value
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
@@ -77,5 +78,42 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	vInfoView.VoucherDate = vInfo.VoucherDate
 	vInfoView.VoucherMonth = vInfo.VoucherMonth
 	vInfoView.NumOfMonth = vInfo.NumOfMonth
+	vInfoView.VoucherFiller = vInfo.VoucherFiller
+	vInfoView.VoucherAuditor = vInfo.VoucherAuditor
 	return vInfoView
+}
+
+func (vs *VoucherInfoService) UpdateVoucherInfo(ctx context.Context, voucherID int, params map[string]interface{}) CcError {
+	FuncName := "VoucherInfoService/UpdateVoucherInfo"
+	bIsRollBack := true
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	//insure the voucherInfo exist
+	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+	default:
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	params["updatedAt"] = time.Now()
+	err = vs.VInfoDao.Update(ctx, tx, voucherID, params)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	return nil
 }

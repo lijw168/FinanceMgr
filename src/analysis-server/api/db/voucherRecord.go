@@ -18,10 +18,10 @@ type VoucherRecordDao struct {
 var (
 	voucherRecordTN     = "voucherRecordInfo"
 	voucherRecordFields = []string{"record_id", "voucher_id", "subject_name", "debit_money", "credit_money",
-		"summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4", "bill_count", "created_at", "updated_at"}
+		"summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4", "bill_count", "status", "created_at", "updated_at"}
 	scanVoucherRecord = func(r DbScanner, st *model.VoucherRecord) error {
 		return r.Scan(&st.RecordID, &st.VoucherID, &st.SubjectName, &st.DebitMoney, &st.CreditMoney,
-			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.BillCount, &st.CreatedAt, &st.UpdatedAt)
+			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.BillCount, &st.Status, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -66,9 +66,9 @@ func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, fil
 
 func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *model.VoucherRecord) error {
 	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
-		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.BillCount, st.CreatedAt, st.UpdatedAt}
+		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.BillCount, st.Status, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -137,11 +137,8 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map
 	return voucherRecordSlice, nil
 }
 
-func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId int,
+func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator, recordId int,
 	params map[string]interface{}) error {
-	// var keyMap = map[string]string{"VoucherID": "voucher_id", "SubjectName": "subject_name", "DebitMoney": "debit_money",
-	// 	"CreditMoney": "credit_money", "Summary": "summary", "SubID1": "sub_id1", "SubID2": "sub_id2",
-	// 	"SubID3": "sub_id3", "SubID4": "sub_id4", "RecordID": "record_id"}
 	strSql := "update " + voucherRecordTN + " set "
 	var values []interface{}
 	var first bool = true
@@ -161,11 +158,42 @@ func (dao *VoucherRecordDao) Update(ctx context.Context, do DbOperator, recordId
 	strSql += " where record_id = ?"
 	values = append(values, recordId)
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Update] [sql: %s, values: %v]", strSql, values)
+	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/UpdateByRecordId] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Update] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/UpdateByRecordId] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/Update] [do.Exec: %s]", err.Error())
+		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/UpdateByRecordId] [do.Exec: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (dao *VoucherRecordDao) UpdateByVoucherId(ctx context.Context, do DbOperator, voucherId int,
+	params map[string]interface{}) error {
+	strSql := "update " + voucherRecordTN + " set "
+	var values []interface{}
+	var first bool = true
+	for key, value := range params {
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
+		}
+		values = append(values, value)
+	}
+	if first {
+		return nil
+	}
+	strSql += " where voucher_id = ?"
+	values = append(values, voucherId)
+	start := time.Now()
+	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/UpdateByVoucherId] [sql: %s, values: %v]", strSql, values)
+	_, err := do.ExecContext(ctx, strSql, values...)
+	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/UpdateByVoucherId] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/UpdateByVoucherId] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil

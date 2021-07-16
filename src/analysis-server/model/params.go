@@ -130,8 +130,9 @@ type DeleteOperatorParams struct {
 
 //VoucherInfoParams ...
 type VoucherInfoParams struct {
-	CompanyID    *int `json:"companyId"`
-	VoucherMonth *int `json:"voucherMonth"`
+	CompanyID     *int    `json:"companyId"`
+	VoucherMonth  *int    `json:"voucherMonth"`
+	VoucherFiller *string `json:"voucherFiller"`
 }
 
 //CreateVoucherRecordParams ...
@@ -166,6 +167,13 @@ type ModifyVoucherRecordParams struct {
 type VoucherParams struct {
 	InfoParams    *VoucherInfoParams           `json:"infoParams"`
 	RecordsParams []*CreateVoucherRecordParams `json:"recordsParams"`
+}
+
+//VoucherAuditParams 凭证的审核参数
+type VoucherAuditParams struct {
+	VoucherID      *int    `json:"voucherId"`
+	VoucherAuditor *string `json:"voucherAuditor"`
+	Status         *int    `json:"status"`
 }
 
 type ListParams struct {
