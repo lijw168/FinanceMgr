@@ -78,7 +78,7 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 	}
 	at.expirationCheckMu.Unlock()
 	//call logout service
-	ctx := context.Background()
+	ctx := context.TODO()
 	for _, optId := range expiredOptID {
 		ccErr := at.authService.Logout(ctx, optId)
 		if ccErr != nil {
@@ -200,7 +200,8 @@ func (at *AccessTokenHandler) getOperatorRole(accessToken string) int {
 	usrInfo, ok := at.tokenToOptIDMap[accessToken]
 	if ok {
 		if usrInfo.iRole == 0 {
-			infoView, err := at.optInfoService.GetOperatorInfoByID(context.Background(), usrInfo.iOperatorID,
+			ctx := context.TODO()
+			infoView, err := at.optInfoService.GetOperatorInfoByID(ctx, usrInfo.iOperatorID,
 				"getOperatorRole")
 			if err != nil {
 				at.logger.LogError("GetOperatorInfoByID,failed,iOperatorID:", usrInfo.iOperatorID,
