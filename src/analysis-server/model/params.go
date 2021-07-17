@@ -161,6 +161,7 @@ type ModifyVoucherRecordParams struct {
 	SubID3      *int     `json:"subId3"`
 	SubID4      *int     `json:"subId4"`
 	BillCount   *int     `json:"billCount"`
+	Status      *int     `json:"status"`
 }
 
 //VoucherParams...

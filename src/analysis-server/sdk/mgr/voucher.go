@@ -18,9 +18,12 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 		return nil, errors.New("CompanyID is required")
 	case opts.InfoOptions.VoucherMonth <= 0:
 		return nil, errors.New("VoucherMonth is required")
+	case opts.InfoOptions.VoucherFiller == "":
+		return nil, errors.New("VoucherFiller is required")
 	}
 	params := model.VoucherParams{}
-	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID), VoucherMonth: &(opts.InfoOptions.VoucherMonth)}
+	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID),
+		VoucherMonth: &(opts.InfoOptions.VoucherMonth), VoucherFiller: &(opts.InfoOptions.VoucherFiller)}
 	params.InfoParams = &vouInfoParam
 	var recordParamSlice []*model.CreateVoucherRecordParams
 	for _, val := range opts.RecordsOptions {
@@ -251,6 +254,9 @@ func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions)
 	}
 	if opts.SubID4 != 0 {
 		param.SubID4 = &opts.SubID4
+	}
+	if opts.Status != 0 {
+		param.Status = &opts.Status
 	}
 	_, err := util.DoRequest(action, param)
 	return err

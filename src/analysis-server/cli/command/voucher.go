@@ -28,7 +28,7 @@ func newVoucherCreateCmd() *cobra.Command {
 	//params := model.VoucherParams{}
 	//vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID), VoucherMonth: &(opts.InfoOptions.VoucherMonth)}
 	cmd := &cobra.Command{
-		Use:   "voucher-create [OPTIONS] companyID voucherMonth",
+		Use:   "voucher-create [OPTIONS] companyID voucherMonth voucherFiller",
 		Short: "Create a voucher",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 2 {
@@ -46,6 +46,7 @@ func newVoucherCreateCmd() *cobra.Command {
 			} else {
 				opts.InfoOptions.VoucherMonth = month
 			}
+			opts.InfoOptions.VoucherFiller = args[2]
 			opts.RecordsOptions = append(opts.RecordsOptions, createRecOpt)
 			if hv, err := Sdk.CreateVoucher(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -140,7 +141,7 @@ func newVoucherRecordDeleteCmd() *cobra.Command {
 
 func newVoucherRecordListCmd() *cobra.Command {
 	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary",
-		"SubID1", "SubID2", "SubID3", "SubID4", "BillCount"}
+		"SubID1", "SubID2", "SubID3", "SubID4", "BillCount", "Status"}
 	cmd := &cobra.Command{
 		Use:   "vouRecord-list voucherId",
 		Short: "List voucher records Support Filter",
@@ -172,7 +173,7 @@ func newVoucherRecordListCmd() *cobra.Command {
 func newVoucherRecordUpdateCmd() *cobra.Command {
 	var opts options.ModifyVoucherRecordOptions
 	cmd := &cobra.Command{
-		Use:   "vouRecord-update [OPTIONS] vouRecordId summary ",
+		Use:   "vouRecord-update [OPTIONS] vouRecordId summary status",
 		Short: "update a voucher record",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 2 {
@@ -184,7 +185,12 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 			} else {
 				opts.VouRecordID = id
 			}
-			opts.Summary = args[1]
+			if status, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.Status = status
+			}
+			opts.Summary = args[2]
 			opts.BillCount = -1
 			opts.CreditMoney = -1
 			opts.DebitMoney = -1
@@ -232,7 +238,7 @@ func newVoucherInfoShowCmd() *cobra.Command {
 }
 
 func newVoucherInfoListCmd() *cobra.Command {
-	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate"}
+	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate", "VoucherFiller", "VoucherAuditor"}
 	cmd := &cobra.Command{
 		Use:   "vouInfo-list companyId",
 		Short: "List voucherInfo Support Filter",

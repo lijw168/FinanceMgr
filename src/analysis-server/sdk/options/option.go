@@ -57,8 +57,9 @@ type NameOptions struct {
 
 //voucher begin;VoucherInfoOptions ...
 type VoucherInfoOptions struct {
-	CompanyID    int
-	VoucherMonth int
+	CompanyID     int
+	VoucherMonth  int
+	VoucherFiller string
 }
 
 //VoucherRecordOptions ...
@@ -87,6 +88,7 @@ type ModifyVoucherRecordOptions struct {
 	SubID3      int
 	SubID4      int
 	BillCount   int
+	Status      int
 }
 
 //VoucherOptions...
