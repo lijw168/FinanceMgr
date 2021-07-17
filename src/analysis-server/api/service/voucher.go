@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"analysis-server/api/db"
-	//"analysis-server/api/utils"
+	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -85,6 +85,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 		vRecord.CreditMoney = *recParam.CreditMoney
 		vRecord.Summary = *recParam.Summary
 		vRecord.BillCount = *recParam.BillCount
+		vRecord.Status = utils.NoAudit
 		vRecord.SubID1 = *recParam.SubID1
 		vRecord.SubID2 = *recParam.SubID2
 		vRecord.SubID3 = *recParam.SubID3
