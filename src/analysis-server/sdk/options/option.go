@@ -137,3 +137,9 @@ type ModifySubjectOptions struct {
 	SubjectName  string
 	SubjectLevel int
 }
+
+type VoucherAuditOptions struct {
+	VoucherID      int
+	VoucherAuditor string
+	Status         int
+}

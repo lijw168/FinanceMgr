@@ -58,6 +58,18 @@ func (vg *VoucherGateway) GetVoucher(param []byte) (resData []byte, errCode int)
 	return resData, errCode
 }
 
+func (vg *VoucherGateway) VoucherAudit(param []byte) (errCode int) {
+	errCode = util.ErrNull
+
+	if err := cSdk.VoucherAudit_json(param); err != nil {
+		errCode = util.ErrVoucherAuditFailed
+		logger.Error("the VoucherAudit_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("VoucherAudit_json succeed")
+	}
+	return errCode
+}
+
 //end voucher;
 
 //beigin voucher records

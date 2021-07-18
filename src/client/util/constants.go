@@ -27,6 +27,7 @@ const (
 	VoucherCreate
 	VoucherDel
 	VoucherShow
+	VoucherAudit
 	VouInfoShow
 	VouInfoList
 	VouRecordCreate

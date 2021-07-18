@@ -23,4 +23,5 @@ const (
 	ErrOnlineCheckout       = 19 //online checkout, failed
 	ErrGbkToUtf8Failed      = 20 //covert gbk to utf8 failed
 	ErrUtf8ToGbkFailed      = 21 //covert utf8 to gbk failed
+	ErrVoucherAuditFailed   = 22 //voucher audit failed
 )

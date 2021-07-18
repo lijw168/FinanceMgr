@@ -267,3 +267,28 @@ func (vr *Voucher) UpdateVoucherRecord_json(params []byte) error {
 	_, err := util.DoRequest_json(action, params)
 	return err
 }
+
+func (vr *Voucher) VoucherAudit_json(params []byte) error {
+	action := "VoucherAudit"
+	_, err := util.DoRequest_json(action, params)
+	return err
+}
+
+func (vr *Voucher) VoucherAudit(opts *options.VoucherAuditOptions) error {
+	action := "VoucherAudit"
+	switch {
+	case opts.VoucherID <= 0:
+		return errors.New("VouRecordID is required")
+	case opts.VoucherAuditor == "":
+		return errors.New("VoucherAudit is required")
+	case opts.Status <= 0:
+		return errors.New("Status is required")
+	}
+
+	param := model.VoucherAuditParams{}
+	param.VoucherID = &opts.VoucherID
+	param.VoucherAuditor = &opts.VoucherAuditor
+	param.Status = &opts.Status
+	_, err := util.DoRequest(action, param)
+	return err
+}

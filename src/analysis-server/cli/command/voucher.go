@@ -20,6 +20,7 @@ func NewVoucherCommand(cmd *cobra.Command) {
 
 	cmd.AddCommand(newVoucherInfoShowCmd())
 	cmd.AddCommand(newVoucherInfoListCmd())
+	cmd.AddCommand(newVoucherAuditCmd())
 }
 
 func newVoucherCreateCmd() *cobra.Command {
@@ -263,6 +264,35 @@ func newVoucherInfoListCmd() *cobra.Command {
 		} else {
 			util.FormatListOutput(*columns, views)
 		}
+	}
+	return cmd
+}
+
+func newVoucherAuditCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "voucher-audit [OPTIONS] voucherID voucherAuditor status",
+		Short: "voucher audit",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 3 {
+				cmd.Help()
+				return
+			}
+			var opts options.VoucherAuditOptions
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.VoucherID = id
+			}
+			opts.VoucherAuditor = args[1]
+			if status, err := strconv.Atoi(args[2]); err != nil {
+				fmt.Println("change to int fail", args[2])
+			} else {
+				opts.Status = status
+			}
+			if err := Sdk.VoucherAudit(&opts); err != nil {
+				util.FormatErrorOutput(err)
+			}
+		},
 	}
 	return cmd
 }
