@@ -237,7 +237,7 @@ func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
 	//update voucher record
 	delete(voucherParams, "voucherAuditor")
 	voucherParams["status"] = params["status"]
-	err = vs.VRecordDao.UpdateByVoucherId(ctx, tx, voucherID, params)
+	err = vs.VRecordDao.UpdateByVoucherId(ctx, tx, voucherID, voucherParams)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"analysis-server/api/db"
+	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -41,17 +42,21 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if conflictCount > 0 {
-		return nil, NewError(ErrOperator, ErrDuplicate, ErrNull, ErrFiledDuplicate)
+		return nil, NewError(ErrOperator, ErrDuplicate, ErrNull, ErrRecordExist)
 	}
 	//generate company
 	optInfo := new(model.OperatorInfo)
 	optInfo.Name = *params.Name
 	optInfo.Password = *params.Password
 	optInfo.CompanyID = *params.CompanyID
-	optInfo.Job = *params.Job
-	optInfo.Department = *params.Department
-	optInfo.Status = *params.Status
+	optInfo.Status = utils.Online
 	optInfo.Role = *params.Role
+	if params.Job != nil {
+		optInfo.Job = *params.Job
+	}
+	if params.Department != nil {
+		optInfo.Department = *params.Department
+	}
 	optInfo.CreatedAt = time.Now()
 	optInfo.OperatorID = GIdInfoService.genOptIdInfo.GetNextId()
 

@@ -467,7 +467,7 @@ func (vh *VoucherHandlers) VoucherAudit(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	updateFields["voucherId"] = *params.VoucherID
-	if params.VoucherAuditor == nil || *(params.VoucherAuditor) == "" {
+	if params.VoucherAuditor == nil /*|| *(params.VoucherAuditor) == "" */ {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouAuditor, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
