@@ -71,6 +71,24 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	return vouInfoViewSlice, vouRecordCount, nil
 }
 
+func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iCompanyID int,
+	requestId string) ([]*model.VoucherInfoView, int, CcError) {
+	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
+	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfoByCompanyID(ctx, vs.Db, iCompanyID)
+	if err != nil {
+		FunctionName := "VoucherInfoService/service/GetLatestVoucherInfo"
+		vs.Logger.ErrorContext(ctx, "[%s] [Error: %s, companyID: %d]", FunctionName, err.Error(), iCompanyID)
+		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+
+	for _, vouInfo := range voucherInfos {
+		vouInfoView := VoucherInfoModelToView(vouInfo)
+		vouInfoViewSlice = append(vouInfoViewSlice, vouInfoView)
+	}
+	vouRecordCount := len(voucherInfos)
+	return vouInfoViewSlice, vouRecordCount, nil
+}
+
 func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	vInfoView := new(model.VoucherInfoView)
 	vInfoView.VoucherID = vInfo.VoucherID
@@ -83,7 +101,8 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	return vInfoView
 }
 
-func (vs *VoucherInfoService) UpdateVoucherInfo(ctx context.Context, voucherID int, params map[string]interface{}) CcError {
+func (vs *VoucherInfoService) UpdateVoucherInfo(ctx context.Context, voucherID int,
+	params map[string]interface{}) CcError {
 	FuncName := "VoucherInfoService/UpdateVoucherInfo"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()

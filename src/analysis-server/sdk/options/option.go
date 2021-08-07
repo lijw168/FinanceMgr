@@ -124,18 +124,22 @@ type ModifyCompanyOptions struct {
 
 // account subject option ...
 type CreateSubjectOptions struct {
-	CompanyID    int
-	CommonID     string
-	SubjectName  string
-	SubjectLevel int
+	CompanyID        int
+	CommonID         string
+	SubjectName      string
+	SubjectLevel     int
+	SubjectDirection int
+	SubjectType      int
 }
 
 type ModifySubjectOptions struct {
-	SubjectID    int
-	CompanyID    int
-	CommonID     string
-	SubjectName  string
-	SubjectLevel int
+	SubjectID        int
+	CompanyID        int
+	CommonID         string
+	SubjectName      string
+	SubjectLevel     int
+	SubjectDirection int
+	SubjectType      int
 }
 
 type VoucherAuditOptions struct {

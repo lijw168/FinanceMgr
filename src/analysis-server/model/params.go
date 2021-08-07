@@ -16,18 +16,22 @@ type BaseParams struct {
 
 // CreateSubjectParams ...
 type CreateSubjectParams struct {
-	CompanyID    *int    `json:"companyId"`
-	CommonID     *string `json:"commonId"`
-	SubjectName  *string `json:"subjectName"`
-	SubjectLevel *int    `json:"subjectLevel"`
+	CompanyID        *int    `json:"companyId"`
+	CommonID         *string `json:"commonId"`
+	SubjectName      *string `json:"subjectName"`
+	SubjectLevel     *int    `json:"subjectLevel"`
+	SubjectDirection *int    `json:"subjectDirection"`
+	SubjectType      *int    `json:"subjectType"`
 }
 
 type ModifySubjectParams struct {
-	SubjectID    *int    `json:"subjectId"`
-	CompanyID    *int    `json:"companyId"`
-	CommonID     *string `json:"commonId"`
-	SubjectName  *string `json:"subjectName"`
-	SubjectLevel *int    `json:"subjectLevel"`
+	SubjectID        *int    `json:"subjectId"`
+	CompanyID        *int    `json:"companyId"`
+	CommonID         *string `json:"commonId"`
+	SubjectName      *string `json:"subjectName"`
+	SubjectLevel     *int    `json:"subjectLevel"`
+	SubjectDirection *int    `json:"subjectDirection"`
+	SubjectType      *int    `json:"subjectType"`
 }
 
 type DeleteSubjectParams struct {

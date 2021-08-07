@@ -4,6 +4,7 @@ import (
 	"analysis-server/model"
 	"analysis-server/sdk/options"
 	"analysis-server/sdk/util"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -180,6 +181,39 @@ func (vr *Voucher) GetVoucherInfo(opts *options.BaseOptions) (*model.VoucherInfo
 		return nil, err
 	}
 	return view, nil
+}
+
+func (vr *Voucher) GetLatestVoucherInfo(opts *options.BaseOptions) (int64, []*model.VoucherInfoView, error) {
+	action := "GetLatestVoucherInfo"
+	if opts.ID <= 0 {
+		return -1, nil, errors.New("ID is required")
+	}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return -1, nil, err
+	}
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
+		return -1, nil, err
+	}
+
+	var ret []*model.VoucherInfoView
+	if err := util.FormatView(desc.Elements, &ret); err != nil {
+		return -1, nil, err
+	}
+	return desc.Tc, ret, nil
+}
+
+func (vr *Voucher) GetLatestVoucherInfo_json(params []byte) ([]byte, error) {
+	action := "GetLatestVoucherInfo"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
 }
 
 func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.VoucherInfoView, error) {

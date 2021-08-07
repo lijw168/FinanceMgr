@@ -17,6 +17,8 @@ const (
 const (
 	CodeAccSubNotExist   = -101
 	CodeInvalAccSubLevel = -102
+	CodeInvalAccSubDir   = -103
+	CodeInvalAccSubType  = -104
 )
 
 //company information

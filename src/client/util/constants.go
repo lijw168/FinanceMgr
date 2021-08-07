@@ -30,6 +30,7 @@ const (
 	VoucherAudit
 	VouInfoShow
 	VouInfoList
+	VouInfoListLatest
 	VouRecordCreate
 	VouRecordDel
 	VouRecordList

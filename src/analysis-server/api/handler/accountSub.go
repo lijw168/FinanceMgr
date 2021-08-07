@@ -39,6 +39,8 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["commonId"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectDirection"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectType"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
@@ -135,6 +137,16 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	if params.SubjectDirection == nil || *params.SubjectDirection > 2 {
+		ccErr := service.NewCcError(cons.CodeInvalAccSubDir, service.ErrAccSub, service.ErrInvalid, service.ErrSubdir, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	if params.SubjectType == nil || *params.SubjectType > 5 {
+		ccErr := service.NewCcError(cons.CodeInvalAccSubType, service.ErrAccSub, service.ErrInvalid, service.ErrType, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
 	if params.CompanyID == nil || *(params.CompanyID) <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCompanyId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
@@ -188,6 +200,12 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	}
 	if params.SubjectLevel != nil {
 		updateFields["subjectLevel"] = *params.SubjectLevel
+	}
+	if params.SubjectDirection != nil {
+		updateFields["subjectDirection"] = *params.SubjectDirection
+	}
+	if params.SubjectType != nil {
+		updateFields["subjectType"] = *params.SubjectType
 	}
 	if params.CompanyID != nil {
 		updateFields["companyId"] = *params.CompanyID

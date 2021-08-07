@@ -47,6 +47,8 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	accSub.SubjectLevel = *params.SubjectLevel
 	accSub.CommonID = *params.CommonID
 	accSub.CompanyID = *params.CompanyID
+	accSub.SubjectDirection = *params.SubjectDirection
+	accSub.SubjectType = *params.SubjectType
 	accSub.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
@@ -71,6 +73,8 @@ func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.A
 	accSubView.SubjectLevel = accSub.SubjectLevel
 	accSubView.CommonID = accSub.CommonID
 	accSubView.CompanyID = accSub.CompanyID
+	accSubView.SubjectType = accSub.SubjectType
+	accSubView.SubjectDirection = accSub.SubjectType
 	return accSubView
 }
 
@@ -143,7 +147,7 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "subjectId", "companyId", "subjectName", "subjectLevel", "commonId":
+			case "subjectId", "companyId", "subjectName", "subjectLevel", "commonId", "subjectDirection", "subjectType":
 				filterFields[*f.Field] = f.Value
 			default:
 				return accSubViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)

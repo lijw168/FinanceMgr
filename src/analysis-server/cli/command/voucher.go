@@ -21,6 +21,7 @@ func NewVoucherCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newVoucherInfoShowCmd())
 	cmd.AddCommand(newVoucherInfoListCmd())
 	cmd.AddCommand(newVoucherAuditCmd())
+	cmd.AddCommand(newGetLatestVouInfoCmd())
 }
 
 func newVoucherCreateCmd() *cobra.Command {
@@ -235,6 +236,35 @@ func newVoucherInfoShowCmd() *cobra.Command {
 			}
 		},
 	}
+	return cmd
+}
+
+func newGetLatestVouInfoCmd() *cobra.Command {
+	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate",
+		"VoucherFiller", "VoucherAuditor"}
+	cmd := &cobra.Command{
+		Use:   "vouInfo-GetLatest [OPTIONS] companyID",
+		Short: "get latest voucher information",
+	}
+	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
+		var opts options.BaseOptions
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.ID = id
+		}
+		if _, views, err := Sdk.GetLatestVoucherInfo(&opts); err != nil {
+			util.FormatErrorOutput(err)
+		} else {
+			util.FormatListOutput(*columns, views)
+		}
+	}
+
 	return cmd
 }
 

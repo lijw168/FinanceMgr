@@ -17,9 +17,11 @@ type AccSubDao struct {
 
 var (
 	accSubInfoTN     = "accountSubject"
-	accSubInfoFields = []string{"subject_id", "company_id", "common_id", "subject_name", "subject_level"}
-	scanAccSubTask   = func(r DbScanner, st *model.AccSubject) error {
-		return r.Scan(&st.SubjectID, &st.CompanyID, &st.CommonID, &st.SubjectName, &st.SubjectLevel)
+	accSubInfoFields = []string{"subject_id", "company_id", "common_id", "subject_name", "subject_level",
+		"subject_direction", "subject_type"}
+	scanAccSubTask = func(r DbScanner, st *model.AccSubject) error {
+		return r.Scan(&st.SubjectID, &st.CompanyID, &st.CommonID, &st.SubjectName, &st.SubjectLevel,
+			&st.SubjectDirection, &st.SubjectType)
 	}
 )
 
@@ -80,8 +82,10 @@ func (dao *AccSubDao) CheckDuplication(ctx context.Context, do DbOperator, compa
 }
 
 func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSubject) error {
-	strSql := "insert into " + accSubInfoTN + " (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?, ?)"
-	values := []interface{}{st.SubjectID, st.CompanyID, st.CommonID, st.SubjectName, st.SubjectLevel}
+	strSql := "insert into " + accSubInfoTN +
+		" (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?, ?,?,?)"
+	values := []interface{}{st.SubjectID, st.CompanyID, st.CommonID, st.SubjectName, st.SubjectLevel,
+		st.SubjectDirection, st.SubjectType}
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

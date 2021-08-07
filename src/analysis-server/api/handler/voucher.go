@@ -23,6 +23,34 @@ type VoucherHandlers struct {
 	Vs     *service.VoucherService
 }
 
+func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeIdParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetLatestVoucherInfo] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	vouInfoViews, count, ccErr := vh.Vis.GetLatestVoucherInfoByCompanyID(r.Context(), *params.ID, requestId)
+	if ccErr != nil {
+		FunctionName := "voucherHandlers/GetVoucherInfo/ServerHTTP"
+		vh.Logger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetVoucherInfoByID: %s]", requestId, FunctionName, ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	dataBuf := &DescData{(int64)(count), vouInfoViews}
+	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	return
+}
+
 func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.ListParams)
 	err := vh.HttpRequestParse(r, params)
@@ -46,10 +74,10 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		//filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
 		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["num_ofMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherFiller"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["voucherFiller"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["voucherAuditor"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)

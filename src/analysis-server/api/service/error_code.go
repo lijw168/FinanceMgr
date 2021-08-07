@@ -59,6 +59,7 @@ const (
 	ErrOd            = "direction" // order direction
 	ErrType          = "type"
 	ErrSubLevel      = "subjectLevel"
+	ErrSubdir        = "subjectDirection"
 	ErrSize          = "size"
 	ErrOffset        = "offset"
 	ErrSubjectName   = "subjectName"

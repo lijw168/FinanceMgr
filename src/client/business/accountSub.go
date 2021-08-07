@@ -67,5 +67,10 @@ func (ag *AccSubGateway) UpdateAccSub(param []byte) (errCode int) {
 
 func (ag *AccSubGateway) DeleteAccSub(param []byte) (errCode int) {
 	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return errCode
+	}
 	return deleteCmd(resource_type_account_sub, id, cSdk.DeleteAccSub)
 }

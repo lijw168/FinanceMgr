@@ -283,6 +283,10 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		resData, errCode := voucherGate.ListVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
+	case util.VouInfoListLatest:
+		resData, errCode := voucherGate.GetLatestVoucherInfo(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
 	case util.VouRecordCreate:
 		resData, errCode := voucherGate.CreateVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)

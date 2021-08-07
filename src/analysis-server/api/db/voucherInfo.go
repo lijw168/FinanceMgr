@@ -93,6 +93,7 @@ func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId 
 	}
 	return nil
 }
+
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
 	offset int, order string, od int) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
@@ -113,6 +114,34 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 		err = scanVoucherInfo(result, voucherInfo)
 		if err != nil {
 			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/List] [ScanSnapshot: %s]", err.Error())
+			return voucherInfoSlice, err
+		}
+		voucherInfoSlice = append(voucherInfoSlice, voucherInfo)
+	}
+	return voucherInfoSlice, nil
+}
+
+func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, do DbOperator,
+	iCompanyID int) ([]*model.VoucherInfo, error) {
+	var voucherInfoSlice []*model.VoucherInfo
+	strSql := "select * from " + voucherInfoTN + " where voucher_month in (select  max(voucher_month) from " +
+		voucherInfoTN + "where company_id = ?)"
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [SqlElapsed: %v]", time.Since(start))
+	}()
+	result, err := do.QueryContext(ctx, strSql, iCompanyID)
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [do.Query: %s]", err.Error())
+		return voucherInfoSlice, err
+	}
+	defer result.Close()
+	for result.Next() {
+		voucherInfo := new(model.VoucherInfo)
+		err = scanVoucherInfo(result, voucherInfo)
+		if err != nil {
+			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [ScanSnapshot: %s]", err.Error())
 			return voucherInfoSlice, err
 		}
 		voucherInfoSlice = append(voucherInfoSlice, voucherInfo)

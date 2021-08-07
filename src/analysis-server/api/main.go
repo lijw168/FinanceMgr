@@ -200,6 +200,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
 	httpRouter.RegisterFunc("GetVoucherInfo", voucherHandlers.GetVoucherInfo)
 	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
+	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
 	httpRouter.RegisterFunc("UpdateVoucherRecord", voucherHandlers.UpdateVoucherRecord)

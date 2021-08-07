@@ -22,12 +22,18 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 		return nil, errors.New("SubjectLevel is required")
 	case opts.CompanyID <= 0:
 		return nil, errors.New("CompanyID is required")
+	case opts.SubjectDirection <= 0:
+		return nil, errors.New("SubjectDirection is required")
+	case opts.SubjectType <= 0:
+		return nil, errors.New("SubjectType is required")
 	}
 	params := model.CreateSubjectParams{
-		SubjectName:  &opts.SubjectName,
-		CommonID:     &opts.CommonID,
-		SubjectLevel: &opts.SubjectLevel,
-		CompanyID:    &opts.CompanyID,
+		SubjectName:      &opts.SubjectName,
+		CommonID:         &opts.CommonID,
+		SubjectLevel:     &opts.SubjectLevel,
+		CompanyID:        &opts.CompanyID,
+		SubjectType:      &opts.SubjectType,
+		SubjectDirection: &opts.SubjectDirection,
 	}
 
 	result, err := util.DoRequest(action, params)
@@ -113,6 +119,12 @@ func (as *AccSub) UpdateAccSub(opts *options.ModifySubjectOptions) error {
 	}
 	if opts.CompanyID > 0 {
 		param.CompanyID = &opts.CompanyID
+	}
+	if opts.SubjectDirection > 0 {
+		param.SubjectDirection = &opts.SubjectDirection
+	}
+	if opts.SubjectType > 0 {
+		param.SubjectType = &opts.SubjectType
 	}
 	_, err := util.DoRequest(action, param)
 	return err

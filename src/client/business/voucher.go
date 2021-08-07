@@ -30,6 +30,11 @@ func (vg *VoucherGateway) CreateVoucher(param []byte) (resData []byte, errCode i
 
 func (vg *VoucherGateway) DeleteVoucher(param []byte) (errCode int) {
 	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return errCode
+	}
 	return deleteCmd(resource_type_voucher, id, cSdk.DeleteVoucher)
 }
 
@@ -60,7 +65,6 @@ func (vg *VoucherGateway) GetVoucher(param []byte) (resData []byte, errCode int)
 
 func (vg *VoucherGateway) VoucherAudit(param []byte) (errCode int) {
 	errCode = util.ErrNull
-
 	if err := cSdk.VoucherAudit_json(param); err != nil {
 		errCode = util.ErrVoucherAuditFailed
 		logger.Error("the VoucherAudit_json failed,err:%v", err.Error())
@@ -91,6 +95,11 @@ func (vg *VoucherGateway) CreateVoucherRecords(param []byte) (resData []byte, er
 
 func (vg *VoucherGateway) DeleteVoucherRecord(param []byte) (errCode int) {
 	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return errCode
+	}
 	return deleteCmd(resource_type_voucher_record, id, cSdk.DeleteVoucherRecord)
 }
 
@@ -133,6 +142,32 @@ func (vg *VoucherGateway) GetVoucherInfo(param []byte) (resData []byte, errCode 
 			logger.Error("the Marshal failed,err:%v", err.Error())
 		}
 		logger.Debug("GetVoucherInfo succeed;views:%v", view)
+	}
+	return resData, errCode
+}
+
+func (vg *VoucherGateway) GetLatestVoucherInfo(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return nil, errCode
+	}
+	var opts options.BaseOptions
+	opts.ID = id
+	inputParam, err := json.Marshal(opts)
+	if err != nil {
+		errCode = util.ErrMarshalFailed
+		logger.Error("the Marshal failed,err:%v", err.Error())
+		return nil, errCode
+	}
+	resData, err = cSdk.GetLatestVoucherInfo_json(inputParam)
+	if err != nil {
+		errCode = util.ErrGetLatestVoucherInfoFailed
+		logger.Error("the GetLatestVoucherInfo failed,err:%v", err.Error())
+	} else {
+		logger.Debug("GetLatestVoucherInfo succeed.")
 	}
 	return resData, errCode
 }
