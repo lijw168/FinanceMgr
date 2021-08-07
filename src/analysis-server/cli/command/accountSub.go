@@ -21,7 +21,7 @@ func NewAccSubCommand(cmd *cobra.Command) {
 func newAccSubCreateCmd() *cobra.Command {
 	var opts options.CreateSubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-create [OPTIONS] common_id subject_name subject_level company_id",
+		Use:   "accSub-create [OPTIONS] commonId subjectName subjectLevel companyId subjectDirection subjectType",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 4 {
@@ -32,6 +32,8 @@ func newAccSubCreateCmd() *cobra.Command {
 				err       error
 				subLevel  int
 				companyID int
+				subDir    int
+				subType   int
 			)
 
 			opts.CommonID = args[0]
@@ -45,6 +47,16 @@ func newAccSubCreateCmd() *cobra.Command {
 				fmt.Println("change to int fail", args[3])
 			}
 			opts.CompanyID = companyID
+
+			if subDir, err = strconv.Atoi(args[4]); err != nil {
+				fmt.Println("change to int fail", args[4])
+			}
+			opts.SubjectDirection = subDir
+
+			if subType, err = strconv.Atoi(args[5]); err != nil {
+				fmt.Println("change to int fail", args[5])
+			}
+			opts.SubjectType = subType
 
 			if hv, err := Sdk.CreateAccSub(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -61,7 +73,7 @@ func newAccSubDeleteCmd() *cobra.Command {
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID"}
+	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID", "SubjectDirection", "SubjectType"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list companyId",
 		Short: "List account subjects Support Filter",
@@ -123,7 +135,7 @@ func newAccSubShowCmd() *cobra.Command {
 func newAccSubUpdateCmd() *cobra.Command {
 	var opts options.ModifySubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-update [OPTIONS] subjectID commonID subject_name subject_level company_id ",
+		Use:   "accSub-update [OPTIONS] subjectID commonID subjectName subjectLevel companyId subjectDirection subjectType",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 5 {
@@ -147,6 +159,18 @@ func newAccSubUpdateCmd() *cobra.Command {
 				fmt.Println("change to int fail", args[4])
 			} else {
 				opts.CompanyID = companyID
+			}
+
+			if subDir, err := strconv.Atoi(args[5]); err != nil {
+				fmt.Println("change to int fail", args[5])
+			} else {
+				opts.SubjectDirection = subDir
+			}
+
+			if subType, err := strconv.Atoi(args[6]); err != nil {
+				fmt.Println("change to int fail", args[6])
+			} else {
+				opts.SubjectType = subType
 			}
 
 			if err := Sdk.UpdateAccSub(&opts); err != nil {
