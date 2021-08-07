@@ -49,8 +49,8 @@ func main() {
 	var logFileSize = flag.Int("s", 20480, "log file size")
 	//server information
 	var pServerPort = flag.Int("p", 7500, "gateway server port")
-	//var pServerHost = flag.String("a", "47.100.210.38", "gateway server host")
-	var pServerHost = flag.String("a", "192.168.148.190", "gateway server host")
+	var pServerHost = flag.String("a", "47.100.210.38", "gateway server host")
+	//var pServerHost = flag.String("a", "192.168.148.190", "gateway server host")
 	var pTimeout = flag.Uint64("t", 3000, "timeout")
 	//tcp server information
 	var pListenPort = flag.Int("l", 9999, "tcp listen port")

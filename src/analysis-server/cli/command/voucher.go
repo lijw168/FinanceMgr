@@ -57,7 +57,7 @@ func newVoucherCreateCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().StringVar(&createRecOpt.SubjectName, "subject name", "test", "subject name")
+	cmd.Flags().StringVar(&createRecOpt.SubjectName, "subject", "test", "subject name")
 	cmd.Flags().StringVar(&createRecOpt.Summary, "summary", "test", "summary")
 	var dm, cm int
 	cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
@@ -243,7 +243,7 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate",
 		"VoucherFiller", "VoucherAuditor"}
 	cmd := &cobra.Command{
-		Use:   "vouInfo-GetLatest [OPTIONS] companyID",
+		Use:   "vouInfo-getLatest [OPTIONS] companyID",
 		Short: "get latest voucher information",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
