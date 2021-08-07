@@ -125,7 +125,7 @@ func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, 
 	iCompanyID int) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
 	strSql := "select * from " + voucherInfoTN + " where voucher_month in (select  max(voucher_month) from " +
-		voucherInfoTN + "where company_id = ?)"
+		voucherInfoTN + "where company_id = ?) order by num_of_month desc"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
 	start := time.Now()
 	defer func() {
