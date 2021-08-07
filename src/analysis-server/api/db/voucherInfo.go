@@ -124,7 +124,8 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, do DbOperator,
 	iCompanyID int) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
-	strSql := "select * from " + voucherInfoTN + " where voucher_month in (select  max(voucher_month) from " +
+	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN +
+		" where voucher_month in (select  max(voucher_month) from " +
 		voucherInfoTN + " where company_id = ?) order by num_of_month desc"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
 	start := time.Now()
@@ -141,7 +142,7 @@ func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, 
 		voucherInfo := new(model.VoucherInfo)
 		err = scanVoucherInfo(result, voucherInfo)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [ScanSnapshot: %s]", err.Error())
+			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [scanVoucherInfo: %s]", err.Error())
 			return voucherInfoSlice, err
 		}
 		voucherInfoSlice = append(voucherInfoSlice, voucherInfo)
