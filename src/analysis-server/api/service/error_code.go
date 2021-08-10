@@ -54,6 +54,8 @@ const (
 	ErrVouRecSub     = "voucher_record_subject"
 	ErrVouRecDebit   = "voucher_record_debit"
 	ErrVouRecCredit  = "voucher_record_crebit"
+	ErrVoucherData   = "voucher debit or crebit data"
+	ErrVouSummary    = "voucher_summary"
 	ErrVoucherRecord = "voucher_record"
 	ErrField         = "field"
 	ErrOd            = "direction" // order direction

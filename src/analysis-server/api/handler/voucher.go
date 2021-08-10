@@ -288,18 +288,23 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, recParam := range params.RecordsParams {
+		if recParam.Summary == nil || *recParam.Summary == "" {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouSummary, service.ErrNull)
+			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			return
+		}
 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		if recParam.CreditMoney == nil || *recParam.CreditMoney <= 0.001 {
-			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
+		if recParam.CreditMoney == nil && recParam.DebitMoney == nil {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherData, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		if recParam.DebitMoney == nil || *recParam.DebitMoney <= 0.001 {
-			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
+		if *recParam.CreditMoney <= 0.001 && *recParam.DebitMoney <= 0.001 {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
@@ -363,18 +368,23 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
+		if recParam.Summary == nil || *recParam.Summary == "" {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouSummary, service.ErrNull)
+			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			return
+		}
 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		if recParam.CreditMoney == nil || *recParam.CreditMoney <= 0.001 {
-			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecCredit, service.ErrNull)
+		if recParam.CreditMoney == nil && recParam.DebitMoney == nil {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherData, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		if recParam.DebitMoney == nil || *recParam.DebitMoney <= 0.001 {
-			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecDebit, service.ErrNull)
+		if *recParam.CreditMoney <= 0.001 && *recParam.DebitMoney <= 0.001 {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}

@@ -62,9 +62,9 @@ func (auth *Authen) Logout() int {
 		logger.Error("the Logout failed,err:%v", err.Error())
 	} else {
 		logger.Debug("logout succeed")
-		auth.setAuthenInfo("", "", 0, util.Offline)
-		cSdk.SetAccessToken("")
 	}
+	auth.setAuthenInfo("", "", 0, util.Offline)
+	cSdk.SetAccessToken("")
 	logger.LogInfo("logout,end")
 	return errCode
 }
