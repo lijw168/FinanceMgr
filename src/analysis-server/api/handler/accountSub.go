@@ -51,6 +51,8 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		switch *params.Order[0].Field {
 		case "subjectId":
 			*params.Order[0].Field = "subjectId"
+		case "commonId":
+			*params.Order[0].Field = "commonId"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
