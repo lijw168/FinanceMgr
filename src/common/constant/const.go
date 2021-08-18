@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	Order_Desc = 0
-	Order_Asc  = 1
+	Order_Asc  = 0
+	Order_Desc = 1
 )
 
 var (
