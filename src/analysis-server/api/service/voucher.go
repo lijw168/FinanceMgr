@@ -66,7 +66,16 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	vInfo.VoucherMonth = *infoParams.VoucherMonth
 	vInfo.VoucherFiller = *infoParams.VoucherFiller
 	vInfo.NumOfMonth = int(count + 1)
-	vInfo.VoucherDate = time.Now()
+	if infoParams.VoucherDate != nil {
+		iDate := *infoParams.VoucherDate
+		iYear := iDate / 10000
+		iMonth := (iDate - iYear*10000) / 100
+		iDay := iDate % 100
+		t := time.Date(iYear, time.Month(iMonth), iDay, 0, 0, 0, 0, time.Local)
+		vInfo.VoucherDate = t
+	} else {
+		vInfo.VoucherDate = time.Now()
+	}
 	vInfo.CreatedAt = time.Now()
 	vInfo.VoucherID = GIdInfoService.genVouIdInfo.GetNextId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)

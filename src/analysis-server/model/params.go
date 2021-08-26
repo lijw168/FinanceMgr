@@ -136,6 +136,7 @@ type DeleteOperatorParams struct {
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
 	VoucherMonth  *int    `json:"voucherMonth"`
+	VoucherDate   *int    `json:"voucherDate"`
 	VoucherFiller *string `json:"voucherFiller"`
 }
 
