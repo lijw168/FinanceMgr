@@ -79,9 +79,9 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vRecord.BillCount = *itemParam.BillCount
 		vRecord.Status = utils.NoAudit
 		vRecord.SubID1 = *itemParam.SubID1
-		vRecord.SubID2 = *itemParam.SubID2
-		vRecord.SubID3 = *itemParam.SubID3
-		vRecord.SubID4 = *itemParam.SubID4
+		// vRecord.SubID2 = *itemParam.SubID2
+		// vRecord.SubID3 = *itemParam.SubID3
+		// vRecord.SubID4 = *itemParam.SubID4
 		vRecord.CreatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())

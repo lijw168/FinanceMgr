@@ -37,7 +37,7 @@ func interceptSignal() {
 	go func() {
 		for {
 			sig := <-daemonExitCh
-			fmt.Printf("the sig is %s\n", sig.String())
+			fmt.Printf("time:%v;the sig is %s\n", time.Now(), sig.String())
 			saveIdResource()
 			handler.GAccessTokenH.QuitExpirationCheckService()
 			break
@@ -51,7 +51,7 @@ func saveIdResource() {
 	if ccErr != nil {
 		ccErr := service.GIdInfoService.WriteIdResourceToDb()
 		if ccErr != nil {
-			fmt.Printf("WriteIdResourceToDb,it is twice to fail,ErrInfo:%s", ccErr.Error())
+			fmt.Printf("time:%v;WriteIdResourceToDb,it is twice to fail,ErrInfo:%s", time.Now(), ccErr.Error())
 		}
 	}
 }

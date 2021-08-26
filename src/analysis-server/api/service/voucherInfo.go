@@ -93,7 +93,8 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	vInfoView := new(model.VoucherInfoView)
 	vInfoView.VoucherID = vInfo.VoucherID
 	vInfoView.CompanyID = vInfo.CompanyID
-	vInfoView.VoucherDate = vInfo.VoucherDate
+	iYear, iMonth, iDay := vInfo.VoucherDate.Date()
+	vInfoView.VoucherDate = iYear*10000 + int(iMonth)*100 + iDay
 	vInfoView.VoucherMonth = vInfo.VoucherMonth
 	vInfoView.NumOfMonth = vInfo.NumOfMonth
 	vInfoView.VoucherFiller = vInfo.VoucherFiller

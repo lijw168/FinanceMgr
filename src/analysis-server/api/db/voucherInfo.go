@@ -126,7 +126,7 @@ func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, 
 	var voucherInfoSlice []*model.VoucherInfo
 	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN +
 		" where voucher_month in (select  max(voucher_month) from " +
-		voucherInfoTN + " where company_id = ?) order by num_of_month desc"
+		voucherInfoTN + " where company_id = ?) order by num_of_month "
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
 	start := time.Now()
 	defer func() {
@@ -164,6 +164,17 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId 
 			first = false
 		} else {
 			strSql += "," + dbKey + "=?"
+		}
+		if dbKey == "voucher_date" {
+			iDate, bOk := value.(int)
+			if !bOk {
+				continue
+			}
+			iYear := iDate / 10000
+			iMonth := (iDate - iYear*10000) / 100
+			iDay := iDate % 100
+			t := time.Date(iYear, time.Month(iMonth), iDay, 0, 0, 0, 0, time.Local)
+			value = t
 		}
 		values = append(values, value)
 	}

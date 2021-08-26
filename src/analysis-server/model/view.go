@@ -66,13 +66,13 @@ type OperatorInfoView struct {
 }
 
 type VoucherInfoView struct {
-	VoucherID      int       `json:"voucherId"`
-	CompanyID      int       `json:"companyId"`
-	VoucherMonth   int       `json:"voucherMonth"`
-	NumOfMonth     int       `json:"numOfMonth"`
-	VoucherDate    time.Time `json:"voucherDate"`
-	VoucherFiller  string    `json:"voucherFiller"`
-	VoucherAuditor string    `json:"voucherAuditor"`
+	VoucherID      int    `json:"voucherId"`
+	CompanyID      int    `json:"companyId"`
+	VoucherMonth   int    `json:"voucherMonth"`
+	NumOfMonth     int    `json:"numOfMonth"`
+	VoucherDate    int    `json:"voucherDate"`
+	VoucherFiller  string `json:"voucherFiller"`
+	VoucherAuditor string `json:"voucherAuditor"`
 }
 
 //VoucherRecordView ...
