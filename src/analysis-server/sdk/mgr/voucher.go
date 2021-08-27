@@ -17,14 +17,14 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 	switch {
 	case opts.InfoOptions.CompanyID <= 0:
 		return nil, errors.New("CompanyID is required")
-	case opts.InfoOptions.VoucherMonth <= 0:
-		return nil, errors.New("VoucherMonth is required")
+	// case opts.InfoOptions.VoucherMonth <= 0:
+	// 	return nil, errors.New("VoucherMonth is required")
 	case opts.InfoOptions.VoucherFiller == "":
 		return nil, errors.New("VoucherFiller is required")
 	}
 	params := model.CreateVoucherParams{}
 	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID),
-		VoucherMonth: &(opts.InfoOptions.VoucherMonth), VoucherFiller: &(opts.InfoOptions.VoucherFiller)}
+		VoucherFiller: &(opts.InfoOptions.VoucherFiller)}
 	params.InfoParams = &vouInfoParam
 	var recordParamSlice []*model.CreateVoucherRecordParams
 	for _, val := range opts.RecordsOptions {

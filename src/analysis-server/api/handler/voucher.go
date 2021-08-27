@@ -270,11 +270,12 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
-		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
-		return
-	}
+	//由于制证日期和制证月份是一一对应的，所以可以不判断制证月份了。因为如果不传该参数，就默认是当前日期和月份。
+	// if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
+	// 	ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+	// 	vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+	// 	return
+	// }
 	if params.InfoParams.VoucherFiller == nil || *(params.InfoParams.VoucherFiller) == "" {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouFiller, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)

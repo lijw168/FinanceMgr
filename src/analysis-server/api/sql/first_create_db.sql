@@ -50,6 +50,8 @@ alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)
 /*==============================================================*/
 /* 会计科目表 Table: accountSubject                              */
 /* common_id 和subject_name都是在一个公司内，不允许有重复的 */
+/*subject_type:科目的类型;0:不选择；1:资产;2:负债;3:权益;4:成本;5:损益*/
+/*subject_direction:科目的性质;1:debit;2:credit*/
 /*==============================================================*/
 drop table if exists `finance_mgr_2021`.`accountSubject`;
 create table if not exists `finance_mgr_2021`.`accountSubject`

@@ -139,12 +139,11 @@ type DeleteOperatorParams struct {
 //VoucherInfoParams ...
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
-	VoucherMonth  *int    `json:"voucherMonth"`
 	VoucherDate   *int    `json:"voucherDate"`
 	VoucherFiller *string `json:"voucherFiller"`
 }
 
-//VoucherInfoParams ...
+//ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
 	VoucherID     *int    `json:"voucherId"`
 	VoucherMonth  *int    `json:"voucherMonth"`

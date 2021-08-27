@@ -64,6 +64,18 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, fil
 	return c, err
 }
 
+//通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号
+func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOperator,
+	iVoucherMonth, iVoucherID int) (int64, error) {
+	strSql := "select count(*) from " + voucherInfoTN +
+		" where voucher_month=? and company_id in (select company_id from " + voucherInfoTN + " where voucher_id=? )"
+	var c int64
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql, iVoucherMonth, iVoucherID).Scan(&c)
+	dao.Logger.InfoContext(ctx, "[voucherInfo/db/GetMaxNumByIdAndMonth] [SqlElapsed: %v]", time.Since(start))
+	return c, err
+}
+
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
 	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
 		") values (?, ?, ?, ?, ? ,? ,?, ?, ?)"

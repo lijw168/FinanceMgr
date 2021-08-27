@@ -50,22 +50,8 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		}
 	}()
 
-	infoParams := params.InfoParams
-	filterFields := make(map[string]interface{})
-	filterFields["companyId"] = *infoParams.CompanyID
-	filterFields["voucherMonth"] = *infoParams.VoucherMonth
-	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d", *infoParams.CompanyID, *infoParams.VoucherMonth)
-	count, err := vs.VInfoDao.CountByFilter(ctx, tx, filterFields)
-	if err != nil {
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	//第0个元素是voucherId,从第1个元素开始，就是recordId
-	var IdValSli []int
 	vInfo := new(model.VoucherInfo)
-	vInfo.CompanyID = *infoParams.CompanyID
-	vInfo.VoucherMonth = *infoParams.VoucherMonth
-	vInfo.VoucherFiller = *infoParams.VoucherFiller
-	vInfo.NumOfMonth = int(count + 1)
+	infoParams := params.InfoParams
 	if infoParams.VoucherDate != nil {
 		iDate := *infoParams.VoucherDate
 		iYear := iDate / 10000
@@ -76,6 +62,22 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	} else {
 		vInfo.VoucherDate = time.Now()
 	}
+	_, month, _ := vInfo.VoucherDate.Date()
+	vInfo.VoucherMonth = int(month)
+	filterFields := make(map[string]interface{})
+	filterFields["companyId"] = *infoParams.CompanyID
+	filterFields["voucherMonth"] = vInfo.VoucherMonth
+	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d", *infoParams.CompanyID, vInfo.VoucherMonth)
+	count, err := vs.VInfoDao.CountByFilter(ctx, tx, filterFields)
+	if err != nil {
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	//第0个元素是voucherId,从第1个元素开始，就是recordId
+	var IdValSli []int
+	vInfo.CompanyID = *infoParams.CompanyID
+
+	vInfo.VoucherFiller = *infoParams.VoucherFiller
+	vInfo.NumOfMonth = int(count + 1)
 	vInfo.CreatedAt = time.Now()
 	vInfo.VoucherID = GIdInfoService.genVouIdInfo.GetNextId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
@@ -150,6 +152,13 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		voucherInfoParams := make(map[string]interface{}, 3)
 		if params.ModifyInfoParams.VoucherMonth != nil {
 			voucherInfoParams["voucherMonth"] = *params.ModifyInfoParams.VoucherMonth
+			//如果凭证的月份发生了变化，则该voucherInfo里的凭证号也发生变化。
+			iMaxNumOfMonth, err := vs.VInfoDao.GetMaxNumByIdAndMonth(ctx, tx, *params.ModifyInfoParams.VoucherMonth,
+				*params.ModifyInfoParams.VoucherID)
+			if err != nil {
+				return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+			}
+			voucherInfoParams["numOfMonth"] = iMaxNumOfMonth
 		}
 		if params.ModifyInfoParams.VoucherDate != nil {
 			voucherInfoParams["voucherDate"] = *params.ModifyInfoParams.VoucherDate
