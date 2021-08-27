@@ -173,16 +173,16 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 			voucherRecordParams["summary"] = *recParam.Summary
 		}
 		if recParam.SubjectName != nil {
-			voucherRecordParams["summary"] = *recParam.SubjectName
+			voucherRecordParams["subjectName"] = *recParam.SubjectName
 		}
 		if recParam.CreditMoney != nil {
-			voucherRecordParams["summary"] = *recParam.CreditMoney
+			voucherRecordParams["creditMoney"] = *recParam.CreditMoney
 		}
 		if recParam.DebitMoney != nil {
-			voucherRecordParams["summary"] = *recParam.DebitMoney
+			voucherRecordParams["debitMoney"] = *recParam.DebitMoney
 		}
 		if recParam.SubID1 != nil {
-			voucherRecordParams["summary"] = *recParam.SubID1
+			voucherRecordParams["subId1"] = *recParam.SubID1
 		}
 		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, voucherRecordParams)
 		if err != nil {
