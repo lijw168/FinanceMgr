@@ -70,6 +70,10 @@ type DeleteIDParams struct {
 	ID *int `json:"Id"`
 }
 
+type IDsParams struct {
+	IDs []int `json:"Ids"`
+}
+
 type ModifyCompanyParams struct {
 	CompanyID   *int    `json:"companyId"`
 	CompanyName *string `json:"companyName"`
@@ -140,6 +144,14 @@ type VoucherInfoParams struct {
 	VoucherFiller *string `json:"voucherFiller"`
 }
 
+//VoucherInfoParams ...
+type ModifyVoucherInfoParams struct {
+	VoucherID     *int    `json:"voucherId"`
+	VoucherMonth  *int    `json:"voucherMonth"`
+	VoucherDate   *int    `json:"voucherDate"`
+	VoucherFiller *string `json:"voucherFiller"`
+}
+
 //CreateVoucherRecordParams ...
 type CreateVoucherRecordParams struct {
 	VoucherID   *int     `json:"voucherId"`
@@ -169,10 +181,17 @@ type ModifyVoucherRecordParams struct {
 	Status      *int     `json:"status"`
 }
 
-//VoucherParams...
-type VoucherParams struct {
+//CreateVoucherParams...
+type CreateVoucherParams struct {
 	InfoParams    *VoucherInfoParams           `json:"infoParams"`
 	RecordsParams []*CreateVoucherRecordParams `json:"recordsParams"`
+}
+
+type UpdateVoucherParams struct {
+	ModifyInfoParams    *ModifyVoucherInfoParams     `json:"modifyInfoParams"`
+	ModifyRecordsParams []*ModifyVoucherRecordParams `json:"modifyRecordsParams"`
+	DelRecordsParams    []int                        `json:"delRecordsParams"`
+	AddRecordsParams    []*CreateVoucherRecordParams `json:"addRecordsParams"`
 }
 
 //VoucherAuditParams 凭证的审核参数

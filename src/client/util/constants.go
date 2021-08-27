@@ -25,6 +25,7 @@ const (
 	AccSubDel
 	AccSubUpdate
 	VoucherCreate
+	VoucherUpdate
 	VoucherDel
 	VoucherShow
 	VoucherAudit
@@ -33,6 +34,7 @@ const (
 	VouInfoListLatest
 	VouRecordCreate
 	VouRecordDel
+	VouRecordsDel
 	VouRecordList
 	VouRecordUpdate
 )

@@ -22,7 +22,7 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 	case opts.InfoOptions.VoucherFiller == "":
 		return nil, errors.New("VoucherFiller is required")
 	}
-	params := model.VoucherParams{}
+	params := model.CreateVoucherParams{}
 	vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID),
 		VoucherMonth: &(opts.InfoOptions.VoucherMonth), VoucherFiller: &(opts.InfoOptions.VoucherFiller)}
 	params.InfoParams = &vouInfoParam
@@ -68,7 +68,20 @@ func (vr *Voucher) CreateVoucher_json(params []byte) (*model.DescData, error) {
 	return desc, nil
 }
 
-// func (vr *Voucher) CreateVoucher_json(params *model.VoucherParams) (*model.DescData, error) {
+//该参数直接就是相应的json格式的数据。所以不需要转换了。
+func (vr *Voucher) UpdateVoucher_json(params []byte) ([]byte, error) {
+	action := "UpdateVoucher"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	if result.Data != nil {
+		return json.Marshal(result.Data)
+	}
+	return nil, nil
+}
+
+// func (vr *Voucher) CreateVoucher_json(params *model.CreateVoucherParams) (*model.DescData, error) {
 // 	action := "CreateVoucher"
 // 	switch {
 // 	case *(params.InfoParams.CompanyID) <= 0:
@@ -169,6 +182,16 @@ func (vr *Voucher) DeleteVoucherRecord(opts *options.BaseOptions) error {
 	return nil
 }
 
+//该参数直接就是相应的json格式的数据。所以不需要转换了。
+func (vr *Voucher) DeleteVoucherRecords_json(params []byte) error {
+	action := "DeleteVoucherRecords"
+	_, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (vr *Voucher) GetVoucherInfo(opts *options.BaseOptions) (*model.VoucherInfoView, error) {
 	action := "GetVoucherInfo"
 	dr, err := DescribeOpsResource(action, opts)
@@ -252,8 +275,8 @@ func (vr *Voucher) ListVoucherRecords_json(params []byte) ([]byte, error) {
 	return ListOpsResources_json(action, params)
 }
 
-func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions) error {
-	action := "UpdateVoucherRecord"
+func (vr *Voucher) UpdateVoucherRecordByID(opts *options.ModifyVoucherRecordOptions) error {
+	action := "UpdateVoucherRecordByID"
 	switch {
 	case opts.VouRecordID <= 0:
 		return errors.New("VouRecordID is required")
@@ -297,7 +320,7 @@ func (vr *Voucher) UpdateVoucherRecord(opts *options.ModifyVoucherRecordOptions)
 }
 
 func (vr *Voucher) UpdateVoucherRecord_json(params []byte) error {
-	action := "UpdateVoucherRecord"
+	action := "UpdateVoucherRecordByID"
 	_, err := util.DoRequest_json(action, params)
 	return err
 }

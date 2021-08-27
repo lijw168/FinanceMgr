@@ -27,8 +27,6 @@ func NewVoucherCommand(cmd *cobra.Command) {
 func newVoucherCreateCmd() *cobra.Command {
 	var opts options.VoucherOptions
 	var createRecOpt options.CreateVoucherRecordOptions
-	//params := model.VoucherParams{}
-	//vouInfoParam := model.VoucherInfoParams{CompanyID: &(opts.InfoOptions.CompanyID), VoucherMonth: &(opts.InfoOptions.VoucherMonth)}
 	cmd := &cobra.Command{
 		Use:   "voucher-create [OPTIONS] companyID voucherMonth voucherFiller",
 		Short: "Create a voucher",
@@ -196,7 +194,7 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 			opts.BillCount = -1
 			opts.CreditMoney = -1
 			opts.DebitMoney = -1
-			if err := Sdk.UpdateVoucherRecord(&opts); err != nil {
+			if err := Sdk.UpdateVoucherRecordByID(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},

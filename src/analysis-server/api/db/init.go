@@ -453,6 +453,77 @@ func transferListSqlWithNo(table string, filter map[string]interface{}, filterNo
 	return strSql, fv
 }
 
+func transferDeleteSql(table string, filter map[string]interface{}) (string, []interface{}) {
+	strSql := "delete  from " + table
+	var fk []string
+	var fv []interface{}
+	handleArrFilter := func(arr []interface{}, s *string) (fv []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else {
+				*s += ", ?"
+			}
+			fv = append(fv, ki)
+		}
+		return
+	}
+
+	for k, v := range filter {
+		tmpK := camelToUnix(k)
+		switch v.(type) {
+		case float64, int:
+			fk = append(fk, tmpK+" = ?")
+			fv = append(fv, v)
+		case string:
+			tempS := strings.TrimSpace(v.(string))
+			if strings.HasPrefix(tempS, ">") || strings.HasPrefix(tempS, "<") {
+				operator := string(tempS[0])
+				val := tempS[1:]
+				fk = append(fk, fmt.Sprintf("%s %s ?", tmpK, operator))
+				fv = append(fv, val)
+			} else {
+				fk = append(fk, tmpK+" = ?")
+				fv = append(fv, v)
+			}
+		case []int:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]int); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		case []string:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]string); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		case []interface{}:
+			tmpK += " IN ("
+			tmpFv := handleArrFilter(v.([]interface{}), &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		}
+	}
+	if len(filter) > 0 {
+		strSql += " where " + strings.Join(fk, " and ")
+	}
+	return strSql, fv
+}
+
 func transferListSql(table string, filter map[string]interface{}, field []string, limit int, offset int, order string, od int) (string, []interface{}) {
 	fields := strings.Join(field, ",")
 	strSql := "select " + fields + " from " + table

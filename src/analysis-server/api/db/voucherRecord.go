@@ -110,6 +110,21 @@ func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperato
 	return nil
 }
 
+func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOperator,
+	filter map[string]interface{}) error {
+	strSql, values := transferDeleteSql(voucherRecordTN, filter)
+	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByMultiCondition] sql %s with values %v", strSql, values)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherRecord/db/DeleteByMultiCondition] [SqlElapsed: %v]", time.Since(start))
+	}()
+	if _, err := do.ExecContext(ctx, strSql, values...); err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/DeleteByMultiCondition] [do.ExecContext: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
 func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
 	offset int, order string, od int) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord

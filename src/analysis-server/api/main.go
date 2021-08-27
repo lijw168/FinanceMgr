@@ -195,15 +195,17 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
 
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
+	httpRouter.RegisterFunc("UpdateVoucher", voucherHandlers.UpdateVoucher)
 	httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)
 	httpRouter.RegisterFunc("DeleteVoucher", voucherHandlers.DeleteVoucher)
 	httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
+	httpRouter.RegisterFunc("DeleteVoucherRecords", voucherHandlers.DeleteVoucherRecords)
 	httpRouter.RegisterFunc("GetVoucherInfo", voucherHandlers.GetVoucherInfo)
 	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
 	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
-	httpRouter.RegisterFunc("UpdateVoucherRecord", voucherHandlers.UpdateVoucherRecord)
+	httpRouter.RegisterFunc("UpdateVoucherRecordByID", voucherHandlers.UpdateVoucherRecordByID)
 	httpRouter.RegisterFunc("VoucherAudit", voucherHandlers.VoucherAudit)
 	//检查是否登录
 	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService, logger)

@@ -159,13 +159,28 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	return recordViewSlice, vouRecordCount, nil
 }
 
-func (vs *VoucherRecordService) DeleteVoucherRecordByID(ctx context.Context, recordID int, requestId string) CcError {
+func (vs *VoucherRecordService) DeleteVoucherRecordByID(ctx context.Context, recordID int,
+	requestId string) CcError {
 	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method begin, "+"record ID:%d", recordID)
 	err := vs.VRecordDao.Delete(ctx, vs.Db, recordID)
 	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method end, "+"voucher ID:%d", recordID)
+	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method end.")
+	return nil
+}
+
+func (vs *VoucherRecordService) DeleteVoucherRecords(ctx context.Context, params *model.IDsParams,
+	requestId string) CcError {
+	vs.Logger.InfoContext(ctx, "DeleteVoucherRecords method begin, "+"record IDs:%v", params.IDs)
+	//var vouIds = []int{}
+	delConditonParams := make(map[string]interface{})
+	delConditonParams["recordId"] = params.IDs
+	err := vs.VRecordDao.DeleteByMultiCondition(ctx, vs.Db, delConditonParams)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	vs.Logger.InfoContext(ctx, "DeleteVoucherRecords method end.")
 	return nil
 }
 
@@ -183,8 +198,8 @@ func (vs *VoucherRecordService) GetVoucherRecordByID(ctx context.Context, record
 	return vRecordView, nil
 }
 
-func (vs *VoucherRecordService) UpdateVoucherRecord(ctx context.Context, recordID int, params map[string]interface{}) CcError {
-	FuncName := "VoucherRecordService/UpdateVoucherRecord"
+func (vs *VoucherRecordService) UpdateVoucherRecordByID(ctx context.Context, recordID int, params map[string]interface{}) CcError {
+	FuncName := "VoucherRecordService/UpdateVoucherRecordByID"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {

@@ -102,9 +102,9 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	return vInfoView
 }
 
-func (vs *VoucherInfoService) UpdateVoucherInfo(ctx context.Context, voucherID int,
+func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucherID int,
 	params map[string]interface{}) CcError {
-	FuncName := "VoucherInfoService/UpdateVoucherInfo"
+	FuncName := "VoucherInfoService/UpdateVoucherInfoByID"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {

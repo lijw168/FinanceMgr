@@ -28,6 +28,19 @@ func (vg *VoucherGateway) CreateVoucher(param []byte) (resData []byte, errCode i
 	return resData, errCode
 }
 
+func (vg *VoucherGateway) UpdateVoucher(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if resData, err = cSdk.UpdateVoucher_json(param); err != nil {
+		errCode = util.ErrUpdateFailed
+		logger.Error("the UpdateVoucher_json failed,err:%v", err.Error())
+		resData = nil
+	} else {
+		logger.Debug("UpdateVoucher_json succeed")
+	}
+	return
+}
+
 func (vg *VoucherGateway) DeleteVoucher(param []byte) (errCode int) {
 	id := int(binary.LittleEndian.Uint32(param))
 	if id <= 0 {
@@ -103,13 +116,23 @@ func (vg *VoucherGateway) DeleteVoucherRecord(param []byte) (errCode int) {
 	return deleteCmd(resource_type_voucher_record, id, cSdk.DeleteVoucherRecord)
 }
 
+func (vg *VoucherGateway) DeleteVoucherRecords(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	if err := cSdk.DeleteVoucherRecords_json(param); err != nil {
+		errCode = util.ErrDeleteFailed
+		logger.Error("the DeleteVoucherRecords_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("DeleteVoucherRecords_json succeed")
+	}
+	return
+}
+
 func (vg *VoucherGateway) ListVoucherRecords(param []byte) (resData []byte, errCode int) {
 	return listCmdJson(resource_type_voucher_record, param, cSdk.ListVoucherRecords_json)
 }
 
-func (vg *VoucherGateway) UpdateVoucherRecord(param []byte) (errCode int) {
+func (vg *VoucherGateway) UpdateVoucherRecordByID(param []byte) (errCode int) {
 	errCode = util.ErrNull
-
 	if err := cSdk.UpdateVoucherRecord_json(param); err != nil {
 		errCode = util.ErrUpdateFailed
 		logger.Error("the UpdateVoucherRecord_json failed,err:%v", err.Error())

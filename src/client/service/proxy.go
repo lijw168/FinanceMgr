@@ -263,6 +263,14 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		resData, errCode := voucherGate.CreateVoucher(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
+	case util.VoucherUpdate:
+		resData, errCode := voucherGate.UpdateVoucher(reqPk.Buf)
+		if resData == nil {
+			proxy.respOptResWithoutData(conn, reqPk, errCode)
+		} else {
+			proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		}
+		break
 	case util.VoucherDel:
 		errCode := voucherGate.DeleteVoucher(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
@@ -295,12 +303,16 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		errCode := voucherGate.DeleteVoucherRecord(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
+	case util.VouRecordsDel:
+		errCode := voucherGate.DeleteVoucherRecords(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
 	case util.VouRecordList:
 		resData, errCode := voucherGate.ListVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
 	case util.VouRecordUpdate:
-		errCode := voucherGate.UpdateVoucherRecord(reqPk.Buf)
+		errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
 	default:

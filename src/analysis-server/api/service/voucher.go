@@ -34,7 +34,7 @@ func IsDuplicateKeyError(err error) bool {
 	return false
 }
 
-func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.VoucherParams,
+func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.CreateVoucherParams,
 	requestId string) ([]int, CcError) {
 	FuncName := "VoucherService/service/CreateVoucher"
 	bIsRollBack := true
@@ -126,6 +126,114 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Vouch
 	}
 	bIsRollBack = false
 	vs.Logger.InfoContext(ctx, "CreateVoucher method end ")
+	return IdValSli, nil
+}
+
+//UpdateVoucher  该函数用于修改voucher ...
+func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.UpdateVoucherParams,
+	requestID string) ([]int, CcError) {
+	vs.Logger.InfoContext(ctx, "UpdateVoucher method begin")
+	FuncName := "VoucherService/UpdateVoucher"
+	bIsRollBack := true
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	//update voucherInfo
+	if params.ModifyInfoParams != nil {
+		voucherInfoParams := make(map[string]interface{}, 3)
+		if params.ModifyInfoParams.VoucherMonth != nil {
+			voucherInfoParams["voucherMonth"] = *params.ModifyInfoParams.VoucherMonth
+		}
+		if params.ModifyInfoParams.VoucherDate != nil {
+			voucherInfoParams["voucherDate"] = *params.ModifyInfoParams.VoucherDate
+		}
+		if params.ModifyInfoParams.VoucherFiller != nil {
+			voucherInfoParams["voucherFiller"] = *params.ModifyInfoParams.VoucherFiller
+		}
+		voucherInfoParams["updatedAt"] = time.Now()
+		err = vs.VInfoDao.Update(ctx, tx, *params.ModifyInfoParams.VoucherID, voucherInfoParams)
+		if err != nil {
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	//update voucher record
+	voucherRecordParams := make(map[string]interface{}, 4)
+	for _, recParam := range params.ModifyRecordsParams {
+		if recParam.VouRecordID == nil || *recParam.VouRecordID == 0 {
+			return nil, NewError(ErrVoucher, ErrMiss, ErrId, ErrNull)
+		}
+		if recParam.Summary != nil {
+			voucherRecordParams["summary"] = *recParam.Summary
+		}
+		if recParam.SubjectName != nil {
+			voucherRecordParams["summary"] = *recParam.SubjectName
+		}
+		if recParam.CreditMoney != nil {
+			voucherRecordParams["summary"] = *recParam.CreditMoney
+		}
+		if recParam.DebitMoney != nil {
+			voucherRecordParams["summary"] = *recParam.DebitMoney
+		}
+		if recParam.SubID1 != nil {
+			voucherRecordParams["summary"] = *recParam.SubID1
+		}
+		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, voucherRecordParams)
+		if err != nil {
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		voucherRecordParams = map[string]interface{}{}
+	}
+	//delete voucher records
+	if len(params.DelRecordsParams) > 0 {
+		delConditonParams := make(map[string]interface{})
+		delConditonParams["recordId"] = params.DelRecordsParams
+		err = vs.VRecordDao.DeleteByMultiCondition(ctx, tx, delConditonParams)
+		if err != nil {
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	//add voucher records
+	var IdValSli []int
+	for _, itemParam := range params.AddRecordsParams {
+		vRecord := new(model.VoucherRecord)
+		vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
+		IdValSli = append(IdValSli, vRecord.RecordID)
+		vRecord.VoucherID = *itemParam.VoucherID
+		vRecord.SubjectName = *itemParam.SubjectName
+		vRecord.DebitMoney = *itemParam.DebitMoney
+		vRecord.CreditMoney = *itemParam.CreditMoney
+		vRecord.Summary = *itemParam.Summary
+		vRecord.BillCount = *itemParam.BillCount
+		vRecord.Status = utils.NoAudit
+		vRecord.SubID1 = *itemParam.SubID1
+		// vRecord.SubID2 = *itemParam.SubID2
+		// vRecord.SubID3 = *itemParam.SubID3
+		// vRecord.SubID4 = *itemParam.SubID4
+		vRecord.CreatedAt = time.Now()
+		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
+			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil && IsDuplicateKeyError(err) {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	} else if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "UpdateVoucher method end ")
+	if len(IdValSli) == 0 {
+		return nil, nil
+	}
 	return IdValSli, nil
 }
 
