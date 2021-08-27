@@ -158,7 +158,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 			if err != nil {
 				return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 			}
-			voucherInfoParams["numOfMonth"] = iMaxNumOfMonth
+			voucherInfoParams["numOfMonth"] = iMaxNumOfMonth + 1
 		}
 		if params.ModifyInfoParams.VoucherDate != nil {
 			voucherInfoParams["voucherDate"] = *params.ModifyInfoParams.VoucherDate
