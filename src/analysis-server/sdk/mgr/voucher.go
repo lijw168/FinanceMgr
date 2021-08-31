@@ -255,12 +255,11 @@ func (vr *Voucher) GetMaxNumOfMonth(opts *options.QueryMaxNumOfMonthOption) (int
 	if err != nil {
 		return -1, err
 	}
-	iCount, ok := result.Data.(int64)
-	if ok {
-		return iCount, nil
+	var iCount int64
+	if err := util.FormatView(result.Data, &iCount); err != nil {
+		return 0, err
 	}
-
-	return 0, nil
+	return iCount, nil
 }
 
 func (vr *Voucher) GetMaxNumOfMonth_json(params []byte) (int64, error) {
@@ -269,11 +268,17 @@ func (vr *Voucher) GetMaxNumOfMonth_json(params []byte) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	iCount, ok := result.Data.(int64)
-	if ok {
-		return iCount, nil
+	var iCount int64
+	if err := util.FormatView(result.Data, &iCount); err != nil {
+		return 0, err
 	}
-	return 0, nil
+	return iCount, nil
+	// iCount, ok := result.Data.(int64)
+	// if ok {
+	// 	return iCount, nil
+	// } else {
+	// 	return 0, errors.New("result.Data type affirm,failed")
+	// }
 }
 
 func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.VoucherInfoView, error) {

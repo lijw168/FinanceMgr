@@ -291,7 +291,8 @@ func newGetMaxNumOfMonthCmd() *cobra.Command {
 			if err != nil {
 				util.FormatErrorOutput(err)
 			} else {
-				util.FormatViewOutput(iCount)
+				//util.FormatViewOutput(iCount)
+				fmt.Println("the max numOfMonth is:%d", iCount)
 			}
 		},
 	}
