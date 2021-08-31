@@ -195,6 +195,20 @@ func (vg *VoucherGateway) GetLatestVoucherInfo(param []byte) (resData []byte, er
 	return resData, errCode
 }
 
+func (vg *VoucherGateway) GetMaxNumOfMonth(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	if iCount, err := cSdk.GetMaxNumOfMonth_json(param); err != nil {
+		errCode = util.ErrGetMaxNumOfMonthFailed
+		logger.Error("the GetMaxNumOfMonth_json failed,err:%v", err.Error())
+		resData = nil
+		return
+	} else {
+		logger.Debug("GetMaxNumOfMonth_json succeed")
+		binary.LittleEndian.PutUint32(resData, uint32(iCount))
+	}
+	return
+}
+
 func (vg *VoucherGateway) ListVoucherInfo(param []byte) (resData []byte, errCode int) {
 	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfo_json)
 }

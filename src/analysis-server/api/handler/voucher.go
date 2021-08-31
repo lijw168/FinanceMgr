@@ -23,6 +23,39 @@ type VoucherHandlers struct {
 	Vs     *service.VoucherService
 }
 
+//获取某个公司的某个月份的最大的凭证号，暂不考虑年度
+func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.QueryMaxNumOfMonthParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/QueryMaxNumOfMonth] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherMonth == nil || *(params.VoucherMonth) <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	count, ccErr := vh.Vis.GetMaxNumOfMonthByContion(r.Context(), params, requestId)
+	if ccErr != nil {
+		FunctionName := "voucherHandlers/GetMaxNumOfMonth/ServerHTTP"
+		vh.Logger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetMaxNumOfMonthByContion: %s]",
+			requestId, FunctionName, ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, count)
+	return
+}
+
 func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.DescribeIdParams)
 	err := vh.HttpRequestParse(r, params)

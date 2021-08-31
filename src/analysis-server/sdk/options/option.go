@@ -55,6 +55,11 @@ type NameOptions struct {
 	Name string
 }
 
+type QueryMaxNumOfMonthOption struct {
+	CompanyID    int
+	VoucherMonth int
+}
+
 //voucher begin;VoucherInfoOptions ...
 type VoucherInfoOptions struct {
 	CompanyID     int

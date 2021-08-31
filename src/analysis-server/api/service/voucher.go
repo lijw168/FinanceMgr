@@ -308,15 +308,16 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	recordViewSlice := make([]model.VoucherRecordView, 0)
 	filterFields := make(map[string]interface{})
 	//获取一个voucherID 所对应的所有的voucher records count
+	//目前前端没有限制记录的条数，后端暂时先不限制。
 	filterFields["voucherId"] = voucherID
-	count, err := vs.VRecordDao.CountByFilter(ctx, tx, filterFields)
-	if err != nil {
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
+	// count, err := vs.VRecordDao.CountByFilter(ctx, tx, filterFields)
+	// if err != nil {
+	// 	return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	// }
 	limit, offset := -1, 0
-	if count > MaxRecordLimit {
-		limit = MaxRecordLimit
-	}
+	// if count > MaxRecordLimit {
+	// 	limit = MaxRecordLimit
+	// }
 	orderField := "recordId"
 	orderDirection := cons.Order_Asc
 	voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
@@ -328,7 +329,8 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		vouRecordView := *(VoucherRecordModelToView(vouRecord))
 		recordViewSlice = append(recordViewSlice, vouRecordView)
 	}
-	voucherView.VouRecordTotalCount = int(count)
+	//voucherView.VouRecordTotalCount = int(count)
+	voucherView.VouRecordTotalCount = len(recordViewSlice)
 	voucherView.VouRecordViewSli = append(voucherView.VouRecordViewSli, recordViewSlice...)
 
 	if err = tx.Commit(); err != nil {

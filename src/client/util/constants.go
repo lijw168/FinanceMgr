@@ -32,6 +32,7 @@ const (
 	VouInfoShow
 	VouInfoList
 	VouInfoListLatest
+	VouInfoMaxNumOfMan
 	VouRecordCreate
 	VouRecordDel
 	VouRecordsDel

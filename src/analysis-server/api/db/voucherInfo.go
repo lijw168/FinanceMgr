@@ -50,7 +50,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, err
 	strSql := "select count(1) from " + voucherInfoTN
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -58,6 +58,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, err
 func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
 	var c int64
 	strSql, values := transferCountSql(voucherInfoTN, filter)
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/CountByFilter] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[voucherInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
@@ -69,6 +70,8 @@ func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOpera
 	iVoucherMonth, iVoucherID int) (int64, error) {
 	strSql := "select count(*) from " + voucherInfoTN +
 		" where voucher_month=? and company_id in (select company_id from " + voucherInfoTN + " where voucher_id=? )"
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetMaxNumByIdAndMonth] [sql: %s, values: %d-%d]",
+		strSql, iVoucherMonth, iVoucherID)
 	var c int64
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, iVoucherMonth, iVoucherID).Scan(&c)

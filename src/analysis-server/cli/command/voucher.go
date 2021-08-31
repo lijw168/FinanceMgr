@@ -22,6 +22,7 @@ func NewVoucherCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newVoucherInfoListCmd())
 	cmd.AddCommand(newVoucherAuditCmd())
 	cmd.AddCommand(newGetLatestVouInfoCmd())
+	cmd.AddCommand(newGetMaxNumOfMonthCmd())
 }
 
 func newVoucherCreateCmd() *cobra.Command {
@@ -263,6 +264,37 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 		}
 	}
 
+	return cmd
+}
+
+func newGetMaxNumOfMonthCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "vouInfo-getMaxNumOfMan [OPTIONS] companyID voucherMonth",
+		Short: "get the max numOfMonth in a month",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 2 {
+				cmd.Help()
+				return
+			}
+			var opts options.QueryMaxNumOfMonthOption
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.CompanyID = id
+			}
+			if month, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherMonth = month
+			}
+			iCount, err := Sdk.GetMaxNumOfMonth(&opts)
+			if err != nil {
+				util.FormatErrorOutput(err)
+			} else {
+				util.FormatViewOutput(iCount)
+			}
+		},
+	}
 	return cmd
 }
 

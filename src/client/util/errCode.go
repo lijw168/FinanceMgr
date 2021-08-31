@@ -25,4 +25,5 @@ const (
 	ErrUtf8ToGbkFailed            = 21 //covert utf8 to gbk failed
 	ErrVoucherAuditFailed         = 22 //voucher audit failed
 	ErrGetLatestVoucherInfoFailed = 23 //get latest voucher information,failed
+	ErrGetMaxNumOfMonthFailed     = 24 //get the max numOfMonth,failed
 )

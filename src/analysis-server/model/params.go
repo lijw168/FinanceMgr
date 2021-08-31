@@ -143,6 +143,12 @@ type VoucherInfoParams struct {
 	VoucherFiller *string `json:"voucherFiller"`
 }
 
+//QueryMaxNumOfMonthParams 查询最大的凭证号...
+type QueryMaxNumOfMonthParams struct {
+	CompanyID    *int `json:"companyId"`
+	VoucherMonth *int `json:"voucherMonth"`
+}
+
 //ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
 	VoucherID     *int    `json:"voucherId"`

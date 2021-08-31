@@ -239,6 +239,43 @@ func (vr *Voucher) GetLatestVoucherInfo_json(params []byte) ([]byte, error) {
 	return json.Marshal(result.Data)
 }
 
+func (vr *Voucher) GetMaxNumOfMonth(opts *options.QueryMaxNumOfMonthOption) (int64, error) {
+	action := "GetMaxNumOfMonth"
+	if opts.CompanyID <= 0 {
+		return 0, errors.New("CompanyID is required")
+	}
+	if opts.VoucherMonth <= 0 {
+		return -1, errors.New("VoucherMonth is required")
+	}
+	params := &model.QueryMaxNumOfMonthParams{
+		CompanyID:    &opts.CompanyID,
+		VoucherMonth: &opts.VoucherMonth,
+	}
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return -1, err
+	}
+	iCount, ok := result.Data.(int64)
+	if ok {
+		return iCount, nil
+	}
+
+	return 0, nil
+}
+
+func (vr *Voucher) GetMaxNumOfMonth_json(params []byte) (int64, error) {
+	action := "GetMaxNumOfMonth"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return 0, err
+	}
+	iCount, ok := result.Data.(int64)
+	if ok {
+		return iCount, nil
+	}
+	return 0, nil
+}
+
 func (vr *Voucher) ListVoucherInfo(opts *options.ListOptions) (int64, []*model.VoucherInfoView, error) {
 	action := "ListVoucherInfo"
 	var ret []*model.VoucherInfoView
