@@ -132,8 +132,8 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map
 	offset int, order string, od int) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
 	//strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(operatorInfoTN, filter, intervalFilter, fuzzyMatchFilter,
-		operatorInfoFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(voucherRecordTN, filter, intervalFilter, fuzzyMatchFilter,
+		voucherRecordFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
