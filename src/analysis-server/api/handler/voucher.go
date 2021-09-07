@@ -191,8 +191,8 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 	if params.AuxiFilter != nil {
 		filterMap := map[string]utils.Attribute{}
 		//因为credit和 debit可能是一个值，也可能是多个值,所以此处就不用做检查了。
-		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["subjectName_fuzzy"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["summary_fuzzy"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.AuxiFilter) {
 			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
