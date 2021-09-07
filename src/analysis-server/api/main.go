@@ -197,7 +197,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
 	httpRouter.RegisterFunc("UpdateVoucher", voucherHandlers.UpdateVoucher)
 	httpRouter.RegisterFunc("DeleteVoucher", voucherHandlers.DeleteVoucher)
-	httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)	
+	httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)
 	httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
 	httpRouter.RegisterFunc("DeleteVoucherRecords", voucherHandlers.DeleteVoucherRecords)
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
@@ -206,6 +206,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
 	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
+	httpRouter.RegisterFunc("ListVoucherInfoByMulCondition", voucherHandlers.ListVoucherInfoByMulCondition)
 	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
 	httpRouter.RegisterFunc("VoucherAudit", voucherHandlers.VoucherAudit)
 	//检查是否登录

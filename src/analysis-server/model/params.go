@@ -213,6 +213,14 @@ type ListParams struct {
 	DescLimit  *int          `json:"desc_limit"`
 }
 
+type ListVoucherInfoParams struct {
+	BasicFilter []*FilterItem `json:"basic_filter"`
+	AuxiFilter  []*FilterItem `json:"auxi_filter"`
+	Order       []*OrderItem  `json:"orders"`
+	DescOffset  *int          `json:"desc_offset"`
+	DescLimit   *int          `json:"desc_limit"`
+}
+
 type DeleteParams struct {
 	Name *string `json:"name"`
 }

@@ -352,6 +352,136 @@ func transferListSqlWithFuzzyMatch(table string, filter map[string]interface{}, 
 	return strSql, fv
 }
 
+//support multi-condition:accurate match,in,like,between ... and,
+//fuzzyMatchFilter,the value type is  string
+//intervalFilter,the value type is numerical value
+func transferListSqlWithMutiCondition(table string, filter map[string]interface{}, intervalFilter map[string]interface{},
+	fuzzyMatchFilter map[string]string, field []string, limit int, offset int, order string, od int) (string, []interface{}) {
+	fields := strings.Join(field, ",")
+	strSql := "select " + fields + " from " + table
+	var fk []string
+	var fv []interface{}
+	handleArrFilter := func(arr []interface{}, s *string) (fv []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else {
+				*s += ", ?"
+			}
+			fv = append(fv, ki)
+		}
+		return
+	}
+	handleBetweenFilter := func(arr []interface{}, s *string) (fv []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else if i == 1 {
+				*s += " and ? "
+			} else {
+				panic("the between parameter is valid")
+			}
+			fv = append(fv, ki)
+		}
+		return
+	}
+
+	for k, v := range filter {
+		tmpK := camelToUnix(k)
+		switch v.(type) {
+		case float64, int, string:
+			fk = append(fk, tmpK+" = ?")
+			fv = append(fv, v)
+		case []int:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]int); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		case []string:
+			tmpK += " IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]string); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		case []interface{}:
+			tmpK += " IN ("
+			tmpFv := handleArrFilter(v.([]interface{}), &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		}
+	}
+
+	for k, v := range intervalFilter {
+		tmpK := camelToUnix(k)
+		switch v.(type) {
+		case []int:
+			tmpK += " between "
+			arr := []interface{}{}
+			if vl, ok := v.([]int); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleBetweenFilter(arr, &tmpK)
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		case []float64:
+			tmpK += " between "
+			arr := []interface{}{}
+			if vl, ok := v.([]float64); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleBetweenFilter(arr, &tmpK)
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		}
+	}
+
+	for k, v := range fuzzyMatchFilter {
+		tmpK := camelToUnix(k)
+		fk = append(fk, tmpK+" like ?")
+		fv = append(fv, v)
+	}
+
+	if len(fk) > 0 {
+		strSql += " where " + strings.Join(fk, " and ")
+	}
+	if order != "" {
+		order = camelToUnix(order)
+		strSql += " order by " + string(order)
+		if od == 1 {
+			strSql += " desc"
+		}
+	}
+	if limit >= 0 {
+		if offset >= 0 {
+			strSql += " LIMIT ?, ?"
+			fv = append(fv, offset)
+			fv = append(fv, limit)
+		} else {
+			strSql += " LIMIT ?"
+			fv = append(fv, limit)
+		}
+	}
+	return strSql, fv
+}
+
 //filterNo,the value type is float64, int and string
 func transferListSqlWithNo(table string, filter map[string]interface{}, filterNo map[string]interface{},
 	field []string, limit int, offset int, order string, od int) (string, []interface{}) {

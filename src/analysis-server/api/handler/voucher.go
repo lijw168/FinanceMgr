@@ -94,7 +94,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		vh.Logger.ErrorContext(r.Context(), "lack base param  Id")
 		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
@@ -149,6 +149,90 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	vouInfoViews, count, ccErr := vh.Vis.ListVoucherInfo(r.Context(), params)
 	if ccErr != nil {
 		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherInfo/ServerHTTP] [VoucherInfoService.ListVoucherInfo: %s]", ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	dataBuf := &DescData{(int64)(count), vouInfoViews}
+	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	return
+}
+
+func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.ListVoucherInfoParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfoByMulCondition] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if isLackBaseParams([]string{"voucherId", "companyId"}, params.BasicFilter) {
+		vh.Logger.ErrorContext(r.Context(), "lack base param Id")
+		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		return
+	}
+	if params.BasicFilter != nil {
+		filterMap := map[string]utils.Attribute{}
+		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//因为numOfMonth和 voucherDate可能是一个值，也可能是多个值
+		//filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherFiller"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["voucherAuditor"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		if !utils.ValiFilter(filterMap, params.BasicFilter) {
+			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+	}
+	if params.AuxiFilter != nil {
+		filterMap := map[string]utils.Attribute{}
+		//因为credit和 debit可能是一个值，也可能是多个值,所以此处就不用做检查了。
+		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		if !utils.ValiFilter(filterMap, params.AuxiFilter) {
+			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+	}
+	if (params.Order != nil) && (len(params.Order) > 0) {
+		switch *params.Order[0].Field {
+		case "voucherId":
+			*params.Order[0].Field = "voucherId"
+		case "createdAt":
+			*params.Order[0].Field = "createdAt"
+		case "updatedAt":
+			*params.Order[0].Field = "updatedAt"
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+		switch *params.Order[0].Direction {
+		case cons.Order_Asc, cons.Order_Desc:
+		default:
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			vh.Response(r.Context(), vh.Logger, w, ce, nil)
+			return
+		}
+	}
+	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
+		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		return
+	}
+	if (params.DescLimit != nil) && (*params.DescLimit < -1) {
+		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrLimit, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		return
+	}
+	vouInfoViews, count, ccErr := vh.Vs.ListVoucherInfoByMulCondition(r.Context(), params)
+	if ccErr != nil {
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/ListVoucherInfoByMulCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}

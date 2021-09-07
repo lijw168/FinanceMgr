@@ -299,6 +299,11 @@ func (vr *Voucher) ListVoucherInfo_json(params []byte) ([]byte, error) {
 	return ListOpsResources_json(action, params)
 }
 
+func (vr *Voucher) ListVoucherInfoByMulCondition_json(params []byte) ([]byte, error) {
+	action := "ListVoucherInfoByMulCondition"
+	return ListOpsResources_json(action, params)
+}
+
 func (vr *Voucher) ListVoucherRecords(opts *options.ListOptions) (int64, []*model.VoucherRecordView, error) {
 	action := "ListVoucherRecords"
 	var ret []*model.VoucherRecordView

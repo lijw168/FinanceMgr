@@ -122,12 +122,22 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	params *model.ListParams) ([]*model.VoucherRecordView, int, CcError) {
 	recordViewSlice := make([]*model.VoucherRecordView, 0)
 	filterFields := make(map[string]interface{})
+	intervalFilterFields := make(map[string]interface{})
+	fuzzyMatchFields := make(map[string]string)
 	limit, offset := -1, 0
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
 			case "recordId", "voucherId", "status", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
+			case "debitMoney_interval":
+				intervalFilterFields["debitMoney"] = f.Value
+			case "creditMoney_interval":
+				intervalFilterFields["creditMoney"] = f.Value
+			case "subjectName_fuzzy":
+				fuzzyMatchFields["subjectName"] = f.Value.(string)
+			case "summary_fuzzy":
+				fuzzyMatchFields["summary"] = f.Value.(string)
 			default:
 				return recordViewSlice, 0, NewError(ErrVoucher, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -145,7 +155,8 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterFields, limit, offset, orderField, orderDirection)
+	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterFields, intervalFilterFields, fuzzyMatchFields,
+		limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return recordViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

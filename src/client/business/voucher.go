@@ -204,6 +204,7 @@ func (vg *VoucherGateway) GetMaxNumOfMonth(param []byte) (resData []byte, errCod
 		return
 	} else {
 		logger.Debug("GetMaxNumOfMonth_json succeed")
+		resData = make([]byte, 4)
 		binary.LittleEndian.PutUint32(resData, uint32(iCount))
 	}
 	return
@@ -211,4 +212,8 @@ func (vg *VoucherGateway) GetMaxNumOfMonth(param []byte) (resData []byte, errCod
 
 func (vg *VoucherGateway) ListVoucherInfo(param []byte) (resData []byte, errCode int) {
 	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfo_json)
+}
+
+func (vg *VoucherGateway) ListVoucherInfoByMulCondition(param []byte) (resData []byte, errCode int) {
+	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfoByMulCondition_json)
 }

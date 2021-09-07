@@ -125,10 +125,15 @@ func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOp
 	return nil
 }
 
-func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map[string]interface{}, limit int,
+//1、在where条件里增加between ... and
+//2、增加了like
+func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map[string]interface{},
+	intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string, limit int,
 	offset int, order string, od int) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
-	strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
+	//strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(operatorInfoTN, filter, intervalFilter, fuzzyMatchFilter,
+		operatorInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {

@@ -34,12 +34,17 @@ func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID 
 func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model.ListParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
 	filterFields := make(map[string]interface{})
+	intervalFilterFields := make(map[string]interface{})
 	limit, offset := -1, 0
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
 				filterFields[*f.Field] = f.Value
+			case "numOfMonth_interval":
+				intervalFilterFields["numOfMonth"] = f.Value
+			case "voucherDate_interval":
+				intervalFilterFields["voucherDate"] = f.Value
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -57,7 +62,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterFields, intervalFilterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

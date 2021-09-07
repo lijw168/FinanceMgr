@@ -320,7 +320,10 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	// }
 	orderField := "recordId"
 	orderDirection := cons.Order_Asc
-	voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+	intervalFilterFields := make(map[string]interface{})
+	fuzzyMatchFields := make(map[string]string)
+	voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, intervalFilterFields, fuzzyMatchFields,
+		limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -345,7 +348,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 //VoucherAudit  该函数用于审核和取消审核 ...
 func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
 	params map[string]interface{}, requestID string) CcError {
-	FuncName := "VoucherInfoService/VoucherAudit"
+	FuncName := "VoucherService/VoucherAudit"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {
@@ -387,4 +390,103 @@ func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
 	}
 	bIsRollBack = false
 	return nil
+}
+
+//之所以放在这，是因为list voucherInfo时，有时，可能需要访问voucher record这个表。
+func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
+	params *model.ListVoucherInfoParams) ([]*model.VoucherInfoView, int, CcError) {
+	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
+	filterFields := make(map[string]interface{})
+	intervalFilterFields := make(map[string]interface{})
+	limit, offset := -1, 0
+	if params.DescLimit != nil {
+		limit = *params.DescLimit
+		if params.DescOffset != nil {
+			offset = *params.DescOffset
+		}
+	}
+	orderField := ""
+	orderDirection := 0
+	if params.Order != nil {
+		orderField = *params.Order[0].Field
+		orderDirection = *params.Order[0].Direction
+	}
+	FuncName := "VoucherService/ListVoucherInfoByMulCondition"
+	bIsRollBack := true
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	if params.AuxiFilter != nil {
+		fuzzyMatchFields := make(map[string]string)
+		for _, f := range params.AuxiFilter {
+			switch *f.Field {
+			case "debitMoney_interval":
+				intervalFilterFields["debitMoney"] = f.Value
+			case "creditMoney_interval":
+				intervalFilterFields["creditMoney"] = f.Value
+			case "subjectName_fuzzy":
+				fuzzyMatchFields["subjectName"] = f.Value.(string)
+			case "summary_fuzzy":
+				fuzzyMatchFields["summary"] = f.Value.(string)
+			default:
+				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
+			}
+		}
+		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, intervalFilterFields, fuzzyMatchFields,
+			limit, offset, orderField, orderDirection)
+		if err != nil {
+			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoByMulCondition] [VRecordDao.List: %s, filterFields: %v]",
+				err.Error(), filterFields)
+			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		voucherIds := make([]int, 1)
+		for _, vouRecord := range voucherRecords {
+			voucherIds = append(voucherIds, vouRecord.VoucherID)
+		}
+		if len(voucherIds) > 0 {
+			filterFields["voucherId"] = voucherIds
+		}
+	}
+
+	delete(intervalFilterFields, "debitMoney")
+	delete(intervalFilterFields, "creditMoney")
+	if params.BasicFilter != nil {
+		for _, f := range params.BasicFilter {
+			switch *f.Field {
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
+				filterFields[*f.Field] = f.Value
+			case "numOfMonth_interval":
+				intervalFilterFields["numOfMonth"] = f.Value
+			case "voucherDate_interval":
+				intervalFilterFields["voucherDate"] = f.Value
+			default:
+				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
+			}
+		}
+	}
+
+	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit, offset, orderField, orderDirection)
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+
+	for _, vouInfo := range voucherInfos {
+		vouInfoView := VoucherInfoModelToView(vouInfo)
+		vouInfoViewSlice = append(vouInfoViewSlice, vouInfoView)
+	}
+	vouRecordCount := len(voucherInfos)
+	return vouInfoViewSlice, vouRecordCount, nil
 }

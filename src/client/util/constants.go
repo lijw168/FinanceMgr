@@ -31,6 +31,7 @@ const (
 	VoucherAudit
 	VouInfoShow
 	VouInfoList
+	VouInfoListByMulCon
 	VouInfoListLatest
 	VouInfoMaxNumOfMan
 	VouRecordCreate
