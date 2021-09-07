@@ -115,8 +115,8 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[s
 	var voucherInfoSlice []*model.VoucherInfo
 	fuzzyMatchFilter := map[string]string{}
 	//strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(operatorInfoTN, filter, intervalFilter, fuzzyMatchFilter,
-		operatorInfoFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(voucherInfoTN, filter, intervalFilter, fuzzyMatchFilter,
+		voucherInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
