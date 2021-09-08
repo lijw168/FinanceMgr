@@ -425,12 +425,19 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	}()
 	if params.AuxiFilter != nil {
 		fuzzyMatchFields := make(map[string]string)
+		var intervalValSlice []float64
 		for _, f := range params.AuxiFilter {
+			if *f.Field == "debitMoney_interval" || *f.Field == "creditMoney_interval" {
+				err := FormatData(f.Value, &intervalValSlice)
+				if err != nil {
+					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+				}
+			}
 			switch *f.Field {
 			case "debitMoney_interval":
-				intervalFilterFields["debitMoney"] = f.Value
+				intervalFilterFields["debitMoney"] = intervalValSlice
 			case "creditMoney_interval":
-				intervalFilterFields["creditMoney"] = f.Value
+				intervalFilterFields["creditMoney"] = intervalValSlice
 			case "subjectName_fuzzy":
 				fuzzyMatchFields["subjectName"] = f.Value.(string)
 			case "summary_fuzzy":
@@ -458,14 +465,21 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	delete(intervalFilterFields, "debitMoney")
 	delete(intervalFilterFields, "creditMoney")
 	if params.BasicFilter != nil {
+		var intervalValSlice []int
 		for _, f := range params.BasicFilter {
+			if *f.Field == "numOfMonth_interval" || *f.Field == "voucherDate_interval" {
+				err := FormatData(f.Value, &intervalValSlice)
+				if err != nil {
+					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+				}
+			}
 			switch *f.Field {
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
 				filterFields[*f.Field] = f.Value
 			case "numOfMonth_interval":
-				intervalFilterFields["numOfMonth"] = f.Value
+				intervalFilterFields["numOfMonth"] = intervalValSlice
 			case "voucherDate_interval":
-				intervalFilterFields["voucherDate"] = f.Value
+				intervalFilterFields["voucherDate"] = intervalValSlice
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
