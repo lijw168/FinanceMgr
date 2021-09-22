@@ -15,6 +15,7 @@ const (
 	resource_type_voucher_info
 	resource_type_login_info
 	resource_type_operator
+	resource_type_menu_info
 )
 
 func deleteCmd(rsT, id int, delHandler func(*options.BaseOptions) error) (errCode int) {
@@ -68,6 +69,8 @@ func getResourceName(rsT int) string {
 		return "loginInfo"
 	case resource_type_operator:
 		return "operator"
+	case resource_type_menu_info:
+		return "menuInfo"
 	default:
 		panic("Unsupport resource type")
 	}

@@ -93,6 +93,15 @@ type IDInfo struct {
 	VoucherRecordID int
 }
 
+//MenuInfo ...
+type MenuInfo struct {
+	MenuID        int
+	MenuName      string
+	MenuLevel     int
+	ParentMenuID  int
+	MenuSerialNum int
+}
+
 //CommResp ...
 type CommResp struct {
 	Code    int         `json:"code"`

@@ -6,6 +6,7 @@ import (
 
 	"analysis-server/sdk/mgr"
 	"analysis-server/sdk/util"
+	"common/log"
 )
 
 type CcSdk struct {
@@ -21,6 +22,8 @@ type CcSdk struct {
 	mgr.Operator
 	mgr.Voucher
 	mgr.Authen
+	mgr.MenuInfo
+	Logger *log.Logger
 }
 
 func (c *CcSdk) Setup() {
@@ -31,6 +34,7 @@ func (c *CcSdk) Setup() {
 	util.Client = new(http.Client)
 	util.Client.Timeout = time.Duration(c.Timeout) * time.Millisecond
 	util.TraceId = c.TraceId
+	util.Logger = c.Logger
 }
 
 func (c *CcSdk) SetAccessToken(accessToken string) {

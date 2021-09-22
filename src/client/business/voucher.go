@@ -143,6 +143,7 @@ func (vg *VoucherGateway) UpdateVoucherRecordByID(param []byte) (errCode int) {
 }
 
 //end voucher records
+
 //begin voucher info
 func (vg *VoucherGateway) GetVoucherInfo(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull

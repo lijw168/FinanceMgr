@@ -150,6 +150,21 @@ create table if not exists `finance_mgr_2021`.`userLoginInfo`
    `ended_at`             datetime
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
+/*==============================================================*/
+/* Table: menuInfo                                              */   
+/*menu_serial_num:用于排列菜单的顺序,只对一级菜单起作用。*/                                           
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`menuInfo`;
+create table if not exists `finance_mgr_2021`.`menuInfo`
+(
+   `menu_id`              int not null,
+   `menu_name`            varchar(24),
+   `menu_level`           int,
+   `parent_menu_id`       int,
+   `menu_serial_num`      int,
+   primary key (menu_id)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
 insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
 insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());
 insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id) value(2,102,501,1001,5001);

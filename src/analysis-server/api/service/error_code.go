@@ -15,6 +15,7 @@ const (
 	ErrLogin       = "login"
 	ErrLogout      = "logout"
 	ErrIdInfo      = "IdInfo"
+	ErrMenuInfo    = "MenuInfo"
 )
 
 const (

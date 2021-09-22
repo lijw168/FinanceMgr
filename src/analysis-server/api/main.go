@@ -150,6 +150,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	loginInfoDao := &db.LoginInfoDao{Logger: logger}
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
+	menuInfoDao := &db.MenuInfoDao{Logger: logger}
 	//初始化ID Resource
 	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
 	ccErr := service.GIdInfoService.InitIdResource()
@@ -164,12 +165,14 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, Db: _db}
 	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, Db: _db}
+	menuService := &service.MenuInfoService{Logger: logger, MenuDao: menuInfoDao, Db: _db}
 	//handlers
 	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
 	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
 	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
 	authHandlers := &handler.AuthenHandlers{Logger: logger, AuthService: authService, ComService: comService, OptInfoService: optInfoService}
+	menuHandlers := &handler.MenuInfoHandlers{Logger: logger, MenuService: menuService}
 
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
@@ -209,6 +212,8 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListVoucherInfoByMulCondition", voucherHandlers.ListVoucherInfoByMulCondition)
 	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
 	httpRouter.RegisterFunc("VoucherAudit", voucherHandlers.VoucherAudit)
+
+	httpRouter.RegisterFunc("ListMenuInfo", menuHandlers.ListMenuInfo)
 	//检查是否登录
 	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService, logger)
 	httpRouter.LoginCheck = handler.GAccessTokenH.LoginCheck

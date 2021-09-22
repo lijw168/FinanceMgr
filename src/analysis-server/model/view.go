@@ -105,3 +105,17 @@ type IDInfoView struct {
 	SubjectID       int `json:"subjectId"`
 	VoucherRecordID int `json:"voucherRecordId"`
 }
+
+type ResourceInfoView struct {
+	CompanyId   int    `json:"companyId"`
+	CompanyName string `json:"companyName"`
+	YearSlice   []int  `json:"year"`
+}
+
+//MenuInfo ...
+type MenuInfoView struct {
+	MenuID       int    `json:"menuId"`
+	MenuName     string `json:"menuName"`
+	MenuLevel    int    `json:"menuLevel"`
+	ParentMenuID int    `json:"parentMenuId"`
+}

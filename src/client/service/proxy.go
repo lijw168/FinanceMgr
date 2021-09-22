@@ -21,34 +21,26 @@ import (
 	"strings"
 	"sync"
 	"time"
-	//"unsafe"
 )
 
 type Proxy struct {
-	iListenPort int
-	// strServerPort string
-	// strHost       string
-	// iTimeout      int
+	iListenPort  int
 	listenCon    net.Listener
 	quitCheckCh  chan bool
 	processResWg sync.WaitGroup
 	logger       *log.Logger
+	profPort     string
+	auth         *business.Authen
 	//tr           *http.Transport
-	profPort string
-	auth     *business.Authen
 }
 
 //Init ...
 func (proxy *Proxy) Init(iListenPort, iServerPort int, strServerHost string, uTimeout uint64, logger *log.Logger) {
 	proxy.iListenPort = iListenPort
-	// proxy.strServerPort = strconv.Itoa(iServerPort)
-	// proxy.strHost = strServerHost
-	// proxy.iTimeout = iTimeout
 	domain := fmt.Sprintf("http://%s:%d/analysis_server", strServerHost, iServerPort)
 	verbose := true
 	business.InitBusiness(logger, verbose, domain, uTimeout)
 	proxy.logger = logger
-	//proxy.userStatus = util.Offline
 	proxy.quitCheckCh = make(chan bool, 1)
 	proxy.listenCon = nil
 	proxy.profPort = "20000"
@@ -140,6 +132,8 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 				proxy.processAccSub(conn, pk)
 			} else if pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouRecordUpdate {
 				proxy.processVoucher(conn, pk)
+			} else if pk.OpCode == util.MenuInfoList {
+				proxy.processMenu(conn, pk)
 			} else {
 				proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", pk.OpCode)
 			}
@@ -218,6 +212,10 @@ func (proxy *Proxy) processCompany(conn net.Conn, reqPk *Packet) {
 	case util.CompanyUpdate:
 		errCode := comGate.UpdateCompany(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
+	case util.InitResourceInfo:
+		resData, errCode := comGate.InitResourceInfo(proxy.auth.OperatorID)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
@@ -322,6 +320,20 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 	case util.VouRecordUpdate:
 		errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
+	default:
+		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
+		panic("bug")
+	}
+	return
+}
+
+func (proxy *Proxy) processMenu(conn net.Conn, reqPk *Packet) {
+	var menuGate business.MenuInfoGateway
+	switch reqPk.OpCode {
+	case util.MenuInfoList:
+		resData, errCode := menuGate.ListMenuInfo(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)

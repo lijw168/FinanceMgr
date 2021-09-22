@@ -1,7 +1,7 @@
 package business
 
 import (
-	//"analysis-server/model"
+	"analysis-server/model"
 	"analysis-server/sdk/options"
 	"client/util"
 	"encoding/binary"
@@ -67,4 +67,45 @@ func (cg *CompanyGateway) UpdateCompany(param []byte) (errCode int) {
 func (cg *CompanyGateway) DeleteCompany(param []byte) (errCode int) {
 	id := int(binary.LittleEndian.Uint32(param))
 	return deleteCmd(resource_type_company, id, cSdk.DeleteCompany)
+}
+
+func (cg *CompanyGateway) InitResourceInfo(operateID int) (resData []byte, errCode int) {
+	var opts options.BaseOptions
+	opts.ID = operateID
+	errCode = util.ErrNull
+	// if descData, err := cSdk.CreateVoucher_json(param); err != nil {
+	// 	errCode = util.ErrCreateFailed
+	// 	logger.Error("the CreateVoucher failed,err:%v", err.Error())
+	// } else {
+	// 	logger.Debug("CreateVoucher succeed;views:%v", descData)
+	// 	resData, err = json.Marshal(descData)
+	// 	if err != nil {
+	// 		errCode = util.ErrMarshalFailed
+	// 		logger.Error("the Marshal failed,err:%v", err.Error())
+	// 	}
+	// 	//把相应的资源写入到文件里。
+	// }
+	//test data
+	//errCode = util.ErrInitResourceInfoFailed
+	resInfoSlice := make([]model.ResourceInfoView, 0)
+	var resInfo = model.ResourceInfoView{}
+	resInfo.CompanyId = 3
+	resInfo.CompanyName = "展讯科技"
+	yearSlice := []int{2020, 2021}
+	resInfo.YearSlice = yearSlice
+	resInfoSlice = append(resInfoSlice, resInfo)
+	resInfo.CompanyId = 4
+	resInfo.CompanyName = "中国科技"
+	yearSlice = yearSlice[0:0]
+	yearSlice = append(yearSlice, 2022)
+	yearSlice = append(yearSlice, 2023)
+	resInfo.YearSlice = yearSlice
+	resInfoSlice = append(resInfoSlice, resInfo)
+	var err error
+	resData, err = json.Marshal(resInfoSlice)
+	if err != nil {
+		errCode = util.ErrMarshalFailed
+		logger.Error("the Marshal failed,err:%v", err.Error())
+	}
+	return
 }

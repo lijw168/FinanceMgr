@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-func initLogger(fileName string, fileMaxSize, filCount int) (*log.Logger, error) {
+func initLogger(fileName string, fileMaxSize, filCount, iLogLevel int) (*log.Logger, error) {
 	var h log.Handler
 	var err error
 	h, err = log.NewRotatingFileHandler(fileName, fileMaxSize, filCount)
@@ -20,23 +20,11 @@ func initLogger(fileName string, fileMaxSize, filCount int) (*log.Logger, error)
 		return nil, err
 	}
 	logger := log.NewDefault(h)
-	//logger.SetLevel(log.LevelInfo)
-	logger.SetLevel(log.LevelDebug)
+	logger.SetLevel(iLogLevel)
 	return logger, nil
 }
 
 func main() {
-	// resData := make([]byte, 4)
-	// binary.LittleEndian.PutUint32(resData, uint32(508))
-	// var err error
-	// tmpBuf := make([]byte, 0)
-	// if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
-	// 	fmt.Printf("err:%s\n", err.Error())
-	// } else {
-	// 	fmt.Printf("tmpBuf:%v\n", tmpBuf)
-	// }
-	// return
-
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Printf("get file path,failed,err:%v\r\n", err.Error())
@@ -60,7 +48,7 @@ func main() {
 	// 	flag.Usage()
 	// 	return
 	// }
-	logger, err := initLogger(*logFileName, *logFileSize, *logFileCount)
+	logger, err := initLogger(*logFileName, *logFileSize, *logFileCount, log.LevelDebug)
 	if err != nil {
 		fmt.Printf("Init logger err: %v \r\n", err.Error())
 		return

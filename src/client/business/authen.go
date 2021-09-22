@@ -9,7 +9,7 @@ import (
 )
 
 type Authen struct {
-	iOperatorID    int
+	OperatorID     int
 	strUserName    string
 	strAccessToken string
 	userStatus     int
@@ -17,7 +17,7 @@ type Authen struct {
 }
 
 func (auth *Authen) setAuthenInfo(strUserName, strAccessToken string, iOperatorID, iUserStatus int) {
-	auth.iOperatorID = iOperatorID
+	auth.OperatorID = iOperatorID
 	auth.strUserName = strUserName
 	auth.strAccessToken = strAccessToken
 	auth.userStatus = iUserStatus
@@ -56,7 +56,7 @@ func (auth *Authen) Logout() int {
 	logger.LogInfo("logout,begin")
 	errCode := util.ErrNull
 	var opts options.BaseOptions
-	opts.ID = auth.iOperatorID
+	opts.ID = auth.OperatorID
 	if err := cSdk.Logout(&opts); err != nil {
 		errCode = util.ErrUserLogoutFailed
 		logger.Error("the Logout failed,err:%v", err.Error())
@@ -72,7 +72,7 @@ func (auth *Authen) Logout() int {
 func (auth *Authen) OnlineCheck() int {
 	errCode := util.ErrNull
 	var opts options.BaseOptions
-	opts.ID = auth.iOperatorID
+	opts.ID = auth.OperatorID
 	if view, err := cSdk.StatusCheckout(&opts); err != nil {
 		errCode = util.ErrOnlineCheckout
 		logger.Error("OnlineCheck failed,err:%v", err.Error())

@@ -18,6 +18,7 @@ const (
 	CompanyList
 	CompanyShow
 	CompanyDel
+	InitResourceInfo
 	CompanyUpdate
 	AccSubCreate
 	AccSubList
@@ -39,6 +40,7 @@ const (
 	VouRecordsDel
 	VouRecordList
 	VouRecordUpdate
+	MenuInfoList
 )
 
 const (

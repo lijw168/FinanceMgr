@@ -26,4 +26,5 @@ const (
 	ErrVoucherAuditFailed         = 22 //voucher audit failed
 	ErrGetLatestVoucherInfoFailed = 23 //get latest voucher information,failed
 	ErrGetMaxNumOfMonthFailed     = 24 //get the max numOfMonth,failed
+	ErrInitResourceInfoFailed     = 25 //init resource information,failed
 )

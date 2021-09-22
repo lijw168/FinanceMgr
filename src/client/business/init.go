@@ -16,5 +16,6 @@ func InitBusiness(pLog *log.Logger, verbose bool, domain string, timeout uint64)
 	cSdk.Verbose = verbose
 	cSdk.Domain = domain
 	cSdk.Timeout = timeout
+	cSdk.Logger = logger
 	cSdk.Setup()
 }

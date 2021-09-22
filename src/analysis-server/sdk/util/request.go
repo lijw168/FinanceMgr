@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	"analysis-server/model"
+	"common/log"
 	"common/utils"
-	//"sync"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	Client      *http.Client
 	TraceId     string
 	AccessToken string
-	//TokenMutex  sync.RWMutex
+	Logger      *log.Logger
 )
 
 type DescData struct {
@@ -83,6 +83,7 @@ func DoRequestwithToken(accessToken, action string,
 	if Verbose {
 		fmt.Println("Request:")
 		fmt.Println(genCurl(req, input))
+		//writeLog(log.LevelDebug, "Request:", genCurl(req, input))
 	}
 
 	resp, err := Client.Do(req)
@@ -97,6 +98,10 @@ func DoRequestwithToken(accessToken, action string,
 		fmt.Println("Trace-Id:" + resp.Header.Get("Trace-Id"))
 		fmt.Println("X-Requst-Trace:" + resp.Header.Get("X-Requst-Trace"))
 		fmt.Println(fmt.Sprintf("%s", body))
+		// writeLog(log.LevelDebug, "Response:")
+		// writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
+		// writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
+		// writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
 	}
 
 	if resp.StatusCode != 200 {
@@ -147,6 +152,7 @@ func DoRequestwithToken_json(accessToken, action string,
 	if Verbose {
 		fmt.Println("Request:")
 		fmt.Println(genCurl(req, params))
+		//writeLog(log.LevelDebug, "Request:", genCurl(req, params))
 	}
 
 	resp, err := Client.Do(req)
@@ -161,6 +167,10 @@ func DoRequestwithToken_json(accessToken, action string,
 		fmt.Println("Trace-Id:" + resp.Header.Get("Trace-Id"))
 		fmt.Println("X-Requst-Trace:" + resp.Header.Get("X-Requst-Trace"))
 		fmt.Println(fmt.Sprintf("%s", body))
+		// writeLog(log.LevelDebug, "Response:")
+		// writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
+		// writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
+		// writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
 	}
 
 	if resp.StatusCode != 200 {
@@ -195,4 +205,23 @@ func FormatView(data interface{}, view interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func writeLog(iLevel int, v ...interface{}) {
+	if Logger != nil {
+		switch iLevel {
+		case log.LevelTrace:
+			Logger.LogTrace(v...)
+		case log.LevelDebug:
+			Logger.LogDebug(v...)
+		case log.LevelInfo:
+			Logger.LogInfo(v...)
+		case log.LevelWarn:
+			Logger.LogWarn(v...)
+		case log.LevelError:
+			Logger.LogError(v...)
+		case log.LevelFatal:
+			Logger.LogFatal(v...)
+		}
+	}
 }
