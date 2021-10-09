@@ -85,16 +85,13 @@ func (ag *AccSubGateway) QueryAccSubReference(param []byte) (resData []byte, err
 	}
 	var opts options.BaseOptions
 	opts.ID = id
-	if descData, err := cSdk.QueryAccSubReference(&opts); err != nil {
+	if iRefCount, err := cSdk.QueryAccSubReference(&opts); err != nil {
 		errCode = util.ErrAccSubRefQueryFailed
 		logger.Error("the QueryAccSubReference failed,err:%v", err.Error())
 	} else {
-		logger.Debug("QueryAccSubReference succeed;views:%v", descData)
-		resData, err = json.Marshal(descData)
-		if err != nil {
-			errCode = util.ErrMarshalFailed
-			logger.Error("the Marshal failed,err:%v", err.Error())
-		}
+		logger.Debug("QueryAccSubReference succeed;iRefCount:%v", iRefCount)
+		resData = make([]byte, 4)
+		binary.LittleEndian.PutUint32(resData, 4)
 	}
 	return resData, errCode
 }

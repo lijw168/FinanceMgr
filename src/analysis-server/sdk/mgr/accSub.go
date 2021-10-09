@@ -136,22 +136,21 @@ func (as *AccSub) UpdateAccSub_json(params []byte) error {
 	return err
 }
 
-func (as *AccSub) QueryAccSubReference(opts *options.BaseOptions) (*model.DescData, error) {
+func (as *AccSub) QueryAccSubReference(opts *options.BaseOptions) (int64, error) {
 	action := "QueryAccSubReference"
 	switch {
 	case opts.ID <= 0:
-		return nil, errors.New("ID is required")
+		return 0, errors.New("ID is required")
 	}
 	params := &model.BaseParams{
 		ID: &opts.ID,
 	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	desc := &(model.DescData{})
-	if err := util.FormatView(result.Data, desc); err != nil {
-		return nil, err
+	if iRefCount, ok := result.Data.(int64); ok {
+		return iRefCount, nil
 	}
-	return desc, nil
+	return 0, errors.New("the type of result.Data  is wrong")
 }

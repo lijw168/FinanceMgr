@@ -275,7 +275,7 @@ func (ah *AccountSubHandlers) QueryAccSubReference(w http.ResponseWriter, r *htt
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	dataBuf := &DescData{iCount, nil}
-	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
+	//dataBuf := &DescData{iCount, nil}
+	ah.Response(r.Context(), ah.Logger, w, nil, iCount)
 	return
 }
