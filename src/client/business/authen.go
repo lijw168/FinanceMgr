@@ -3,8 +3,8 @@ package business
 import (
 	//"analysis-server/model"
 	"analysis-server/sdk/options"
+	sUtil "analysis-server/sdk/util"
 	"client/util"
-	//"encoding/json"
 	"sync"
 )
 
@@ -75,7 +75,17 @@ func (auth *Authen) OnlineCheck() int {
 	opts.ID = auth.OperatorID
 	if view, err := cSdk.StatusCheckout(&opts); err != nil {
 		errCode = util.ErrOnlineCheckout
-		logger.Error("OnlineCheck failed,err:%v", err.Error())
+		resErr, ok := err.(*sUtil.RespErr)
+		if ok {
+			logger.Error("OnlineCheck failed,err:%v", err.Error())
+			//errInfo:please login first
+			if resErr.Code == -2 {
+				auth.setAuthenInfo("", "", 0, util.Offline)
+				cSdk.SetAccessToken("")
+				logger.Debug("the user status has been to convert to the %v", util.Offline)
+			}
+		}
+
 	} else {
 		//userStatus = view.Status
 		if auth.GetUserStatus() != view.Status {

@@ -113,7 +113,7 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// add trace_id
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, "trace_id", traceId)
+	ctx = context.WithValue(ctx, "Trace-Id", traceId)
 	r = r.WithContext(ctx)
 	start := time.Now()
 	w.Header().Set("Content-Type", "application/json")

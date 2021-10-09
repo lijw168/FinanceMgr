@@ -61,51 +61,6 @@ func waitDaemonExit() {
 	time.Sleep(3 * time.Second)
 }
 
-func main() {
-
-	if utils.SetLimit() != nil {
-		fmt.Println("[Init] set max open files failed")
-		return
-	}
-
-	// all in one
-	var apiServerCfgFile = flag.String("c",
-		"/etc/analysis/web_server.cfg", "Server config file name")
-
-	flag.Parse()
-	if tag.CheckAndShowVersion() {
-		return
-	}
-
-	apiServerConf, err := cfg.ParseApiServerConfig(apiServerCfgFile)
-	if err != nil {
-		fmt.Println("[Init] parse config", *apiServerCfgFile, "err: ", err)
-		return
-	}
-	if err = apiServerConf.CheckValid(); err != nil {
-		fmt.Println("[init] checkconfig err", err)
-		return
-	}
-
-	logger, err := config.LogFac{Logconf: apiServerConf.LogConf}.NewLogger()
-	if err != nil {
-		fmt.Println("[Init] new logger err: ", err)
-		return
-	}
-	url.InitCommonUrlRouter(logger, nil)
-	httpRouter := url.NewUrlRouter(logger)
-	err = handlerInit(httpRouter, logger, apiServerConf)
-	if err != nil {
-		fmt.Println("[Init] Handler registe error: ", err)
-		return
-	}
-	interceptSignal()
-	startServer(httpRouter, apiServerConf.ServerConf)
-	waitDaemonExit()
-	logger.Close()
-	return
-}
-
 func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 
 	runtime.GOMAXPROCS(serverConf.Cores)
@@ -158,7 +113,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		return ccErr
 	}
 	/*service*/
-	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, Db: _db}
+	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, VRecordDao: voucherRecordDao, Db: _db}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
 	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
@@ -179,6 +134,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
 	httpRouter.RegisterFunc("GetAccSub", accSubHandlers.GetAccSub)
 	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
+	httpRouter.RegisterFunc("JudgeAccSubReference", accSubHandlers.JudgeAccSubReference)
 
 	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
 	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)
@@ -221,4 +177,49 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	//用户登录的过期检查服务
 	go handler.GAccessTokenH.ExpirationCheck()
 	return nil
+}
+
+func main() {
+
+	if utils.SetLimit() != nil {
+		fmt.Println("[Init] set max open files failed")
+		return
+	}
+
+	// all in one
+	var apiServerCfgFile = flag.String("c",
+		"/etc/analysis/web_server.cfg", "Server config file name")
+
+	flag.Parse()
+	if tag.CheckAndShowVersion() {
+		return
+	}
+
+	apiServerConf, err := cfg.ParseApiServerConfig(apiServerCfgFile)
+	if err != nil {
+		fmt.Println("[Init] parse config", *apiServerCfgFile, "err: ", err)
+		return
+	}
+	if err = apiServerConf.CheckValid(); err != nil {
+		fmt.Println("[init] checkconfig err", err)
+		return
+	}
+
+	logger, err := config.LogFac{Logconf: apiServerConf.LogConf}.NewLogger()
+	if err != nil {
+		fmt.Println("[Init] new logger err: ", err)
+		return
+	}
+	url.InitCommonUrlRouter(logger, nil)
+	httpRouter := url.NewUrlRouter(logger)
+	err = handlerInit(httpRouter, logger, apiServerConf)
+	if err != nil {
+		fmt.Println("[Init] Handler registe error: ", err)
+		return
+	}
+	interceptSignal()
+	startServer(httpRouter, apiServerConf.ServerConf)
+	waitDaemonExit()
+	logger.Close()
+	return
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"unicode/utf8"
 
@@ -159,7 +160,7 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 	accSubView, ccErr := ah.AccSubService.CreateAccSub(r.Context(), params, requestId)
 	ah.Logger.InfoContext(r.Context(), "AccSubService.CreateAccSub in CreateAccSub.")
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/CreateAccSub/ServerHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
+		ah.Logger.ErrorContext(r.Context(), "[accSub/CreateAccSub/ServerHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -219,7 +220,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	}
 	ccErr := ah.AccSubService.UpdateAccSubById(r.Context(), *params.SubjectID, updateFields)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
+		ah.Logger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
@@ -244,10 +245,37 @@ func (ah *AccountSubHandlers) DeleteAccSub(w http.ResponseWriter, r *http.Reques
 	requestId := ah.GetTraceId(r)
 	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteaccSubByName: %s]", ccErr.Detail())
+		ah.Logger.ErrorContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteaccSubByName: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
 	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+	return
+}
+
+func (ah *AccountSubHandlers) JudgeAccSubReference(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeIdParams)
+	err := ah.HttpRequestParse(r, params)
+	if err != nil {
+		ah.Logger.ErrorContext(r.Context(), "[accSub/JudgeAccSubReference] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := ah.GetTraceId(r)
+	iCount, ccErr := ah.AccSubService.JudgeAccSubReferenceBySubID(r.Context(), *params.ID, requestId)
+	if ccErr != nil {
+		errInfo := fmt.Sprintf("[accSub/JudgeAccSubReference/ServerHTTP] [AccSubService.JudgeAccSubReferenceBySubID: %s]", ccErr.Detail())
+		ah.Logger.ErrorContext(r.Context(), errInfo)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	dataBuf := &DescData{iCount, nil}
+	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
 	return
 }
