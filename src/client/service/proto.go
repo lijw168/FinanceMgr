@@ -108,6 +108,8 @@ func (p *Packet) isConvertToUtf8() bool {
 		fallthrough
 	case util.VouInfoShow:
 		break
+	case util.AccSubReferenceQuery:
+		break
 	default:
 		bRet = true
 		break

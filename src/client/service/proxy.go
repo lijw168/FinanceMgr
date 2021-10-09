@@ -247,6 +247,10 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 		errCode := accSubGate.UpdateAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
+	case util.AccSubReferenceQuery:
+		resData, errCode := accSubGate.QueryAccSubReference(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")

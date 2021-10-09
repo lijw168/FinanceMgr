@@ -25,6 +25,7 @@ const (
 	AccSubShow
 	AccSubDel
 	AccSubUpdate
+	AccSubReferenceQuery
 	VoucherCreate
 	VoucherUpdate
 	VoucherDel

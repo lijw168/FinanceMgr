@@ -253,11 +253,11 @@ func (ah *AccountSubHandlers) DeleteAccSub(w http.ResponseWriter, r *http.Reques
 	return
 }
 
-func (ah *AccountSubHandlers) JudgeAccSubReference(w http.ResponseWriter, r *http.Request) {
+func (ah *AccountSubHandlers) QueryAccSubReference(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/JudgeAccSubReference] [HttpRequestParse: %v]", err)
+		ah.Logger.ErrorContext(r.Context(), "[accSub/QueryAccSubReference] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
@@ -268,9 +268,9 @@ func (ah *AccountSubHandlers) JudgeAccSubReference(w http.ResponseWriter, r *htt
 		return
 	}
 	requestId := ah.GetTraceId(r)
-	iCount, ccErr := ah.AccSubService.JudgeAccSubReferenceBySubID(r.Context(), *params.ID, requestId)
+	iCount, ccErr := ah.AccSubService.QueryAccSubReferenceBySubID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		errInfo := fmt.Sprintf("[accSub/JudgeAccSubReference/ServerHTTP] [AccSubService.JudgeAccSubReferenceBySubID: %s]", ccErr.Detail())
+		errInfo := fmt.Sprintf("[accSub/QueryAccSubReference/ServerHTTP] [AccSubService.JudgeAccSubReferenceBySubID: %s]", ccErr.Detail())
 		ah.Logger.ErrorContext(r.Context(), errInfo)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return

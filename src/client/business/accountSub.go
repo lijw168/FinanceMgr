@@ -74,3 +74,27 @@ func (ag *AccSubGateway) DeleteAccSub(param []byte) (errCode int) {
 	}
 	return deleteCmd(resource_type_account_sub, id, cSdk.DeleteAccSub)
 }
+
+func (ag *AccSubGateway) QueryAccSubReference(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return nil, errCode
+	}
+	var opts options.BaseOptions
+	opts.ID = id
+	if descData, err := cSdk.QueryAccSubReference(&opts); err != nil {
+		errCode = util.ErrAccSubRefQueryFailed
+		logger.Error("the QueryAccSubReference failed,err:%v", err.Error())
+	} else {
+		logger.Debug("QueryAccSubReference succeed;views:%v", descData)
+		resData, err = json.Marshal(descData)
+		if err != nil {
+			errCode = util.ErrMarshalFailed
+			logger.Error("the Marshal failed,err:%v", err.Error())
+		}
+	}
+	return resData, errCode
+}

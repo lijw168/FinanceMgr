@@ -224,16 +224,16 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 	return accSubViewSlice, accSubInfoCount, nil
 }
 
-func (as *AccountSubService) JudgeAccSubReferenceBySubID(ctx context.Context, subjectID int,
+func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, subjectID int,
 	requestId string) (int64, CcError) {
-	as.Logger.InfoContext(ctx, "JudgeAccSubReferenceBySubID method begin, "+"subject:%d", subjectID)
+	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method begin, "+"subject:%d", subjectID)
 	filterFields := make(map[string]interface{})
 	filterFields["subId1"] = subjectID
 	iCount, err := as.VRecordDao.CountByFilter(ctx, as.Db, filterFields)
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+		as.Logger.ErrorContext(ctx, "[AccountSubService/service/QueryAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	as.Logger.InfoContext(ctx, "JudgeAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
+	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
 	return iCount, nil
 }
