@@ -21,11 +21,11 @@ const (
 	InitResourceInfo
 	CompanyUpdate
 	AccSubCreate
+	AccSubReferenceQuery
 	AccSubList
 	AccSubShow
 	AccSubDel
 	AccSubUpdate
-	AccSubReferenceQuery
 	VoucherCreate
 	VoucherUpdate
 	VoucherDel
@@ -35,7 +35,7 @@ const (
 	VouInfoList
 	VouInfoListByMulCon
 	VouInfoListLatest
-	VouInfoMaxNumOfMan
+	VouInfoMaxNumOfMonth
 	VouRecordCreate
 	VouRecordDel
 	VouRecordsDel

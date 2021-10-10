@@ -231,6 +231,10 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 		resData, errCode := accSubGate.CreateAccSub(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
+	case util.AccSubReferenceQuery:
+		resData, errCode := accSubGate.QueryAccSubReference(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
 	case util.AccSubList:
 		resData, errCode := accSubGate.ListAccSub(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
@@ -246,10 +250,6 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 	case util.AccSubUpdate:
 		errCode := accSubGate.UpdateAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
-	case util.AccSubReferenceQuery:
-		resData, errCode := accSubGate.QueryAccSubReference(reqPk.Buf)
-		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
@@ -301,7 +301,7 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		resData, errCode := voucherGate.GetLatestVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
-	case util.VouInfoMaxNumOfMan:
+	case util.VouInfoMaxNumOfMonth:
 		resData, errCode := voucherGate.GetMaxNumOfMonth(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break

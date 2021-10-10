@@ -149,8 +149,13 @@ func (as *AccSub) QueryAccSubReference(opts *options.BaseOptions) (int64, error)
 	if err != nil {
 		return 0, err
 	}
-	if iRefCount, ok := result.Data.(int64); ok {
-		return iRefCount, nil
+	var iRefCount int64
+	if err = util.FormatView(result.Data, &iRefCount); err != nil {
+		return 0, err
 	}
-	return 0, errors.New("the type of result.Data  is wrong")
+	return iRefCount, nil
+	// if iRefCount, ok := result.Data.(int64); ok {
+	// 	return iRefCount, nil
+	// }
+	//return 0, errors.New("the type of result.Data is wrong")
 }

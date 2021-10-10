@@ -91,7 +91,7 @@ func (ag *AccSubGateway) QueryAccSubReference(param []byte) (resData []byte, err
 	} else {
 		logger.Debug("QueryAccSubReference succeed;iRefCount:%v", iRefCount)
 		resData = make([]byte, 4)
-		binary.LittleEndian.PutUint32(resData, 4)
+		binary.LittleEndian.PutUint32(resData, uint32(iRefCount))
 	}
 	return resData, errCode
 }
