@@ -21,10 +21,10 @@ func NewAccSubCommand(cmd *cobra.Command) {
 func newAccSubCreateCmd() *cobra.Command {
 	var opts options.CreateSubjectOptions
 	cmd := &cobra.Command{
-		Use:   "accSub-create [OPTIONS] commonId subjectName subjectLevel companyId subjectDirection subjectType",
+		Use:   "accSub-create [OPTIONS] commonId subjectName subjectLevel companyId subjectDirection subjectType subjectStyle",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 4 {
+			if len(args) < 6 {
 				cmd.Help()
 				return
 			}
@@ -58,6 +58,8 @@ func newAccSubCreateCmd() *cobra.Command {
 			}
 			opts.SubjectType = subType
 
+			opts.SubjectStyle = args[6]
+
 			if hv, err := Sdk.CreateAccSub(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			} else {
@@ -73,7 +75,8 @@ func newAccSubDeleteCmd() *cobra.Command {
 }
 
 func newAccSubListCmd() *cobra.Command {
-	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID", "SubjectDirection", "SubjectType"}
+	defCs := []string{"SubjectID", "CommonID", "SubjectName", "SubjectLevel", "CompanyID",
+		"SubjectDirection", "SubjectType", "SubjectStyle", "MnemonicCode"}
 	cmd := &cobra.Command{
 		Use:   "accSub-list companyId",
 		Short: "List account subjects Support Filter",

@@ -20,6 +20,8 @@ type AccSubjectView struct {
 	SubjectLevel     int    `json:"subjectLevel"`
 	SubjectDirection int    `json:"subjectDirection"`
 	SubjectType      int    `json:"subjectType"`
+	MnemonicCode     string `json:"mnemonicCode"`
+	SubjectStyle     string `json:"subjectStyle"`
 }
 
 type CompanyView struct {

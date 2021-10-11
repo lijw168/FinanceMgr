@@ -42,6 +42,8 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		filterMap["subjectLevel"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["subjectDirection"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["subjectType"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["subjectStyle"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["mnemonicCode"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
@@ -155,7 +157,11 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-
+	if params.SubjectStyle == nil || *params.SubjectStyle == "" {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrSubStyle, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
 	requestId := ah.GetTraceId(r)
 	accSubView, ccErr := ah.AccSubService.CreateAccSub(r.Context(), params, requestId)
 	ah.Logger.InfoContext(r.Context(), "AccSubService.CreateAccSub in CreateAccSub.")
@@ -212,6 +218,12 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	}
 	if params.CompanyID != nil {
 		updateFields["companyId"] = *params.CompanyID
+	}
+	if params.SubjectStyle != nil {
+		updateFields["subjectStyle"] = *params.SubjectStyle
+	}
+	if params.MnemonicCode != nil {
+		updateFields["mnemonicCode"] = *params.MnemonicCode
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrChangeContent, service.ErrNull)

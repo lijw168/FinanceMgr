@@ -53,6 +53,8 @@ type AccSubject struct {
 	SubjectLevel     int
 	SubjectDirection int
 	SubjectType      int
+	MnemonicCode     string
+	SubjectStyle     string
 }
 
 //VoucherInfo ...

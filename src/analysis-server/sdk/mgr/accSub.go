@@ -26,6 +26,8 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 		return nil, errors.New("SubjectDirection is required")
 	case opts.SubjectType <= 0:
 		return nil, errors.New("SubjectType is required")
+	case opts.SubjectStyle == "":
+		return nil, errors.New("SubjectStyle is required")
 	}
 	params := model.CreateSubjectParams{
 		SubjectName:      &opts.SubjectName,
@@ -34,6 +36,7 @@ func (as *AccSub) CreateAccSub(opts *options.CreateSubjectOptions) (*model.AccSu
 		CompanyID:        &opts.CompanyID,
 		SubjectType:      &opts.SubjectType,
 		SubjectDirection: &opts.SubjectDirection,
+		SubjectStyle:     &opts.SubjectStyle,
 	}
 
 	result, err := util.DoRequest(action, params)

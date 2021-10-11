@@ -63,6 +63,7 @@ const (
 	ErrType          = "type"
 	ErrSubLevel      = "subjectLevel"
 	ErrSubdir        = "subjectDirection"
+	ErrSubStyle      = "subjectStyle"
 	ErrSize          = "size"
 	ErrOffset        = "offset"
 	ErrSubjectName   = "subjectName"

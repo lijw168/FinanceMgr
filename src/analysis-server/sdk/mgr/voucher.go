@@ -80,25 +80,6 @@ func (vr *Voucher) UpdateVoucher_json(params []byte) ([]byte, error) {
 	return nil, nil
 }
 
-// func (vr *Voucher) CreateVoucher_json(params *model.CreateVoucherParams) (*model.DescData, error) {
-// 	action := "CreateVoucher"
-// 	switch {
-// 	case *(params.InfoParams.CompanyID) <= 0:
-// 		return nil, errors.New("CompanyID is required")
-// 	case *(params.InfoParams.VoucherMonth) <= 0:
-// 		return nil, errors.New("VoucherMonth is required")
-// 	}
-// 	result, err := util.DoRequest(action, params)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	desc := &(model.DescData{})
-// 	if err := util.FormatView(result.Data, desc); err != nil {
-// 		return nil, err
-// 	}
-// 	return desc, nil
-// }
-
 func (vr *Voucher) DeleteVoucher(opts *options.BaseOptions) error {
 	action := "DeleteVoucher"
 	err := DeleteOpsResource(action, opts)

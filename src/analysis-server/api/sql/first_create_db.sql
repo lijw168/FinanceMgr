@@ -61,8 +61,10 @@ create table if not exists `finance_mgr_2021`.`accountSubject`
    `common_id`             varchar(10) not null COMMENT '该ID是操作用户添加的，该行业习惯用的ID' ,
    `subject_name`          varchar(24) not null ,
    `subject_level`         tinyint not null,
-   `subject_direction`      tinyint not null,
-   `subject_type`           tinyint not null,
+   `subject_direction`     tinyint not null,
+   `subject_type`          tinyint not null,
+   `mnemonic_code`         varchar(10),
+   `subject_style`         varchar(10),
    primary key (subject_id)
    /*unique key `subjectName` (`subject_name`),*/
    /*unique key `commonId` (`common_id`)*/
