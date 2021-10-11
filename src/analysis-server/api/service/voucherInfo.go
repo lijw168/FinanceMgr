@@ -127,14 +127,14 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 		}
 	}()
 	//insure the voucherInfo exist
-	// _, err = vs.VInfoDao.Get(ctx, tx, voucherID)
-	// switch err {
-	// case nil:
-	// case sql.ErrNoRows:
-	// 	return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
-	// default:
-	// 	return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	// }
+	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+	default:
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
 	params["updatedAt"] = time.Now()
 	err = vs.VInfoDao.Update(ctx, tx, voucherID, params)
 	if err != nil {

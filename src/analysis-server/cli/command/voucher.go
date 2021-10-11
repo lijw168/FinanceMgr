@@ -59,6 +59,7 @@ func newVoucherCreateCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&createRecOpt.SubjectName, "subject", "test", "subject name")
 	cmd.Flags().StringVar(&createRecOpt.Summary, "summary", "test", "summary")
+	//如下的两个字段，只能用于测试。因为cmd的中，没有实现float64的操作。
 	var dm, cm int
 	cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
 	cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
@@ -102,10 +103,10 @@ func newVoucherShowCmd() *cobra.Command {
 func newVoucherArrangeCmd() *cobra.Command {
 	var opts options.VoucherArrangeOptions
 	cmd := &cobra.Command{
-		Use:   "voucher-audit [OPTIONS] companyID voucherMonth",
-		Short: "voucher audit",
+		Use:   "voucher-arrange [OPTIONS] companyID voucherMonth",
+		Short: "voucher arrange",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 3 {
+			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
