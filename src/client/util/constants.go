@@ -30,12 +30,13 @@ const (
 	VoucherUpdate
 	VoucherDel
 	VoucherShow
-	VoucherAudit
+	VoucherArrange
 	VouInfoShow
 	VouInfoList
 	VouInfoListByMulCon
 	VouInfoListLatest
 	VouInfoMaxNumOfMonth
+	VouInfoUpdate
 	VouRecordCreate
 	VouRecordDel
 	VouRecordsDel

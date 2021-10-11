@@ -18,10 +18,10 @@ type VoucherInfoDao struct {
 var (
 	voucherInfoTN     = "voucherInfo"
 	voucherInfoFields = []string{"voucher_id", "company_id", "voucher_month", "num_of_month",
-		"voucher_filler", "voucher_auditor", "voucher_date", "created_at", "updated_at"}
+		"voucher_filler", "voucher_auditor", "voucher_date", "bill_count", "status", "created_at", "updated_at"}
 	scanVoucherInfo = func(r DbScanner, st *model.VoucherInfo) error {
 		return r.Scan(&st.VoucherID, &st.CompanyID, &st.VoucherMonth, &st.NumOfMonth, &st.VoucherFiller,
-			&st.VoucherAuditor, &st.VoucherDate, &st.CreatedAt, &st.UpdatedAt)
+			&st.VoucherAuditor, &st.VoucherDate, &st.BillCount, &st.Status, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -81,9 +81,9 @@ func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOpera
 
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
 	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
-		") values (?, ?, ?, ?, ? ,? ,?, ?, ?)"
+		") values (?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?)"
 	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherFiller,
-		st.VoucherAuditor, st.VoucherDate, st.CreatedAt, st.UpdatedAt}
+		st.VoucherAuditor, st.VoucherDate, st.BillCount, st.Status, st.CreatedAt, st.UpdatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -103,6 +103,33 @@ func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId 
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.ExecContext(ctx, strSql, voucherId); err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/Delete] [do.Exec: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, voucherIds []int) error {
+	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else {
+				*s += ", ?"
+			}
+			fv = append(fv, ki)
+		}
+		return
+	}
+	strSql := "delete from " + voucherInfoTN + " where voucher_id IN ("
+	fv := handleArrFilter(voucherIds, &strSql)
+	strSql += ")"
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, ids: %v]", strSql, voucherIds)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+	}()
+	if _, err := do.ExecContext(ctx, strSql, fv...); err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}

@@ -40,8 +40,6 @@ type VoucherRecord struct {
 	SubID2      int
 	SubID3      int
 	SubID4      int
-	BillCount   int
-	Status      int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -66,6 +64,8 @@ type VoucherInfo struct {
 	VoucherDate    time.Time
 	VoucherFiller  string
 	VoucherAuditor string
+	BillCount      int
+	Status         int
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }

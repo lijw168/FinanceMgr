@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"analysis-server/api/db"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -32,8 +32,6 @@ func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params 
 	vRecord.DebitMoney = *params.DebitMoney
 	vRecord.CreditMoney = *params.CreditMoney
 	vRecord.Summary = *params.Summary
-	vRecord.BillCount = *params.BillCount
-	vRecord.Status = utils.NoAudit
 	vRecord.SubID1 = *params.SubID1
 	vRecord.SubID2 = *params.SubID2
 	vRecord.SubID3 = *params.SubID3
@@ -76,8 +74,6 @@ func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, record
 		vRecord.DebitMoney = *itemParam.DebitMoney
 		vRecord.CreditMoney = *itemParam.CreditMoney
 		vRecord.Summary = *itemParam.Summary
-		vRecord.BillCount = *itemParam.BillCount
-		vRecord.Status = utils.NoAudit
 		vRecord.SubID1 = *itemParam.SubID1
 		// vRecord.SubID2 = *itemParam.SubID2
 		// vRecord.SubID3 = *itemParam.SubID3
@@ -109,8 +105,6 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 	vRecordView.DebitMoney = vRecord.DebitMoney
 	vRecordView.CreditMoney = vRecord.CreditMoney
 	vRecordView.Summary = vRecord.Summary
-	vRecordView.BillCount = vRecord.BillCount
-	vRecordView.Status = vRecord.Status
 	vRecordView.SubID1 = vRecord.SubID1
 	vRecordView.SubID2 = vRecord.SubID2
 	vRecordView.SubID3 = vRecord.SubID3
@@ -128,7 +122,9 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "recordId", "voucherId", "status", "subjectName", "summary", "subId1", "subId2", "subId3", "subId4":
+			case "recordId", "voucherId", "subjectName", "summary", "subId1":
+				fallthrough
+			case "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
 			case "debitMoney_interval":
 				intervalFilterFields["debitMoney"] = f.Value
@@ -209,7 +205,8 @@ func (vs *VoucherRecordService) GetVoucherRecordByID(ctx context.Context, record
 	return vRecordView, nil
 }
 
-func (vs *VoucherRecordService) UpdateVoucherRecordByID(ctx context.Context, recordID int, params map[string]interface{}) CcError {
+func (vs *VoucherRecordService) UpdateVoucherRecordByID(ctx context.Context, recordID int,
+	params map[string]interface{}) CcError {
 	FuncName := "VoucherRecordService/UpdateVoucherRecordByID"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()

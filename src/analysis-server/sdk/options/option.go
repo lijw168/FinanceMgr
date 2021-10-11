@@ -67,6 +67,17 @@ type VoucherInfoOptions struct {
 	VoucherFiller string
 }
 
+//ModifyVoucherInfoOptions ...
+type ModifyVoucherInfoOptions struct {
+	VoucherID      int
+	VoucherMonth   int
+	VoucherDate    int
+	VoucherFiller  string
+	VoucherAuditor string
+	BillCount      int
+	Status         int
+}
+
 //VoucherRecordOptions ...
 type CreateVoucherRecordOptions struct {
 	VoucherID   int
@@ -100,6 +111,13 @@ type ModifyVoucherRecordOptions struct {
 type VoucherOptions struct {
 	InfoOptions    VoucherInfoOptions
 	RecordsOptions []CreateVoucherRecordOptions
+}
+
+//VoucherArrangeOptions 凭证整理参数
+type VoucherArrangeOptions struct {
+	CompanyID         int
+	VoucherMonth      int
+	ArrangeVoucherNum bool
 }
 
 //voucher end
@@ -147,8 +165,8 @@ type ModifySubjectOptions struct {
 	SubjectType      int
 }
 
-type VoucherAuditOptions struct {
-	VoucherID      int
-	VoucherAuditor string
-	Status         int
-}
+// type VoucherAuditOptions struct {
+// 	VoucherID      int
+// 	VoucherAuditor string
+// 	Status         int
+// }

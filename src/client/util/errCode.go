@@ -23,7 +23,7 @@ const (
 	ErrOnlineCheckout             = 19 //online checkout, failed
 	ErrGbkToUtf8Failed            = 20 //covert gbk to utf8 failed
 	ErrUtf8ToGbkFailed            = 21 //covert utf8 to gbk failed
-	ErrVoucherAuditFailed         = 22 //voucher audit failed
+	ErrVoucherArrangeFailed       = 22 //voucher arrange failed
 	ErrGetLatestVoucherInfoFailed = 23 //get latest voucher information,failed
 	ErrGetMaxNumOfMonthFailed     = 24 //get the max numOfMonth,failed
 	ErrInitResourceInfoFailed     = 25 //init resource information,failed

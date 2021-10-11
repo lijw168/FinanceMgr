@@ -9,7 +9,7 @@ const (
 
 //voucher record status
 const (
-	NoAudit = 1 // 未审核
-	Audited = 2 // 已审核
-	Deleted = 2 // 已删除
+	NoAuditVoucher = 1 // 该凭证未审核
+	InvalidVoucher = 2 // 该凭证作废
+	AuditedVoucher = 3 // 该凭证已审核
 )

@@ -76,13 +76,13 @@ func (vg *VoucherGateway) GetVoucher(param []byte) (resData []byte, errCode int)
 	return resData, errCode
 }
 
-func (vg *VoucherGateway) VoucherAudit(param []byte) (errCode int) {
+func (vg *VoucherGateway) ArrangeVoucher(param []byte) (errCode int) {
 	errCode = util.ErrNull
-	if err := cSdk.VoucherAudit_json(param); err != nil {
-		errCode = util.ErrVoucherAuditFailed
-		logger.Error("the VoucherAudit_json failed,err:%v", err.Error())
+	if err := cSdk.ArrangeVoucher_json(param); err != nil {
+		errCode = util.ErrVoucherArrangeFailed
+		logger.Error("the ArrangeVoucher_json failed,err:%v", err.Error())
 	} else {
-		logger.Debug("VoucherAudit_json succeed")
+		logger.Debug("ArrangeVoucher_json succeed")
 	}
 	return errCode
 }
@@ -217,4 +217,15 @@ func (vg *VoucherGateway) ListVoucherInfo(param []byte) (resData []byte, errCode
 
 func (vg *VoucherGateway) ListVoucherInfoByMulCondition(param []byte) (resData []byte, errCode int) {
 	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfoByMulCondition_json)
+}
+
+func (vg *VoucherGateway) UpdateVoucherInfo(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	if err := cSdk.UpdateVoucherInfo_json(param); err != nil {
+		errCode = util.ErrUpdateFailed
+		logger.Error("the UpdateVoucherInfo_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("UpdateVoucherInfo_json succeed")
+	}
+	return errCode
 }

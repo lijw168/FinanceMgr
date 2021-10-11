@@ -39,7 +39,9 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
+				fallthrough
+			case "voucherAuditor", "status", "billCount":
 				filterFields[*f.Field] = f.Value
 			case "numOfMonth_interval":
 				intervalFilterFields["numOfMonth"] = f.Value
@@ -104,9 +106,12 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	vInfoView.NumOfMonth = vInfo.NumOfMonth
 	vInfoView.VoucherFiller = vInfo.VoucherFiller
 	vInfoView.VoucherAuditor = vInfo.VoucherAuditor
+	vInfoView.BillCount = vInfo.BillCount
+	vInfoView.Status = vInfo.Status
 	return vInfoView
 }
 
+//该函数也可以用于审核、取消审核、作废凭证等功能 ...
 func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucherID int,
 	params map[string]interface{}) CcError {
 	FuncName := "VoucherInfoService/UpdateVoucherInfoByID"
@@ -122,14 +127,14 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 		}
 	}()
 	//insure the voucherInfo exist
-	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
-	switch err {
-	case nil:
-	case sql.ErrNoRows:
-		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
-	default:
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
+	// _, err = vs.VInfoDao.Get(ctx, tx, voucherID)
+	// switch err {
+	// case nil:
+	// case sql.ErrNoRows:
+	// 	return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
+	// default:
+	// 	return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	// }
 	params["updatedAt"] = time.Now()
 	err = vs.VInfoDao.Update(ctx, tx, voucherID, params)
 	if err != nil {

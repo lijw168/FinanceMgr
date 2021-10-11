@@ -136,11 +136,12 @@ type DeleteOperatorParams struct {
 	Name *string `json:"name"`
 }
 
-//VoucherInfoParams ...
+//VoucherInfoParams ...  BillCount:该参数暂未使用，如果使用时，前端会传入该值。
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
 	VoucherDate   *int    `json:"voucherDate"`
 	VoucherFiller *string `json:"voucherFiller"`
+	BillCount     *int    `json:"billCount"`
 }
 
 //QueryMaxNumOfMonthParams 查询最大的凭证号...
@@ -151,10 +152,13 @@ type QueryMaxNumOfMonthParams struct {
 
 //ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
-	VoucherID     *int    `json:"voucherId"`
-	VoucherMonth  *int    `json:"voucherMonth"`
-	VoucherDate   *int    `json:"voucherDate"`
-	VoucherFiller *string `json:"voucherFiller"`
+	VoucherID      *int    `json:"voucherId"`
+	VoucherMonth   *int    `json:"voucherMonth"`
+	VoucherDate    *int    `json:"voucherDate"`
+	VoucherFiller  *string `json:"voucherFiller"`
+	VoucherAuditor *string `json:"voucherAuditor"`
+	BillCount      *int    `json:"billCount"`
+	Status         *int    `json:"status"`
 }
 
 //CreateVoucherRecordParams ...
@@ -168,7 +172,6 @@ type CreateVoucherRecordParams struct {
 	SubID2      *int     `json:"subId2"`
 	SubID3      *int     `json:"subId3"`
 	SubID4      *int     `json:"subId4"`
-	BillCount   *int     `json:"billCount"`
 }
 
 //ModifyVoucherRecordParams ...
@@ -182,8 +185,6 @@ type ModifyVoucherRecordParams struct {
 	SubID2      *int     `json:"subId2"`
 	SubID3      *int     `json:"subId3"`
 	SubID4      *int     `json:"subId4"`
-	BillCount   *int     `json:"billCount"`
-	Status      *int     `json:"status"`
 }
 
 //CreateVoucherParams...
@@ -204,6 +205,13 @@ type VoucherAuditParams struct {
 	VoucherID      *int    `json:"voucherId"`
 	VoucherAuditor *string `json:"voucherAuditor"`
 	Status         *int    `json:"status"`
+}
+
+//VoucherArrangeParams 凭证整理参数
+type VoucherArrangeParams struct {
+	CompanyID         *int  `json:"companyId"`
+	VoucherMonth      *int  `json:"voucherMonth"`
+	ArrangeVoucherNum *bool `json:"arrangeVoucherNum"`
 }
 
 type ListParams struct {

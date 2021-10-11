@@ -12,6 +12,7 @@ func NewVoucherCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newVoucherCreateCmd())
 	cmd.AddCommand(newVoucherDeleteCmd())
 	cmd.AddCommand(newVoucherShowCmd())
+	cmd.AddCommand(newVoucherArrangeCmd())
 
 	cmd.AddCommand(newVoucherRecordCreateCmd())
 	cmd.AddCommand(newVoucherRecordDeleteCmd())
@@ -20,9 +21,9 @@ func NewVoucherCommand(cmd *cobra.Command) {
 
 	cmd.AddCommand(newVoucherInfoShowCmd())
 	cmd.AddCommand(newVoucherInfoListCmd())
-	cmd.AddCommand(newVoucherAuditCmd())
 	cmd.AddCommand(newGetLatestVouInfoCmd())
 	cmd.AddCommand(newGetMaxNumOfMonthCmd())
+	cmd.AddCommand(newVoucherInfoUpdateCmd())
 }
 
 func newVoucherCreateCmd() *cobra.Command {
@@ -95,6 +96,35 @@ func newVoucherShowCmd() *cobra.Command {
 			}
 		},
 	}
+	return cmd
+}
+
+func newVoucherArrangeCmd() *cobra.Command {
+	var opts options.VoucherArrangeOptions
+	cmd := &cobra.Command{
+		Use:   "voucher-audit [OPTIONS] companyID voucherMonth",
+		Short: "voucher audit",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 3 {
+				cmd.Help()
+				return
+			}
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.CompanyID = id
+			}
+			if voucherMonth, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherMonth = voucherMonth
+			}
+			if err := Sdk.ArrangeVoucher(&opts); err != nil {
+				util.FormatErrorOutput(err)
+			}
+		},
+	}
+	cmd.Flags().BoolVar(&opts.ArrangeVoucherNum, "isArrangeVoucherNum", false, "arrange voucher Num")
 	return cmd
 }
 
@@ -200,15 +230,16 @@ func newVoucherRecordUpdateCmd() *cobra.Command {
 			}
 		},
 	}
-	// cmd.Flags().StringVar(&opts.SubjectName, "subName", "test_update", "subjectName")
-	// cmd.Flags().StringVar(&opts.Summary, "summary", "test_update", "summary")
+	cmd.Flags().StringVar(&opts.SubjectName, "subName", "", "subjectName")
+	cmd.Flags().StringVar(&opts.Summary, "summary", "", "summary")
+	//因为金额，可以允许为负数，所以不能用这样的默认参数。所以不能用cli修改金额。可以用客户端来修改。
 	// var dm, cm int
-	// cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
-	// cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
+	// cmd.Flags().IntVar(&dm, "dm", 0, "debit money")
+	// cmd.Flags().IntVar(&cm, "cm", 0, "credit money")
 	// opts.DebitMoney = float64(dm)
 	// opts.CreditMoney = float64(cm)
-	// cmd.Flags().IntVar(&opts.SubID1, "sub1", 1, "SubID1")
-	// cmd.Flags().IntVar(&opts.SubID2, "sub2", 2, "SubID2")
+	cmd.Flags().IntVar(&opts.SubID1, "sub1", 0, "SubID1")
+	//cmd.Flags().IntVar(&opts.SubID2, "sub2", 0, "SubID2")
 	return cmd
 }
 
@@ -329,31 +360,30 @@ func newVoucherInfoListCmd() *cobra.Command {
 	return cmd
 }
 
-func newVoucherAuditCmd() *cobra.Command {
+func newVoucherInfoUpdateCmd() *cobra.Command {
+	var opts options.ModifyVoucherInfoOptions
 	cmd := &cobra.Command{
-		Use:   "voucher-audit [OPTIONS] voucherID voucherAuditor status",
-		Short: "voucher audit",
+		Use:   "vouInfo-update [OPTIONS] voucherId",
+		Short: "update a voucher information",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 3 {
+			if len(args) < 1 {
 				cmd.Help()
 				return
 			}
-			var opts options.VoucherAuditOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.VoucherID = id
 			}
-			opts.VoucherAuditor = args[1]
-			if status, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
-			} else {
-				opts.Status = status
-			}
-			if err := Sdk.VoucherAudit(&opts); err != nil {
+			if err := Sdk.UpdateVoucherInfo(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},
 	}
+	cmd.Flags().StringVar(&opts.VoucherFiller, "vouFiller", "", "voucher filler")
+	cmd.Flags().StringVar(&opts.VoucherAuditor, "vouAuditor", "", "voucher auditor")
+	cmd.Flags().IntVar(&opts.VoucherDate, "vouDate", 0, "voucher date")
+	cmd.Flags().IntVar(&opts.BillCount, "billCount", 0, "voucher bill count")
+	cmd.Flags().IntVar(&opts.Status, "status", 0, "voucher status")
 	return cmd
 }

@@ -32,13 +32,12 @@ func (vr *Voucher) CreateVoucher(opts *options.VoucherOptions) (*model.DescData,
 		recordParam := model.CreateVoucherRecordParams{
 			SubjectName: &recordItem.SubjectName,
 			Summary:     &recordItem.Summary,
-			BillCount:   &recordItem.BillCount,
 			CreditMoney: &recordItem.CreditMoney,
 			DebitMoney:  &recordItem.DebitMoney,
 			SubID1:      &recordItem.SubID1,
-			SubID2:      &recordItem.SubID2,
-			SubID3:      &recordItem.SubID3,
-			SubID4:      &recordItem.SubID4,
+			// SubID2:      &recordItem.SubID2,
+			// SubID3:      &recordItem.SubID3,
+			// SubID4:      &recordItem.SubID4,
 		}
 		recordParamSlice = append(recordParamSlice, &recordParam)
 	}
@@ -124,6 +123,31 @@ func (vr *Voucher) GetVoucher(opts *options.BaseOptions) (*model.VoucherView, er
 	return view, nil
 }
 
+func (vr *Voucher) ArrangeVoucher_json(params []byte) error {
+	action := "ArrangeVoucher"
+	_, err := util.DoRequest_json(action, params)
+	return err
+}
+
+func (vr *Voucher) ArrangeVoucher(opts *options.VoucherArrangeOptions) error {
+	action := "ArrangeVoucher"
+	switch {
+	case opts.CompanyID <= 0:
+		return errors.New("CompanyID is required")
+	case opts.VoucherMonth <= 0:
+		return errors.New("VoucherMonth is required")
+	}
+
+	param := model.VoucherArrangeParams{}
+	param.CompanyID = &opts.CompanyID
+	param.VoucherMonth = &opts.VoucherMonth
+	if opts.ArrangeVoucherNum {
+		param.ArrangeVoucherNum = &opts.ArrangeVoucherNum
+	}
+	_, err := util.DoRequest(action, param)
+	return err
+}
+
 //该参数直接就是相应的json格式的数据。所以不需要转换了。
 func (vr *Voucher) CreateVoucherRecords_json(params []byte) (*model.DescData, error) {
 	action := "CreateVoucherRecords"
@@ -151,13 +175,12 @@ func (vr *Voucher) CreateVoucherRecords(opts []options.CreateVoucherRecordOption
 			VoucherID:   &recordItem.VoucherID,
 			SubjectName: &recordItem.SubjectName,
 			Summary:     &recordItem.Summary,
-			BillCount:   &recordItem.BillCount,
 			CreditMoney: &recordItem.CreditMoney,
 			DebitMoney:  &recordItem.DebitMoney,
 			SubID1:      &recordItem.SubID1,
-			SubID2:      &recordItem.SubID2,
-			SubID3:      &recordItem.SubID3,
-			SubID4:      &recordItem.SubID4,
+			// SubID2:      &recordItem.SubID2,
+			// SubID3:      &recordItem.SubID3,
+			// SubID4:      &recordItem.SubID4,
 		}
 		recordParamSlice = append(recordParamSlice, &recordParam)
 	}
@@ -338,30 +361,25 @@ func (vr *Voucher) UpdateVoucherRecordByID(opts *options.ModifyVoucherRecordOpti
 	if opts.SubjectName != "" {
 		param.SubjectName = &opts.SubjectName
 	}
-	if opts.BillCount != -1 {
-		param.BillCount = &opts.BillCount
-	}
-	if opts.CreditMoney != -1 {
-		param.CreditMoney = &opts.CreditMoney
-	}
-	if opts.DebitMoney != -1 {
-		param.DebitMoney = &opts.DebitMoney
-	}
-	if opts.SubID1 != 0 {
+	//因为金额，可以允许为负数，所以不能用该判断。
+	// if opts.CreditMoney >= 0.001 {
+	// 	param.CreditMoney = &opts.CreditMoney
+	// }
+	// if opts.DebitMoney >= 0.001 {
+	// 	param.DebitMoney = &opts.DebitMoney
+	// }
+	if opts.SubID1 >= 0 {
 		param.SubID1 = &opts.SubID1
 	}
-	if opts.SubID2 != 0 {
-		param.SubID2 = &opts.SubID2
-	}
-	if opts.SubID3 != 0 {
-		param.SubID3 = &opts.SubID3
-	}
-	if opts.SubID4 != 0 {
-		param.SubID4 = &opts.SubID4
-	}
-	if opts.Status != 0 {
-		param.Status = &opts.Status
-	}
+	// if opts.SubID2 != 0 {
+	// 	param.SubID2 = &opts.SubID2
+	// }
+	// if opts.SubID3 != 0 {
+	// 	param.SubID3 = &opts.SubID3
+	// }
+	// if opts.SubID4 != 0 {
+	// 	param.SubID4 = &opts.SubID4
+	// }
 	_, err := util.DoRequest(action, param)
 	return err
 }
@@ -372,27 +390,35 @@ func (vr *Voucher) UpdateVoucherRecord_json(params []byte) error {
 	return err
 }
 
-func (vr *Voucher) VoucherAudit_json(params []byte) error {
-	action := "VoucherAudit"
-	_, err := util.DoRequest_json(action, params)
-	return err
-}
-
-func (vr *Voucher) VoucherAudit(opts *options.VoucherAuditOptions) error {
-	action := "VoucherAudit"
+func (vr *Voucher) UpdateVoucherInfo(opts *options.ModifyVoucherInfoOptions) error {
+	action := "UpdateVoucherInfo"
 	switch {
 	case opts.VoucherID <= 0:
 		return errors.New("VouRecordID is required")
-	case opts.VoucherAuditor == "":
-		return errors.New("VoucherAudit is required")
-	case opts.Status <= 0:
-		return errors.New("Status is required")
 	}
-
-	param := model.VoucherAuditParams{}
+	param := model.ModifyVoucherInfoParams{}
 	param.VoucherID = &opts.VoucherID
-	param.VoucherAuditor = &opts.VoucherAuditor
-	param.Status = &opts.Status
+	if opts.VoucherDate > 0 {
+		param.VoucherDate = &opts.VoucherDate
+	}
+	if opts.VoucherFiller != "" {
+		param.VoucherFiller = &opts.VoucherFiller
+	}
+	if opts.VoucherAuditor != "" {
+		param.VoucherAuditor = &opts.VoucherAuditor
+	}
+	if opts.BillCount > 0 {
+		param.BillCount = &opts.BillCount
+	}
+	if opts.Status > 0 {
+		param.Status = &opts.Status
+	}
 	_, err := util.DoRequest(action, param)
+	return err
+}
+
+func (vr *Voucher) UpdateVoucherInfo_json(params []byte) error {
+	action := "UpdateVoucherInfo"
+	_, err := util.DoRequest_json(action, params)
 	return err
 }

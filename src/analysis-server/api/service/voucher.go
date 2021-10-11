@@ -1,16 +1,16 @@
 package service
 
 import (
-	"context"
-	"database/sql"
-	"time"
-
 	"analysis-server/api/db"
 	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
+	"context"
+	"database/sql"
+	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"time"
 )
 
 //默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
@@ -67,7 +67,8 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
 	filterFields["voucherMonth"] = vInfo.VoucherMonth
-	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d", *infoParams.CompanyID, vInfo.VoucherMonth)
+	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d",
+		*infoParams.CompanyID, vInfo.VoucherMonth)
 	count, err := vs.VInfoDao.CountByFilter(ctx, tx, filterFields)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -75,7 +76,10 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	//第0个元素是voucherId,从第1个元素开始，就是recordId
 	var IdValSli []int
 	vInfo.CompanyID = *infoParams.CompanyID
-
+	vInfo.Status = utils.NoAuditVoucher
+	if infoParams.BillCount != nil {
+		vInfo.BillCount = *infoParams.BillCount
+	}
 	vInfo.VoucherFiller = *infoParams.VoucherFiller
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.CreatedAt = time.Now()
@@ -94,25 +98,21 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		vRecord.SubjectName = *recParam.SubjectName
 		vRecord.DebitMoney = *recParam.DebitMoney
 		vRecord.CreditMoney = *recParam.CreditMoney
-		vRecord.Status = utils.NoAudit
 		if recParam.Summary != nil {
 			vRecord.Summary = *recParam.Summary
-		}
-		if recParam.BillCount != nil {
-			vRecord.BillCount = *recParam.BillCount
 		}
 		if recParam.SubID1 != nil {
 			vRecord.SubID1 = *recParam.SubID1
 		}
-		if recParam.SubID2 != nil {
-			vRecord.SubID2 = *recParam.SubID2
-		}
-		if recParam.SubID3 != nil {
-			vRecord.SubID3 = *recParam.SubID3
-		}
-		if recParam.SubID4 != nil {
-			vRecord.SubID4 = *recParam.SubID4
-		}
+		// if recParam.SubID2 != nil {
+		// 	vRecord.SubID2 = *recParam.SubID2
+		// }
+		// if recParam.SubID3 != nil {
+		// 	vRecord.SubID3 = *recParam.SubID3
+		// }
+		// if recParam.SubID4 != nil {
+		// 	vRecord.SubID4 = *recParam.SubID4
+		// }
 		vRecord.CreatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
@@ -219,8 +219,6 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		vRecord.DebitMoney = *itemParam.DebitMoney
 		vRecord.CreditMoney = *itemParam.CreditMoney
 		vRecord.Summary = *itemParam.Summary
-		vRecord.BillCount = *itemParam.BillCount
-		vRecord.Status = utils.NoAudit
 		vRecord.SubID1 = *itemParam.SubID1
 		// vRecord.SubID2 = *itemParam.SubID2
 		// vRecord.SubID3 = *itemParam.SubID3
@@ -261,7 +259,7 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
-	err = vs.VRecordDao.DeleteByVoucherId(ctx, vs.Db, voucherID)
+	err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
@@ -345,10 +343,80 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	return voucherView, nil
 }
 
-//VoucherAudit  该函数用于审核和取消审核 ...
-func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
-	params map[string]interface{}, requestID string) CcError {
-	FuncName := "VoucherService/VoucherAudit"
+//VoucherArrange
+func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.VoucherArrangeParams,
+	requestID string) CcError {
+	vs.Logger.InfoContext(ctx, "ArrangeVoucher method begin,companyID:%d ,month:%d",
+		*params.CompanyID, *params.VoucherMonth)
+	err := vs.deleteInvalidVoucher(ctx, *params.CompanyID, *params.VoucherMonth)
+	if err == nil {
+		//update the voucher Num
+		if *params.ArrangeVoucherNum {
+			err = vs.arrangeVoucherNum(ctx, *params.CompanyID, *params.VoucherMonth)
+		}
+	}
+	vs.Logger.InfoContext(ctx, "ArrangeVoucher method end")
+	return err
+}
+
+func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID int, voucherMonth int) CcError {
+	FuncName := "VoucherService/service/deleteInvalidVoucher"
+	bIsRollBack := true
+	vs.Logger.InfoContext(ctx, "deleteInvalidVoucher method begin,companyID:%d ,month:%d", companyID, voucherMonth)
+	// Begin transaction
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	filterFields := make(map[string]interface{}, 1)
+	intervalFilterFields := make(map[string]interface{})
+	limit, offset := -1, 0
+	filterFields["companyId"] = companyID
+	filterFields["voucherMonth"] = voucherMonth
+	filterFields["status"] = utils.InvalidVoucher
+	orderField := ""
+	orderDirection := 0
+	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit,
+		offset, orderField, orderDirection)
+	if err != nil {
+		errInfo := fmt.Sprintf("[VoucherService/service/deleteInvalidVoucher] [VInfoDao.List: %s, filterFields: %v]",
+			err.Error(), filterFields)
+		vs.Logger.ErrorContext(ctx, errInfo)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	voucherIdSlice := make([]int, len(voucherInfos))
+	for i := 0; i < len(voucherInfos); i++ {
+		//delete voucher record
+		voucherIdSlice = append(voucherIdSlice, voucherInfos[i].VoucherID)
+		err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherInfos[i].VoucherID)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher record failed")
+		}
+	}
+	//batch,delete voucher information
+	err = vs.VInfoDao.BatchDelete(ctx, tx, voucherIdSlice)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher information failed")
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "deleteInvalidVoucher method end")
+	return nil
+}
+
+func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, voucherMonth int) CcError {
+	vs.Logger.InfoContext(ctx, "arrangeVoucherNum method begin,companyID:%d ,month:%d", companyID, voucherMonth)
+	//Begin transaction
+	FuncName := "VoucherService/service/arrangeVoucherNum"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {
@@ -360,35 +428,39 @@ func (vs *VoucherService) VoucherAudit(ctx context.Context, voucherID int,
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
-	//insure the voucherInfo exist
-	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
-	switch err {
-	case nil:
-	case sql.ErrNoRows:
-		return NewCcError(cons.CodeVoucherInfoNotExist, ErrVoucherInfo, ErrNotFound, ErrNull, "the VoucherInfo is not exist")
-	default:
+	//update the voucher Num
+	filterFields := make(map[string]interface{}, 1)
+	intervalFilterFields := make(map[string]interface{})
+	limit, offset := -1, 0
+	orderField := "numOfMonth"
+	orderDirection := 0
+	filterFields["voucherMonth"] = voucherMonth
+	filterFields["companyId"] = companyID
+	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit,
+		offset, orderField, orderDirection)
+	if err != nil {
+		errInfo := fmt.Sprintf("[VoucherService/service/arrangeVoucherNum] [VInfoDao.List: %s, filterFields: %v]",
+			err.Error(), filterFields)
+		vs.Logger.ErrorContext(ctx, errInfo)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	voucherParams := make(map[string]interface{}, 2)
-	voucherParams["voucherAuditor"] = params["voucherAuditor"]
-	voucherParams["updatedAt"] = time.Now()
-	//update voucher information
-	err = vs.VInfoDao.Update(ctx, tx, voucherID, voucherParams)
-	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	//update voucher record
-	delete(voucherParams, "voucherAuditor")
-	voucherParams["status"] = params["status"]
-	err = vs.VRecordDao.UpdateByVoucherId(ctx, tx, voucherID, voucherParams)
-	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	voucherInfoParams := make(map[string]interface{}, 2)
+	for i := 0; i < len(voucherInfos); i++ {
+		//update numOfMonth
+		voucherInfoParams["numOfMonth"] = i + 1
+		voucherInfoParams["updatedAt"] = time.Now()
+		//update voucher information
+		err = vs.VInfoDao.Update(ctx, tx, voucherInfos[i].VoucherID, voucherInfoParams)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "arrangeVoucherNum method end")
 	return nil
 }
 
