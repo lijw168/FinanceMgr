@@ -7,6 +7,7 @@ import (
 	cons "common/constant"
 	"common/log"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 	"unicode/utf8"
@@ -391,12 +392,11 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		//因为金额，可以允许为负数，所以不能这样判断。
-		// if *recParam.CreditMoney <= 0.001 && *recParam.DebitMoney <= 0.001 {
-		// 	ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
-		// 	vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
-		// 	return
-		// }
+		if math.Abs(*recParam.CreditMoney) <= 0.001 && math.Abs(*recParam.DebitMoney) <= 0.001 {
+			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
+			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			return
+		}
 	}
 	requestId := vh.GetTraceId(r)
 
@@ -536,7 +536,7 @@ func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.R
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return
 		}
-		if *recParam.CreditMoney <= 0.001 && *recParam.DebitMoney <= 0.001 {
+		if math.Abs(*recParam.CreditMoney) <= 0.001 && math.Abs(*recParam.DebitMoney) <= 0.001 {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 			return

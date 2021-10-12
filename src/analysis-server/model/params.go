@@ -205,11 +205,11 @@ type UpdateVoucherParams struct {
 }
 
 //VoucherAuditParams 凭证的审核参数
-type VoucherAuditParams struct {
-	VoucherID      *int    `json:"voucherId"`
-	VoucherAuditor *string `json:"voucherAuditor"`
-	Status         *int    `json:"status"`
-}
+// type VoucherAuditParams struct {
+// 	VoucherID      *int    `json:"voucherId"`
+// 	VoucherAuditor *string `json:"voucherAuditor"`
+// 	Status         *int    `json:"status"`
+// }
 
 //VoucherArrangeParams 凭证整理参数
 type VoucherArrangeParams struct {

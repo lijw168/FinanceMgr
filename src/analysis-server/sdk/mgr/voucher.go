@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 )
 
 type Voucher struct {
@@ -342,13 +343,12 @@ func (vr *Voucher) UpdateVoucherRecordByID(opts *options.ModifyVoucherRecordOpti
 	if opts.SubjectName != "" {
 		param.SubjectName = &opts.SubjectName
 	}
-	//因为金额，可以允许为负数，所以不能用该判断。
-	// if opts.CreditMoney >= 0.001 {
-	// 	param.CreditMoney = &opts.CreditMoney
-	// }
-	// if opts.DebitMoney >= 0.001 {
-	// 	param.DebitMoney = &opts.DebitMoney
-	// }
+	if math.Abs(opts.CreditMoney) >= 0.001 {
+		param.CreditMoney = &opts.CreditMoney
+	}
+	if math.Abs(opts.DebitMoney) >= 0.001 {
+		param.DebitMoney = &opts.DebitMoney
+	}
 	if opts.SubID1 >= 0 {
 		param.SubID1 = &opts.SubID1
 	}

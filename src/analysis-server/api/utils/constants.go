@@ -7,7 +7,7 @@ const (
 	Offline       = 2 // user offline	status
 )
 
-//voucher record status
+//voucher status
 const (
 	NoAuditVoucher = 1 // 该凭证未审核
 	InvalidVoucher = 2 // 该凭证作废
