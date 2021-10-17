@@ -2,11 +2,10 @@ package main
 
 import (
 	"client/service"
-	//"client/util"
 	"common/log"
-	//"encoding/binary"
 	"flag"
 	"fmt"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 )

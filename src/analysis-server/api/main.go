@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	//_ "net/http/pprof"
+	_ "net/http/pprof"
 	"runtime"
 	"strconv"
 
