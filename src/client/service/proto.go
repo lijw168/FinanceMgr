@@ -110,8 +110,6 @@ func (p *Packet) isConvertToUtf8() bool {
 		break
 	case util.AccSubReferenceQuery:
 		break
-	case util.BatchAuditVouchers:
-		break
 	default:
 		bRet = true
 		break

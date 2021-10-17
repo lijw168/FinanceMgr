@@ -331,12 +331,12 @@ func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Req
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherAuditor != nil {
+	if params.VoucherAuditor == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouAuditor, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.IDs != nil || len(params.IDs) == 0 {
+	if params.IDs == nil || len(params.IDs) == 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
