@@ -318,10 +318,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	// }
 	orderField := "recordId"
 	orderDirection := cons.Order_Asc
-	intervalFilterFields := make(map[string]interface{})
-	fuzzyMatchFields := make(map[string]string)
-	voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, intervalFilterFields, fuzzyMatchFields,
-		limit, offset, orderField, orderDirection)
+	voucherRecords, err := vs.VRecordDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -374,16 +371,14 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID in
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
-	filterFields := make(map[string]interface{}, 1)
-	intervalFilterFields := make(map[string]interface{})
+	filterFields := make(map[string]interface{}, 3)
 	limit, offset := -1, 0
 	filterFields["companyId"] = companyID
 	filterFields["voucherMonth"] = voucherMonth
 	filterFields["status"] = utils.InvalidVoucher
 	orderField := ""
 	orderDirection := 0
-	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit,
-		offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/deleteInvalidVoucher] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
@@ -430,14 +425,12 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, 
 	}()
 	//update the voucher Num
 	filterFields := make(map[string]interface{}, 1)
-	intervalFilterFields := make(map[string]interface{})
 	limit, offset := -1, 0
 	orderField := "numOfMonth"
 	orderDirection := 0
 	filterFields["voucherMonth"] = voucherMonth
 	filterFields["companyId"] = companyID
-	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit,
-		offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/arrangeVoucherNum] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
@@ -468,6 +461,7 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, 
 func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	params *model.ListVoucherInfoParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
+	filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
 	limit, offset := -1, 0
@@ -518,8 +512,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
-		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterFields, intervalFilterFields, fuzzyMatchFields,
-			limit, offset, orderField, orderDirection)
+		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields,
+			fuzzyMatchFields, limit, offset, orderField, orderDirection)
 		if err != nil {
 			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoByMulCondition] [VRecordDao.List: %s, filterFields: %v]",
 				err.Error(), filterFields)
@@ -546,8 +540,12 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				}
 			}
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller", "voucherAuditor":
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
+				fallthrough
+			case "voucherAuditor", "status":
 				filterFields[*f.Field] = f.Value
+			case "status_no":
+				filterNo["status"] = f.Value
 			case "numOfMonth_interval":
 				intervalFilterFields["numOfMonth"] = intervalValSlice
 			case "voucherDate_interval":
@@ -558,7 +556,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 		}
 	}
 
-	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterFields, intervalFilterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields,
+		limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

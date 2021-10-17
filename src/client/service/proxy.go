@@ -305,6 +305,10 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		resData, errCode := voucherGate.GetMaxNumOfMonth(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
+	case util.BatchAuditVouchers:
+		errCode := voucherGate.BatchAuditVouchers(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
 	case util.VouInfoUpdate:
 		errCode := voucherGate.UpdateVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)

@@ -229,3 +229,14 @@ func (vg *VoucherGateway) UpdateVoucherInfo(param []byte) (errCode int) {
 	}
 	return errCode
 }
+
+func (vg *VoucherGateway) BatchAuditVouchers(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	if err := cSdk.BatchAuditVouchers_json(param); err != nil {
+		errCode = util.ErrBatchAuditVouchersFailed
+		logger.Error("the BatchAuditVouchers_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("BatchAuditVouchers_json succeed")
+	}
+	return errCode
+}

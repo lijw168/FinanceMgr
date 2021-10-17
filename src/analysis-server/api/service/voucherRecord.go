@@ -115,6 +115,7 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	params *model.ListParams) ([]*model.VoucherRecordView, int, CcError) {
 	recordViewSlice := make([]*model.VoucherRecordView, 0)
+	filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
 	fuzzyMatchFields := make(map[string]string)
@@ -151,7 +152,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterFields, intervalFilterFields, fuzzyMatchFields,
+	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields, fuzzyMatchFields,
 		limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)

@@ -124,26 +124,55 @@ func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, vouch
 	strSql := "delete from " + voucherInfoTN + " where voucher_id IN ("
 	fv := handleArrFilter(voucherIds, &strSql)
 	strSql += ")"
-	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, ids: %v]", strSql, voucherIds)
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/BatchDelete] [sql: %s, ids: %v]", strSql, voucherIds)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/BatchDelete] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.ExecContext(ctx, strSql, fv...); err != nil {
-		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/Delete] [do.Exec: %s]", err.Error())
+		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/BatchDelete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
 }
 
+//没有复杂的匹配条件
+func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
+	limit int, offset int, order string, od int) ([]*model.VoucherInfo, error) {
+	var voucherInfoSlice []*model.VoucherInfo
+	strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/SimpleList] sql %s with values %v", strSql, values)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/SimpleList] [SqlElapsed: %v]", time.Since(start))
+	}()
+	result, err := do.QueryContext(ctx, strSql, values...)
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/SimpleList] [do.Query: %s]", err.Error())
+		return voucherInfoSlice, err
+	}
+	defer result.Close()
+	for result.Next() {
+		voucherInfo := new(model.VoucherInfo)
+		err = scanVoucherInfo(result, voucherInfo)
+		if err != nil {
+			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/SimpleList] [ScanSnapshot: %s]", err.Error())
+			return voucherInfoSlice, err
+		}
+		voucherInfoSlice = append(voucherInfoSlice, voucherInfo)
+	}
+	return voucherInfoSlice, nil
+}
+
 //在where条件里增加between ... and
-func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filter map[string]interface{},
-	intervalFilter map[string]interface{}, limit int, offset int, order string, od int) ([]*model.VoucherInfo, error) {
+func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
+	filter map[string]interface{}, intervalFilter map[string]interface{},
+	limit int, offset int, order string, od int) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
 	fuzzyMatchFilter := map[string]string{}
 	//strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(voucherInfoTN, filter, intervalFilter, fuzzyMatchFilter,
-		voucherInfoFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(voucherInfoTN, filterNo, filter, intervalFilter,
+		fuzzyMatchFilter, voucherInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -235,6 +264,41 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId 
 	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/Update] [do.Exec: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
+//用于批量审核/取消凭证。
+func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iStatus int,
+	strVoucherAuditor string, voucherIds []int) error {
+	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
+		for i, ki := range arr {
+			if i == 0 {
+				*s += "?"
+			} else {
+				*s += ", ?"
+			}
+			fv = append(fv, ki)
+		}
+		return
+	}
+	var filterVal []interface{}
+	filterVal = append(filterVal, iStatus)
+	filterVal = append(filterVal, strVoucherAuditor)
+	filterVal = append(filterVal, time.Now())
+	strSql := "update " + voucherInfoTN +
+		" set status = ?, voucher_auditor = ?, updated_at = ?  where voucher_id IN ("
+	fv := handleArrFilter(voucherIds, &strSql)
+	filterVal = append(filterVal, fv...)
+	strSql += ")"
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/BatchUpdate] [sql: %s, ids: %v]", strSql, voucherIds)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/BatchUpdate] [SqlElapsed: %v]", time.Since(start))
+	}()
+	if _, err := do.ExecContext(ctx, strSql, filterVal...); err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/BatchUpdate] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil

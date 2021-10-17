@@ -403,3 +403,9 @@ func (vr *Voucher) UpdateVoucherInfo_json(params []byte) error {
 	_, err := util.DoRequest_json(action, params)
 	return err
 }
+
+func (vr *Voucher) BatchAuditVouchers_json(params []byte) error {
+	action := "BatchAuditVouchers"
+	_, err := util.DoRequest_json(action, params)
+	return err
+}

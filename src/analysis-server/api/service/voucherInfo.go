@@ -33,6 +33,7 @@ func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID 
 
 func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model.ListParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
+	filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
 	limit, offset := -1, 0
@@ -43,6 +44,8 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 				fallthrough
 			case "voucherAuditor", "status", "billCount":
 				filterFields[*f.Field] = f.Value
+			case "status_no":
+				filterNo["status"] = f.Value
 			case "numOfMonth_interval":
 				intervalFilterFields["numOfMonth"] = f.Value
 			case "voucherDate_interval":
@@ -64,7 +67,8 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterFields, intervalFilterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields,
+		limit, offset, orderField, orderDirection)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -137,6 +141,32 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 	}
 	params["updatedAt"] = time.Now()
 	err = vs.VInfoDao.Update(ctx, tx, voucherID, params)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	return nil
+}
+
+func (vs *VoucherInfoService) BatchAuditVoucherInfo(ctx context.Context, params *model.BatchAuditParams) CcError {
+	FuncName := "VoucherInfoService/BatchAuditVoucherInfo"
+	bIsRollBack := true
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	//insure the voucherInfo exist  由于是批量更新，所以就不一一判断了。
+	err = vs.VInfoDao.BatchUpdate(ctx, tx, *params.Status, *params.VoucherAuditor, params.IDs)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

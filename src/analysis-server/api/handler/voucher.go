@@ -296,7 +296,7 @@ func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Requ
 	if params.VoucherFiller != nil {
 		voucherInfoParams["voucherFiller"] = *params.VoucherFiller
 	}
-	if params.VoucherFiller != nil {
+	if params.VoucherAuditor != nil {
 		voucherInfoParams["voucherAuditor"] = *params.VoucherAuditor
 	}
 	if params.Status != nil {
@@ -309,6 +309,41 @@ func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Requ
 	ccErr := vh.Vis.UpdateVoucherInfoByID(r.Context(), *params.VoucherID, voucherInfoParams)
 	if ccErr != nil {
 		errInfo := fmt.Sprintf("[voucher/UpdateVoucherInfo/ServerHTTP] [Vis.UpdateVoucherInfoByID: %s]", ccErr.Detail())
+		vh.Logger.ErrorContext(r.Context(), errInfo)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+	return
+}
+
+func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.BatchAuditParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/BatchAuditVouchers] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Status == nil || *params.Status < 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherAuditor != nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouAuditor, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.IDs != nil || len(params.IDs) == 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	ccErr := vh.Vis.BatchAuditVoucherInfo(r.Context(), params)
+	if ccErr != nil {
+		errInfo := fmt.Sprintf("[voucher/BatchAuditVouchers/ServerHTTP] [Vis.BatchAuditVoucherInfo: %s]", ccErr.Detail())
 		vh.Logger.ErrorContext(r.Context(), errInfo)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return

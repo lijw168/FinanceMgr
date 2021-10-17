@@ -51,8 +51,6 @@ func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) 
 		//区分创建管理员和普通的操作员，是通过给role赋值来实现的。
 		fallthrough
 	case "DeleteOperator":
-		fallthrough
-	case "ListOperatorInfo":
 		if !GAccessTokenH.isAdminToken(accessToken) {
 			bIsPass = false
 			err = errors.New("No authority,access the function")

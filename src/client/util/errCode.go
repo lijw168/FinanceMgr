@@ -28,4 +28,5 @@ const (
 	ErrGetMaxNumOfMonthFailed     = 24 //get the max numOfMonth,failed
 	ErrInitResourceInfoFailed     = 25 //init resource information,failed
 	ErrAccSubRefQueryFailed       = 27 //query account subject reference,failed
+	ErrBatchAuditVouchersFailed   = 28 // audit vouchers,failed
 )

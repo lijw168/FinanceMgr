@@ -352,11 +352,13 @@ func transferListSqlWithFuzzyMatch(table string, filter map[string]interface{}, 
 	return strSql, fv
 }
 
-//support multi-condition:accurate match,in,like,between ... and,
+//support multi-condition:accurate match,!= ,not,in,like,between ... and,
 //fuzzyMatchFilter,the value type is  string
 //intervalFilter,the value type is numerical value
-func transferListSqlWithMutiCondition(table string, filter map[string]interface{}, intervalFilter map[string]interface{},
-	fuzzyMatchFilter map[string]string, field []string, limit int, offset int, order string, od int) (string, []interface{}) {
+//filterNo,the var type is float64, int and string
+func transferListSqlWithMutiCondition(table string, filterNo map[string]interface{}, filter map[string]interface{},
+	intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string, field []string,
+	limit int, offset int, order string, od int) (string, []interface{}) {
 	fields := strings.Join(field, ",")
 	strSql := "select " + fields + " from " + table
 	var fk []string
@@ -385,7 +387,26 @@ func transferListSqlWithMutiCondition(table string, filter map[string]interface{
 		}
 		return
 	}
-
+	for k, v := range filterNo {
+		tmpK := camelToUnix(k)
+		switch v.(type) {
+		case float64, int, string:
+			fk = append(fk, tmpK+" != ?")
+			fv = append(fv, v)
+		case []int:
+			tmpK += " NOT IN ("
+			arr := []interface{}{}
+			if vl, ok := v.([]int); ok {
+				for _, ki := range vl {
+					arr = append(arr, ki)
+				}
+			}
+			tmpFv := handleArrFilter(arr, &tmpK)
+			tmpK += ")"
+			fv = append(fv, tmpFv...)
+			fk = append(fk, tmpK)
+		}
+	}
 	for k, v := range filter {
 		tmpK := camelToUnix(k)
 		switch v.(type) {
@@ -424,7 +445,6 @@ func transferListSqlWithMutiCondition(table string, filter map[string]interface{
 			fk = append(fk, tmpK)
 		}
 	}
-
 	for k, v := range intervalFilter {
 		tmpK := camelToUnix(k)
 		switch v.(type) {
@@ -452,13 +472,11 @@ func transferListSqlWithMutiCondition(table string, filter map[string]interface{
 			fk = append(fk, tmpK)
 		}
 	}
-
 	for k, v := range fuzzyMatchFilter {
 		tmpK := camelToUnix(k)
 		fk = append(fk, tmpK+" like ?")
 		fv = append(fv, v)
 	}
-
 	if len(fk) > 0 {
 		strSql += " where " + strings.Join(fk, " and ")
 	}

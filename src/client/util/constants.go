@@ -36,6 +36,7 @@ const (
 	VouInfoListByMulCon
 	VouInfoListLatest
 	VouInfoMaxNumOfMonth
+	BatchAuditVouchers
 	VouInfoUpdate
 	VouRecordCreate
 	VouRecordDel

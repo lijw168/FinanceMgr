@@ -154,6 +154,12 @@ type QueryMaxNumOfMonthParams struct {
 	VoucherMonth *int `json:"voucherMonth"`
 }
 
+type BatchAuditParams struct {
+	IDs            []int   `json:"ids"`
+	Status         *int    `json:"status"`
+	VoucherAuditor *string `json:"voucherAuditor"`
+}
+
 //ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
 	VoucherID      *int    `json:"voucherId"`

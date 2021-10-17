@@ -123,14 +123,42 @@ func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOp
 	return nil
 }
 
+//没有复杂的匹配条件。
+func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
+	limit int, offset int, order string, od int) ([]*model.VoucherRecord, error) {
+	var voucherRecordSlice []*model.VoucherRecord
+	strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
+	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/SimpleList] sql %s with values %v", strSql, values)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[VoucherRecord/db/SimpleList] [SqlElapsed: %v]", time.Since(start))
+	}()
+	result, err := do.QueryContext(ctx, strSql, values...)
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/SimpleList] [do.Query: %s]", err.Error())
+		return voucherRecordSlice, err
+	}
+	defer result.Close()
+	for result.Next() {
+		VoucherRecord := new(model.VoucherRecord)
+		err = scanVoucherRecord(result, VoucherRecord)
+		if err != nil {
+			dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/SimpleList] [ScanSnapshot: %s]", err.Error())
+			return voucherRecordSlice, err
+		}
+		voucherRecordSlice = append(voucherRecordSlice, VoucherRecord)
+	}
+	return voucherRecordSlice, nil
+}
+
 //1、在where条件里增加between ... and
 //2、增加了like
-func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filter map[string]interface{},
-	intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string, limit int,
-	offset int, order string, od int) ([]*model.VoucherRecord, error) {
+func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
+	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
+	limit int, offset int, order string, od int) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
 	//strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(voucherRecordTN, filter, intervalFilter, fuzzyMatchFilter,
+	strSql, values := transferListSqlWithMutiCondition(voucherRecordTN, filterNo, filter, intervalFilter, fuzzyMatchFilter,
 		voucherRecordFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()

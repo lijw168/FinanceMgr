@@ -169,6 +169,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("ListVoucherInfoByMulCondition", voucherHandlers.ListVoucherInfoByMulCondition)
 	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
 	httpRouter.RegisterFunc("UpdateVoucherInfo", voucherHandlers.UpdateVoucherInfo)
+	httpRouter.RegisterFunc("BatchAuditVouchers", voucherHandlers.BatchAuditVouchers)
 
 	httpRouter.RegisterFunc("ListMenuInfo", menuHandlers.ListMenuInfo)
 	//检查是否登录
