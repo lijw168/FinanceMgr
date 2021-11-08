@@ -6,7 +6,7 @@ curl -X  POST http://127.0.0.1:7500/common?action=version
 
 //***********************company**************************//
 //create
-analysis_cli company-create 中科网威 中科 13581682742
+analysis_cli company-create 中科网威 中科 13581682742      
 curl -H "Content-Type:application/json" -X POST --data '{"companyName":"好管家","abbreviationName":"管家","corporator":"lijw","phone":"15637198690","e_mail":"362718007@qq.com","companyAddr":"zhengzhou","backup":"test"}' http://127.0.0.1:7500/analysis_server?Action=CreateCompany
 
 //list
@@ -32,14 +32,19 @@ analysis_cli company-delete
 
 //create
 analysis_cli accSub-create  差旅费 1
-curl -H "Content-Type:application/json" -X POST --data '{"companyName":"好管家","abbreviationName":"管家","corporator":"lijw","phone":"15637198690","e_mail":"362718007@qq.com","companyAddr":"zhengzhou","backup":"test"}' http://127.0.0.1:7500/analysis_server?Action=CreateCompany
+//curl -H "Content-Type:application/json" -X POST --data '{"companyName":"好管家","abbreviationName":"管家","corporator":"lijw","phone":"15637198690","e_mail":"362718007@qq.com","companyAddr":"zhengzhou","backup":"test"}' http://127.0.0.1:7500/analysis_server?Action=CreateCompany
+
+./analysis_cli accSub-create 1001 资产 1 3 1 1 --token olwotoodi5
+./analysis_cli accSub-create 100110 房屋 2 3 1 1 --token olwotoodi5
+./analysis_cli accSub-create 1002 债务 1 3 2 2 --token olwotoodi5
+./analysis_cli accSub-create 100210 银行借款 2 3 2 2 --token olwotoodi5
 
 //list
 analysis_cli accSub-list
-curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":103}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
-curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":103}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
 
-curl -H "Content-Type:application/json" -H "Cookie: access_token=gft863skno" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub
+curl -H "Content-Type:application/json" -H "Cookie: access_token=gft863skno" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
 
 //describe  
 analysis_cli accSub-show
@@ -80,7 +85,7 @@ analysis_cli logout wei --token 4c3bqpmc63
 curl -H "Content-Type:application/json"  -H "Cookie: access_token=gft863skno" -X POST --data '{"name":"wei"}' http://127.0.0.1:7500/analysis_server?Action=Logout
 //list
 analysis_cli loginInfo-list --token 4c3bqpmc63
-curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"name","value":"wei"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListLoginInfo
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"name","value":"wei"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListLoginInfo | python -m json.tool
 
 //show  该命令可以获取一个用户的多条记录
 analysis_cli loginInfo-show wei
@@ -91,6 +96,8 @@ analysis_cli loginInfo-show wei
 analysis_cli voucher-create 105 7
 
 curl -H "Content-Type:application/json" -X POST --data '{"infoParams":{"companyId":105,"voucherMonth":6},"recordsParams":[{"voucherId":null,"subjectName":"test","debitMoney":1,"creditMoney":1,"summary":"test","subId1":1,"subId2":2,"subId3":0,"subId4":0,"billCount":0},{"voucherId":null,"subjectName":"test2","debitMoney":2,"creditMoney":2,"summary":"test2","subId1":2,"subId2":2,"subId3":0,"subId4":0,"billCount":2}]}' http://127.0.0.1:7500/analysis_server?Action=CreateVoucher
+
+./analysis_cli voucher-create 3 12 juan --cm 10 --dm 20 --sub1 502 --sub2 503 --token w569ls0ogi
 
 //describe  a voucher
 analysis_cli voucher-show 510   需要测试voucherRecord 超过100条的场景，已经测试通过
@@ -117,5 +124,76 @@ analysis_cli vouRecord-list
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_name","value":"test"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"voucher_id","value":510}],"orders":[{"field":"record_id","direction":1}],"desc_offset":100,"desc_limit":107}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
 
+select * from voucherInfo where voucher_month in (select  max(voucher_month) from voucherInfo where company_id = 1) order by num_of_month desc;
 
+insert into voucherInfo(voucher_id,company_id,voucher_month,num_of_month,voucher_date) value(2,1,12,4,now());
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(81,"总账系统",1,0,1);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8001,"会计科目",2,81,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8002,"记账凭证",2,81,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8003,"凭证明细",2,81,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8004,"审核凭证",2,81,813);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(82,"项目管理",1,0,2);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(12803,"帮助",1,0,3);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(12809,"关于...",2,12803,1000);
+
+go build -o /E/project/007/Debug/clientService.exe ./main.go
+
+//******************************todo**********************************//
+2、创建失败时，把相应的ID恢复到原来的值，这样的话，就不浪费相应的ID资源了。1
+
+12、为了防止退出data service情况，要确保，1分钟之内没有心跳的话，就退出data service。并且界面进程，当通过心跳获取的状态
+     如果是不是在线状态，要进行提醒。  2
+	 和上面的问题45，可以同时解决。该问题也问题14 是同一个过程。
+
+14、当用户状态检查时，用户的状态不是online时，要通过heartbeat向UI进程报告，然后UI进程进行退出。1
+
+20、用户正在使用的过程中，不能被删除。优先级：1
+
+21、一个公司的账号，只能操作一个公司的。
+22、系统里有一个默认的管理员。
+23、系统里有一个超级管理员。
+24、其实21 ~ 23就是权限的管理。2
+     关于权限管理的部分，管理员的那部分已经做好了。只有业务那部分没有做好。
+
+8、在voucherRecordInfo表里存储的subId,可以转换成，保存commonID的组合，这样的话，凭证记录，也就可以不用限制科目名字，都有几个级别组成了。
+    另外一种方案，在科目信息表里，commonId 和 companyId 是可以确定一条记录的。所以在选取凭证记录时，可以先通过companyId选择voucherId，然后再
+	根据该ID，进行like commonId  也是可以的。我觉得该方案会更合适一些。
+	另外一种方案，在voucherRecordInfo表里只存储一个subId，如果要找其父节点，则通过accSub表里的commonID， 目前的代码实现，就是该方案。
+
+37、启动多个服务程序
+    暂时，先不考虑该问题。等以后系统正常运行了，在考虑该问题。
+40、一个公司可以建立多个账套。需要增加一个账套表。 优先级：2
+41、初始化的资源信息，是否普通用户就可以。首先判断资源信息里，是否有数据，如果没有数据，就直接登录管理员进行初始化，或者使用单独的应用程序进行初始化。
+	 优先级：2
+14、数据的年度，在数据库中，没有该字段，要考虑增加该字段。年度和月份，是否可以合并？？？
+	优先级：2
+43、请求的trace_id一直都是一样的，该问题是由实现导致的，目前暂不修改。优先级：1
+44、重复登录时，如果发现还在线，则直接返回登录成功。
+     以后把clientService.exe编译成动态库了，该问题就不存在了。
+45、UI ,hearbeat,如果处理错误时，则不进行重新登录。和上面的问题12，可以同时解决
+	该问题，等以后把clientService.exe编译成动态库了，再进行修改。  优先级：1
+
+
+48、优化的部分：填制凭证，当增加或修改了凭证后，就触发重新加载最近月份的凭证信息。修改为，当关闭了填制凭证对话框时，再进行触发。如果没有其他的功能需要
+                实时的最近月份的凭证信息，就可以这样进行修改。
+
+52、工具里要增加一个重新登录的菜单 2
+	
+	////todo 
+29、要实现一个管理员或者操作员操作多个关联公司的数据，可以通过公司组来实现。如果一个用户是属于某个公司组的操作员，则可以访问所有的关联公司
+	需求：
+	1、通过同一个客户端，可以操作不同公司的财务。
+	2、
+	方案：是否只要实现管理员操作多个关联公司就可以了。
+30、要实现延迟删除。允许恢复删除的数据。
+7、analysis_server中断重启后，要重新初始化所有用户的状态。0
+
+9、要增加设置科目  级别表的操作。
+11、要把科目表里的数据，构造为tree型的数据。
+10、目前是一个公司只能建一个正在使用的账套的。以后可以修改为一个公司，可以创建多个账套。
+12、增加一个校验ID信息里的ID值，是否目前最后生成的ID值，如果不是，需要进行更新。以防当server挂掉后，再次重启后，ID不一致。
+
+15、增加的菜单，也需要通过管理员账号进行初始化。将来会做成与某个套餐相关联，然后公司订购某个套餐。是否可以普通用户就可以呢？
+     目前的实现是通过普通用户。
 

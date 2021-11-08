@@ -11,6 +11,7 @@ import (
 const (
 	resource_type_account_sub = iota
 	resource_type_company
+	resource_type_company_group
 	resource_type_voucher
 	resource_type_voucher_record
 	resource_type_operator
@@ -49,6 +50,8 @@ func getResourceCmdName(rsc int) string {
 		return "accSub"
 	case resource_type_company:
 		return "company"
+	case resource_type_company_group:
+		return "companyGroup"
 	case resource_type_voucher:
 		return "voucher"
 	case resource_type_voucher_record:

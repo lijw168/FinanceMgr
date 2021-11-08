@@ -1,8 +1,24 @@
 drop DATABASE if exists `finance_mgr_2021`;
 CREATE DATABASE IF NOT EXISTS `finance_mgr_2021` DEFAULT CHARACTER SET utf8;
 
+
+/*==============================================================*/
+/* Table: companyGroup                                          */
+/*==============================================================*/
+drop table if exists `finance_mgr_2021`.`companyGroup`;
+create table if not exists `finance_mgr_2021`.`companyGroup`
+(
+   `company_group_id`       int not null,
+   `group_name`             varchar(64),
+   `group_status`           int COMMENT '目前暂定两种状态：1：有效状态；0：无效状态',
+   `created_at`             time,
+   `updated_at`             time,
+   primary key (company_group_id)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
 /*==============================================================*/
 /* Table: companyInfo                                           */
+/*company_group_id,该字段为0的话，就表示该公司不与其他任何公司组成为组*/
 /*==============================================================*/
 drop table if exists `finance_mgr_2021`.`companyInfo`;
 create table if not exists `finance_mgr_2021`.`companyInfo`
@@ -17,6 +33,7 @@ create table if not exists `finance_mgr_2021`.`companyInfo`
    `backup`                varchar(32),
    `created_at`            datetime,
    `updated_at`            datetime,
+   `company_group_id`      int DEFAULT 0 COMMENT '不能作为companyGroup的外键',
    primary key (company_id),
    UNIQUE KEY `company_name` (`company_name`),
    UNIQUE KEY `abbre_name` (`abbre_name`)
@@ -80,7 +97,8 @@ drop table if exists `finance_mgr_2021`.`voucherInfo`;
 create table if not exists `finance_mgr_2021`.`voucherInfo`
 (
    `voucher_id`            int not null,
-   `company_id`            int not null,   
+   `company_id`            int not null, 
+   /*`voucher_year`          int not null COMMENT '制证年度', */
    `voucher_month`         int not null COMMENT '制证月份',
    `num_of_month`          int not null COMMENT '本月第几次记录凭证',
    `voucher_date`          date not null COMMENT '制证日期',
@@ -134,7 +152,8 @@ create table if not exists `finance_mgr_2021`.`idInfo`
    `operator_id`            int not null,
    `subject_id`             int not null,
    `voucher_id`             int not null,
-   `voucher_record_id`      int not null
+   `voucher_record_id`      int not null,
+   `company_group_id`       int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -169,4 +188,4 @@ create table if not exists `finance_mgr_2021`.`menuInfo`
 
 insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
 insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());
-insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id) value(2,102,501,1001,5001);
+insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id,company_group_id) value(2,102,501,1001,5001,801);

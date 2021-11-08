@@ -63,6 +63,17 @@ type CreateCompanyParams struct {
 	Backup      *string `json:"backup"`
 }
 
+type ModifyCompanyParams struct {
+	CompanyID   *int    `json:"companyId"`
+	CompanyName *string `json:"companyName"`
+	AbbrevName  *string `json:"abbreviationName"`
+	Corporator  *string `json:"corporator"`
+	Phone       *string `json:"phone"`
+	Email       *string `json:"e_mail"`
+	CompanyAddr *string `json:"companyAddr"`
+	Backup      *string `json:"backup"`
+}
+
 type ListCompanyParams struct {
 	Filter     []*FilterItem `json:"filter"`
 	Order      []*OrderItem  `json:"orders"`
@@ -78,15 +89,21 @@ type IDsParams struct {
 	IDs []int `json:"Ids"`
 }
 
-type ModifyCompanyParams struct {
-	CompanyID   *int    `json:"companyId"`
-	CompanyName *string `json:"companyName"`
-	AbbrevName  *string `json:"abbreviationName"`
-	Corporator  *string `json:"corporator"`
-	Phone       *string `json:"phone"`
-	Email       *string `json:"e_mail"`
-	CompanyAddr *string `json:"companyAddr"`
-	Backup      *string `json:"backup"`
+type AssociatedCompanyGroupParams struct {
+	CompanyGroupID *int  `json:"companyGroupId"`
+	CompanyID      *int  `json:"companyId"`
+	IsAttach       *bool `json:"isAttach"`
+}
+
+type CreateCompanyGroupParams struct {
+	GroupName   *string `json:"groupName"`
+	GroupStatus *int    `json:"groupStatus"`
+}
+
+type ModifyCompanyGroupParams struct {
+	CompanyGroupID *int    `json:"companyGroupId"`
+	GroupName      *string `json:"groupName"`
+	GroupStatus    *int    `json:"groupStatus"`
 }
 
 type AuthenInfoParams struct {
@@ -249,4 +266,5 @@ type IDInfoParams struct {
 	CompanyID       *int `json:"companyID"`
 	SubjectID       *int `json:"subjectID"`
 	VoucherRecordID *int `json:"voucherRecordID"`
+	ComGroupID      *int `json:"comGroupId"`
 }

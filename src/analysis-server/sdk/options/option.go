@@ -145,6 +145,23 @@ type ModifyCompanyOptions struct {
 	Backup      string
 }
 
+type AssociatedCompanyGroupOptions struct {
+	CompanyGroupID int
+	CompanyID      int
+	IsAttach       bool
+}
+
+type CreateCompanyGroupOptions struct {
+	GroupName   string
+	GroupStatus int
+}
+
+type ModifyCompanyGroupOptions struct {
+	CompanyGroupID int
+	GroupName      string
+	GroupStatus    int
+}
+
 // account subject option ...
 type CreateSubjectOptions struct {
 	CompanyID        int

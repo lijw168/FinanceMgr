@@ -29,6 +29,7 @@ func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyGroupId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["companyName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["abbreName"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["corporator"] = utils.Attribute{Type: utils.T_String, Val: nil}
@@ -228,4 +229,42 @@ func (ch *CompanyHandlers) DeleteCompany(w http.ResponseWriter, r *http.Request)
 	}
 	ch.Response(r.Context(), ch.Logger, w, nil, nil)
 	return
+}
+
+func (ch *CompanyHandlers) AssociatedCompanyGroup(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.AssociatedCompanyGroupParams)
+	err := ch.HttpRequestParse(r, params)
+	if err != nil {
+		ch.Logger.ErrorContext(r.Context(), "[company/AssociatedCompanyGroup] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrCompany, service.ErrMalformed, service.ErrNull, err.Error())
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrId, service.ErrNull)
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.CompanyGroupID == nil || *params.CompanyGroupID <= 0 {
+		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrId, service.ErrNull)
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.IsAttach == nil {
+		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrAttachParam, service.ErrNull)
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := ch.GetTraceId(r)
+	ccErr := ch.ComService.AssociatedCompanyGroup(r.Context(), params, requestId)
+	if ccErr != nil {
+		ch.Logger.WarnContext(r.Context(),
+			"[company/AssociatedCompanyGroup/ServerHTTP] [ComService.AssociatedCompanyGroup: %s]", ccErr.Detail())
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
+	ch.Response(r.Context(), ch.Logger, w, nil, nil)
 }

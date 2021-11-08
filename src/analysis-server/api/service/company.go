@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"analysis-server/api/db"
-	//"analysis-server/api/utils"
+	"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -13,10 +13,10 @@ import (
 )
 
 type CompanyService struct {
-	Logger     *log.Logger
-	CompanyDao *db.CompanyDao
-	Db         *sql.DB
-	//GenComId   *utils.GenIdInfo
+	Logger          *log.Logger
+	CompanyDao      *db.CompanyDao
+	CompanyGroupDao *db.CompanyGroupDao
+	Db              *sql.DB
 }
 
 func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.CreateCompanyParams,
@@ -84,6 +84,7 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	comView.CompanyID = comInfo.CompanyID
 	comView.CreatedAt = comInfo.CreatedAt
 	comView.UpdatedAt = comInfo.UpdatedAt
+	comView.CompanyGroupID = comInfo.CompanyGroupID
 	return comView
 }
 
@@ -173,7 +174,7 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 			// 	fuzzyMatchFields["volume_name"] = volName
 			case "companyId", "companyName", "abbreName", "corporator":
 				filterFields[*f.Field] = f.Value
-			case "phone", "e_mail", "companyAddr", "backup":
+			case "phone", "e_mail", "companyAddr", "backup", "companyGroupId":
 				filterFields[*f.Field] = f.Value
 			default:
 				return comViewSlice, 0, NewError(ErrCompany, ErrUnsupported, ErrField, *f.Field)
@@ -209,4 +210,50 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 	// 	return nil, 0, CcErr
 	// }
 	return comViewSlice, comInfoCount, nil
+}
+
+func (cs *CompanyService) AssociatedCompanyGroup(ctx context.Context, params *model.AssociatedCompanyGroupParams,
+	requestId string) CcError {
+	FuncName := "CompanyService/Company/AssociatedCompanyGroup"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := cs.Db.Begin()
+	if err != nil {
+		cs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, cs.Logger, FuncName, tx)
+		}
+	}()
+	//insure the company group exist
+	filterFields := make(map[string]interface{})
+	filterFields["companyGroupId"] = *params.CompanyGroupID
+	filterFields["groupStatus"] = utils.ValidCompanyGroup
+	conflictCount, err := cs.CompanyGroupDao.CountByFilter(ctx, tx, filterFields)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if conflictCount == 0 {
+		return NewCcError(cons.CodeCompanyGroupNotExist, ErrCompany, ErrNotFound, ErrNull, "the company group is not exist")
+	}
+	//update company info
+	updateFields := make(map[string]interface{})
+	if *params.IsAttach {
+		updateFields["companyGroupId"] = *params.CompanyGroupID
+	} else {
+		updateFields["companyGroupId"] = 0
+	}
+	updateFields["UpdatedAt"] = time.Now()
+	err = cs.CompanyDao.Update(ctx, tx, *params.CompanyID, updateFields)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		cs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	return nil
 }

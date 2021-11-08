@@ -11,14 +11,15 @@ import (
 )
 
 type IDInfoService struct {
-	logger          *log.Logger
-	idInfoDao       *db.IDInfoDao
-	_db             *sql.DB
-	genSubIdInfo    *aUtils.GenIdInfo
-	genComIdInfo    *aUtils.GenIdInfo
-	genVouIdInfo    *aUtils.GenIdInfo
-	genVouRecIdInfo *aUtils.GenIdInfo
-	genOptIdInfo    *aUtils.GenIdInfo
+	logger            *log.Logger
+	idInfoDao         *db.IDInfoDao
+	_db               *sql.DB
+	genSubIdInfo      *aUtils.GenIdInfo
+	genComIdInfo      *aUtils.GenIdInfo
+	genVouIdInfo      *aUtils.GenIdInfo
+	genVouRecIdInfo   *aUtils.GenIdInfo
+	genOptIdInfo      *aUtils.GenIdInfo
+	genComGroupIdInfo *aUtils.GenIdInfo
 }
 
 func NewIDInfoService() *IDInfoService {
@@ -63,6 +64,11 @@ func (is *IDInfoService) InitIdResource() CcError {
 		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
+	is.genComGroupIdInfo, err = aUtils.NewGenIdInfo(idInfoView.ComGroupID)
+	if err != nil {
+		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
+	}
 	return nil
 }
 
@@ -76,6 +82,7 @@ func (is *IDInfoService) CreateIDInfo(params *model.IDInfoParams,
 	idInfo.SubjectID = *params.SubjectID
 	idInfo.VoucherID = *params.VoucherID
 	idInfo.VoucherRecordID = *params.VoucherRecordID
+	idInfo.ComGroupID = *params.ComGroupID
 	if err := is.idInfoDao.Create(is._db, idInfo); err != nil {
 		is.logger.Error("[CreateIDInfo] [IdInfoDao.Create: %s]", err.Error())
 		return nil, NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
@@ -93,6 +100,7 @@ func (is *IDInfoService) IdInfoModelToView(idInfo *model.IDInfo) *model.IDInfoVi
 	idInfoView.VoucherID = idInfo.VoucherID
 	idInfoView.VoucherRecordID = idInfo.VoucherRecordID
 	idInfoView.OperatorID = idInfo.OperatorID
+	idInfoView.ComGroupID = idInfo.ComGroupID
 	return idInfoView
 }
 
@@ -136,12 +144,14 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	comId := is.genComIdInfo.GetId()
 	vouId := is.genVouIdInfo.GetId()
 	vouRecId := is.genVouRecIdInfo.GetId()
+	comGroupId := is.genComGroupIdInfo.GetId()
 	updateFields := make(map[string]interface{})
 	updateFields["subjectId"] = subId
 	updateFields["operatorId"] = optId
 	updateFields["companyId"] = comId
 	updateFields["voucherId"] = vouId
 	updateFields["voucherRecordId"] = vouRecId
+	updateFields["companyGroupId"] = comGroupId
 	ccErr := is.UpdateIdInfo(updateFields)
 	if ccErr != nil {
 		is.logger.Error("WriteIdResourceToDb failed,errInfo:%s", ccErr.Error())

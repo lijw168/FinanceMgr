@@ -131,3 +131,39 @@ func (c *Company) UpdateCompany_json(param []byte) error {
 	_, err := util.DoRequest_json(action, param)
 	return err
 }
+
+func (c *Company) AssociatedCompanyGroup(opts *options.AssociatedCompanyGroupOptions) error {
+	action := "AssociatedCompanyGroup"
+	switch {
+	case opts.CompanyGroupID <= 0:
+		return errors.New("CompanyGroupID is required")
+	case opts.CompanyID <= 0:
+		return errors.New("CompanyID is required")
+	}
+	params := model.AssociatedCompanyGroupParams{
+		CompanyGroupID: &opts.CompanyGroupID,
+		CompanyID:      &opts.CompanyID,
+		IsAttach:       &opts.IsAttach,
+	}
+	_, err := util.DoRequest(action, params)
+	return err
+}
+
+func (c *Company) InitResourceInfo(opts *options.BaseOptions) (*model.DescData, error) {
+	action := "InitResourceInfo"
+	if opts.ID <= 0 {
+		return nil, errors.New("operatorID is required")
+	}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return nil, err
+	}
+	desc := &(model.DescData{})
+	if err := util.FormatView(result.Data, desc); err != nil {
+		return nil, err
+	}
+	return desc, nil
+}

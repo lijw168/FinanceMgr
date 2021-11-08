@@ -348,7 +348,7 @@ func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.Vouc
 	err := vs.deleteInvalidVoucher(ctx, *params.CompanyID, *params.VoucherMonth)
 	if err == nil {
 		//update the voucher Num
-		if *params.ArrangeVoucherNum {
+		if params.ArrangeVoucherNum != nil || *params.ArrangeVoucherNum {
 			err = vs.arrangeVoucherNum(ctx, *params.CompanyID, *params.VoucherMonth)
 		}
 	}

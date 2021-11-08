@@ -59,8 +59,9 @@ type AccSubject struct {
 
 //VoucherInfo ...
 type VoucherInfo struct {
-	VoucherID      int
-	CompanyID      int
+	VoucherID int
+	CompanyID int
+	//oucherYear    int
 	VoucherMonth   int
 	NumOfMonth     int
 	VoucherDate    time.Time
@@ -74,16 +75,26 @@ type VoucherInfo struct {
 
 //CompanyInfo ...
 type CompanyInfo struct {
-	CompanyID   int
-	CompanyName string
-	AbbrevName  string
-	Corporator  string
-	Phone       string
-	Email       string
-	CompanyAddr string
-	Backup      string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	CompanyID      int
+	CompanyName    string
+	AbbrevName     string
+	Corporator     string
+	Phone          string
+	Email          string
+	CompanyAddr    string
+	Backup         string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	CompanyGroupID int
+}
+
+//CompanyGroup ...
+type CompanyGroup struct {
+	CompanyGroupID int
+	GroupName      string
+	GroupStatus    int
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 //IDInfo ...
@@ -93,6 +104,7 @@ type IDInfo struct {
 	CompanyID       int
 	SubjectID       int
 	VoucherRecordID int
+	ComGroupID      int
 }
 
 //MenuInfo ...

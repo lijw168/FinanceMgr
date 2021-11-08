@@ -14,6 +14,7 @@ func NewCompanyCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newCompanyListCmd())
 	cmd.AddCommand(newCompanyShowCmd())
 	cmd.AddCommand(newCompanyUpdateCmd())
+	cmd.AddCommand(newInitResourceInfoCmd())
 }
 
 func newCompanyCreateCmd() *cobra.Command {
@@ -126,5 +127,61 @@ func newCompanyUpdateCmd() *cobra.Command {
 	// cmd.Flags().StringVar(&opts.Corporator, "corporator", "test", "Corporator")
 	// cmd.Flags().StringVar(&opts.Email, "email", "test", "Email")
 	// cmd.Flags().StringVar(&opts.Backup, "bc", "test", "backup")
+	return cmd
+}
+
+func newAssociatedCompanyGroupCmd() *cobra.Command {
+	var opts options.AssociatedCompanyGroupOptions
+	cmd := &cobra.Command{
+		Use:   "companyGroup-associated [OPTIONS] companyGroupId companyId",
+		Short: "associate a company group",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 2 {
+				cmd.Help()
+				return
+			}
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.CompanyGroupID = id
+			}
+
+			if id, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.CompanyID = id
+			}
+
+			if err := Sdk.AssociatedCompanyGroup(&opts); err != nil {
+				util.FormatErrorOutput(err)
+			}
+		},
+	}
+	cmd.Flags().BoolVar(&opts.IsAttach, "isAttach", true, "is attach")
+	return cmd
+}
+
+func newInitResourceInfoCmd() *cobra.Command {
+	var opts options.BaseOptions
+	cmd := &cobra.Command{
+		Use:   "resourceInfo-init [OPTIONS] operatorId",
+		Short: "init resource information",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 2 {
+				cmd.Help()
+				return
+			}
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.ID = id
+			}
+			if hv, err := Sdk.InitResourceInfo(&opts); err != nil {
+				util.FormatErrorOutput(err)
+			} else {
+				util.FormatViewOutput(hv)
+			}
+		},
+	}
 	return cmd
 }

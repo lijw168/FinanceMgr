@@ -25,16 +25,25 @@ type AccSubjectView struct {
 }
 
 type CompanyView struct {
-	CompanyID   int       `json:"companyId"`
-	CompanyName string    `json:"companyName"`
-	AbbrevName  string    `json:"abbreviationName"`
-	Corporator  string    `json:"corporator"`
-	Phone       string    `json:"phone"`
-	Email       string    `json:"e_mail"`
-	CompanyAddr string    `json:"companyAddr"`
-	Backup      string    `json:"backup"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CompanyID      int       `json:"companyId"`
+	CompanyName    string    `json:"companyName"`
+	AbbrevName     string    `json:"abbreviationName"`
+	Corporator     string    `json:"corporator"`
+	Phone          string    `json:"phone"`
+	Email          string    `json:"e_mail"`
+	CompanyAddr    string    `json:"companyAddr"`
+	Backup         string    `json:"backup"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+	CompanyGroupID int       `json:"companyGroupId"`
+}
+
+type CompanyGroupView struct {
+	CompanyGroupID int       `json:"companyGroupId"`
+	GroupName      string    `json:"groupName"`
+	GroupStatus    int       `json:"groupStatus"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 //LoginInfoView ...
@@ -106,6 +115,7 @@ type IDInfoView struct {
 	CompanyID       int `json:"companyId"`
 	SubjectID       int `json:"subjectId"`
 	VoucherRecordID int `json:"voucherRecordId"`
+	ComGroupID      int `json:"comGroupId"`
 }
 
 type ResourceInfoView struct {

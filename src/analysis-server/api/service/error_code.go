@@ -8,6 +8,7 @@ const (
 	ErrSystem      = "system"
 	ErrAccSub      = "accountSubject"
 	ErrCompany     = "company"
+	ErrComGroup    = "companyGroup"
 	ErrOperator    = "operator"
 	ErrVoucherInfo = "voucherInfo"
 	ErrVoucher     = "voucher"
@@ -16,6 +17,7 @@ const (
 	ErrLogout      = "logout"
 	ErrIdInfo      = "IdInfo"
 	ErrMenuInfo    = "MenuInfo"
+	ErrResInfo     = "ResourceInfo"
 )
 
 const (
@@ -69,6 +71,7 @@ const (
 	ErrSubjectName   = "subjectName"
 	ErrRole          = "role"
 	ErrStatus        = "status"
+	ErrAttachParam   = "attach parameter"
 	ErrNoAuthority   = "no authority"
 )
 

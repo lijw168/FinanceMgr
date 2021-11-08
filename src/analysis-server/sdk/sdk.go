@@ -19,6 +19,7 @@ type CcSdk struct {
 	//AccessToken string
 	mgr.AccSub
 	mgr.Company
+	mgr.CompanyGroup
 	mgr.Operator
 	mgr.Voucher
 	mgr.Authen

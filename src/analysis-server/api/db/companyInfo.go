@@ -18,10 +18,10 @@ type CompanyDao struct {
 var (
 	companyInfoTN     = "companyInfo"
 	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
-		"e_mail", "company_addr", "backup", "created_at", "updated_at"}
+		"e_mail", "company_addr", "backup", "created_at", "updated_at", "company_group_id"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-			&st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt)
+			&st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt, &st.CompanyGroupID)
 	}
 )
 
@@ -44,15 +44,27 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 	}
 }
 
-//list count by filter
-// func (d *CompanyDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
-// 	var c int64
-// 	strSql, values := transferCountSql(companyInfoTN, filter)
-// 	start := time.Now()
-// 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
-// 	d.Logger.InfoContext(ctx, "[CompanyInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
-// 	return c, err
-// }
+func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOperator,
+	operatorId int) (*model.CompanyInfo, error) {
+	strSql := "select " + strings.Join(companyInfoFields, ",") +
+		" from operatorInfo as a, companyInfo as b where a.operator_id =? and a.company_id = b.company_id"
+	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetComGroupIdByOperatorId] [sql: %s ,values: %d]",
+		strSql, operatorId)
+	var compInfo = &model.CompanyInfo{}
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetComGroupIdByOperatorId] [SqlElapsed: %v]", time.Since(start))
+	}()
+	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, operatorId), compInfo); err {
+	case nil:
+		return compInfo, nil
+	case sql.ErrNoRows:
+		return nil, err
+	default:
+		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
+		return nil, err
+	}
+}
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
 	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
@@ -134,22 +146,18 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 
 func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	params map[string]interface{}) error {
-	var keyMap = map[string]string{"CompanyID": "company_id", "CompanyName": "company_name", "AbbrevName": "abbre_name",
-		"Corporator": "corporator", "Phone": "phone", "E_mail": "e_mail", "CompanyAddr": "company_addr", "Backup": "backup",
-		"CreatedAt": "created_at", "UpdatedAt": "updated_at"}
 	strSql := "update " + companyInfoTN + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
-		if dbKey, ok := keyMap[key]; ok {
-			if first {
-				strSql += dbKey + "=?"
-				first = false
-			} else {
-				strSql += "," + dbKey + "=?"
-			}
-			values = append(values, value)
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
 		}
+		values = append(values, value)
 	}
 	if first {
 		return nil

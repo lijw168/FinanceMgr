@@ -13,3 +13,9 @@ const (
 	InvalidVoucher = 2 // 该凭证作废
 	AuditedVoucher = 3 // 该凭证已审核
 )
+
+//company group status
+const (
+	InvalidCompanyGroup = 0 // 该公司组无效
+	ValidCompanyGroup   = 1 // 该公司组有效
+)

@@ -47,3 +47,8 @@ const (
 const (
 	CodeIdInfoNotExist = -601
 )
+
+//companyGroup
+const (
+	CodeCompanyGroupNotExist = -701
+)

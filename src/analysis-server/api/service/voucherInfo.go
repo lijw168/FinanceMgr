@@ -40,9 +40,9 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
+			case "voucherId", "companyId", "voucherYear", "voucherMonth", "numOfMonth", "voucherDate":
 				fallthrough
-			case "voucherAuditor", "status", "billCount":
+			case "voucherAuditor", "voucherFiller", "status", "billCount":
 				filterFields[*f.Field] = f.Value
 			case "status_no":
 				filterNo["status"] = f.Value

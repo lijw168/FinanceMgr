@@ -38,6 +38,8 @@ func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) 
 		fallthrough
 	case "UpdateCompany":
 		fallthrough
+	case "AssociatedCompanyGroup":
+		fallthrough
 	case "ListCompany":
 		if !GAccessTokenH.isRootToken(accessToken) {
 			bIsPass = false
@@ -49,6 +51,8 @@ func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) 
 		fallthrough
 	case "CreateOperator":
 		//区分创建管理员和普通的操作员，是通过给role赋值来实现的。
+		fallthrough
+	case "InitResourceInfo":
 		fallthrough
 	case "DeleteOperator":
 		if !GAccessTokenH.isAdminToken(accessToken) {
