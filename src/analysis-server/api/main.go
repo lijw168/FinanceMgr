@@ -115,7 +115,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	}
 	/*service*/
 	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, VRecordDao: voucherRecordDao, Db: _db}
-	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, Db: _db}
+	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, CompanyGroupDao: companygroupDao, Db: _db}
 	comGroupService := &service.CompanyGroupService{Logger: logger, ComGroupDao: companygroupDao, Db: _db}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
 	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
