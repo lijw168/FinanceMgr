@@ -86,6 +86,7 @@ func NewCcCli() *cobra.Command {
 	NewOperatorCommand(cmd)
 	NewVoucherCommand(cmd)
 	NewAuthenCommand(cmd)
+	NewCompanyGroupCommand(cmd)
 
 	return cmd
 }

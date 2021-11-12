@@ -96,7 +96,7 @@ func newCompanyGroupShowCmd() *cobra.Command {
 func newCompanyGroupUpdateCmd() *cobra.Command {
 	var opts options.ModifyCompanyGroupOptions
 	cmd := &cobra.Command{
-		Use:   "company-update [OPTIONS] companyGroupId groupStatus",
+		Use:   "companyGroup-update [OPTIONS] companyGroupId groupStatus",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {

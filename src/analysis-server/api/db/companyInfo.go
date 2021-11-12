@@ -68,9 +68,9 @@ func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOpera
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
 	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt}
+		st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt, st.CompanyGroupID}
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

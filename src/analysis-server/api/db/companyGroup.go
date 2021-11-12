@@ -85,8 +85,9 @@ func (dao *CompanyGroupDao) Count(ctx context.Context, do DbOperator) (int64, er
 func (dao *CompanyGroupDao) CountByFilter(ctx context.Context, do DbOperator,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
-	strSql, values := transferCountSql(companyGroupTN, filter)
 	start := time.Now()
+	strSql, values := transferCountSql(companyGroupTN, filter)
+	dao.Logger.DebugContext(ctx, "[CompanyGroup/db/CountByFilter] sql %s with values %v", strSql, values)
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[CompanyGroup/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err

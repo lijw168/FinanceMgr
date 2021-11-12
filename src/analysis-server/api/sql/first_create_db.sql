@@ -11,8 +11,8 @@ create table if not exists `finance_mgr_2021`.`companyGroup`
    `company_group_id`       int not null,
    `group_name`             varchar(64),
    `group_status`           int COMMENT '目前暂定两种状态：1：有效状态；0：无效状态',
-   `created_at`             time,
-   `updated_at`             time,
+   `created_at`             datetime,
+   `updated_at`             datetime,
    primary key (company_group_id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 

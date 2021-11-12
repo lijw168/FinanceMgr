@@ -14,6 +14,7 @@ func NewCompanyCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newCompanyListCmd())
 	cmd.AddCommand(newCompanyShowCmd())
 	cmd.AddCommand(newCompanyUpdateCmd())
+	cmd.AddCommand(newAssociatedCompanyGroupCmd())
 	cmd.AddCommand(newInitResourceInfoCmd())
 }
 
