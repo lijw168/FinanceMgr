@@ -9,7 +9,6 @@ import (
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
-	"fmt"
 )
 
 type ResouceInfoService struct {
@@ -19,6 +18,7 @@ type ResouceInfoService struct {
 	Db         *sql.DB
 }
 
+//可以优化一下GetComGroupIdByOperatorId这个函数的返回值。
 func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId int,
 	requestId string) ([]*model.ResourceInfoView, CcError) {
 	//create
@@ -91,24 +91,11 @@ func (rs *ResouceInfoService) getResourceData(ctx context.Context, pComView *mod
 	resInfo := new(model.ResourceInfoView)
 	resInfo.CompanyId = pComView.CompanyID
 	resInfo.CompanyName = pComView.CompanyName
-	//get voucherInfo
-	filterFields := make(map[string]interface{})
-	limit, offset := -1, 0
-	orderField := ""
-	orderDirection := 0
-	filterFields["companyId"] = pComView.CompanyID
-	voucherInfos, err := rs.VInfoDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
-	if err != nil {
-		rs.Logger.ErrorContext(ctx, "[ResouceInfoService/service/GetResourceData] [VInfoDao.SimpleList: %s, filterFields: %v]",
-			err.Error(), filterFields)
-		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	yearSlice := make([]int, len(voucherInfos))
-	for _, item := range voucherInfos {
-		//先暂时这样写，等以后想到了解决方案，再继续实行该函数。
-		//yearSlice = append(yearSlice, item.Year)
-		fmt.Printf("year:%d", item.VoucherMonth)
-		yearSlice = append(yearSlice, 2021)
+	iStartAccountYear := pComView.StartAccountPeriod / 100
+	iLatestAccountYear := pComView.LatestAccountYear
+	yearSlice := make([]int, 1)
+	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {
+		yearSlice = append(yearSlice, i)
 	}
 	resInfo.YearSlice = yearSlice
 	return resInfo, nil

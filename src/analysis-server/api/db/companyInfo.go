@@ -18,10 +18,12 @@ type CompanyDao struct {
 var (
 	companyInfoTN     = "companyInfo"
 	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
-		"e_mail", "company_addr", "backup", "created_at", "updated_at", "company_group_id"}
+		"e_mail", "company_addr", "backup", "created_at", "start_account_period", "latest_account_period",
+		"updated_at", "company_group_id"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-			&st.Email, &st.CompanyAddr, &st.Backup, &st.CreatedAt, &st.UpdatedAt, &st.CompanyGroupID)
+			&st.Email, &st.CompanyAddr, &st.Backup, &st.StartAccountPeriod, &st.LatestAccountYear,
+			&st.CreatedAt, &st.UpdatedAt, &st.CompanyGroupID)
 	}
 )
 
@@ -46,7 +48,7 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 
 func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOperator,
 	operatorId int) (*model.CompanyInfo, error) {
-	strSql := "select " + strings.Join(companyInfoFields, ",") +
+	strSql := "select b." + strings.Join(companyInfoFields, ",b.") +
 		" from operatorInfo as a, companyInfo as b where a.operator_id =? and a.company_id = b.company_id"
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetComGroupIdByOperatorId] [sql: %s ,values: %d]",
 		strSql, operatorId)
@@ -68,9 +70,10 @@ func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOpera
 
 func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.CompanyInfo) error {
 	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		st.Email, st.CompanyAddr, st.Backup, st.CreatedAt, st.UpdatedAt, st.CompanyGroupID}
+		st.Email, st.CompanyAddr, st.Backup, st.StartAccountPeriod, st.LatestAccountYear,
+		st.CreatedAt, st.UpdatedAt, st.CompanyGroupID}
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

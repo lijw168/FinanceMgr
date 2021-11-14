@@ -52,7 +52,7 @@ func newCompanyDeleteCmd() *cobra.Command {
 
 func newCompanyListCmd() *cobra.Command {
 	defCs := []string{"CompanyID", "CompanyName", "AbbrevName", "Corporator", "Phone",
-		"Email", "CompanyAddr", "Backup", "CreatedAt", "UpdatedAt"}
+		"Email", "CompanyAddr", "Backup", "CreatedAt", "UpdatedAt", "CompanyGroupID"}
 	cmd := &cobra.Command{
 		Use:   "company-list ",
 		Short: "List company Support Filter",
@@ -168,7 +168,7 @@ func newInitResourceInfoCmd() *cobra.Command {
 		Use:   "resourceInfo-init [OPTIONS] operatorId",
 		Short: "init resource information",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 2 {
+			if len(args) < 1 {
 				cmd.Help()
 				return
 			}

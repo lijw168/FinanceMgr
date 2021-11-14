@@ -57,6 +57,8 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.Backup = *params.Backup
 	comInfo.CreatedAt = time.Now()
 	comInfo.CompanyID = GIdInfoService.genComIdInfo.GetNextId()
+	comInfo.StartAccountPeriod = *params.StartAccountPeriod
+	comInfo.LatestAccountYear = (*params.StartAccountPeriod) / 100
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
 		cs.Logger.ErrorContext(ctx, "[%s] [CompanyDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -81,6 +83,8 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	comView.Email = comInfo.Email
 	comView.CompanyAddr = comInfo.CompanyAddr
 	comView.Backup = comInfo.Backup
+	comView.StartAccountPeriod = comInfo.StartAccountPeriod
+	comView.LatestAccountYear = comInfo.LatestAccountYear
 	comView.CompanyID = comInfo.CompanyID
 	comView.CreatedAt = comInfo.CreatedAt
 	comView.UpdatedAt = comInfo.UpdatedAt
@@ -172,9 +176,9 @@ func (cs *CompanyService) ListCompany(ctx context.Context,
 			// case "fuzzy_name":
 			// 	volName := "%" + f.Value.(string) + "%"
 			// 	fuzzyMatchFields["volume_name"] = volName
-			case "companyId", "companyName", "abbreName", "corporator":
+			case "companyId", "companyName", "abbreName", "corporator", "phone", "e_mail", "companyAddr":
 				filterFields[*f.Field] = f.Value
-			case "phone", "e_mail", "companyAddr", "backup", "companyGroupId":
+			case "backup", "startAccountPeriod", "latestAccountYear", "companyGroupId":
 				filterFields[*f.Field] = f.Value
 			default:
 				return comViewSlice, 0, NewError(ErrCompany, ErrUnsupported, ErrField, *f.Field)

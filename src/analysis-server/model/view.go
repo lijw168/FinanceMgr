@@ -25,17 +25,19 @@ type AccSubjectView struct {
 }
 
 type CompanyView struct {
-	CompanyID      int       `json:"companyId"`
-	CompanyName    string    `json:"companyName"`
-	AbbrevName     string    `json:"abbreviationName"`
-	Corporator     string    `json:"corporator"`
-	Phone          string    `json:"phone"`
-	Email          string    `json:"e_mail"`
-	CompanyAddr    string    `json:"companyAddr"`
-	Backup         string    `json:"backup"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	CompanyGroupID int       `json:"companyGroupId"`
+	CompanyID          int       `json:"companyId"`
+	CompanyName        string    `json:"companyName"`
+	AbbrevName         string    `json:"abbreviationName"`
+	Corporator         string    `json:"corporator"`
+	Phone              string    `json:"phone"`
+	Email              string    `json:"e_mail"`
+	CompanyAddr        string    `json:"companyAddr"`
+	Backup             string    `json:"backup"`
+	StartAccountPeriod int       `json:"startAccountPeriod"`
+	LatestAccountYear  int       `json:"latestAccountPeriod"`
+	CreatedAt          time.Time `json:"createdAt"`
+	UpdatedAt          time.Time `json:"updatedAt"`
+	CompanyGroupID     int       `json:"companyGroupId"`
 }
 
 type CompanyGroupView struct {

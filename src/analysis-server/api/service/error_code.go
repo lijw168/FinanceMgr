@@ -73,6 +73,7 @@ const (
 	ErrStatus        = "status"
 	ErrAttachParam   = "attach parameter"
 	ErrNoAuthority   = "no authority"
+	ErrAccountPeriod = "account period"
 )
 
 const (

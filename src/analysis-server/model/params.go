@@ -54,24 +54,26 @@ type ListSubjectParams struct {
 }
 
 type CreateCompanyParams struct {
-	CompanyName *string `json:"companyName"`
-	AbbrevName  *string `json:"abbreviationName"`
-	Corporator  *string `json:"corporator"`
-	Phone       *string `json:"phone"`
-	Email       *string `json:"e_mail"`
-	CompanyAddr *string `json:"companyAddr"`
-	Backup      *string `json:"backup"`
+	CompanyName        *string `json:"companyName"`
+	AbbrevName         *string `json:"abbreviationName"`
+	Corporator         *string `json:"corporator"`
+	Phone              *string `json:"phone"`
+	Email              *string `json:"e_mail"`
+	CompanyAddr        *string `json:"companyAddr"`
+	Backup             *string `json:"backup"`
+	StartAccountPeriod *int    `json:"startAccountPeriod"`
 }
 
 type ModifyCompanyParams struct {
-	CompanyID   *int    `json:"companyId"`
-	CompanyName *string `json:"companyName"`
-	AbbrevName  *string `json:"abbreviationName"`
-	Corporator  *string `json:"corporator"`
-	Phone       *string `json:"phone"`
-	Email       *string `json:"e_mail"`
-	CompanyAddr *string `json:"companyAddr"`
-	Backup      *string `json:"backup"`
+	CompanyID          *int    `json:"companyId"`
+	CompanyName        *string `json:"companyName"`
+	AbbrevName         *string `json:"abbreviationName"`
+	Corporator         *string `json:"corporator"`
+	Phone              *string `json:"phone"`
+	Email              *string `json:"e_mail"`
+	CompanyAddr        *string `json:"companyAddr"`
+	Backup             *string `json:"backup"`
+	StartAccountPeriod *int    `json:"startAccountPeriod"`
 }
 
 type ListCompanyParams struct {

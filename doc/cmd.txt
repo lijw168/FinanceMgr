@@ -41,7 +41,7 @@ analysis_cli accSub-create  差旅费 1
 
 //list
 analysis_cli accSub-list
-curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":103}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
+curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_id","value":502},{"field":"common_id","value":101}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
 
 curl -H "Content-Type:application/json" -H "Cookie: access_token=gft863skno" -X POST --data '{"filter":[],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListAccSub | python -m json.tool
@@ -179,6 +179,20 @@ go build -o /E/project/007/Debug/clientService.exe ./main.go
                 实时的最近月份的凭证信息，就可以这样进行修改。
 
 52、工具里要增加一个重新登录的菜单 2
+
+53、解决方案：只分表，不分库。只需要把voucherInfo和voucherRecordInfo这两个表，进行分表即可。
+   当访问这两个表是，需要带年度。这样的话，就可以确定表名。
+   实现方式，根据登录时，选择的年度。当访问那两表时，就把年度作为一个参数带上。
+   在后台服务的db里，拼sql时，直接拼上，即可。
+
+54、方案一：关于资源数据的初始化。需要增加一个账套表,增加该表，是为了解决年度数据的问题。字段：accountSetId,companyid,istartDate (账套启用日期)，iLatestUsingDate(账套最新使用
+日期),createdAt(创建日期)，updatedAt(更新日期)。
+   a>创建账套时，创建公司，增加一条记录
+   b>计算每年的结余时，增加一条记录
+   
+   方案二：把istartDate (账套启用日期)，iLatestUsingDate(账套最新使用日期)放到companyInfo表里。也可以解决该问题。
+   a>计算每年的结余时，修改，iLatestUsingDate。
+   目前使用该解决方案。
 	
 	////todo 
 29、要实现一个管理员或者操作员操作多个关联公司的数据，可以通过公司组来实现。如果一个用户是属于某个公司组的操作员，则可以访问所有的关联公司
@@ -196,4 +210,6 @@ go build -o /E/project/007/Debug/clientService.exe ./main.go
 
 15、增加的菜单，也需要通过管理员账号进行初始化。将来会做成与某个套餐相关联，然后公司订购某个套餐。是否可以普通用户就可以呢？
      目前的实现是通过普通用户。
+
+
 

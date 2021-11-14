@@ -37,6 +37,8 @@ func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 		filterMap["e_mail"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["companyAddr"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		filterMap["backup"] = utils.Attribute{Type: utils.T_String, Val: nil}
+		filterMap["startAccountPeriod"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["latestAccountYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrCompany, service.ErrValue, service.ErrField, service.ErrNull)
 			ch.Response(r.Context(), ch.Logger, w, ce, nil)
@@ -130,6 +132,11 @@ func (ch *CompanyHandlers) CreateCompany(w http.ResponseWriter, r *http.Request)
 		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
 		return
 	}
+	if params.StartAccountPeriod == nil || *params.StartAccountPeriod <= 0 {
+		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrAccountPeriod, service.ErrNull)
+		ch.Response(r.Context(), ch.Logger, w, ccErr, nil)
+		return
+	}
 
 	requestId := ch.GetTraceId(r)
 
@@ -191,6 +198,9 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	}
 	if params.Backup != nil {
 		updateFields["Backup"] = *params.Backup
+	}
+	if params.StartAccountPeriod == nil {
+		updateFields["StartAccountPeriod"] = *params.StartAccountPeriod
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrChangeContent, service.ErrNull)

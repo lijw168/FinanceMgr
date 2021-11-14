@@ -31,6 +31,8 @@ create table if not exists `finance_mgr_2021`.`companyInfo`
    `e_mail`                varchar(32),
    `company_addr`          varchar(128),
    `backup`                varchar(32),
+   `start_account_period`  int not null COMMENT '启用会计期'
+   `latest_account_year`   int not null COMMENT '最近使用的会计年度'
    `created_at`            datetime,
    `updated_at`            datetime,
    `company_group_id`      int DEFAULT 0 COMMENT '不能作为companyGroup的外键',
@@ -98,7 +100,6 @@ create table if not exists `finance_mgr_2021`.`voucherInfo`
 (
    `voucher_id`            int not null,
    `company_id`            int not null, 
-   /*`voucher_year`          int not null COMMENT '制证年度', */
    `voucher_month`         int not null COMMENT '制证月份',
    `num_of_month`          int not null COMMENT '本月第几次记录凭证',
    `voucher_date`          date not null COMMENT '制证日期',
