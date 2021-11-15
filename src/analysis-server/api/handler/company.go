@@ -199,8 +199,8 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	if params.Backup != nil {
 		updateFields["Backup"] = *params.Backup
 	}
-	if params.StartAccountPeriod == nil {
-		updateFields["StartAccountPeriod"] = *params.StartAccountPeriod
+	if params.LatestAccountYear == nil {
+		updateFields["LatestAccountYear"] = *params.LatestAccountYear
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrChangeContent, service.ErrNull)

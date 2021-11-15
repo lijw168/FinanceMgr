@@ -18,15 +18,18 @@ func (c *Company) CreateCompany(opts *options.CreateCompanyOptions) (*model.Comp
 		return nil, errors.New("CompanyName is required")
 	case opts.Phone == "":
 		return nil, errors.New("Phone is required")
+	case opts.StartAccountPeriod <= 0:
+		return nil, errors.New("StartAccountPeriod is required")
 	}
 	params := model.CreateCompanyParams{
-		CompanyName: &opts.CompanyName,
-		Phone:       &opts.Phone,
-		AbbrevName:  &opts.AbbrevName,
-		Backup:      &opts.Backup,
-		CompanyAddr: &opts.CompanyAddr,
-		Corporator:  &opts.Corporator,
-		Email:       &opts.Email,
+		CompanyName:        &opts.CompanyName,
+		Phone:              &opts.Phone,
+		AbbrevName:         &opts.AbbrevName,
+		Backup:             &opts.Backup,
+		CompanyAddr:        &opts.CompanyAddr,
+		Corporator:         &opts.Corporator,
+		StartAccountPeriod: &opts.StartAccountPeriod,
+		Email:              &opts.Email,
 	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {
@@ -121,6 +124,9 @@ func (c *Company) UpdateCompany(opts *options.ModifyCompanyOptions) error {
 	}
 	if opts.Email != "" {
 		param.Email = &opts.Email
+	}
+	if opts.LatestAccountYear > 0 {
+		param.LatestAccountYear = &opts.LatestAccountYear
 	}
 	_, err := util.DoRequest(action, param)
 	return err

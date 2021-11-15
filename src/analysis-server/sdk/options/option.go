@@ -124,25 +124,27 @@ type VoucherArrangeOptions struct {
 
 //commpany option
 type CreateCompanyOptions struct {
-	CompanyName string
-	AbbrevName  string
-	Corporator  string
-	Phone       string
-	Summary     string
-	Email       string
-	CompanyAddr string
-	Backup      string
+	CompanyName        string
+	AbbrevName         string
+	Corporator         string
+	Phone              string
+	Summary            string
+	Email              string
+	CompanyAddr        string
+	Backup             string
+	StartAccountPeriod int
 }
 
 type ModifyCompanyOptions struct {
-	CompanyID   int
-	CompanyName string
-	AbbrevName  string
-	Corporator  string
-	Phone       string
-	Email       string
-	CompanyAddr string
-	Backup      string
+	CompanyID         int
+	CompanyName       string
+	AbbrevName        string
+	Corporator        string
+	Phone             string
+	Email             string
+	CompanyAddr       string
+	Backup            string
+	LatestAccountYear int
 }
 
 type AssociatedCompanyGroupOptions struct {
