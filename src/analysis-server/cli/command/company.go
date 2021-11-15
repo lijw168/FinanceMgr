@@ -21,10 +21,10 @@ func NewCompanyCommand(cmd *cobra.Command) {
 func newCompanyCreateCmd() *cobra.Command {
 	var opts options.CreateCompanyOptions
 	cmd := &cobra.Command{
-		Use:   "company-create [OPTIONS] companyName abbreName,corporator,phone,e_mail,companyAdd,backup",
+		Use:   "company-create [OPTIONS] companyName abbreName,corporator,phone,e_mail,companyAdd,startAccountPeriod",
 		Short: "Create a company",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 7 {
 				cmd.Help()
 				return
 			}
@@ -34,7 +34,11 @@ func newCompanyCreateCmd() *cobra.Command {
 			opts.Phone = args[3]
 			opts.Email = args[4]
 			opts.CompanyAddr = args[5]
-			opts.Backup = args[6]
+			if period, err := strconv.Atoi(args[6]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.StartAccountPeriod = period
+			}
 
 			if hv, err := Sdk.CreateCompany(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -52,7 +56,8 @@ func newCompanyDeleteCmd() *cobra.Command {
 
 func newCompanyListCmd() *cobra.Command {
 	defCs := []string{"CompanyID", "CompanyName", "AbbrevName", "Corporator", "Phone",
-		"Email", "CompanyAddr", "Backup", "CreatedAt", "UpdatedAt", "CompanyGroupID"}
+		"Email", "CompanyAddr", "Backup", "CreatedAt", "UpdatedAt", "CompanyGroupID",
+		"StartAccountPeriod", "LatestAccountYear"}
 	cmd := &cobra.Command{
 		Use:   "company-list ",
 		Short: "List company Support Filter",
@@ -122,12 +127,13 @@ func newCompanyUpdateCmd() *cobra.Command {
 			}
 		},
 	}
-	// cmd.Flags().StringVar(&opts.CompanyName, "comName", "test", "CompanyName")
-	// cmd.Flags().StringVar(&opts.AbbrevName, "abbrevName", "test", "AbbrevName")
-	// cmd.Flags().StringVar(&opts.CompanyAddr, "comAddr", "test", "CompanyAddr")
-	// cmd.Flags().StringVar(&opts.Corporator, "corporator", "test", "Corporator")
-	// cmd.Flags().StringVar(&opts.Email, "email", "test", "Email")
-	// cmd.Flags().StringVar(&opts.Backup, "bc", "test", "backup")
+	cmd.Flags().StringVar(&opts.CompanyName, "comName", "", "CompanyName")
+	cmd.Flags().StringVar(&opts.AbbrevName, "abbrevName", "", "AbbrevName")
+	cmd.Flags().StringVar(&opts.CompanyAddr, "comAddr", "", "CompanyAddr")
+	cmd.Flags().StringVar(&opts.Corporator, "corporator", "", "Corporator")
+	cmd.Flags().StringVar(&opts.Email, "email", "", "Email")
+	cmd.Flags().StringVar(&opts.Backup, "bc", "", "backup")
+	cmd.Flags().IntVar(&opts.LatestAccountYear, "bc", 0, "LatestAccountYear")
 	return cmd
 }
 
