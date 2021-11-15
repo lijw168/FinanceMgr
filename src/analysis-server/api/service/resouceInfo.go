@@ -93,7 +93,7 @@ func (rs *ResouceInfoService) getResourceData(ctx context.Context, pComView *mod
 	resInfo.CompanyName = pComView.CompanyName
 	iStartAccountYear := pComView.StartAccountPeriod / 100
 	iLatestAccountYear := pComView.LatestAccountYear
-	yearSlice := make([]int, 1)
+	yearSlice := make([]int, 0,(iLatestAccountYear-iStartAccountYear+1))
 	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {
 		yearSlice = append(yearSlice, i)
 	}

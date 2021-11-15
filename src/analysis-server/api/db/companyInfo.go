@@ -18,7 +18,7 @@ type CompanyDao struct {
 var (
 	companyInfoTN     = "companyInfo"
 	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
-		"e_mail", "company_addr", "backup", "created_at", "start_account_period", "latest_account_period",
+		"e_mail", "company_addr", "backup","start_account_period", "latest_account_year","created_at",
 		"updated_at", "company_group_id"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
