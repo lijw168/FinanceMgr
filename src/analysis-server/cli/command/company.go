@@ -133,7 +133,7 @@ func newCompanyUpdateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&opts.Corporator, "corporator", "", "Corporator")
 	cmd.Flags().StringVar(&opts.Email, "email", "", "Email")
 	cmd.Flags().StringVar(&opts.Backup, "bc", "", "backup")
-	cmd.Flags().IntVar(&opts.LatestAccountYear, "bc", 0, "LatestAccountYear")
+	cmd.Flags().IntVar(&opts.LatestAccountYear, "accYear", 0, "LatestAccountYear")
 	return cmd
 }
 
