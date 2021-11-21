@@ -544,7 +544,7 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				}
 			}
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherFiller":
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
 				fallthrough
 			case "voucherAuditor", "status":
 				filterFields[*f.Field] = f.Value
