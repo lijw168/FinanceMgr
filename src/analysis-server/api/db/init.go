@@ -355,7 +355,8 @@ func transferListSqlWithFuzzyMatch(table string, filter map[string]interface{}, 
 //support multi-condition:accurate match,!= ,not,in,like,between ... and,
 //fuzzyMatchFilter,the value type is  string
 //intervalFilter,the value type is numerical value
-//filterNo,the var type is float64, int and string
+//filterNo,the value type is float64, int and string
+//filter,support '<' ,'>','=',but,"<,>",the value type is string
 func transferListSqlWithMutiCondition(table string, filterNo map[string]interface{}, filter map[string]interface{},
 	intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string, field []string,
 	limit int, offset int, order string, od int) (string, []interface{}) {
@@ -410,9 +411,20 @@ func transferListSqlWithMutiCondition(table string, filterNo map[string]interfac
 	for k, v := range filter {
 		tmpK := camelToUnix(k)
 		switch v.(type) {
-		case float64, int, string:
+		case float64, int:
 			fk = append(fk, tmpK+" = ?")
 			fv = append(fv, v)
+		case string:
+			tempS := strings.TrimSpace(v.(string))
+			if strings.HasPrefix(tempS, ">") || strings.HasPrefix(tempS, "<") {
+				operator := string(tempS[0])
+				val := tempS[1:]
+				fk = append(fk, fmt.Sprintf("%s %s ?", tmpK, operator))
+				fv = append(fv, val)
+			} else {
+				fk = append(fk, tmpK+" = ?")
+				fv = append(fv, v)
+			}
 		case []int:
 			tmpK += " IN ("
 			arr := []interface{}{}

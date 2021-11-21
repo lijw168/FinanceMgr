@@ -239,7 +239,7 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 	}
 	vouInfoViews, count, ccErr := vh.Vs.ListVoucherInfoByMulCondition(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/ListVoucherInfoByMulCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/ListVoucherInfoByMulCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}

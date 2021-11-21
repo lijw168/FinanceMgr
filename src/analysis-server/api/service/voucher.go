@@ -491,6 +491,7 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	}()
 	if params.AuxiFilter != nil {
 		fuzzyMatchFields := make(map[string]string)
+		//因为debitMoney_interval和creditMoney_interval只能同时出现一个，所以可以共用如下的slice
 		var intervalValSlice []float64
 		for _, f := range params.AuxiFilter {
 			if *f.Field == "debitMoney_interval" || *f.Field == "creditMoney_interval" {
@@ -508,6 +509,9 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				fuzzyMatchFields["subjectName"] = f.Value.(string)
 			case "summary_fuzzy":
 				fuzzyMatchFields["summary"] = f.Value.(string)
+			//因为此时只有单个值的时候，就是>,<的操作，所以此时的类型为string
+			case "debitMoney", "creditMoney":
+				filterFields[*f.Field] = f.Value.(string)
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -540,7 +544,7 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				}
 			}
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherFiller":
 				fallthrough
 			case "voucherAuditor", "status":
 				filterFields[*f.Field] = f.Value
