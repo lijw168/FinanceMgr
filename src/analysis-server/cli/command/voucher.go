@@ -14,9 +14,9 @@ func NewVoucherCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newVoucherShowCmd())
 	cmd.AddCommand(newVoucherArrangeCmd())
 
-	cmd.AddCommand(newVoucherRecordCreateCmd())
-	cmd.AddCommand(newVoucherRecordDeleteCmd())
-	cmd.AddCommand(newVoucherRecordUpdateCmd())
+	// cmd.AddCommand(newVoucherRecordCreateCmd())
+	// cmd.AddCommand(newVoucherRecordDeleteCmd())
+	// cmd.AddCommand(newVoucherRecordUpdateCmd())
 	cmd.AddCommand(newVoucherRecordListCmd())
 
 	cmd.AddCommand(newVoucherInfoShowCmd())
@@ -71,23 +71,54 @@ func newVoucherCreateCmd() *cobra.Command {
 }
 
 func newVoucherDeleteCmd() *cobra.Command {
-	return deleteCmd(resource_type_voucher, Sdk.DeleteVoucher)
-}
-
-func newVoucherShowCmd() *cobra.Command {
+	//return deleteCmd(resource_type_voucher, Sdk.DeleteVoucher)
 	cmd := &cobra.Command{
-		Use:   "voucher-show [OPTIONS] voucherId",
-		Short: "Show voucher",
+		Use:   "voucher-delete [OPTIONS] voucherId voucherYear",
+		Short: "delete a voucher",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
-			var opts options.BaseOptions
+			var opts options.DeleteYearAndIDOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.ID = id
+			}
+			if iYear, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = iYear
+			}
+			err := Sdk.DeleteVoucher(&opts)
+			if err != nil {
+				util.FormatErrorOutput(err)
+			}
+		},
+	}
+	return cmd
+}
+
+func newVoucherShowCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "voucher-show [OPTIONS] voucherId voucherYear",
+		Short: "Show voucher",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 2 {
+				cmd.Help()
+				return
+			}
+			var opts options.DescribeYearAndIDOptions
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.ID = id
+			}
+			if iYear, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = iYear
 			}
 			view, err := Sdk.GetVoucher(&opts)
 			if err != nil {
@@ -103,10 +134,10 @@ func newVoucherShowCmd() *cobra.Command {
 func newVoucherArrangeCmd() *cobra.Command {
 	var opts options.VoucherArrangeOptions
 	cmd := &cobra.Command{
-		Use:   "voucher-arrange [OPTIONS] companyID voucherMonth",
+		Use:   "voucher-arrange [OPTIONS] companyID voucherYear voucherMonth",
 		Short: "voucher arrange",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 2 {
+			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
@@ -115,8 +146,13 @@ func newVoucherArrangeCmd() *cobra.Command {
 			} else {
 				opts.CompanyID = id
 			}
-			if voucherMonth, err := strconv.Atoi(args[1]); err != nil {
+			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = voucherYear
+			}
+			if voucherMonth, err := strconv.Atoi(args[2]); err != nil {
+				fmt.Println("change to int fail", args[2])
 			} else {
 				opts.VoucherMonth = voucherMonth
 			}
@@ -129,58 +165,58 @@ func newVoucherArrangeCmd() *cobra.Command {
 	return cmd
 }
 
-func newVoucherRecordCreateCmd() *cobra.Command {
-	var opts options.CreateVoucherRecordOptions
-	cmd := &cobra.Command{
-		Use:   "vouRecord-create [OPTIONS] voucherId subject-name ...",
-		Short: "Create a voucher record",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.VoucherID = id
-			}
-			opts.SubjectName = args[1]
-			optSlice := []options.CreateVoucherRecordOptions{}
-			optSlice = append(optSlice, opts)
+// func newVoucherRecordCreateCmd() *cobra.Command {
+// 	var opts options.CreateVoucherRecordOptions
+// 	cmd := &cobra.Command{
+// 		Use:   "vouRecord-create [OPTIONS] voucherId subject-name ...",
+// 		Short: "Create a voucher record",
+// 		Run: func(cmd *cobra.Command, args []string) {
+// 			if len(args) < 1 {
+// 				cmd.Help()
+// 				return
+// 			}
+// 			if id, err := strconv.Atoi(args[0]); err != nil {
+// 				fmt.Println("change to int fail", args[0])
+// 			} else {
+// 				opts.VoucherID = id
+// 			}
+// 			opts.SubjectName = args[1]
+// 			optSlice := []options.CreateVoucherRecordOptions{}
+// 			optSlice = append(optSlice, opts)
 
-			if hv, err := Sdk.CreateVoucherRecords(optSlice); err != nil {
-				util.FormatErrorOutput(err)
-			} else {
-				util.FormatViewOutput(hv)
-			}
-		},
-	}
-	//cmd.Flags().StringVar(&opts.SubjectName, "subject name", "test", "subject name")
-	cmd.Flags().StringVar(&opts.Summary, "summary", "test", "summary")
-	var dm, cm int
-	cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
-	cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
-	opts.DebitMoney = float64(dm)
-	opts.CreditMoney = float64(cm)
-	cmd.Flags().IntVar(&opts.SubID1, "sub1", 1, "SubID1")
-	cmd.Flags().IntVar(&opts.SubID2, "sub2", 2, "SubID2")
-	return cmd
-}
+// 			if hv, err := Sdk.CreateVoucherRecords(optSlice); err != nil {
+// 				util.FormatErrorOutput(err)
+// 			} else {
+// 				util.FormatViewOutput(hv)
+// 			}
+// 		},
+// 	}
+// 	//cmd.Flags().StringVar(&opts.SubjectName, "subject name", "test", "subject name")
+// 	cmd.Flags().StringVar(&opts.Summary, "summary", "test", "summary")
+// 	var dm, cm int
+// 	cmd.Flags().IntVar(&dm, "dm", 1, "debit money")
+// 	cmd.Flags().IntVar(&cm, "cm", 1, "credit money")
+// 	opts.DebitMoney = float64(dm)
+// 	opts.CreditMoney = float64(cm)
+// 	cmd.Flags().IntVar(&opts.SubID1, "sub1", 1, "SubID1")
+// 	cmd.Flags().IntVar(&opts.SubID2, "sub2", 2, "SubID2")
+// 	return cmd
+// }
 
-func newVoucherRecordDeleteCmd() *cobra.Command {
-	return deleteCmd(resource_type_voucher_record, Sdk.DeleteVoucherRecord)
-}
+// func newVoucherRecordDeleteCmd() *cobra.Command {
+// 	return deleteCmd(resource_type_voucher_record, Sdk.DeleteVoucherRecord)
+// }
 
 func newVoucherRecordListCmd() *cobra.Command {
 	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary",
 		"SubID1", "SubID2", "SubID3", "SubID4", "BillCount", "Status"}
 	cmd := &cobra.Command{
-		Use:   "vouRecord-list voucherId",
+		Use:   "vouRecord-list voucherId voucherYear",
 		Short: "List voucher records Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
+		if len(args) < 2 {
 			cmd.Help()
 			return
 		}
@@ -193,6 +229,11 @@ func newVoucherRecordListCmd() *cobra.Command {
 		} else {
 			opts.Filter["voucherId"] = id
 		}
+		if iVoucherYear, err := strconv.Atoi(args[1]); err != nil {
+			fmt.Println("change to int fail", args[1])
+		} else {
+			opts.Filter["voucherYear"] = iVoucherYear
+		}
 		if _, views, err := Sdk.ListVoucherRecords(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
@@ -202,62 +243,67 @@ func newVoucherRecordListCmd() *cobra.Command {
 	return cmd
 }
 
-func newVoucherRecordUpdateCmd() *cobra.Command {
-	var opts options.ModifyVoucherRecordOptions
+// func newVoucherRecordUpdateCmd() *cobra.Command {
+// 	var opts options.ModifyVoucherRecordOptions
+// 	cmd := &cobra.Command{
+// 		Use:   "vouRecord-update [OPTIONS] vouRecordId summary status",
+// 		Short: "update a voucher record",
+// 		Run: func(cmd *cobra.Command, args []string) {
+// 			if len(args) < 2 {
+// 				cmd.Help()
+// 				return
+// 			}
+// 			if id, err := strconv.Atoi(args[0]); err != nil {
+// 				fmt.Println("change to int fail", args[0])
+// 			} else {
+// 				opts.VouRecordID = id
+// 			}
+// 			if status, err := strconv.Atoi(args[1]); err != nil {
+// 				fmt.Println("change to int fail", args[1])
+// 			} else {
+// 				opts.Status = status
+// 			}
+// 			opts.Summary = args[2]
+// 			opts.BillCount = -1
+// 			opts.CreditMoney = -1
+// 			opts.DebitMoney = -1
+// 			if err := Sdk.UpdateVoucherRecordByID(&opts); err != nil {
+// 				util.FormatErrorOutput(err)
+// 			}
+// 		},
+// 	}
+// 	cmd.Flags().StringVar(&opts.SubjectName, "subName", "", "subjectName")
+// 	cmd.Flags().StringVar(&opts.Summary, "summary", "", "summary")
+// 	//因为金额，可以允许为负数，所以不能用这样的默认参数。所以不能用cli修改金额。可以用客户端来修改。
+// 	// var dm, cm int
+// 	// cmd.Flags().IntVar(&dm, "dm", 0, "debit money")
+// 	// cmd.Flags().IntVar(&cm, "cm", 0, "credit money")
+// 	// opts.DebitMoney = float64(dm)
+// 	// opts.CreditMoney = float64(cm)
+// 	cmd.Flags().IntVar(&opts.SubID1, "sub1", 0, "SubID1")
+// 	//cmd.Flags().IntVar(&opts.SubID2, "sub2", 0, "SubID2")
+// 	return cmd
+// }
+
+func newVoucherInfoShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "vouRecord-update [OPTIONS] vouRecordId summary status",
-		Short: "update a voucher record",
+		Use:   "vouInfo-show [OPTIONS] voucherID voucherYear",
+		Short: "Show a voucher information",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.VouRecordID = id
-			}
-			if status, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
-			} else {
-				opts.Status = status
-			}
-			opts.Summary = args[2]
-			opts.BillCount = -1
-			opts.CreditMoney = -1
-			opts.DebitMoney = -1
-			if err := Sdk.UpdateVoucherRecordByID(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			}
-		},
-	}
-	cmd.Flags().StringVar(&opts.SubjectName, "subName", "", "subjectName")
-	cmd.Flags().StringVar(&opts.Summary, "summary", "", "summary")
-	//因为金额，可以允许为负数，所以不能用这样的默认参数。所以不能用cli修改金额。可以用客户端来修改。
-	// var dm, cm int
-	// cmd.Flags().IntVar(&dm, "dm", 0, "debit money")
-	// cmd.Flags().IntVar(&cm, "cm", 0, "credit money")
-	// opts.DebitMoney = float64(dm)
-	// opts.CreditMoney = float64(cm)
-	cmd.Flags().IntVar(&opts.SubID1, "sub1", 0, "SubID1")
-	//cmd.Flags().IntVar(&opts.SubID2, "sub2", 0, "SubID2")
-	return cmd
-}
-
-func newVoucherInfoShowCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "vouInfo-show [OPTIONS] voucherID",
-		Short: "Show a voucher information",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			var opts options.BaseOptions
+			var opts options.DescribeYearAndIDOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.ID = id
+			}
+			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = voucherYear
 			}
 			view, err := Sdk.GetVoucherInfo(&opts)
 			if err != nil {
@@ -279,15 +325,20 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
+		if len(args) < 2 {
 			cmd.Help()
 			return
 		}
-		var opts options.BaseOptions
+		var opts options.DescribeYearAndIDOptions
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
 		} else {
 			opts.ID = id
+		}
+		if voucherYear, err := strconv.Atoi(args[1]); err != nil {
+			fmt.Println("change to int fail", args[1])
+		} else {
+			opts.VoucherYear = voucherYear
 		}
 		if _, views, err := Sdk.GetLatestVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
@@ -304,7 +355,7 @@ func newGetMaxNumOfMonthCmd() *cobra.Command {
 		Use:   "vouInfo-getMaxNumOfMan [OPTIONS] companyID voucherMonth",
 		Short: "get the max numOfMonth in a month",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 2 {
+			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
@@ -314,8 +365,13 @@ func newGetMaxNumOfMonthCmd() *cobra.Command {
 			} else {
 				opts.CompanyID = id
 			}
-			if month, err := strconv.Atoi(args[1]); err != nil {
+			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = voucherYear
+			}
+			if month, err := strconv.Atoi(args[2]); err != nil {
+				fmt.Println("change to int fail", args[2])
 			} else {
 				opts.VoucherMonth = month
 			}
@@ -334,7 +390,7 @@ func newGetMaxNumOfMonthCmd() *cobra.Command {
 func newVoucherInfoListCmd() *cobra.Command {
 	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate", "VoucherFiller", "VoucherAuditor"}
 	cmd := &cobra.Command{
-		Use:   "vouInfo-list companyId",
+		Use:   "vouInfo-list companyId voucherYear",
 		Short: "List voucherInfo Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -352,6 +408,11 @@ func newVoucherInfoListCmd() *cobra.Command {
 		} else {
 			opts.Filter["companyId"] = id
 		}
+		if iVoucherYear, err := strconv.Atoi(args[1]); err != nil {
+			fmt.Println("change to int fail", args[1])
+		} else {
+			opts.Filter["voucherYear"] = iVoucherYear
+		}
 		if _, views, err := Sdk.ListVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
 		} else {
@@ -367,7 +428,7 @@ func newVoucherInfoUpdateCmd() *cobra.Command {
 		Use:   "vouInfo-update [OPTIONS] voucherId",
 		Short: "update a voucher information",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
+			if len(args) < 2 {
 				cmd.Help()
 				return
 			}
@@ -375,6 +436,11 @@ func newVoucherInfoUpdateCmd() *cobra.Command {
 				fmt.Println("change to int fail", args[0])
 			} else {
 				opts.VoucherID = id
+			}
+			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
+				fmt.Println("change to int fail", args[1])
+			} else {
+				opts.VoucherYear = voucherYear
 			}
 			if err := Sdk.UpdateVoucherInfo(&opts); err != nil {
 				util.FormatErrorOutput(err)

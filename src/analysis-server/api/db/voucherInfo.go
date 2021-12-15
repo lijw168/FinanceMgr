@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -25,8 +26,13 @@ var (
 	}
 )
 
-func (dao *VoucherInfoDao) Get(ctx context.Context, do DbOperator, voucherId int) (*model.VoucherInfo, error) {
-	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN + " where voucher_id=?"
+func genTableName(iYear int, baseTableName string) string {
+	return fmt.Sprintf("%s_%d", baseTableName, iYear)
+}
+
+func (dao *VoucherInfoDao) Get(ctx context.Context, do DbOperator, voucherId, iYear int) (*model.VoucherInfo, error) {
+	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " +
+		genTableName(iYear, voucherInfoTN) + " where voucher_id=?"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Get] [sql: %s ,values: %d]", strSql, voucherId)
 	var voucherInfo = &model.VoucherInfo{}
 	start := time.Now()
@@ -45,19 +51,20 @@ func (dao *VoucherInfoDao) Get(ctx context.Context, do DbOperator, voucherId int
 }
 
 //get the count of the table
-func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator) (int64, error) {
+func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator, iYear int) (int64, error) {
 	var c int64
-	strSql := "select count(1) from " + voucherInfoTN
+	strSql := "select count(1) from " + genTableName(iYear, voucherInfoTN)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
-//list count by filter
-func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
+//list count by filter ...
+func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
+	filter map[string]interface{}) (int64, error) {
 	var c int64
-	strSql, values := transferCountSql(voucherInfoTN, filter)
+	strSql, values := transferCountSql(genTableName(iYear, voucherInfoTN), filter)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/CountByFilter] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
@@ -67,9 +74,10 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, fil
 
 //通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号
 func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOperator,
-	iVoucherMonth, iVoucherID int) (int64, error) {
-	strSql := "select count(*) from " + voucherInfoTN +
-		" where voucher_month=? and company_id in (select company_id from " + voucherInfoTN + " where voucher_id=? )"
+	iYear, iVoucherMonth, iVoucherID int) (int64, error) {
+	tableName := genTableName(iYear, voucherInfoTN)
+	strSql := "select count(*) from " + tableName +
+		" where voucher_month=? and company_id in (select company_id from " + tableName + " where voucher_id=? )"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetMaxNumByIdAndMonth] [sql: %s, values: %d-%d]",
 		strSql, iVoucherMonth, iVoucherID)
 	var c int64
@@ -80,7 +88,8 @@ func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOpera
 }
 
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
-	strSql := "insert into " + voucherInfoTN + " (" + strings.Join(voucherInfoFields, ",") +
+	tableName := genTableName(st.VoucherDate.Year(), voucherInfoTN)
+	strSql := "insert into " + tableName + " (" + strings.Join(voucherInfoFields, ",") +
 		") values (?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?)"
 	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherFiller,
 		st.VoucherAuditor, st.VoucherDate, st.BillCount, st.Status, st.CreatedAt, st.UpdatedAt}
@@ -94,8 +103,8 @@ func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.
 	}
 	return nil
 }
-func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId int) error {
-	strSql := "delete from " + voucherInfoTN + " where voucher_id=?"
+func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId, iYear int) error {
+	strSql := "delete from " + genTableName(iYear, voucherInfoTN) + " where voucher_id=?"
 
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/Delete] [sql: %s, id: %d]", strSql, voucherId)
 	start := time.Now()
@@ -109,7 +118,7 @@ func (dao *VoucherInfoDao) Delete(ctx context.Context, do DbOperator, voucherId 
 	return nil
 }
 
-func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, voucherIds []int) error {
+func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, iYear int, voucherIds []int) error {
 	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
 		for i, ki := range arr {
 			if i == 0 {
@@ -121,7 +130,7 @@ func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, vouch
 		}
 		return
 	}
-	strSql := "delete from " + voucherInfoTN + " where voucher_id IN ("
+	strSql := "delete from " + genTableName(iYear, voucherInfoTN) + " where voucher_id IN ("
 	fv := handleArrFilter(voucherIds, &strSql)
 	strSql += ")"
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/BatchDelete] [sql: %s, ids: %v]", strSql, voucherIds)
@@ -138,9 +147,10 @@ func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, vouch
 
 //没有复杂的匹配条件
 func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
-	limit int, offset int, order string, od int) ([]*model.VoucherInfo, error) {
+	iYear, limit, offset, od int, order string) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
-	strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
+	strSql, values := transferListSql(genTableName(iYear, voucherInfoTN), filter, voucherInfoFields,
+		limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/SimpleList] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -167,12 +177,12 @@ func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter
 //在where条件里增加between ... and
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{},
-	limit int, offset int, order string, od int) ([]*model.VoucherInfo, error) {
+	iYear, limit, offset, od int, order string) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
 	fuzzyMatchFilter := map[string]string{}
 	//strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(voucherInfoTN, filterNo, filter, intervalFilter,
-		fuzzyMatchFilter, voucherInfoFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(genTableName(iYear, voucherInfoTN), filterNo, filter,
+		intervalFilter, fuzzyMatchFilter, voucherInfoFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -197,11 +207,12 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map
 }
 
 func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, do DbOperator,
-	iCompanyID int) ([]*model.VoucherInfo, error) {
+	iYear, iCompanyID int) ([]*model.VoucherInfo, error) {
+	tableName := genTableName(iYear, voucherInfoTN)
 	var voucherInfoSlice []*model.VoucherInfo
-	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + voucherInfoTN +
+	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + tableName +
 		" where voucher_month in (select  max(voucher_month) from " +
-		voucherInfoTN + " where company_id = ?) order by num_of_month "
+		tableName + " where company_id = ?) order by num_of_month "
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
 	start := time.Now()
 	defer func() {
@@ -225,11 +236,9 @@ func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, 
 	return voucherInfoSlice, nil
 }
 
-func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId int,
+func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId, iYear int,
 	params map[string]interface{}) error {
-	// var keyMap = map[string]string{"VoucherID": "voucher_id", "CompanyID": "company_id", "VoucherDate": "voucher_month",
-	// 	"NumOfMonth": "num_of_month", "VoucherMonth": "voucher_date", "CreatedAt": "create_at", "UpdatedAt": "update_at"}
-	strSql := "update " + voucherInfoTN + " set "
+	strSql := "update " + genTableName(iYear, voucherInfoTN) + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
@@ -270,7 +279,7 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId 
 }
 
 //用于批量审核/取消凭证。
-func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iStatus int,
+func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iYear, iStatus int,
 	strVoucherAuditor string, voucherIds []int) error {
 	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
 		for i, ki := range arr {
@@ -287,7 +296,7 @@ func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iStat
 	filterVal = append(filterVal, iStatus)
 	filterVal = append(filterVal, strVoucherAuditor)
 	filterVal = append(filterVal, time.Now())
-	strSql := "update " + voucherInfoTN +
+	strSql := "update " + genTableName(iYear, voucherInfoTN) +
 		" set status = ?, voucher_auditor = ?, updated_at = ?  where voucher_id IN ("
 	fv := handleArrFilter(voucherIds, &strSql)
 	filterVal = append(filterVal, fv...)

@@ -114,7 +114,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		return ccErr
 	}
 	/*service*/
-	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, VRecordDao: voucherRecordDao, Db: _db}
+	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, CompanyDao: companyDao, VRecordDao: voucherRecordDao, Db: _db}
 	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, CompanyGroupDao: companygroupDao, Db: _db}
 	comGroupService := &service.CompanyGroupService{Logger: logger, ComGroupDao: companygroupDao, Db: _db}
 	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
@@ -169,11 +169,11 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("UpdateVoucher", voucherHandlers.UpdateVoucher)
 	httpRouter.RegisterFunc("DeleteVoucher", voucherHandlers.DeleteVoucher)
 	httpRouter.RegisterFunc("ArrangeVoucher", voucherHandlers.ArrangeVoucher)
-	httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)
-	httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
-	httpRouter.RegisterFunc("DeleteVoucherRecords", voucherHandlers.DeleteVoucherRecords)
+	// httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)
+	// httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
+	// httpRouter.RegisterFunc("DeleteVoucherRecords", voucherHandlers.DeleteVoucherRecords)
 	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
-	httpRouter.RegisterFunc("UpdateVoucherRecordByID", voucherHandlers.UpdateVoucherRecordByID)
+	//httpRouter.RegisterFunc("UpdateVoucherRecordByID", voucherHandlers.UpdateVoucherRecordByID)
 	httpRouter.RegisterFunc("GetVoucherInfo", voucherHandlers.GetVoucherInfo)
 	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
 	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)

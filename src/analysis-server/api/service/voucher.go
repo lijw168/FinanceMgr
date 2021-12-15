@@ -62,14 +62,14 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	} else {
 		vInfo.VoucherDate = time.Now()
 	}
-	_, month, _ := vInfo.VoucherDate.Date()
+	year, month, _ := vInfo.VoucherDate.Date()
 	vInfo.VoucherMonth = int(month)
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
 	filterFields["voucherMonth"] = vInfo.VoucherMonth
 	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d",
 		*infoParams.CompanyID, vInfo.VoucherMonth)
-	count, err := vs.VInfoDao.CountByFilter(ctx, tx, filterFields)
+	count, err := vs.VInfoDao.CountByFilter(ctx, tx, year, filterFields)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -114,7 +114,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		// 	vRecord.SubID4 = *recParam.SubID4
 		// }
 		vRecord.CreatedAt = time.Now()
-		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
+		if err = vs.VRecordDao.Create(ctx, tx, year, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -147,6 +147,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
+	iVoucherYear := *params.VoucherYear
 	//update voucherInfo
 	if params.ModifyInfoParams != nil {
 		voucherInfoParams := make(map[string]interface{}, 3)
@@ -154,7 +155,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 			voucherInfoParams["voucherMonth"] = *params.ModifyInfoParams.VoucherMonth
 			//如果凭证的月份发生了变化，则该voucherInfo里的凭证号也发生变化。
 			iMaxNumOfMonth, err := vs.VInfoDao.GetMaxNumByIdAndMonth(ctx, tx, *params.ModifyInfoParams.VoucherMonth,
-				*params.ModifyInfoParams.VoucherID)
+				iVoucherYear, *params.ModifyInfoParams.VoucherID)
 			if err != nil {
 				return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 			}
@@ -167,7 +168,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 			voucherInfoParams["voucherFiller"] = *params.ModifyInfoParams.VoucherFiller
 		}
 		voucherInfoParams["updatedAt"] = time.Now()
-		err = vs.VInfoDao.Update(ctx, tx, *params.ModifyInfoParams.VoucherID, voucherInfoParams)
+		err = vs.VInfoDao.Update(ctx, tx, *params.ModifyInfoParams.VoucherID, iVoucherYear, voucherInfoParams)
 		if err != nil {
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -193,7 +194,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		if recParam.SubID1 != nil {
 			voucherRecordParams["subId1"] = *recParam.SubID1
 		}
-		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, voucherRecordParams)
+		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, iVoucherYear, voucherRecordParams)
 		if err != nil {
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -203,7 +204,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 	if len(params.DelRecordsParams) > 0 {
 		delConditonParams := make(map[string]interface{})
 		delConditonParams["recordId"] = params.DelRecordsParams
-		err = vs.VRecordDao.DeleteByMultiCondition(ctx, tx, delConditonParams)
+		err = vs.VRecordDao.DeleteByMultiCondition(ctx, tx, iVoucherYear, delConditonParams)
 		if err != nil {
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -224,7 +225,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		// vRecord.SubID3 = *itemParam.SubID3
 		// vRecord.SubID4 = *itemParam.SubID4
 		vRecord.CreatedAt = time.Now()
-		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
+		if err = vs.VRecordDao.Create(ctx, tx, iVoucherYear, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -244,7 +245,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 	return IdValSli, nil
 }
 
-func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requestId string) CcError {
+func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID, iYear int, requestId string) CcError {
 	FuncName := "VoucherService/service/DeleteVoucher"
 	bIsRollBack := true
 	vs.Logger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%d", voucherID)
@@ -259,11 +260,11 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
-	err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherID)
+	err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherID, iYear)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	err = vs.VInfoDao.Delete(ctx, tx, voucherID)
+	err = vs.VInfoDao.Delete(ctx, tx, voucherID, iYear)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
@@ -276,7 +277,7 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID int, requ
 	return nil
 }
 
-func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID int,
+func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, iYear int,
 	requestId string) (*model.VoucherView, CcError) {
 	FuncName := "VoucherService/service/GetVoucherByVoucherID"
 	bIsRollBack := true
@@ -293,7 +294,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 		}
 	}()
 	//get voucher information
-	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID)
+	vInfo, err := vs.VInfoDao.Get(ctx, tx, voucherID, iYear)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -318,7 +319,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID i
 	// }
 	orderField := "recordId"
 	orderDirection := cons.Order_Asc
-	voucherRecords, err := vs.VRecordDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+	voucherRecords, err := vs.VRecordDao.SimpleList(ctx, tx, filterFields, iYear, limit, offset, orderDirection, orderField)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -345,18 +346,18 @@ func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.Vouc
 	requestID string) CcError {
 	vs.Logger.InfoContext(ctx, "ArrangeVoucher method begin,companyID:%d ,month:%d",
 		*params.CompanyID, *params.VoucherMonth)
-	err := vs.deleteInvalidVoucher(ctx, *params.CompanyID, *params.VoucherMonth)
+	err := vs.deleteInvalidVoucher(ctx, *params.VoucherYear, *params.CompanyID, *params.VoucherMonth)
 	if err == nil {
 		//update the voucher Num
 		if params.ArrangeVoucherNum != nil || *params.ArrangeVoucherNum {
-			err = vs.arrangeVoucherNum(ctx, *params.CompanyID, *params.VoucherMonth)
+			err = vs.arrangeVoucherNum(ctx, *params.VoucherYear, *params.CompanyID, *params.VoucherMonth)
 		}
 	}
 	vs.Logger.InfoContext(ctx, "ArrangeVoucher method end")
 	return err
 }
 
-func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID int, voucherMonth int) CcError {
+func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, iVoucherYear, companyID, voucherMonth int) CcError {
 	FuncName := "VoucherService/service/deleteInvalidVoucher"
 	bIsRollBack := true
 	vs.Logger.InfoContext(ctx, "deleteInvalidVoucher method begin,companyID:%d ,month:%d", companyID, voucherMonth)
@@ -378,7 +379,7 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID in
 	filterFields["status"] = utils.InvalidVoucher
 	orderField := ""
 	orderDirection := 0
-	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, iVoucherYear, limit, offset, orderDirection, orderField)
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/deleteInvalidVoucher] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
@@ -389,13 +390,13 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID in
 	for i := 0; i < len(voucherInfos); i++ {
 		//delete voucher record
 		voucherIdSlice = append(voucherIdSlice, voucherInfos[i].VoucherID)
-		err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherInfos[i].VoucherID)
+		err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherInfos[i].VoucherID, iVoucherYear)
 		if err != nil {
 			return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher record failed")
 		}
 	}
 	//batch,delete voucher information
-	err = vs.VInfoDao.BatchDelete(ctx, tx, voucherIdSlice)
+	err = vs.VInfoDao.BatchDelete(ctx, tx, iVoucherYear, voucherIdSlice)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher information failed")
 	}
@@ -408,7 +409,7 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, companyID in
 	return nil
 }
 
-func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, voucherMonth int) CcError {
+func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, companyID int, voucherMonth int) CcError {
 	vs.Logger.InfoContext(ctx, "arrangeVoucherNum method begin,companyID:%d ,month:%d", companyID, voucherMonth)
 	//Begin transaction
 	FuncName := "VoucherService/service/arrangeVoucherNum"
@@ -430,7 +431,7 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, 
 	orderDirection := 0
 	filterFields["voucherMonth"] = voucherMonth
 	filterFields["companyId"] = companyID
-	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.SimpleList(ctx, tx, filterFields, iVoucherYear, limit, offset, orderDirection, orderField)
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/arrangeVoucherNum] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
@@ -443,7 +444,7 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, companyID int, 
 		voucherInfoParams["numOfMonth"] = i + 1
 		voucherInfoParams["updatedAt"] = time.Now()
 		//update voucher information
-		err = vs.VInfoDao.Update(ctx, tx, voucherInfos[i].VoucherID, voucherInfoParams)
+		err = vs.VInfoDao.Update(ctx, tx, voucherInfos[i].VoucherID, iVoucherYear, voucherInfoParams)
 		if err != nil {
 			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -477,6 +478,7 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
+	iVoucherYear := 0
 	FuncName := "VoucherService/ListVoucherInfoByMulCondition"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
@@ -489,51 +491,6 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
-	if params.AuxiFilter != nil {
-		fuzzyMatchFields := make(map[string]string)
-		//因为debitMoney_interval和creditMoney_interval只能同时出现一个，所以可以共用如下的slice
-		var intervalValSlice []float64
-		for _, f := range params.AuxiFilter {
-			if *f.Field == "debitMoney_interval" || *f.Field == "creditMoney_interval" {
-				err := FormatData(f.Value, &intervalValSlice)
-				if err != nil {
-					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-				}
-			}
-			switch *f.Field {
-			case "debitMoney_interval":
-				intervalFilterFields["debitMoney"] = intervalValSlice
-			case "creditMoney_interval":
-				intervalFilterFields["creditMoney"] = intervalValSlice
-			case "subjectName_fuzzy":
-				fuzzyMatchFields["subjectName"] = f.Value.(string)
-			case "summary_fuzzy":
-				fuzzyMatchFields["summary"] = f.Value.(string)
-			//因为此时只有单个值的时候，就是>,<的操作，所以此时的类型为string
-			case "debitMoney", "creditMoney":
-				filterFields[*f.Field] = f.Value.(string)
-			default:
-				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
-			}
-		}
-		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields,
-			fuzzyMatchFields, limit, offset, orderField, orderDirection)
-		if err != nil {
-			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoByMulCondition] [VRecordDao.List: %s, filterFields: %v]",
-				err.Error(), filterFields)
-			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-		}
-		voucherIds := make([]int, 1)
-		for _, vouRecord := range voucherRecords {
-			voucherIds = append(voucherIds, vouRecord.VoucherID)
-		}
-		if len(voucherIds) > 0 {
-			filterFields["voucherId"] = voucherIds
-		}
-	}
-
-	delete(intervalFilterFields, "debitMoney")
-	delete(intervalFilterFields, "creditMoney")
 	if params.BasicFilter != nil {
 		var intervalValSlice []int
 		for _, f := range params.BasicFilter {
@@ -544,6 +501,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				}
 			}
 			switch *f.Field {
+			case "voucherYear":
+				iVoucherYear = f.Value.(int)
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
 				fallthrough
 			case "voucherAuditor", "status":
@@ -559,9 +518,54 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			}
 		}
 	}
+	if params.AuxiFilter != nil {
+		filterRecNo := make(map[string]interface{})
+		filterRecFields := make(map[string]interface{})
+		intervalFilterRecFields := make(map[string]interface{})
+		fuzzyMatchFields := make(map[string]string)
+		//因为debitMoney_interval和creditMoney_interval只能同时出现一个，所以可以共用如下的slice
+		var intervalValSlice []float64
+		for _, f := range params.AuxiFilter {
+			if *f.Field == "debitMoney_interval" || *f.Field == "creditMoney_interval" {
+				err := FormatData(f.Value, &intervalValSlice)
+				if err != nil {
+					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+				}
+			}
+			switch *f.Field {
+			case "debitMoney_interval":
+				intervalFilterRecFields["debitMoney"] = intervalValSlice
+			case "creditMoney_interval":
+				intervalFilterRecFields["creditMoney"] = intervalValSlice
+			case "subjectName_fuzzy":
+				fuzzyMatchFields["subjectName"] = f.Value.(string)
+			case "summary_fuzzy":
+				fuzzyMatchFields["summary"] = f.Value.(string)
+			//因为此时只有单个值的时候，就是>,<的操作，所以此时的类型为string
+			case "debitMoney", "creditMoney":
+				filterRecFields[*f.Field] = f.Value.(string)
+			default:
+				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
+			}
+		}
+		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterRecNo, filterRecFields, intervalFilterRecFields,
+			fuzzyMatchFields, iVoucherYear, limit, offset, orderDirection, orderField)
+		if err != nil {
+			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoByMulCondition] [VRecordDao.List: %s, filterFields: %v]",
+				err.Error(), filterFields)
+			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		voucherIds := make([]int, 1)
+		for _, vouRecord := range voucherRecords {
+			voucherIds = append(voucherIds, vouRecord.VoucherID)
+		}
+		if len(voucherIds) > 0 {
+			filterFields["voucherId"] = voucherIds
+		}
+	}
 
 	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields,
-		limit, offset, orderField, orderDirection)
+		iVoucherYear, limit, offset, orderDirection, orderField)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

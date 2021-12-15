@@ -1,12 +1,12 @@
-drop DATABASE if exists `finance_mgr_2021`;
-CREATE DATABASE IF NOT EXISTS `finance_mgr_2021` DEFAULT CHARACTER SET utf8;
+drop DATABASE if exists `finance_mgr`;
+CREATE DATABASE IF NOT EXISTS `finance_mgr` DEFAULT CHARACTER SET utf8;
 
 
 /*==============================================================*/
 /* Table: companyGroup                                          */
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`companyGroup`;
-create table if not exists `finance_mgr_2021`.`companyGroup`
+drop table if exists `finance_mgr`.`companyGroup`;
+create table if not exists `finance_mgr`.`companyGroup`
 (
    `company_group_id`       int not null,
    `group_name`             varchar(64),
@@ -20,8 +20,8 @@ create table if not exists `finance_mgr_2021`.`companyGroup`
 /* Table: companyInfo                                           */
 /*company_group_id,该字段为0的话，就表示该公司不与其他任何公司组成为组*/
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`companyInfo`;
-create table if not exists `finance_mgr_2021`.`companyInfo`
+drop table if exists `finance_mgr`.`companyInfo`;
+create table if not exists `finance_mgr`.`companyInfo`
 (
    `company_id`            int not null,
    `company_name`          varchar(64),
@@ -46,8 +46,8 @@ create table if not exists `finance_mgr_2021`.`companyInfo`
 /*role:第一个字节的数值是操作员权限；第二个字节的数值是管理员的权限。*/
 /*角色 ：1：制单, 2：出纳, 4：审核, 8：记账,16：查询, 32：增加，64：修改, 128:删除*/
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`operatorInfo`;
-create table if not exists `finance_mgr_2021`.`operatorInfo`
+drop table if exists `finance_mgr`.`operatorInfo`;
+create table if not exists `finance_mgr`.`operatorInfo`
 (
    `operator_id`          int not null,
    `name`                 varchar(10) not null COMMENT '一个公司内，不允许有重复的',
@@ -62,7 +62,7 @@ create table if not exists `finance_mgr_2021`.`operatorInfo`
    primary key (operator_id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
-use  finance_mgr_2021;
+use  finance_mgr;
 alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)  
       references companyInfo (company_id) on delete restrict on update restrict;
 
@@ -72,8 +72,8 @@ alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)
 /*subject_type:科目的类型;0:不选择；1:资产;2:负债;3:权益;4:成本;5:损益*/
 /*subject_direction:科目的性质;1:debit;2:credit*/
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`accountSubject`;
-create table if not exists `finance_mgr_2021`.`accountSubject`
+drop table if exists `finance_mgr`.`accountSubject`;
+create table if not exists `finance_mgr`.`accountSubject`
 (
    `subject_id`            int not null,
    `company_id`            int not null,
@@ -95,8 +95,8 @@ alter table accountSubject add constraint FK_Reference_2 foreign key (company_id
 /*==============================================================*/
 /* 凭证信息表 Table: VoucherInfo                                 */
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`voucherInfo`;
-create table if not exists `finance_mgr_2021`.`voucherInfo`
+drop table if exists `finance_mgr`.`voucherInfo`;
+create table if not exists `finance_mgr`.`voucherInfo`
 (
    `voucher_id`            int not null,
    `company_id`            int not null, 
@@ -118,8 +118,8 @@ alter table voucherInfo add constraint FK_Reference_3 foreign key (company_id)
 /*==============================================================*/
 /* 凭证信息表 Table: voucherRecordInfo                               */
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`voucherRecordInfo`;
-create table  if not exists `finance_mgr_2021`.`voucherRecordInfo`
+drop table if exists `finance_mgr`.`voucherRecordInfo`;
+create table  if not exists `finance_mgr`.`voucherRecordInfo`
 (
    `record_id`             int not null,
    `voucher_id`            int  not null COMMENT '凭证ID',
@@ -146,8 +146,8 @@ alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucher
 /* voucherId：从1001开始，设计的值的最大值，是int类型的最大值； */  
 /* recordId：从5001开始。设计的值的最大值，是int类型的最大值；*/
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`idInfo`;
-create table if not exists `finance_mgr_2021`.`idInfo`
+drop table if exists `finance_mgr`.`idInfo`;
+create table if not exists `finance_mgr`.`idInfo`
 (
    `company_id`             int not null,
    `operator_id`            int not null,
@@ -160,8 +160,8 @@ create table if not exists `finance_mgr_2021`.`idInfo`
 /*==============================================================*/
 /* Table: userLoginInfo                                         */
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`userLoginInfo`;
-create table if not exists `finance_mgr_2021`.`userLoginInfo`
+drop table if exists `finance_mgr`.`userLoginInfo`;
+create table if not exists `finance_mgr`.`userLoginInfo`
 (
    `id`                   int primary key AUTO_INCREMENT,
    `operator_id`          int not null,
@@ -176,8 +176,8 @@ create table if not exists `finance_mgr_2021`.`userLoginInfo`
 /* Table: menuInfo                                              */   
 /*menu_serial_num:用于排列菜单的顺序,只对一级菜单起作用。*/                                           
 /*==============================================================*/
-drop table if exists `finance_mgr_2021`.`menuInfo`;
-create table if not exists `finance_mgr_2021`.`menuInfo`
+drop table if exists `finance_mgr`.`menuInfo`;
+create table if not exists `finance_mgr`.`menuInfo`
 (
    `menu_id`              int not null,
    `menu_name`            varchar(24),

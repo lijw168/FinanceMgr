@@ -51,6 +51,7 @@ const (
 	ErrCompanyId     = "companyId"
 	ErrCookie        = "cookie"
 	ErrPasswd        = "password"
+	ErrVouYear       = "voucher_year"
 	ErrVouMon        = "voucher_month"
 	ErrVouFiller     = "voucher_filler"
 	ErrVouAuditor    = "voucher_auditor"

@@ -18,7 +18,7 @@ type ResouceInfoService struct {
 	Db         *sql.DB
 }
 
-//可以优化一下GetComGroupIdByOperatorId这个函数的返回值。
+//可以优化一下GetCompanyByOperatorId这个函数的返回值。
 func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId int,
 	requestId string) ([]*model.ResourceInfoView, CcError) {
 	//create
@@ -37,7 +37,7 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 		}
 	}()
 	//get company info
-	comInfo, err := rs.CompanyDao.GetComGroupIdByOperatorId(ctx, tx, operatorId)
+	comInfo, err := rs.CompanyDao.GetCompanyByOperatorId(ctx, tx, operatorId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -61,14 +61,14 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 		for _, comInfo := range comInfos {
-			resInfo, err := rs.getResourceData(ctx, comInfo, tx)
+			resInfo, err := rs.getResourceData(ctx, comInfo)
 			if err != nil {
 				return nil, err
 			}
 			resInfoSlice = append(resInfoSlice, resInfo)
 		}
 	} else if comInfo.CompanyGroupID == 0 {
-		resInfo, err := rs.getResourceData(ctx, comInfo, tx)
+		resInfo, err := rs.getResourceData(ctx, comInfo)
 		if err != nil {
 			return nil, err
 		}
@@ -86,14 +86,14 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 }
 
 //这是中间计算的函数
-func (rs *ResouceInfoService) getResourceData(ctx context.Context, pComView *model.CompanyInfo,
-	tx *sql.Tx) (*model.ResourceInfoView, CcError) {
+func (rs *ResouceInfoService) getResourceData(ctx context.Context,
+	pComView *model.CompanyInfo) (*model.ResourceInfoView, CcError) {
 	resInfo := new(model.ResourceInfoView)
 	resInfo.CompanyId = pComView.CompanyID
 	resInfo.CompanyName = pComView.CompanyName
 	iStartAccountYear := pComView.StartAccountPeriod / 100
 	iLatestAccountYear := pComView.LatestAccountYear
-	yearSlice := make([]int, 0,(iLatestAccountYear-iStartAccountYear+1))
+	yearSlice := make([]int, 0, (iLatestAccountYear - iStartAccountYear + 1))
 	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {
 		yearSlice = append(yearSlice, i)
 	}

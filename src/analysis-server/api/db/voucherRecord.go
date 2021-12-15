@@ -25,8 +25,10 @@ var (
 	}
 )
 
-func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId int) (*model.VoucherRecord, error) {
-	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " + voucherRecordTN + " where record_id=?"
+func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId,
+	iYear int) (*model.VoucherRecord, error) {
+	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " +
+		genTableName(iYear, voucherRecordTN) + " where record_id=?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Get] [sql: %s ,values: %d]", strSql, recordId)
 	var recInfo = &model.VoucherRecord{}
 	start := time.Now()
@@ -45,9 +47,9 @@ func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId in
 }
 
 //get the count of the table
-func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator) (int64, error) {
+func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator, iYear int) (int64, error) {
 	var c int64
-	strSql := "select count(1) from " + voucherInfoTN
+	strSql := "select count(1) from " + genTableName(iYear, voucherRecordTN)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Count] [SqlElapsed: %v]", time.Since(start))
@@ -55,17 +57,18 @@ func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator) (int64, e
 }
 
 //list count by filter
-func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
+func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
+	filter map[string]interface{}) (int64, error) {
 	var c int64
-	strSql, values := transferCountSql(voucherRecordTN, filter)
+	strSql, values := transferCountSql(genTableName(iYear, voucherRecordTN), filter)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
 	d.Logger.InfoContext(ctx, "[VoucherRecord/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
-func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *model.VoucherRecord) error {
-	strSql := "insert into " + voucherRecordTN + " (" + strings.Join(voucherRecordFields, ",") +
+func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, iYear int, st *model.VoucherRecord) error {
+	strSql := "insert into " + genTableName(iYear, voucherRecordTN) + " (" + strings.Join(voucherRecordFields, ",") +
 		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
 		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.CreatedAt, st.UpdatedAt}
@@ -80,8 +83,8 @@ func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, st *mode
 	return nil
 }
 
-func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId int) error {
-	strSql := "delete from " + voucherRecordTN + " where record_id = ?"
+func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId, iYear int) error {
+	strSql := "delete from " + genTableName(iYear, voucherRecordTN) + " where record_id = ?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Delete] [sql: %s, id: %s]", strSql, recordId)
 	start := time.Now()
 	defer func() {
@@ -94,8 +97,8 @@ func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId
 	return nil
 }
 
-func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperator, voucherId int) error {
-	strSql := "delete from " + voucherRecordTN + " where voucher_id = ?"
+func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperator, voucherId, iYear int) error {
+	strSql := "delete from " + genTableName(iYear, voucherRecordTN) + " where voucher_id = ?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByVoucherId] [sql: %s, id: %s]", strSql, voucherId)
 	start := time.Now()
 	defer func() {
@@ -109,8 +112,8 @@ func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperato
 }
 
 func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOperator,
-	filter map[string]interface{}) error {
-	strSql, values := transferDeleteSql(voucherRecordTN, filter)
+	iYear int, filter map[string]interface{}) error {
+	strSql, values := transferDeleteSql(genTableName(iYear, voucherRecordTN), filter)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByMultiCondition] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -125,9 +128,10 @@ func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOp
 
 //没有复杂的匹配条件。
 func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
-	limit int, offset int, order string, od int) ([]*model.VoucherRecord, error) {
+	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
-	strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
+	strSql, values := transferListSql(genTableName(iYear, voucherRecordTN), filter, voucherRecordFields,
+		limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/SimpleList] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -155,10 +159,10 @@ func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filt
 //2、增加了like
 func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
-	limit int, offset int, order string, od int) ([]*model.VoucherRecord, error) {
+	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
-	//strSql, values := transferListSql(voucherRecordTN, filter, voucherRecordFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(voucherRecordTN, filterNo, filter, intervalFilter, fuzzyMatchFilter,
+	//strSql, values := transferListSql(genTableName(iYear, voucherRecordTN), filter, voucherRecordFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(genTableName(iYear, voucherRecordTN), filterNo, filter, intervalFilter, fuzzyMatchFilter,
 		voucherRecordFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
@@ -183,9 +187,9 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo m
 	return voucherRecordSlice, nil
 }
 
-func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator, recordId int,
+func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator, recordId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + voucherRecordTN + " set "
+	strSql := "update " + genTableName(iYear, voucherRecordTN) + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
@@ -214,9 +218,9 @@ func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator
 	return nil
 }
 
-func (dao *VoucherRecordDao) UpdateByVoucherId(ctx context.Context, do DbOperator, voucherId int,
+func (dao *VoucherRecordDao) UpdateByVoucherId(ctx context.Context, do DbOperator, voucherId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + voucherRecordTN + " set "
+	strSql := "update " + genTableName(iYear, voucherRecordTN) + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {

@@ -17,9 +17,9 @@ type VoucherInfoService struct {
 	Db       *sql.DB
 }
 
-func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID int,
+func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID, iYear int,
 	requestId string) (*model.VoucherInfoView, CcError) {
-	vInfo, err := vs.VInfoDao.Get(ctx, vs.Db, voucherID)
+	vInfo, err := vs.VInfoDao.Get(ctx, vs.Db, voucherID, iYear)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -37,10 +37,13 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
 	limit, offset := -1, 0
+	iVoucherYear := 0
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucherId", "companyId", "voucherYear", "voucherMonth", "numOfMonth", "voucherDate":
+			case "voucherYear":
+				iVoucherYear = f.Value.(int)
+			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
 				fallthrough
 			case "voucherAuditor", "voucherFiller", "status", "billCount":
 				filterFields[*f.Field] = f.Value
@@ -67,8 +70,8 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields,
-		limit, offset, orderField, orderDirection)
+	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields, iVoucherYear,
+		limit, offset, orderDirection, orderField)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -82,10 +85,10 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	return vouInfoViewSlice, vouRecordCount, nil
 }
 
-func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iCompanyID int,
+func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iYear, iCompanyID int,
 	requestId string) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
-	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfoByCompanyID(ctx, vs.Db, iCompanyID)
+	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfoByCompanyID(ctx, vs.Db, iYear, iCompanyID)
 	if err != nil {
 		FunctionName := "VoucherInfoService/service/GetLatestVoucherInfo"
 		vs.Logger.ErrorContext(ctx, "[%s] [Error: %s, companyID: %d]", FunctionName, err.Error(), iCompanyID)
@@ -116,7 +119,7 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 }
 
 //该函数也可以用于审核、取消审核、作废凭证等功能 ...
-func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucherID int,
+func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucherID, iYear int,
 	params map[string]interface{}) CcError {
 	FuncName := "VoucherInfoService/UpdateVoucherInfoByID"
 	bIsRollBack := true
@@ -131,7 +134,7 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 		}
 	}()
 	//insure the voucherInfo exist
-	_, err = vs.VInfoDao.Get(ctx, tx, voucherID)
+	_, err = vs.VInfoDao.Get(ctx, tx, voucherID, iYear)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -140,7 +143,7 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	params["updatedAt"] = time.Now()
-	err = vs.VInfoDao.Update(ctx, tx, voucherID, params)
+	err = vs.VInfoDao.Update(ctx, tx, voucherID, iYear, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -166,7 +169,7 @@ func (vs *VoucherInfoService) BatchAuditVoucherInfo(ctx context.Context, params 
 		}
 	}()
 	//insure the voucherInfo exist  由于是批量更新，所以就不一一判断了。
-	err = vs.VInfoDao.BatchUpdate(ctx, tx, *params.Status, *params.VoucherAuditor, params.IDs)
+	err = vs.VInfoDao.BatchUpdate(ctx, tx, *params.VoucherYear, *params.Status, *params.VoucherAuditor, params.IDs)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -183,7 +186,7 @@ func (vs *VoucherInfoService) GetMaxNumOfMonthByContion(ctx context.Context,
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *params.CompanyID
 	filterFields["voucherMonth"] = *params.VoucherMonth
-	count, err := vs.VInfoDao.CountByFilter(ctx, vs.Db, filterFields)
+	count, err := vs.VInfoDao.CountByFilter(ctx, vs.Db, *params.VoucherYear, filterFields)
 	if err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

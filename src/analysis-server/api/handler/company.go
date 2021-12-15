@@ -199,7 +199,7 @@ func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request)
 	if params.Backup != nil {
 		updateFields["Backup"] = *params.Backup
 	}
-	if params.LatestAccountYear == nil {
+	if params.LatestAccountYear != nil {
 		updateFields["LatestAccountYear"] = *params.LatestAccountYear
 	}
 	if len(updateFields) == 0 {

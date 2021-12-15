@@ -18,7 +18,7 @@ type CompanyDao struct {
 var (
 	companyInfoTN     = "companyInfo"
 	companyInfoFields = []string{"company_id", "company_name", "abbre_name", "corporator", "phone",
-		"e_mail", "company_addr", "backup","start_account_period", "latest_account_year","created_at",
+		"e_mail", "company_addr", "backup", "start_account_period", "latest_account_year", "created_at",
 		"updated_at", "company_group_id"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
@@ -46,16 +46,16 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 	}
 }
 
-func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOperator,
+func (dao *CompanyDao) GetCompanyByOperatorId(ctx context.Context, do DbOperator,
 	operatorId int) (*model.CompanyInfo, error) {
 	strSql := "select b." + strings.Join(companyInfoFields, ",b.") +
 		" from operatorInfo as a, companyInfo as b where a.operator_id =? and a.company_id = b.company_id"
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetComGroupIdByOperatorId] [sql: %s ,values: %d]",
+	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [sql: %s ,values: %d]",
 		strSql, operatorId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetComGroupIdByOperatorId] [SqlElapsed: %v]", time.Since(start))
+		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, operatorId), compInfo); err {
 	case nil:
@@ -64,6 +64,28 @@ func (dao *CompanyDao) GetComGroupIdByOperatorId(ctx context.Context, do DbOpera
 		return nil, err
 	default:
 		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
+		return nil, err
+	}
+}
+
+func (dao *CompanyDao) GetCompanyByAccSubId(ctx context.Context, do DbOperator,
+	subjectId int) (*model.CompanyInfo, error) {
+	strSql := "select b." + strings.Join(companyInfoFields, ",b.") +
+		" from accountSubject as a, companyInfo as b where a.subject_id =? and a.company_id = b.company_id"
+	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [sql: %s ,values: %d]",
+		strSql, subjectId)
+	var compInfo = &model.CompanyInfo{}
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [SqlElapsed: %v]", time.Since(start))
+	}()
+	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, subjectId), compInfo); err {
+	case nil:
+		return compInfo, nil
+	case sql.ErrNoRows:
+		return nil, err
+	default:
+		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [scanCompanyInfo: %s]", err.Error())
 		return nil, err
 	}
 }

@@ -14,6 +14,7 @@ type AccountSubService struct {
 	Logger     *log.Logger
 	AccSubDao  *db.AccSubDao
 	VRecordDao *db.VoucherRecordDao
+	CompanyDao *db.CompanyDao
 	Db         *sql.DB
 }
 
@@ -101,6 +102,42 @@ func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 	return accSubView, nil
 }
 
+func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID int,
+	tx *sql.Tx, isCalTotal bool) (error, int) {
+	iTotalCount := 0
+	//get company info
+	comInfo, err := as.CompanyDao.GetCompanyByAccSubId(ctx, tx, subjectID)
+	if err != nil {
+		return err, iTotalCount
+	}
+	//获取有数据的会计年度
+	iStartAccountYear := comInfo.StartAccountPeriod / 100
+	iLatestAccountYear := comInfo.LatestAccountYear
+	yearSlice := make([]int, 0, (iLatestAccountYear - iStartAccountYear + 1))
+	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {
+		yearSlice = append(yearSlice, i)
+	}
+	//判断是否在使用
+	for _, year := range yearSlice {
+		filterFields := make(map[string]interface{})
+		filterFields["subId1"] = subjectID
+		var iCount int64
+		iCount, err = as.VRecordDao.CountByFilter(ctx, tx, year, filterFields)
+		if err != nil {
+			as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+			return err, 0
+		}
+		if iCount > 0 {
+			if isCalTotal {
+				iTotalCount += int(iCount)
+			} else {
+				return nil, int(iCount)
+			}
+		}
+	}
+	return nil, iTotalCount
+}
+
 func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int,
 	requestId string) CcError {
 	as.Logger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%d", subjectID)
@@ -116,18 +153,12 @@ func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int
 			RollbackLog(ctx, as.Logger, FuncName, tx)
 		}
 	}()
-
-	//判断是否在使用
-	filterFields := make(map[string]interface{})
-	filterFields["subId1"] = subjectID
-	var iCount int64
-	iCount, err = as.VRecordDao.CountByFilter(ctx, tx, filterFields)
-	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+	iCount := 0
+	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if iCount > 0 {
-		return NewError(ErrAccSub, ErrError, ErrNull, "the account subject is using, don't delete.")
+		return NewError(ErrAccSub, ErrError, ErrNull, "the account subjectID is using, don't delete.")
 	}
 	err = as.AccSubDao.DeleteByID(ctx, tx, subjectID)
 	if err != nil {
@@ -142,7 +173,8 @@ func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int
 	return nil
 }
 
-func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int, params map[string]interface{}) CcError {
+func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int,
+	params map[string]interface{}) CcError {
 	FuncName := "AccountSubService/accountSub/UpdateAccSubById"
 	bIsRollBack := true
 	tx, err := as.Db.Begin()
@@ -156,29 +188,13 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 		}
 	}()
 
-	//判断是否在使用
-	filterFields := make(map[string]interface{})
-	filterFields["subId1"] = subjectID
-	var iCount int64
-	iCount, err = as.VRecordDao.CountByFilter(ctx, tx, filterFields)
-	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+	iCount := 0
+	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if iCount > 0 {
-		return NewError(ErrAccSub, ErrError, ErrNull, "the account subject is using, don't delete.")
+		return NewError(ErrAccSub, ErrError, ErrNull, "the account subjectID is using, don't updated.")
 	}
-	//如果不存在该条记录，则数据库会报错，所以就不用该操作了。
-	// _, err = as.AccSubDao.GetAccSubByID(ctx, tx, subjectID)
-	// switch err {
-	// case nil:
-	// case sql.ErrNoRows:
-	// 	return NewCcError(cons.CodeAccSubNotExist, ErrAccSub, ErrNotFound, ErrNull, "the account subject is not exist")
-	// default:
-	// 	return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	// }
-	//update info
-	//params["UpdatedAt"] = time.Now()
 	err = as.AccSubDao.UpdateBySubID(ctx, tx, subjectID, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -235,15 +251,26 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 }
 
 func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, subjectID int,
-	requestId string) (int64, CcError) {
+	requestId string) (int, CcError) {
 	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method begin, "+"subject:%d", subjectID)
-	filterFields := make(map[string]interface{})
-	filterFields["subId1"] = subjectID
-	iCount, err := as.VRecordDao.CountByFilter(ctx, as.Db, filterFields)
+	FuncName := "AccountSubService/accountSub/QueryAccSubReferenceBySubID"
+	bIsRollBack := true
+	tx, err := as.Db.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/QueryAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, as.Logger, FuncName, tx)
+		}
+	}()
+
+	iCount := 0
+	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, true); err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	bIsRollBack = false
 	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
 	return iCount, nil
 }

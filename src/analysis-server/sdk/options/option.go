@@ -57,6 +57,7 @@ type NameOptions struct {
 
 type QueryMaxNumOfMonthOption struct {
 	CompanyID    int
+	VoucherYear  int
 	VoucherMonth int
 }
 
@@ -69,6 +70,7 @@ type VoucherInfoOptions struct {
 
 //ModifyVoucherInfoOptions ...
 type ModifyVoucherInfoOptions struct {
+	VoucherYear    int
 	VoucherID      int
 	VoucherMonth   int
 	VoucherDate    int
@@ -116,8 +118,19 @@ type VoucherOptions struct {
 //VoucherArrangeOptions 凭证整理参数
 type VoucherArrangeOptions struct {
 	CompanyID         int
+	VoucherYear       int
 	VoucherMonth      int
 	ArrangeVoucherNum bool
+}
+
+type DescribeYearAndIDOptions struct {
+	VoucherYear int
+	ID          int
+}
+
+type DeleteYearAndIDOptions struct {
+	VoucherYear int
+	ID          int
 }
 
 //voucher end

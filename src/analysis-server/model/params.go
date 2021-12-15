@@ -159,6 +159,16 @@ type DeleteOperatorParams struct {
 	Name *string `json:"name"`
 }
 
+type DescribeYearAndIDParams struct {
+	VoucherYear *int `json:"voucherYear"`
+	ID          *int `json:"id"`
+}
+
+type DeleteYearAndIDParams struct {
+	VoucherYear *int `json:"voucherYear"`
+	ID          *int `json:"id"`
+}
+
 //VoucherInfoParams ...  BillCount:该参数暂未使用，如果使用时，前端会传入该值。
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
@@ -170,10 +180,12 @@ type VoucherInfoParams struct {
 //QueryMaxNumOfMonthParams 查询最大的凭证号...
 type QueryMaxNumOfMonthParams struct {
 	CompanyID    *int `json:"companyId"`
+	VoucherYear  *int `json:"voucherYear"`
 	VoucherMonth *int `json:"voucherMonth"`
 }
 
 type BatchAuditParams struct {
+	VoucherYear    *int    `json:"voucherYear"`
 	IDs            []int   `json:"ids"`
 	Status         *int    `json:"status"`
 	VoucherAuditor *string `json:"voucherAuditor"`
@@ -181,6 +193,7 @@ type BatchAuditParams struct {
 
 //ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
+	VoucherYear    *int    `json:"voucherYear"`
 	VoucherID      *int    `json:"voucherId"`
 	VoucherMonth   *int    `json:"voucherMonth"`
 	VoucherDate    *int    `json:"voucherDate"`
@@ -223,6 +236,7 @@ type CreateVoucherParams struct {
 }
 
 type UpdateVoucherParams struct {
+	VoucherYear         *int                         `json:"voucherYear"`
 	ModifyInfoParams    *ModifyVoucherInfoParams     `json:"modifyInfoParams"`
 	ModifyRecordsParams []*ModifyVoucherRecordParams `json:"modifyRecordsParams"`
 	DelRecordsParams    []int                        `json:"delRecordsParams"`
@@ -238,6 +252,7 @@ type UpdateVoucherParams struct {
 
 //VoucherArrangeParams 凭证整理参数
 type VoucherArrangeParams struct {
+	VoucherYear       *int  `json:"voucherYear"`
 	CompanyID         *int  `json:"companyId"`
 	VoucherMonth      *int  `json:"voucherMonth"`
 	ArrangeVoucherNum *bool `json:"arrangeVoucherNum"`
