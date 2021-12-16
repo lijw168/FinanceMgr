@@ -386,19 +386,21 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, iVoucherYear
 		vs.Logger.ErrorContext(ctx, errInfo)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	voucherIdSlice := make([]int, len(voucherInfos))
-	for i := 0; i < len(voucherInfos); i++ {
-		//delete voucher record
-		voucherIdSlice = append(voucherIdSlice, voucherInfos[i].VoucherID)
-		err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherInfos[i].VoucherID, iVoucherYear)
-		if err != nil {
-			return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher record failed")
+	if len(voucherInfos) > 0 {
+		voucherIdSlice := make([]int, len(voucherInfos))
+		for i := 0; i < len(voucherInfos); i++ {
+			//delete voucher record
+			voucherIdSlice = append(voucherIdSlice, voucherInfos[i].VoucherID)
+			err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherInfos[i].VoucherID, iVoucherYear)
+			if err != nil {
+				return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher record failed")
+			}
 		}
-	}
-	//batch,delete voucher information
-	err = vs.VInfoDao.BatchDelete(ctx, tx, iVoucherYear, voucherIdSlice)
-	if err != nil {
-		return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher information failed")
+		//batch,delete voucher information
+		err = vs.VInfoDao.BatchDelete(ctx, tx, iVoucherYear, voucherIdSlice)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, "Delete voucher information failed")
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)

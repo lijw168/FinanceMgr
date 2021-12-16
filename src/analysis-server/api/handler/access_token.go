@@ -87,6 +87,7 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 			at.logger.WarnContext(ctx, "[delBatchToken] [AuthService.Logout,failed,errInfo: %s]", ccErr.Detail())
 			return
 		}
+		at.logger.DebugContext(ctx, "[delBatchToken] [the operator %d has been logout]", optId)
 	}
 	return
 }

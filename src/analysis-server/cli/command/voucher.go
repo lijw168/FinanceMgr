@@ -320,7 +320,7 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate",
 		"VoucherFiller", "VoucherAuditor"}
 	cmd := &cobra.Command{
-		Use:   "vouInfo-getLatest [OPTIONS] companyID",
+		Use:   "vouInfo-getLatest [OPTIONS] companyID voucherYear",
 		Short: "get latest voucher information",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -352,7 +352,7 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 
 func newGetMaxNumOfMonthCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "vouInfo-getMaxNumOfMan [OPTIONS] companyID voucherMonth",
+		Use:   "vouInfo-getMaxNumOfMonth [OPTIONS] companyID voucherYear voucherMonth",
 		Short: "get the max numOfMonth in a month",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 3 {
@@ -425,7 +425,7 @@ func newVoucherInfoListCmd() *cobra.Command {
 func newVoucherInfoUpdateCmd() *cobra.Command {
 	var opts options.ModifyVoucherInfoOptions
 	cmd := &cobra.Command{
-		Use:   "vouInfo-update [OPTIONS] voucherId",
+		Use:   "vouInfo-update [OPTIONS] voucherId voucherYear",
 		Short: "update a voucher information",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 2 {

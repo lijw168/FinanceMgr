@@ -123,7 +123,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
 		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		//filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
@@ -753,6 +753,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		//先暂时修改为一个值，如果以后确实需要，再进行添加。
 		//filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
 		filterMap["recordId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
