@@ -305,26 +305,26 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		errCode := voucherGate.UpdateVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
 		break
-	case util.VouRecordCreate:
-		resData, errCode := voucherGate.CreateVoucherRecords(reqPk.Buf)
-		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
-	case util.VouRecordDel:
-		errCode := voucherGate.DeleteVoucherRecord(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
-	case util.VouRecordsDel:
-		errCode := voucherGate.DeleteVoucherRecords(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
+	// case util.VouRecordCreate:
+	// 	resData, errCode := voucherGate.CreateVoucherRecords(reqPk.Buf)
+	// 	proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	// 	break
+	// case util.VouRecordDel:
+	// 	errCode := voucherGate.DeleteVoucherRecord(reqPk.Buf)
+	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+	// 	break
+	// case util.VouRecordsDel:
+	// 	errCode := voucherGate.DeleteVoucherRecords(reqPk.Buf)
+	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+	// 	break
 	case util.VouRecordList:
 		resData, errCode := voucherGate.ListVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
-	case util.VouRecordUpdate:
-		errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
+	// case util.VouRecordUpdate:
+	// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
+	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+	// 	break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -450,7 +450,7 @@ func (proxy *Proxy) onLineLoopCheck() {
 		select {
 		case <-proxy.quitCheckCh:
 			goto end
-		case <-time.Tick(time.Second * 30):
+		case <-time.Tick(time.Second * 10):
 			if proxy.auth.GetUserStatus() == util.Online {
 				proxy.auth.OnlineCheck()
 			} else {

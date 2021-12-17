@@ -32,7 +32,7 @@ create table if not exists `finance_mgr`.`companyInfo`
    `company_addr`          varchar(128),
    `backup`                varchar(32),
    `start_account_period`  int not null COMMENT '启用会计期',
-   `latest_account_year`   int not null COMMENT '最近使用的会计年度',
+   `latest_account_year`   int not null COMMENT '最新的会计年度',
    `created_at`            datetime,
    `updated_at`            datetime,
    `company_group_id`      int DEFAULT 0 COMMENT '不能作为companyGroup的外键',

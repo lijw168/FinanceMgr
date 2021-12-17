@@ -112,7 +112,7 @@ func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, stCheckoutView)
+	//add lease
 	cookie, err := r.Cookie("access_token")
 	if err != nil {
 		ah.Logger.ErrorContext(r.Context(),
@@ -120,6 +120,8 @@ func (ah *AuthenHandlers) StatusCheckout(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	GAccessTokenH.modifyTokenExpiredTime(cookie.Value)
+
+	ah.Response(r.Context(), ah.Logger, w, nil, stCheckoutView)
 	return
 }
 

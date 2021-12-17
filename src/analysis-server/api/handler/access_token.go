@@ -25,6 +25,8 @@ type AccessTokenHandler struct {
 	authService       *service.AuthenService
 	optInfoService    *service.OperatorInfoService
 	logger            *log.Logger
+	//for statistics
+	checkStatusCount int
 }
 
 func NewAccessTokenHandler() *AccessTokenHandler {
@@ -32,6 +34,7 @@ func NewAccessTokenHandler() *AccessTokenHandler {
 	accTokenHandler.tokenToOptIDMap = make(map[string]*onlineUserInfo)
 	accTokenHandler.tokenToTimeMap = make(map[string]int64)
 	accTokenHandler.quitCheckCh = make(chan bool, 1)
+	accTokenHandler.checkStatusCount = 0
 	return &accTokenHandler
 }
 
@@ -96,6 +99,7 @@ func (at *AccessTokenHandler) modifyTokenExpiredTime(accessToken string) {
 	at.expirationCheckMu.Lock()
 	at.tokenToTimeMap[accessToken] = time.Now().Unix() + (int64)(keepOnlineTime)
 	at.expirationCheckMu.Unlock()
+	at.checkStatusCount = at.checkStatusCount + 1
 }
 
 //用户在线检查
@@ -138,6 +142,7 @@ func (at *AccessTokenHandler) ExpirationCheck() {
 			for k, v := range at.tokenToTimeMap {
 				if curTime > v {
 					expirationToken = append(expirationToken, k)
+					at.logger.Debug("[has been expire.] [token:time[%s:%v];curTime:%v;times:%d][in ExpirationCheck]", k, v, curTime, at.checkStatusCount)
 				}
 			}
 			at.expirationCheckMu.RUnlock()
