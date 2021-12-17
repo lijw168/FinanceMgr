@@ -28,7 +28,7 @@ var (
 func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId,
 	iYear int) (*model.VoucherRecord, error) {
 	strSql := "select " + strings.Join(voucherRecordFields, ",") + " from " +
-		genTableName(iYear, voucherRecordTN) + " where record_id=?"
+		GenTableName(iYear, voucherRecordTN) + " where record_id=?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Get] [sql: %s ,values: %d]", strSql, recordId)
 	var recInfo = &model.VoucherRecord{}
 	start := time.Now()
@@ -49,7 +49,7 @@ func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId,
 //get the count of the table
 func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator, iYear int) (int64, error) {
 	var c int64
-	strSql := "select count(1) from " + genTableName(iYear, voucherRecordTN)
+	strSql := "select count(1) from " + GenTableName(iYear, voucherRecordTN)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Count] [SqlElapsed: %v]", time.Since(start))
@@ -60,7 +60,7 @@ func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator, iYear int
 func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
-	strSql, values := transferCountSql(genTableName(iYear, voucherRecordTN), filter)
+	strSql, values := transferCountSql(GenTableName(iYear, voucherRecordTN), filter)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
 	d.Logger.InfoContext(ctx, "[VoucherRecord/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
@@ -68,7 +68,7 @@ func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, iYe
 }
 
 func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, iYear int, st *model.VoucherRecord) error {
-	strSql := "insert into " + genTableName(iYear, voucherRecordTN) + " (" + strings.Join(voucherRecordFields, ",") +
+	strSql := "insert into " + GenTableName(iYear, voucherRecordTN) + " (" + strings.Join(voucherRecordFields, ",") +
 		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
 		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.CreatedAt, st.UpdatedAt}
@@ -84,7 +84,7 @@ func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, iYear in
 }
 
 func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId, iYear int) error {
-	strSql := "delete from " + genTableName(iYear, voucherRecordTN) + " where record_id = ?"
+	strSql := "delete from " + GenTableName(iYear, voucherRecordTN) + " where record_id = ?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/Delete] [sql: %s, id: %s]", strSql, recordId)
 	start := time.Now()
 	defer func() {
@@ -98,7 +98,7 @@ func (dao *VoucherRecordDao) Delete(ctx context.Context, do DbOperator, recordId
 }
 
 func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperator, voucherId, iYear int) error {
-	strSql := "delete from " + genTableName(iYear, voucherRecordTN) + " where voucher_id = ?"
+	strSql := "delete from " + GenTableName(iYear, voucherRecordTN) + " where voucher_id = ?"
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByVoucherId] [sql: %s, id: %s]", strSql, voucherId)
 	start := time.Now()
 	defer func() {
@@ -113,7 +113,7 @@ func (dao *VoucherRecordDao) DeleteByVoucherId(ctx context.Context, do DbOperato
 
 func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOperator,
 	iYear int, filter map[string]interface{}) error {
-	strSql, values := transferDeleteSql(genTableName(iYear, voucherRecordTN), filter)
+	strSql, values := transferDeleteSql(GenTableName(iYear, voucherRecordTN), filter)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/DeleteByMultiCondition] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -130,7 +130,7 @@ func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOp
 func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
 	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
-	strSql, values := transferListSql(genTableName(iYear, voucherRecordTN), filter, voucherRecordFields,
+	strSql, values := transferListSql(GenTableName(iYear, voucherRecordTN), filter, voucherRecordFields,
 		limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/SimpleList] sql %s with values %v", strSql, values)
 	start := time.Now()
@@ -161,8 +161,8 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo m
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
 	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
-	//strSql, values := transferListSql(genTableName(iYear, voucherRecordTN), filter, voucherRecordFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(genTableName(iYear, voucherRecordTN), filterNo, filter, intervalFilter, fuzzyMatchFilter,
+	//strSql, values := transferListSql(GenTableName(iYear, voucherRecordTN), filter, voucherRecordFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithMutiCondition(GenTableName(iYear, voucherRecordTN), filterNo, filter, intervalFilter, fuzzyMatchFilter,
 		voucherRecordFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
@@ -189,7 +189,7 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo m
 
 func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator, recordId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + genTableName(iYear, voucherRecordTN) + " set "
+	strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
@@ -220,7 +220,7 @@ func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator
 
 func (dao *VoucherRecordDao) UpdateByVoucherId(ctx context.Context, do DbOperator, voucherId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + genTableName(iYear, voucherRecordTN) + " set "
+	strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
 	var values []interface{}
 	var first bool = true
 	for key, value := range params {
