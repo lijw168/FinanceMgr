@@ -504,7 +504,16 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			}
 			switch *f.Field {
 			case "voucherYear":
-				iVoucherYear = f.Value.(int)
+				{
+					switch f.Value.(type) {
+					case float64:
+						//从客户端发过来的，解析json时，会解析成float64
+						iVoucherYear = int(f.Value.(float64))
+					case int:
+						//从cli发过来的，解析json时，会解析成int
+						iVoucherYear = f.Value.(int)
+					}
+				}
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
 				fallthrough
 			case "voucherAuditor", "status":
