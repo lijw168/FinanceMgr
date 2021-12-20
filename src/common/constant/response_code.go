@@ -35,13 +35,15 @@ const (
 
 //voucher information
 const (
-	CodeVoucherInfoNotExist = -401
+	CodeVoucherInfoNotExist     = -401
+	CodeVoucherRecordNotExist   = -402
+	CodeVoucherTemplateNotExist = -403
 )
 
 //voucher record
-const (
-	CodeVoucherRecordNotExist = -501
-)
+// const (
+// 	CodeVoucherRecordNotExist = -501
+// )
 
 //IdInfo
 const (

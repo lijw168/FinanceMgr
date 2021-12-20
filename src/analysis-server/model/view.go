@@ -90,6 +90,14 @@ type VoucherInfoView struct {
 	Status         int    `json:"status"`
 }
 
+type VoucherTemplateView struct {
+	SerialNum    int       `json:"serialNum"`
+	RefVoucherID int       `json:"refVoucherID"`
+	VoucherYear  int       `json:"voucherYear"`
+	Illustration string    `json:"illustration"`
+	CreatedAt    time.Time `json:"createdAt"`
+}
+
 //VoucherRecordView ...
 type VoucherRecordView struct {
 	RecordID    int     `json:"recordId"`

@@ -169,6 +169,12 @@ type DeleteYearAndIDParams struct {
 	ID          *int `json:"id"`
 }
 
+type VoucherTemplateParams struct {
+	RefVoucherID *int    `json:"refVoucherID"`
+	VoucherYear  *int    `json:"voucherYear"`
+	Illustration *string `json:"illustration"`
+}
+
 //VoucherInfoParams ...  BillCount:该参数暂未使用，如果使用时，前端会传入该值。
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`

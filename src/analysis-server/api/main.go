@@ -107,6 +107,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
 	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
 	menuInfoDao := &db.MenuInfoDao{Logger: logger}
+	voucherTempDao := &db.VoucherTemplateDao{Logger: logger}
 	//初始化ID Resource
 	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
 	ccErr := service.GIdInfoService.InitIdResource()
@@ -123,6 +124,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, Db: _db}
 	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, Db: _db}
 	menuService := &service.MenuInfoService{Logger: logger, MenuDao: menuInfoDao, Db: _db}
+	voucherTempService := &service.VoucherTemplateService{Logger: logger, VTemplateDao: voucherTempDao, Db: _db}
 	resService := &service.ResouceInfoService{Logger: logger, VInfoDao: voucherInfoDao, CompanyDao: companyDao, Db: _db}
 	//handlers
 	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
@@ -130,6 +132,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	comGroupHandlers := &handler.CompanyGroupHandlers{Logger: logger, ComGroupService: comGroupService}
 	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
 	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
+	voucherTempHandlers := &handler.VoucherTemplateHandlers{Logger: logger, VoucherTempService: voucherTempService}
 	authHandlers := &handler.AuthenHandlers{Logger: logger, AuthService: authService, ComService: comService, OptInfoService: optInfoService}
 	menuHandlers := &handler.MenuInfoHandlers{Logger: logger, MenuService: menuService}
 	resHandlers := &handler.ResourceInfoHandlers{Logger: logger, ResService: resService}
@@ -182,6 +185,11 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
 	httpRouter.RegisterFunc("UpdateVoucherInfo", voucherHandlers.UpdateVoucherInfo)
 	httpRouter.RegisterFunc("BatchAuditVouchers", voucherHandlers.BatchAuditVouchers)
+
+	httpRouter.RegisterFunc("CreateVoucherTemplate", voucherTempHandlers.CreateVoucherTemplate)
+	httpRouter.RegisterFunc("DeleteVoucherTemplate", voucherTempHandlers.DeleteVoucherTemplate)
+	httpRouter.RegisterFunc("GetVoucherTemplate", voucherTempHandlers.GetVoucherTemplate)
+	httpRouter.RegisterFunc("ListVoucherTemplate", voucherTempHandlers.ListVoucherTemplate)
 
 	httpRouter.RegisterFunc("ListMenuInfo", menuHandlers.ListMenuInfo)
 	httpRouter.RegisterFunc("InitResourceInfo", resHandlers.InitResourceInfo)

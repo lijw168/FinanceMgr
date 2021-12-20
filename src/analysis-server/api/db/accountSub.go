@@ -65,10 +65,12 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 }
 
 //检查在同一个company内是否subjectName和commonId是否有重复的记录
+//会计科目的名称，1级科目名称不能重复，但二级以后的科目名称是可以重复的。
 func (dao *AccSubDao) CheckDuplication(ctx context.Context, do DbOperator, companyId int,
 	commonId, subjectName string) (int64, error) {
 	var c int64
-	strSql := "select count(1) from " + accSubInfoTN + " where company_id = ? and (common_id = ? or subject_name = ?)"
+	strSql := "select count(1) from " + accSubInfoTN +
+		" where company_id = ? and (common_id = ?  or (subject_name = ? and subject_level = 1))"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/CheckDuplication] [sql:%s,company_id: %d,commonId:%d,subject_name:%s]",
 		strSql, companyId, commonId, subjectName)
 	start := time.Now()

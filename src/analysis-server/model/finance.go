@@ -73,6 +73,15 @@ type VoucherInfo struct {
 	UpdatedAt      time.Time
 }
 
+//VoucherTemplate ...
+type VoucherTemplate struct {
+	SerialNum    int
+	RefVoucherID int
+	VoucherYear  int
+	Illustration string
+	CreatedAt    time.Time
+}
+
 //CompanyInfo ...
 type CompanyInfo struct {
 	CompanyID          int

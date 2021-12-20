@@ -5,19 +5,20 @@ const (
 )
 
 const (
-	ErrSystem      = "system"
-	ErrAccSub      = "accountSubject"
-	ErrCompany     = "company"
-	ErrComGroup    = "companyGroup"
-	ErrOperator    = "operator"
-	ErrVoucherInfo = "voucherInfo"
-	ErrVoucher     = "voucher"
-	ErrOrder       = "order"
-	ErrLogin       = "login"
-	ErrLogout      = "logout"
-	ErrIdInfo      = "IdInfo"
-	ErrMenuInfo    = "MenuInfo"
-	ErrResInfo     = "ResourceInfo"
+	ErrSystem          = "system"
+	ErrAccSub          = "accountSubject"
+	ErrCompany         = "company"
+	ErrComGroup        = "companyGroup"
+	ErrOperator        = "operator"
+	ErrVoucherInfo     = "voucherInfo"
+	ErrVoucherTemplate = "voucherTemplate"
+	ErrVoucher         = "voucher"
+	ErrOrder           = "order"
+	ErrLogin           = "login"
+	ErrLogout          = "logout"
+	ErrIdInfo          = "IdInfo"
+	ErrMenuInfo        = "MenuInfo"
+	ErrResInfo         = "ResourceInfo"
 )
 
 const (
@@ -61,6 +62,7 @@ const (
 	ErrVoucherData   = "voucher debit or crebit data"
 	ErrVouSummary    = "voucher_summary"
 	ErrVoucherRecord = "voucher_record"
+	ErrSerialNUm     = "serial_number"
 	ErrField         = "field"
 	ErrOd            = "direction" // order direction
 	ErrType          = "type"

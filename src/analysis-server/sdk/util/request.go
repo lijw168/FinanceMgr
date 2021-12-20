@@ -98,10 +98,10 @@ func DoRequestwithToken(accessToken, action string,
 		fmt.Println("Trace-Id:" + resp.Header.Get("Trace-Id"))
 		fmt.Println("X-Requst-Trace:" + resp.Header.Get("X-Requst-Trace"))
 		fmt.Println(fmt.Sprintf("%s", body))
-		// writeLog(log.LevelDebug, "Response:")
-		// writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
-		// writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
-		// writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
+		writeLog(log.LevelDebug, "Response:")
+		writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
+		writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
+		writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
 	}
 
 	if resp.StatusCode != 200 {
@@ -152,7 +152,7 @@ func DoRequestwithToken_json(accessToken, action string,
 	if Verbose {
 		fmt.Println("Request:")
 		fmt.Println(genCurl(req, params))
-		//writeLog(log.LevelDebug, "Request:", genCurl(req, params))
+		writeLog(log.LevelDebug, "Request:", genCurl(req, params))
 	}
 
 	resp, err := Client.Do(req)
@@ -167,10 +167,10 @@ func DoRequestwithToken_json(accessToken, action string,
 		fmt.Println("Trace-Id:" + resp.Header.Get("Trace-Id"))
 		fmt.Println("X-Requst-Trace:" + resp.Header.Get("X-Requst-Trace"))
 		fmt.Println(fmt.Sprintf("%s", body))
-		// writeLog(log.LevelDebug, "Response:")
-		// writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
-		// writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
-		// writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
+		writeLog(log.LevelDebug, "Response:")
+		writeLog(log.LevelDebug, "Trace-Id:"+resp.Header.Get("Trace-Id"))
+		writeLog(log.LevelDebug, "X-Requst-Trace:"+resp.Header.Get("X-Requst-Trace"))
+		writeLog(log.LevelDebug, fmt.Sprintf("%s", body))
 	}
 
 	if resp.StatusCode != 200 {

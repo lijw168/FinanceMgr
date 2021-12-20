@@ -68,7 +68,8 @@ alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)
 
 /*==============================================================*/
 /* 会计科目表 Table: accountSubject                              */
-/* common_id 和subject_name都是在一个公司内，不允许有重复的 */
+/* common_id是在一个公司内，不允许有重复的;但subject_name会计科目的名称，*/
+/* 在一个公司内，1级科目名称不能重复，但二级以后的科目名称是可以重复的。*/
 /*subject_type:科目的类型;0:不选择；1:资产;2:负债;3:权益;4:成本;5:损益*/
 /*subject_direction:科目的性质;1:debit;2:credit*/
 /*==============================================================*/
@@ -138,6 +139,21 @@ create table  if not exists `finance_mgr`.`voucherRecordInfo`
 
 alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucher_id)
       references voucherInfo (voucher_id) on delete restrict on update restrict;
+
+
+/*==============================================================*/
+/* Table: commonVoucher                                         */
+/*==============================================================*/
+drop table if exists `finance_mgr`.`commonVoucher`; 
+create table if not exists `finance_mgr`.`commonVoucher`
+(
+   `serial_num`             int not null,
+   `reference_voucher_id`   int COMMENT '所引用的凭证ID',
+   `voucher_year`           int COMMENT '所引用的凭证数据年度',
+   `illustration`           varchar(24),
+   `created_at`             datetime,
+   primary key (serial_num)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
 /* Table: IDInfo                                           */
