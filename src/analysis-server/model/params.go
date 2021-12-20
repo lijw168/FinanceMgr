@@ -279,6 +279,10 @@ type ListVoucherInfoParams struct {
 	DescLimit   *int          `json:"desc_limit"`
 }
 
+type SerialNumParams struct {
+	SerialNum *int `json:"serialNum"`
+}
+
 type DeleteParams struct {
 	Name *string `json:"name"`
 }
