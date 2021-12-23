@@ -170,7 +170,7 @@ type DeleteYearAndIDParams struct {
 }
 
 type VoucherTemplateParams struct {
-	RefVoucherID *int    `json:"refVoucherID"`
+	RefVoucherID *int    `json:"refVoucherId"`
 	VoucherYear  *int    `json:"voucherYear"`
 	Illustration *string `json:"illustration"`
 }

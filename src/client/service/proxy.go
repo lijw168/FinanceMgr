@@ -122,7 +122,7 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 				proxy.processCompany(conn, pk)
 			} else if pk.OpCode >= util.AccSubCreate && pk.OpCode <= util.AccSubUpdate {
 				proxy.processAccSub(conn, pk)
-			} else if pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouRecordUpdate {
+			} else if pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouTemplateList {
 				proxy.processVoucher(conn, pk)
 			} else if pk.OpCode == util.MenuInfoList {
 				proxy.processMenu(conn, pk)
@@ -321,10 +321,26 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		resData, errCode := voucherGate.ListVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		break
-	// case util.VouRecordUpdate:
-	// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
-	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
-	// 	break
+		// case util.VouRecordUpdate:
+		// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
+		// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+		// 	break
+	case util.VouTemplateCreate:
+		// resData, errCode := voucherGate.GetLatestVoucherInfo(reqPk.Buf)
+		// proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
+	case util.VouTemplateDel:
+		// resData, errCode := voucherGate.GetMaxNumOfMonth(reqPk.Buf)
+		// proxy.respOptResWithData(conn, reqPk, errCode, resData)
+		break
+	case util.VouTemplateShow:
+		// errCode := voucherGate.BatchAuditVouchers(reqPk.Buf)
+		// proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
+	case util.VouTemplateList:
+		// errCode := voucherGate.UpdateVoucherInfo(reqPk.Buf)
+		// proxy.respOptResWithoutData(conn, reqPk, errCode)
+		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")

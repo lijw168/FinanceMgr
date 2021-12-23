@@ -467,3 +467,53 @@ func (vr *Voucher) BatchAuditVouchers_json(params []byte) error {
 	_, err := util.DoRequest_json(action, params)
 	return err
 }
+
+//voucher template begin
+func (vr *Voucher) CreateVoucherTemplate_json(params []byte) ([]byte, error) {
+	action := "CreateVoucherTemplate"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+}
+
+//该参数直接就是相应的json格式的数据。所以不需要转换了。
+func (vr *Voucher) ListVoucherTemplate_json(params []byte) ([]byte, error) {
+	action := "ListVoucherTemplate"
+	return ListOpsResources_json(action, params)
+}
+
+func (vr *Voucher) DeleteVoucherTemplate(opts *options.SerialNumOptions) error {
+	action := "DeleteVoucherTemplate"
+	if opts.SerialNum <= 0 {
+		return errors.New("SerialNum is required")
+	}
+	params := &model.SerialNumParams{
+		SerialNum: &opts.SerialNum,
+	}
+	_, err := util.DoRequest(action, params)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("DeleteVoucher succeed\n")
+	return nil
+}
+
+func (vr *Voucher) GetVoucherTemplate(opts *options.SerialNumOptions) ([]byte, error) {
+	action := "GetVoucherTemplate"
+
+	if opts.SerialNum <= 0 {
+		return nil, errors.New("SerialNum is required")
+	}
+	params := &model.SerialNumParams{
+		SerialNum: &opts.SerialNum,
+	}
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+}
+
+//voucher template end

@@ -104,8 +104,8 @@ func (p *Packet) isConvertToUtf8() bool {
 		fallthrough
 	case util.VoucherShow:
 		fallthrough
-	case util.VouRecordDel:
-		fallthrough
+	// case util.VouRecordDel:
+	// 	fallthrough
 	case util.VouInfoShow:
 		break
 	case util.AccSubReferenceQuery:

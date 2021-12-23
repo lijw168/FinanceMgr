@@ -13,6 +13,7 @@ const (
 	resource_type_voucher
 	resource_type_voucher_record
 	resource_type_voucher_info
+	resource_type_voucher_template
 	resource_type_login_info
 	resource_type_operator
 	resource_type_menu_info

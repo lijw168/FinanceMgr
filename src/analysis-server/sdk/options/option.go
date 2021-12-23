@@ -133,6 +133,10 @@ type DeleteYearAndIDOptions struct {
 	ID          int
 }
 
+type SerialNumOptions struct {
+	SerialNum int
+}
+
 //voucher end
 
 //commpany option

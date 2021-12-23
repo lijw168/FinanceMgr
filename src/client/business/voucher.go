@@ -2,7 +2,7 @@ package business
 
 import (
 	//"analysis-server/model"
-	//"analysis-server/sdk/options"
+	"analysis-server/sdk/options"
 	"client/util"
 	"encoding/binary"
 	//"encoding/json"
@@ -196,4 +196,58 @@ func (vg *VoucherGateway) BatchAuditVouchers(param []byte) (errCode int) {
 		logger.Debug("BatchAuditVouchers_json succeed")
 	}
 	return errCode
+}
+
+//beigin voucher template
+func (vg *VoucherGateway) CreateVoucherTemplate(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if resData, err = cSdk.CreateVoucherTemplate_json(param); err != nil {
+		errCode = util.ErrCreateFailed
+		logger.Error("the CreateVoucherTemplate failed,err:%v", err.Error())
+	} else {
+		logger.Debug("CreateVoucherTemplate succeed;views.")
+	}
+	return resData, errCode
+}
+
+func (vg *VoucherGateway) ListVoucherTemplate(param []byte) (resData []byte, errCode int) {
+	return listCmdJson(resource_type_voucher_template, param, cSdk.ListVoucherTemplate_json)
+}
+
+func (vg *VoucherGateway) DeleteVoucherTemplate(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	iNum := int(binary.LittleEndian.Uint32(param))
+	if iNum <= 0 {
+		logger.Error("the serial number param is: %d", iNum)
+		errCode = util.ErrInvalidParam
+		return
+	}
+	var opts options.SerialNumOptions
+	opts.SerialNum = iNum
+	if err := cSdk.DeleteVoucherTemplate(&opts); err != nil {
+		errCode = util.ErrDeleteFailed
+		logger.Error("the DeleteVoucher_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("DeleteVoucher_json succeed")
+	}
+	return
+}
+func (vg *VoucherGateway) GetVoucherTemplate(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	iNum := int(binary.LittleEndian.Uint32(param))
+	if iNum <= 0 {
+		logger.Error("the serial number param is: %d", iNum)
+		errCode = util.ErrInvalidParam
+		return nil, errCode
+	}
+	var opts options.SerialNumOptions
+	opts.SerialNum = iNum
+	resData, err := cSdk.GetVoucherTemplate(&opts)
+	if err != nil {
+		errCode = util.ErrShowFailed
+		logger.Error("the GetVoucherTemplate failed,err:%v", err.Error())
+	}
+	logger.Debug("GetVoucherTemplate succeed")
+	return resData, errCode
 }
