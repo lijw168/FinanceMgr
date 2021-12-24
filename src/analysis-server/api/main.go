@@ -237,7 +237,7 @@ func main() {
 	httpRouter := url.NewUrlRouter(logger)
 	err = handlerInit(httpRouter, logger, apiServerConf)
 	if err != nil {
-		fmt.Println("[Init] Handler registe error: ", err)
+		fmt.Println("[Init] Handler register error: ", err)
 		return
 	}
 	interceptSignal()

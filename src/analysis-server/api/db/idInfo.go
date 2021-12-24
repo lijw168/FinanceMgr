@@ -17,9 +17,11 @@ type IDInfoDao struct {
 
 var (
 	idInfoTN     = "idInfo"
-	idInfoFields = []string{"company_id", "operator_id", "subject_id", "voucher_id", "voucher_record_id", `company_group_id`}
-	scanIdInfo   = func(r DbScanner, st *model.IDInfo) error {
-		return r.Scan(&st.CompanyID, &st.OperatorID, &st.SubjectID, &st.VoucherID, &st.VoucherRecordID, &st.ComGroupID)
+	idInfoFields = []string{"company_id", "operator_id", "subject_id", "voucher_id",
+		"voucher_record_id", `company_group_id`, `voucher_template_id`}
+	scanIdInfo = func(r DbScanner, st *model.IDInfo) error {
+		return r.Scan(&st.CompanyID, &st.OperatorID, &st.SubjectID, &st.VoucherID,
+			&st.VoucherRecordID, &st.ComGroupID, &st.VoucherTemplateID)
 	}
 )
 
@@ -44,8 +46,9 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 
 func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") +
-		") values (?, ?, ?, ?, ?, ?)"
-	values := []interface{}{st.CompanyID, st.OperatorID, st.SubjectID, st.VoucherID, st.VoucherRecordID, st.ComGroupID}
+		") values (?, ?, ?, ?, ?, ?, ?)"
+	values := []interface{}{st.CompanyID, st.OperatorID, st.SubjectID, st.VoucherID,
+		st.VoucherRecordID, st.ComGroupID, st.VoucherTemplateID}
 	dao.Logger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.Exec(strSql, values...)
@@ -77,7 +80,7 @@ func (dao *IDInfoDao) Count(do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + idInfoTN
 	start := time.Now()
-	err := do.QueryRow(strSql, nil).Scan(&c)
+	err := do.QueryRow(strSql).Scan(&c)
 	dao.Logger.Info("[IDInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
