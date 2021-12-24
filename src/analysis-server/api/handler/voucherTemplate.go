@@ -126,13 +126,13 @@ func (vt *VoucherTemplateHandlers) CreateVoucherTemplate(w http.ResponseWriter, 
 	}
 	requestId := vt.GetTraceId(r)
 
-	tmpView, ccErr := vt.VoucherTempService.CreateVoucherTemplate(r.Context(), params, requestId)
+	serialNum, ccErr := vt.VoucherTempService.CreateVoucherTemplate(r.Context(), params, requestId)
 	if ccErr != nil {
 		vt.Logger.WarnContext(r.Context(), "[voucherTemplate/CreateVoucherTemplate/ServerHTTP] [VoucherTempService.CreateVoucherTemplate: %s]", ccErr.Detail())
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
-	vt.Response(r.Context(), vt.Logger, w, nil, tmpView)
+	vt.Response(r.Context(), vt.Logger, w, nil, serialNum)
 	return
 }
 

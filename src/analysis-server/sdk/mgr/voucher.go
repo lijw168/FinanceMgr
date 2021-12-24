@@ -469,13 +469,17 @@ func (vr *Voucher) BatchAuditVouchers_json(params []byte) error {
 }
 
 //voucher template begin
-func (vr *Voucher) CreateVoucherTemplate_json(params []byte) ([]byte, error) {
+func (vr *Voucher) CreateVoucherTemplate_json(params []byte) (int, error) {
 	action := "CreateVoucherTemplate"
 	result, err := util.DoRequest_json(action, params)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return json.Marshal(result.Data)
+	var iSerialNum int
+	if err := util.FormatView(result.Data, &iSerialNum); err != nil {
+		return 0, err
+	}
+	return iSerialNum, nil
 }
 
 //该参数直接就是相应的json格式的数据。所以不需要转换了。

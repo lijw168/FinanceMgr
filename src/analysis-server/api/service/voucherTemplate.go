@@ -38,7 +38,7 @@ func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, par
 	if err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	vTemplate.SerialNum = int(count)
+	vTemplate.SerialNum = int(count) + 1
 	vTemplate.RefVoucherID = *params.RefVoucherID
 	vTemplate.VoucherYear = *params.VoucherYear
 	vTemplate.Illustration = *params.Illustration

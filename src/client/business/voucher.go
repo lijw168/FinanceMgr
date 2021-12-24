@@ -159,7 +159,6 @@ func (vg *VoucherGateway) GetMaxNumOfMonth(param []byte) (resData []byte, errCod
 		errCode = util.ErrGetMaxNumOfMonthFailed
 		logger.Error("the GetMaxNumOfMonth_json failed,err:%v", err.Error())
 		resData = nil
-		return
 	} else {
 		logger.Debug("GetMaxNumOfMonth_json succeed")
 		resData = make([]byte, 4)
@@ -201,11 +200,13 @@ func (vg *VoucherGateway) BatchAuditVouchers(param []byte) (errCode int) {
 //beigin voucher template
 func (vg *VoucherGateway) CreateVoucherTemplate(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
-	var err error
-	if resData, err = cSdk.CreateVoucherTemplate_json(param); err != nil {
+	if iSerialNum, err := cSdk.CreateVoucherTemplate_json(param); err != nil {
 		errCode = util.ErrCreateFailed
 		logger.Error("the CreateVoucherTemplate failed,err:%v", err.Error())
+		resData = nil
 	} else {
+		resData = make([]byte, 4)
+		binary.LittleEndian.PutUint32(resData, uint32(iSerialNum))
 		logger.Debug("CreateVoucherTemplate succeed;views.")
 	}
 	return resData, errCode

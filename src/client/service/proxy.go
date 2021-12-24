@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -82,6 +83,12 @@ func (proxy *Proxy) StartTcpService() {
 
 func (proxy *Proxy) handleConn(conn net.Conn) {
 	//defer proxy.processResWg.Done()
+	defer func() {
+		if err := recover(); err != nil {
+			proxy.logger.LogError("in function handleConn [panic: %v, stack %s]", err, string(debug.Stack()))
+			panic(err)
+		}
+	}()
 	defer conn.Close()
 	var err error
 	errCode := util.ErrNull
