@@ -425,7 +425,7 @@ func (proxy *Proxy) onLineLoopCheck() {
 		select {
 		case <-proxy.quitCheckCh:
 			goto end
-		case <-time.Tick(time.Second * 10):
+		case <-time.Tick(time.Second * 30):
 			if proxy.auth.GetUserStatus() == util.Online {
 				proxy.auth.OnlineCheck()
 			} else {

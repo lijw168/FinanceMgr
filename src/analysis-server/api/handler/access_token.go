@@ -5,6 +5,7 @@ import (
 	"common/log"
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -25,7 +26,7 @@ type AccessTokenHandler struct {
 	authService       *service.AuthenService
 	optInfoService    *service.OperatorInfoService
 	logger            *log.Logger
-	//for statistics
+	//for statistics;test
 	checkStatusCount int
 }
 
@@ -73,7 +74,13 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 	var expiredOptID = []int{}
 	at.loginCheckMu.Lock()
 	for _, token := range accessTokenSlice {
-		expiredOptID = append(expiredOptID, at.tokenToOptIDMap[token].iOperatorID)
+		if usrInfo, ok := at.tokenToOptIDMap[token]; ok {
+			expiredOptID = append(expiredOptID, usrInfo.iOperatorID)
+		} else {
+			errMsg := fmt.Sprintf("can't find the %s token in tokenToOptIDMap", token)
+			at.logger.Error(errMsg)
+			panic(errMsg)
+		}
 		delete(at.tokenToOptIDMap, token)
 	}
 	at.loginCheckMu.Unlock()
