@@ -76,7 +76,7 @@ func (dao *CompanyGroupDao) Count(ctx context.Context, do DbOperator) (int64, er
 	var c int64
 	strSql := "select count(1) from " + companyGroupTN
 	start := time.Now()
-	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
+	err := do.QueryRowContext(ctx, strSql).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[CompanyGroup/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }

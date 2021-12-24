@@ -59,7 +59,7 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + accSubInfoTN
 	start := time.Now()
-	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
+	err := do.QueryRowContext(ctx, strSql).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }

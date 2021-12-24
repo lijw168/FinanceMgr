@@ -148,8 +148,8 @@ drop table if exists `finance_mgr`.`commonVoucher`;
 create table if not exists `finance_mgr`.`commonVoucher`
 (
    `serial_num`             int not null,
-   `reference_voucher_id`   int COMMENT '所引用的凭证ID',
-   `voucher_year`           int COMMENT '所引用的凭证数据年度',
+   `reference_voucher_id`   int not null COMMENT '所引用的凭证ID',
+   `voucher_year`           int not null COMMENT '所引用的凭证数据年度',
    `illustration`           varchar(24),
    `created_at`             datetime,
    primary key (serial_num)

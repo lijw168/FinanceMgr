@@ -105,10 +105,8 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 			proxy.listenCon = nil
 			time.Sleep(3 * time.Second)
 			os.Exit(0)
-			break
 		case util.Heartbeat:
 			proxy.respHeartbeatInfo(conn, pk)
-			break
 		default:
 			if pk.OpCode != util.UserLogin {
 				if proxy.auth.GetUserStatus() != util.Online {
@@ -129,7 +127,6 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 			} else {
 				proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", pk.OpCode)
 			}
-			break
 		}
 		proxy.logger.LogInfo("response data :", pk)
 	}
@@ -143,37 +140,28 @@ func (proxy *Proxy) processOperator(conn net.Conn, reqPk *Packet) {
 		errCode := proxy.auth.UserLogin(reqPk.Buf)
 		proxy.respAuthResInfo(conn, reqPk, errCode)
 		go proxy.onLineLoopCheck()
-		break
 	case util.LoginInfoList:
 		resData, errCode := proxy.auth.ListLoginInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.UserLogout:
 		errCode := proxy.auth.Logout()
 		proxy.respAuthResInfo(conn, reqPk, errCode)
 		proxy.quitCheckCh <- true
-		break
 	case util.OperatorCreate:
 		resData, errCode := optGate.CreateOperator(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		//proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.OperatorList:
 		resData, errCode := optGate.ListOperatorInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.OperatorShow:
 		resData, errCode := optGate.GetOperatorInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.OperatorDel:
 		errCode := optGate.DeleteOperator(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.OperatorUpdate:
 		errCode := optGate.UpdateOperator(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -188,27 +176,21 @@ func (proxy *Proxy) processCompany(conn net.Conn, reqPk *Packet) {
 	case util.CompanyCreate:
 		resData, errCode := comGate.CreateCompany(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.CompanyList:
 		resData, errCode := comGate.ListCompany(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.CompanyDel:
 		errCode := comGate.DeleteCompany(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.CompanyShow:
 		resData, errCode := comGate.GetCompany(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.CompanyUpdate:
 		errCode := comGate.UpdateCompany(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.InitResourceInfo:
 		resData, errCode := comGate.InitResourceInfo(proxy.auth.OperatorID)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -222,27 +204,21 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 	case util.AccSubCreate:
 		resData, errCode := accSubGate.CreateAccSub(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.AccSubReferenceQuery:
 		resData, errCode := accSubGate.QueryAccSubReference(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.AccSubList:
 		resData, errCode := accSubGate.ListAccSub(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.AccSubShow:
 		resData, errCode := accSubGate.GetAccSub(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.AccSubDel:
 		errCode := accSubGate.DeleteAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.AccSubUpdate:
 		errCode := accSubGate.UpdateAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -256,7 +232,6 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 	case util.VoucherCreate:
 		resData, errCode := voucherGate.CreateVoucher(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VoucherUpdate:
 		resData, errCode := voucherGate.UpdateVoucher(reqPk.Buf)
 		if resData == nil {
@@ -264,83 +239,63 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 		} else {
 			proxy.respOptResWithData(conn, reqPk, errCode, resData)
 		}
-		break
 	case util.VoucherDel:
 		errCode := voucherGate.DeleteVoucher(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.VoucherShow:
 		resData, errCode := voucherGate.GetVoucher(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VoucherArrange:
 		errCode := voucherGate.ArrangeVoucher(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.VouInfoShow:
 		resData, errCode := voucherGate.GetVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VouInfoList:
 		resData, errCode := voucherGate.ListVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VouInfoListByMulCon:
 		resData, errCode := voucherGate.ListVoucherInfoByMulCondition(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VouInfoListLatest:
 		resData, errCode := voucherGate.GetLatestVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.VouInfoMaxNumOfMonth:
 		resData, errCode := voucherGate.GetMaxNumOfMonth(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	case util.BatchAuditVouchers:
 		errCode := voucherGate.BatchAuditVouchers(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	case util.VouInfoUpdate:
 		errCode := voucherGate.UpdateVoucherInfo(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
 	// case util.VouRecordCreate:
 	// 	resData, errCode := voucherGate.CreateVoucherRecords(reqPk.Buf)
 	// 	proxy.respOptResWithData(conn, reqPk, errCode, resData)
-	// 	break
 	// case util.VouRecordDel:
 	// 	errCode := voucherGate.DeleteVoucherRecord(reqPk.Buf)
 	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
-	// 	break
 	// case util.VouRecordsDel:
 	// 	errCode := voucherGate.DeleteVoucherRecords(reqPk.Buf)
 	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
-	// 	break
 	case util.VouRecordList:
 		resData, errCode := voucherGate.ListVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 		// case util.VouRecordUpdate:
 		// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
 		// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
-		// 	break
 	case util.VouTemplateCreate:
-		// resData, errCode := voucherGate.GetLatestVoucherInfo(reqPk.Buf)
-		// proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
+		resData, errCode := voucherGate.CreateVoucherTemplate(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.VouTemplateDel:
-		// resData, errCode := voucherGate.GetMaxNumOfMonth(reqPk.Buf)
-		// proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
+		errCode := voucherGate.DeleteVoucherTemplate(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	case util.VouTemplateShow:
-		// errCode := voucherGate.BatchAuditVouchers(reqPk.Buf)
-		// proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
+		resData, errCode := voucherGate.GetVoucherTemplate(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.VouTemplateList:
-		// errCode := voucherGate.UpdateVoucherInfo(reqPk.Buf)
-		// proxy.respOptResWithoutData(conn, reqPk, errCode)
-		break
+		resData, errCode := voucherGate.ListVoucherTemplate(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -354,7 +309,6 @@ func (proxy *Proxy) processMenu(conn net.Conn, reqPk *Packet) {
 	case util.MenuInfoList:
 		resData, errCode := menuGate.ListMenuInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		break
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")
@@ -403,10 +357,8 @@ func (proxy *Proxy) isConvertToGbk(reqPk *Packet) bool {
 	case util.AccSubCreate:
 		fallthrough
 	case util.OperatorCreate:
-		break
 	default:
 		bRet = true
-		break
 	}
 	return bRet
 }

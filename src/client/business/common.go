@@ -66,6 +66,8 @@ func getResourceName(rsT int) string {
 		return "vouRecord"
 	case resource_type_voucher_info:
 		return "vouInfo"
+	case resource_type_voucher_template:
+		return "vouTemplate"
 	case resource_type_login_info:
 		return "loginInfo"
 	case resource_type_operator:

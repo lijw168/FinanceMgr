@@ -50,7 +50,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator, iYear int) 
 	var c int64
 	strSql := "select count(1) from " + GenTableName(iYear, voucherInfoTN)
 	start := time.Now()
-	err := do.QueryRowContext(ctx, strSql, nil).Scan(&c)
+	err := do.QueryRowContext(ctx, strSql).Scan(&c)
 	dao.Logger.InfoContext(ctx, "[VoucherInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
