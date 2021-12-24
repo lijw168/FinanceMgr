@@ -217,33 +217,19 @@ func (vg *VoucherGateway) ListVoucherTemplate(param []byte) (resData []byte, err
 }
 
 func (vg *VoucherGateway) DeleteVoucherTemplate(param []byte) (errCode int) {
-	errCode = util.ErrNull
-	iNum := int(binary.LittleEndian.Uint32(param))
-	if iNum <= 0 {
-		logger.Error("the serial number param is: %d", iNum)
-		errCode = util.ErrInvalidParam
-		return
-	}
-	var opts options.SerialNumOptions
-	opts.SerialNum = iNum
-	if err := cSdk.DeleteVoucherTemplate(&opts); err != nil {
-		errCode = util.ErrDeleteFailed
-		logger.Error("the DeleteVoucher_json failed,err:%v", err.Error())
-	} else {
-		logger.Debug("DeleteVoucher_json succeed")
-	}
-	return
+	id := int(binary.LittleEndian.Uint32(param))
+	return deleteCmd(resource_type_voucher_template, id, cSdk.DeleteVoucherTemplate)
 }
 func (vg *VoucherGateway) GetVoucherTemplate(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
-	iNum := int(binary.LittleEndian.Uint32(param))
-	if iNum <= 0 {
-		logger.Error("the serial number param is: %d", iNum)
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the voucher template id param is: %d", id)
 		errCode = util.ErrInvalidParam
 		return nil, errCode
 	}
-	var opts options.SerialNumOptions
-	opts.SerialNum = iNum
+	var opts options.BaseOptions
+	opts.ID = id
 	resData, err := cSdk.GetVoucherTemplate(&opts)
 	if err != nil {
 		errCode = util.ErrShowFailed

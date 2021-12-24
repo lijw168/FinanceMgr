@@ -142,17 +142,17 @@ alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucher
 
 
 /*==============================================================*/
-/* Table: commonVoucher                                         */
+/* Table: voucherTemplate                                         */
 /*==============================================================*/
-drop table if exists `finance_mgr`.`commonVoucher`; 
-create table if not exists `finance_mgr`.`commonVoucher`
+drop table if exists `finance_mgr`.`voucherTemplate`; 
+create table if not exists `finance_mgr`.`voucherTemplate`
 (
-   `serial_num`             int not null,
+   `voucher_template_id`    int not null,
    `reference_voucher_id`   int not null COMMENT '所引用的凭证ID',
    `voucher_year`           int not null COMMENT '所引用的凭证数据年度',
    `illustration`           varchar(24),
    `created_at`             datetime,
-   primary key (serial_num)
+   primary key (voucher_template_id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -161,6 +161,8 @@ create table if not exists `finance_mgr`.`commonVoucher`
 /* subjectId：从501开始，设计的值是到1000；*/
 /* voucherId：从1001开始，设计的值的最大值，是int类型的最大值； */  
 /* recordId：从5001开始。设计的值的最大值，是int类型的最大值；*/
+/* companyGroupId：从801开始。设计的值的最大值，是int类型的最大值；*/
+/* voucherTemplateId：从1开始。设计的值的最大值，是int类型的最大值；*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`idInfo`;
 create table if not exists `finance_mgr`.`idInfo`
@@ -170,7 +172,8 @@ create table if not exists `finance_mgr`.`idInfo`
    `subject_id`             int not null,
    `voucher_id`             int not null,
    `voucher_record_id`      int not null,
-   `company_group_id`       int not null
+   `company_group_id`       int not null,
+   `voucher_template_id`    int not null
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -205,4 +208,4 @@ create table if not exists `finance_mgr`.`menuInfo`
 
 insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
 insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());
-insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id,company_group_id) value(2,102,501,1001,5001,801);
+insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id,company_group_id,voucher_template_id) value(2,102,501,1001,5001,801,1);

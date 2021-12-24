@@ -20,6 +20,7 @@ type IDInfoService struct {
 	genVouRecIdInfo   *aUtils.GenIdInfo
 	genOptIdInfo      *aUtils.GenIdInfo
 	genComGroupIdInfo *aUtils.GenIdInfo
+	genvVouTempIdInfo *aUtils.GenIdInfo
 }
 
 func NewIDInfoService() *IDInfoService {
@@ -41,32 +42,37 @@ func (is *IDInfoService) InitIdResource() CcError {
 	var err error
 	is.genSubIdInfo, err = aUtils.NewGenIdInfo(idInfoView.SubjectID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genSubIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	is.genComIdInfo, err = aUtils.NewGenIdInfo(idInfoView.CompanyID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genComIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	is.genVouIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed:", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genVouIdInfo,failed:", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	is.genVouRecIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherRecordID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genVouRecIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	is.genOptIdInfo, err = aUtils.NewGenIdInfo(idInfoView.OperatorID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genOptIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	is.genComGroupIdInfo, err = aUtils.NewGenIdInfo(idInfoView.ComGroupID)
 	if err != nil {
-		is.logger.LogError("[InitGenIdInfo] NewGenIdInfo,failed: ", err.Error())
+		is.logger.LogError("[InitGenIdInfo] genComGroupIdInfo,failed: ", err.Error())
+		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
+	}
+	is.genvVouTempIdInfo, err = aUtils.NewGenIdInfo(idInfoView.VoucherTemplateID)
+	if err != nil {
+		is.logger.LogError("[InitGenIdInfo] genvVouTempIdInfo,failed: ", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
 	}
 	return nil
@@ -83,6 +89,7 @@ func (is *IDInfoService) CreateIDInfo(params *model.IDInfoParams,
 	idInfo.VoucherID = *params.VoucherID
 	idInfo.VoucherRecordID = *params.VoucherRecordID
 	idInfo.ComGroupID = *params.ComGroupID
+	idInfo.VoucherTemplateID = *params.VoucherTemplateID
 	if err := is.idInfoDao.Create(is._db, idInfo); err != nil {
 		is.logger.Error("[CreateIDInfo] [IdInfoDao.Create: %s]", err.Error())
 		return nil, NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
@@ -101,6 +108,7 @@ func (is *IDInfoService) IdInfoModelToView(idInfo *model.IDInfo) *model.IDInfoVi
 	idInfoView.VoucherRecordID = idInfo.VoucherRecordID
 	idInfoView.OperatorID = idInfo.OperatorID
 	idInfoView.ComGroupID = idInfo.ComGroupID
+	idInfoView.VoucherTemplateID = idInfo.VoucherTemplateID
 	return idInfoView
 }
 
@@ -145,6 +153,7 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	vouId := is.genVouIdInfo.GetId()
 	vouRecId := is.genVouRecIdInfo.GetId()
 	comGroupId := is.genComGroupIdInfo.GetId()
+	vouTempId := is.genvVouTempIdInfo.GetId()
 	updateFields := make(map[string]interface{})
 	updateFields["subjectId"] = subId
 	updateFields["operatorId"] = optId
@@ -152,6 +161,7 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	updateFields["voucherId"] = vouId
 	updateFields["voucherRecordId"] = vouRecId
 	updateFields["companyGroupId"] = comGroupId
+	updateFields["voucherTemplateId"] = vouTempId
 	ccErr := is.UpdateIdInfo(updateFields)
 	if ccErr != nil {
 		is.logger.Error("WriteIdResourceToDb failed,errInfo:%s", ccErr.Error())

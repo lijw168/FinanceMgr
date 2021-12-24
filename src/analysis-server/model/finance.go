@@ -75,11 +75,11 @@ type VoucherInfo struct {
 
 //VoucherTemplate ...
 type VoucherTemplate struct {
-	SerialNum    int
-	RefVoucherID int
-	VoucherYear  int
-	Illustration string
-	CreatedAt    time.Time
+	VoucherTemplateID int
+	RefVoucherID      int
+	VoucherYear       int
+	Illustration      string
+	CreatedAt         time.Time
 }
 
 //CompanyInfo ...
@@ -110,12 +110,13 @@ type CompanyGroup struct {
 
 //IDInfo ...
 type IDInfo struct {
-	VoucherID       int
-	OperatorID      int
-	CompanyID       int
-	SubjectID       int
-	VoucherRecordID int
-	ComGroupID      int
+	VoucherID         int
+	OperatorID        int
+	CompanyID         int
+	SubjectID         int
+	VoucherRecordID   int
+	ComGroupID        int
+	VoucherTemplateID int
 }
 
 //MenuInfo ...

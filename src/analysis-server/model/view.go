@@ -91,11 +91,11 @@ type VoucherInfoView struct {
 }
 
 type VoucherTemplateView struct {
-	SerialNum    int       `json:"serialNum"`
-	RefVoucherID int       `json:"refVoucherId"`
-	VoucherYear  int       `json:"voucherYear"`
-	Illustration string    `json:"illustration"`
-	CreatedAt    time.Time `json:"createdAt"`
+	VoucherTemplateID int       `json:"voucherTemplateId"`
+	RefVoucherID      int       `json:"refVoucherId"`
+	VoucherYear       int       `json:"voucherYear"`
+	Illustration      string    `json:"illustration"`
+	CreatedAt         time.Time `json:"createdAt"`
 }
 
 //VoucherRecordView ...
@@ -120,12 +120,13 @@ type VoucherView struct {
 }
 
 type IDInfoView struct {
-	VoucherID       int `json:"voucherId"`
-	OperatorID      int `json:"operatorId"`
-	CompanyID       int `json:"companyId"`
-	SubjectID       int `json:"subjectId"`
-	VoucherRecordID int `json:"voucherRecordId"`
-	ComGroupID      int `json:"comGroupId"`
+	VoucherID         int `json:"voucherId"`
+	OperatorID        int `json:"operatorId"`
+	CompanyID         int `json:"companyId"`
+	SubjectID         int `json:"subjectId"`
+	VoucherRecordID   int `json:"voucherRecordId"`
+	ComGroupID        int `json:"comGroupId"`
+	VoucherTemplateID int `json:"voucherTemplateId"`
 }
 
 type ResourceInfoView struct {

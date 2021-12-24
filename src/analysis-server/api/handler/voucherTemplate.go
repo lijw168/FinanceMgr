@@ -28,7 +28,8 @@ func (vt *VoucherTemplateHandlers) ListVoucherTemplate(w http.ResponseWriter, r 
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["refVoucherID"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["voucherTemplateId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["refVoucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["illustration"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
@@ -39,8 +40,8 @@ func (vt *VoucherTemplateHandlers) ListVoucherTemplate(w http.ResponseWriter, r 
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "serialNum":
-			*params.Order[0].Field = "serialNum"
+		case "voucherTemplateId":
+			*params.Order[0].Field = "voucherTemplateId"
 		case "createdAt":
 			*params.Order[0].Field = "createdAt"
 		default:
@@ -79,7 +80,7 @@ func (vt *VoucherTemplateHandlers) ListVoucherTemplate(w http.ResponseWriter, r 
 }
 
 func (vt *VoucherTemplateHandlers) GetVoucherTemplate(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.SerialNumParams)
+	var params = new(model.DescribeIdParams)
 	err := vt.HttpRequestParse(r, params)
 	if err != nil {
 		vt.Logger.ErrorContext(r.Context(), "[voucherTemplate/GetVoucherTemplate] [HttpRequestParse: %v]", err)
@@ -87,15 +88,15 @@ func (vt *VoucherTemplateHandlers) GetVoucherTemplate(w http.ResponseWriter, r *
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
-	//the id is serialNum
-	if params.SerialNum == nil || *params.SerialNum <= 0 {
-		ccErr := service.NewError(service.ErrVoucherTemplate, service.ErrMiss, service.ErrSerialNUm, service.ErrNull)
+	//the id is voucherTemplateID
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherTemplate, service.ErrMiss, service.ErrVoucherTemplateID, service.ErrNull)
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
 
 	requestId := vt.GetTraceId(r)
-	tmpView, ccErr := vt.VoucherTempService.GetVoucherTemplate(r.Context(), *params.SerialNum, requestId)
+	tmpView, ccErr := vt.VoucherTempService.GetVoucherTemplate(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		vt.Logger.WarnContext(r.Context(), "[voucherTemplate/GetVoucherTemplate/ServerHTTP] [VoucherTempService.GetVoucherTemplate: %s]", ccErr.Detail())
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
@@ -126,18 +127,18 @@ func (vt *VoucherTemplateHandlers) CreateVoucherTemplate(w http.ResponseWriter, 
 	}
 	requestId := vt.GetTraceId(r)
 
-	serialNum, ccErr := vt.VoucherTempService.CreateVoucherTemplate(r.Context(), params, requestId)
+	voucherTemplateID, ccErr := vt.VoucherTempService.CreateVoucherTemplate(r.Context(), params, requestId)
 	if ccErr != nil {
 		vt.Logger.WarnContext(r.Context(), "[voucherTemplate/CreateVoucherTemplate/ServerHTTP] [VoucherTempService.CreateVoucherTemplate: %s]", ccErr.Detail())
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
-	vt.Response(r.Context(), vt.Logger, w, nil, serialNum)
+	vt.Response(r.Context(), vt.Logger, w, nil, voucherTemplateID)
 	return
 }
 
 func (vt *VoucherTemplateHandlers) DeleteVoucherTemplate(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.SerialNumParams)
+	var params = new(model.DeleteSubjectParams)
 	err := vt.HttpRequestParse(r, params)
 	if err != nil {
 		vt.Logger.ErrorContext(r.Context(), "[vouchertemplate/DeleteOperator] [HttpRequestParse: %v]", err)
@@ -145,14 +146,14 @@ func (vt *VoucherTemplateHandlers) DeleteVoucherTemplate(w http.ResponseWriter, 
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
-	//the id is serialNum
-	if params.SerialNum == nil || *params.SerialNum <= 0 {
-		ccErr := service.NewError(service.ErrVoucherTemplate, service.ErrMiss, service.ErrSerialNUm, service.ErrNull)
+	//the id is voucherTemplateID
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherTemplate, service.ErrMiss, service.ErrVoucherTemplateID, service.ErrNull)
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
 	requestId := vt.GetTraceId(r)
-	ccErr := vt.VoucherTempService.DeleteVoucherTemplate(r.Context(), *params.SerialNum, requestId)
+	ccErr := vt.VoucherTempService.DeleteVoucherTemplate(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		vt.Logger.WarnContext(r.Context(), "[vouchertemplate/DeleteVoucherTemplate/ServerHTTP] [VoucherTempService.DeleteVoucherTemplate: %s]", ccErr.Detail())
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)

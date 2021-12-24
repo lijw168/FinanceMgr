@@ -488,15 +488,9 @@ func (vr *Voucher) ListVoucherTemplate_json(params []byte) ([]byte, error) {
 	return ListOpsResources_json(action, params)
 }
 
-func (vr *Voucher) DeleteVoucherTemplate(opts *options.SerialNumOptions) error {
+func (vr *Voucher) DeleteVoucherTemplate(opts *options.BaseOptions) error {
 	action := "DeleteVoucherTemplate"
-	if opts.SerialNum <= 0 {
-		return errors.New("SerialNum is required")
-	}
-	params := &model.SerialNumParams{
-		SerialNum: &opts.SerialNum,
-	}
-	_, err := util.DoRequest(action, params)
+	err := DeleteOpsResource(action, opts)
 	if err != nil {
 		return err
 	}
@@ -504,20 +498,13 @@ func (vr *Voucher) DeleteVoucherTemplate(opts *options.SerialNumOptions) error {
 	return nil
 }
 
-func (vr *Voucher) GetVoucherTemplate(opts *options.SerialNumOptions) ([]byte, error) {
+func (vr *Voucher) GetVoucherTemplate(opts *options.BaseOptions) ([]byte, error) {
 	action := "GetVoucherTemplate"
-
-	if opts.SerialNum <= 0 {
-		return nil, errors.New("SerialNum is required")
-	}
-	params := &model.SerialNumParams{
-		SerialNum: &opts.SerialNum,
-	}
-	result, err := util.DoRequest(action, params)
+	resData, err := DescribeOpsResource(action, opts)
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(result.Data)
+	return json.Marshal(resData)
 }
 
 //voucher template end

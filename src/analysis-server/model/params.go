@@ -279,19 +279,16 @@ type ListVoucherInfoParams struct {
 	DescLimit   *int          `json:"desc_limit"`
 }
 
-type SerialNumParams struct {
-	SerialNum *int `json:"serialNum"`
-}
-
 type DeleteParams struct {
 	Name *string `json:"name"`
 }
 
 type IDInfoParams struct {
-	VoucherID       *int `json:"voucherID"`
-	OperatorID      *int `json:"operatorId"`
-	CompanyID       *int `json:"companyID"`
-	SubjectID       *int `json:"subjectID"`
-	VoucherRecordID *int `json:"voucherRecordID"`
-	ComGroupID      *int `json:"comGroupId"`
+	VoucherID         *int `json:"voucherId"`
+	OperatorID        *int `json:"operatorId"`
+	CompanyID         *int `json:"companyId"`
+	SubjectID         *int `json:"subjectId"`
+	VoucherRecordID   *int `json:"voucherRecordId"`
+	ComGroupID        *int `json:"comGroupId"`
+	VoucherTemplateID *int `json:"voucherTemplateId"`
 }

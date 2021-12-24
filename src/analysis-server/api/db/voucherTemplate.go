@@ -16,22 +16,22 @@ type VoucherTemplateDao struct {
 }
 
 var (
-	voucherTemplateTN     = "commonVoucher"
-	voucherTemplateFields = []string{"serial_num", "reference_voucher_id", "voucher_year", "illustration", "created_at"}
+	voucherTemplateTN     = "voucherTemplate"
+	voucherTemplateFields = []string{"voucher_template_id", "reference_voucher_id", "voucher_year", "illustration", "created_at"}
 	scanVoucherTemplate   = func(r DbScanner, st *model.VoucherTemplate) error {
-		return r.Scan(&st.SerialNum, &st.RefVoucherID, &st.VoucherYear, &st.Illustration, &st.CreatedAt)
+		return r.Scan(&st.VoucherTemplateID, &st.RefVoucherID, &st.VoucherYear, &st.Illustration, &st.CreatedAt)
 	}
 )
 
-func (dao *VoucherTemplateDao) Get(ctx context.Context, do DbOperator, serialNum int) (*model.VoucherTemplate, error) {
-	strSql := "select " + strings.Join(voucherTemplateFields, ",") + " from " + voucherTemplateTN + " where serial_num=?"
-	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Get] [sql: %s ,values: %d]", strSql, serialNum)
+func (dao *VoucherTemplateDao) Get(ctx context.Context, do DbOperator, voucherTemplateID int) (*model.VoucherTemplate, error) {
+	strSql := "select " + strings.Join(voucherTemplateFields, ",") + " from " + voucherTemplateTN + " where voucher_template_id=?"
+	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Get] [sql: %s ,values: %d]", strSql, voucherTemplateID)
 	var comVoucher = &model.VoucherTemplate{}
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
-	switch err := scanVoucherTemplate(do.QueryRowContext(ctx, strSql, serialNum), comVoucher); err {
+	switch err := scanVoucherTemplate(do.QueryRowContext(ctx, strSql, voucherTemplateID), comVoucher); err {
 	case nil:
 		return comVoucher, nil
 	case sql.ErrNoRows:
@@ -67,7 +67,7 @@ func (dao *VoucherTemplateDao) CountByFilter(ctx context.Context, do DbOperator,
 func (dao *VoucherTemplateDao) Create(ctx context.Context, do DbOperator, st *model.VoucherTemplate) error {
 	strSql := "insert into " + voucherTemplateTN + " (" + strings.Join(voucherTemplateFields, ",") +
 		") values (?, ?, ?, ?, ?)"
-	values := []interface{}{st.SerialNum, st.RefVoucherID, st.VoucherYear, st.Illustration, st.CreatedAt}
+	values := []interface{}{st.VoucherTemplateID, st.RefVoucherID, st.VoucherYear, st.Illustration, st.CreatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -78,15 +78,15 @@ func (dao *VoucherTemplateDao) Create(ctx context.Context, do DbOperator, st *mo
 	}
 	return nil
 }
-func (dao *VoucherTemplateDao) Delete(ctx context.Context, do DbOperator, serialNum int) error {
-	strSql := "delete from " + voucherTemplateTN + " where serial_num=?"
+func (dao *VoucherTemplateDao) Delete(ctx context.Context, do DbOperator, voucherTemplateID int) error {
+	strSql := "delete from " + voucherTemplateTN + " where voucher_template_id=?"
 
-	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Delete] [sql: %s, id: %d]", strSql, serialNum)
+	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Delete] [sql: %s, id: %d]", strSql, voucherTemplateID)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherTemplate/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
-	if _, err := do.ExecContext(ctx, strSql, serialNum); err != nil {
+	if _, err := do.ExecContext(ctx, strSql, voucherTemplateID); err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherTemplate/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}

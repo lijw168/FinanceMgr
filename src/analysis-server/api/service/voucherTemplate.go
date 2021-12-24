@@ -34,11 +34,11 @@ func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, par
 	}()
 
 	vTemplate := new(model.VoucherTemplate)
-	count, err := vs.VTemplateDao.Count(ctx, tx)
-	if err != nil {
-		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	vTemplate.SerialNum = int(count) + 1
+	// count, err := vs.VTemplateDao.Count(ctx, tx)
+	// if err != nil {
+	// 	return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	// }
+	vTemplate.VoucherTemplateID = GIdInfoService.genvVouTempIdInfo.GetNextId()
 	vTemplate.RefVoucherID = *params.RefVoucherID
 	vTemplate.VoucherYear = *params.VoucherYear
 	vTemplate.Illustration = *params.Illustration
@@ -56,14 +56,14 @@ func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, par
 	}
 	bIsRollBack = false
 	vs.Logger.InfoContext(ctx, "CreateVoucherTemplate method end ")
-	return vTemplate.SerialNum, nil
+	return vTemplate.VoucherTemplateID, nil
 }
 
-func (vs *VoucherTemplateService) DeleteVoucherTemplate(ctx context.Context, serialNum int,
+func (vs *VoucherTemplateService) DeleteVoucherTemplate(ctx context.Context, voucherTemplateID int,
 	requestId string) CcError {
 	vs.Logger.InfoContext(ctx, "DeleteVoucherTemplate method begin")
 	//delete voucher template
-	err := vs.VTemplateDao.Delete(ctx, vs.Db, serialNum)
+	err := vs.VTemplateDao.Delete(ctx, vs.Db, voucherTemplateID)
 	if err != nil {
 		errMsg := fmt.Sprintf("Delete voucher template failed,errInfo:", err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, errMsg)
@@ -72,9 +72,9 @@ func (vs *VoucherTemplateService) DeleteVoucherTemplate(ctx context.Context, ser
 	return nil
 }
 
-func (vs *VoucherTemplateService) GetVoucherTemplate(ctx context.Context, serialNum int,
+func (vs *VoucherTemplateService) GetVoucherTemplate(ctx context.Context, voucherTemplateID int,
 	requestId string) (*model.VoucherTemplateView, CcError) {
-	vTemplate, err := vs.VTemplateDao.Get(ctx, vs.Db, serialNum)
+	vTemplate, err := vs.VTemplateDao.Get(ctx, vs.Db, voucherTemplateID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -93,7 +93,7 @@ func (vs *VoucherTemplateService) ListVoucherTemplate(ctx context.Context, param
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "serial_num", "reference_voucher_id", "voucher_year", "illustration", "status":
+			case "voucher_template_id", "reference_voucher_id", "voucher_year", "illustration", "status":
 				filterFields[*f.Field] = f.Value
 			default:
 				return voucherTemplateSlice, 0, NewError(ErrVoucherTemplate, ErrUnsupported, ErrField, *f.Field)
@@ -128,7 +128,7 @@ func (vs *VoucherTemplateService) ListVoucherTemplate(ctx context.Context, param
 
 func VoucherTemplateModelToView(vTemp *model.VoucherTemplate) *model.VoucherTemplateView {
 	vTempView := new(model.VoucherTemplateView)
-	vTempView.SerialNum = vTemp.SerialNum
+	vTempView.VoucherTemplateID = vTemp.VoucherTemplateID
 	vTempView.RefVoucherID = vTemp.RefVoucherID
 	vTempView.VoucherYear = vTemp.VoucherYear
 	vTempView.Illustration = vTemp.Illustration
