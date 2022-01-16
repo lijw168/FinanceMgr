@@ -97,108 +97,33 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		fmt.Println("[Init] Create Db connection error: ", err)
 		return err
 	}
-	/* Dao */
-	idInfoDao := &db.IDInfoDao{Logger: logger}
-	companyDao := &db.CompanyDao{Logger: logger}
-	companygroupDao := &db.CompanyGroupDao{Logger: logger}
-	accSubDao := &db.AccSubDao{Logger: logger}
-	optInfoDao := &db.OperatorInfoDao{Logger: logger}
-	loginInfoDao := &db.LoginInfoDao{Logger: logger}
-	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
-	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
-	menuInfoDao := &db.MenuInfoDao{Logger: logger}
-	voucherTempDao := &db.VoucherTemplateDao{Logger: logger}
 	//初始化ID Resource
+	idInfoDao := &db.IDInfoDao{Logger: logger}
 	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
 	ccErr := service.GIdInfoService.InitIdResource()
 	if ccErr != nil {
 		return ccErr
 	}
+	//下面的几个变量是公共使用的部分
+	/* Dao */
+	companyDao := &db.CompanyDao{Logger: logger}
+	companygroupDao := &db.CompanyGroupDao{Logger: logger}
+	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
 	/*service*/
-	accSubService := &service.AccountSubService{Logger: logger, AccSubDao: accSubDao, CompanyDao: companyDao, VRecordDao: voucherRecordDao, Db: _db}
-	comService := &service.CompanyService{Logger: logger, CompanyDao: companyDao, CompanyGroupDao: companygroupDao, Db: _db}
-	comGroupService := &service.CompanyGroupService{Logger: logger, ComGroupDao: companygroupDao, Db: _db}
-	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
-	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
-	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
-	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, Db: _db}
-	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, Db: _db}
-	menuService := &service.MenuInfoService{Logger: logger, MenuDao: menuInfoDao, Db: _db}
-	voucherTempService := &service.VoucherTemplateService{Logger: logger, VTemplateDao: voucherTempDao, Db: _db}
-	resService := &service.ResouceInfoService{Logger: logger, VInfoDao: voucherInfoDao, CompanyDao: companyDao, Db: _db}
-	//handlers
-	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
-	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
-	comGroupHandlers := &handler.CompanyGroupHandlers{Logger: logger, ComGroupService: comGroupService}
-	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
-	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
-	voucherTempHandlers := &handler.VoucherTemplateHandlers{Logger: logger, VoucherTempService: voucherTempService}
-	authHandlers := &handler.AuthenHandlers{Logger: logger, AuthService: authService, ComService: comService, OptInfoService: optInfoService}
-	menuHandlers := &handler.MenuInfoHandlers{Logger: logger, MenuService: menuService}
-	resHandlers := &handler.ResourceInfoHandlers{Logger: logger, ResService: resService}
+	comService := &service.CompanyService{
+		Logger:          logger,
+		CompanyDao:      companyDao,
+		CompanyGroupDao: companygroupDao,
+		Db:              _db}
 
-	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
-	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
-	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
-	httpRouter.RegisterFunc("GetAccSub", accSubHandlers.GetAccSub)
-	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
-	httpRouter.RegisterFunc("QueryAccSubReference", accSubHandlers.QueryAccSubReference)
-
-	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
-	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)
-	httpRouter.RegisterFunc("GetCompany", comHandlers.GetCompany)
-	httpRouter.RegisterFunc("ListCompany", comHandlers.ListCompany)
-	httpRouter.RegisterFunc("UpdateCompany", comHandlers.UpdateCompany)
-	httpRouter.RegisterFunc("AssociatedCompanyGroup", comHandlers.AssociatedCompanyGroup)
-
-	httpRouter.RegisterFunc("CreateCompanyGroup", comGroupHandlers.CreateCompanyGroup)
-	httpRouter.RegisterFunc("DeleteCompanyGroup", comGroupHandlers.DeleteCompanyGroup)
-	httpRouter.RegisterFunc("GetCompanyGroup", comGroupHandlers.GetCompanyGroup)
-	httpRouter.RegisterFunc("ListCompanyGroup", comGroupHandlers.ListCompanyGroup)
-	httpRouter.RegisterFunc("UpdateCompanyGroup", comGroupHandlers.UpdateCompanyGroup)
-
-	httpRouter.RegisterFunc("CreateOperator", optInfoHandlers.CreateOperator)
-	httpRouter.RegisterFunc("DeleteOperator", optInfoHandlers.DeleteOperator)
-	httpRouter.RegisterFunc("GetOperatorInfo", optInfoHandlers.GetOperatorInfo)
-	httpRouter.RegisterFunc("ListOperatorInfo", optInfoHandlers.ListOperatorInfo)
-	httpRouter.RegisterFunc("UpdateOperator", optInfoHandlers.UpdateOperator)
-
-	httpRouter.RegisterFunc("Login", authHandlers.Login)
-	httpRouter.RegisterFunc("Logout", authHandlers.Logout)
-	httpRouter.RegisterFunc("StatusCheckout", authHandlers.StatusCheckout)
-	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
-
-	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
-	httpRouter.RegisterFunc("UpdateVoucher", voucherHandlers.UpdateVoucher)
-	httpRouter.RegisterFunc("DeleteVoucher", voucherHandlers.DeleteVoucher)
-	httpRouter.RegisterFunc("ArrangeVoucher", voucherHandlers.ArrangeVoucher)
-	// httpRouter.RegisterFunc("CreateVoucherRecords", voucherHandlers.CreateVoucherRecords)
-	// httpRouter.RegisterFunc("DeleteVoucherRecord", voucherHandlers.DeleteVoucherRecord)
-	// httpRouter.RegisterFunc("DeleteVoucherRecords", voucherHandlers.DeleteVoucherRecords)
-	httpRouter.RegisterFunc("ListVoucherRecords", voucherHandlers.ListVoucherRecords)
-	//httpRouter.RegisterFunc("UpdateVoucherRecordByID", voucherHandlers.UpdateVoucherRecordByID)
-	httpRouter.RegisterFunc("GetVoucherInfo", voucherHandlers.GetVoucherInfo)
-	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
-	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)
-	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
-	httpRouter.RegisterFunc("ListVoucherInfoByMulCondition", voucherHandlers.ListVoucherInfoByMulCondition)
-	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
-	httpRouter.RegisterFunc("UpdateVoucherInfo", voucherHandlers.UpdateVoucherInfo)
-	httpRouter.RegisterFunc("BatchAuditVouchers", voucherHandlers.BatchAuditVouchers)
-
-	httpRouter.RegisterFunc("CreateVoucherTemplate", voucherTempHandlers.CreateVoucherTemplate)
-	httpRouter.RegisterFunc("DeleteVoucherTemplate", voucherTempHandlers.DeleteVoucherTemplate)
-	httpRouter.RegisterFunc("GetVoucherTemplate", voucherTempHandlers.GetVoucherTemplate)
-	httpRouter.RegisterFunc("ListVoucherTemplate", voucherTempHandlers.ListVoucherTemplate)
-
-	httpRouter.RegisterFunc("ListMenuInfo", menuHandlers.ListMenuInfo)
-	httpRouter.RegisterFunc("InitResourceInfo", resHandlers.InitResourceInfo)
-	//检查是否登录
-	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService, logger)
-	httpRouter.LoginCheck = handler.GAccessTokenH.LoginCheck
-	httpRouter.InterfaceAuthorityCheck = handler.GAuthManaged.InterfaceAuthorityCheck
-	//用户登录的过期检查服务
-	go handler.GAccessTokenH.ExpirationCheck()
+	registerYearBalance(logger, httpRouter, _db)
+	registerVoucherTemplate(logger, httpRouter, _db)
+	registerComGroup(logger, httpRouter, companygroupDao, _db)
+	registerCompany(logger, httpRouter, comService, _db)
+	registerAccSub(logger, httpRouter, companyDao, voucherRecordDao, _db)
+	registerOptAndAuthenHandler(logger, httpRouter, comService, _db)
+	registerResAndVoucherHandler(logger, httpRouter, companyDao, voucherRecordDao, _db)
+	registerMenuHandler(logger, httpRouter, _db)
 	return nil
 }
 

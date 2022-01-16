@@ -508,3 +508,15 @@ func (vr *Voucher) GetVoucherTemplate(opts *options.BaseOptions) ([]byte, error)
 }
 
 //voucher template end
+
+//voucher generate report forms,begin
+func (vr *Voucher) CalculateAccumulativeMoney_json(params []byte) ([]byte, error) {
+	action := "CalculateAccumulativeMoney"
+	resData, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(resData)
+}
+
+//voucher generate report forms,end

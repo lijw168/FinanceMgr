@@ -128,61 +128,98 @@ select * from voucherInfo where voucher_month in (select  max(voucher_month) fro
 
 insert into voucherInfo(voucher_id,company_id,voucher_month,num_of_month,voucher_date) value(2,1,12,4,now());
 
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(81,"总账系统",1,0,1);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8001,"会计科目",2,81,1000);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8002,"记账凭证",2,81,1000);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8003,"凭证明细",2,81,1000);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8004,"审核凭证",2,81,813);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(82,"项目管理",1,0,2);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(12803,"帮助",1,0,3);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(12809,"关于...",2,12803,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(71,"系统",1,0,1);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7101,"系统设置",2,71,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7102,"菜单管理",2,71,1001);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7103,"重新登录",2,71,1002);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7104,"修改密码",2,71,1003);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7105,"退出",2,71,1004);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(81,"总账系统",1,0,2);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8101,"明细账",2,81,1101);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8102,"余额表",2,81,1102);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8103,"科目汇总",2,81,1103);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8104,"日记账",2,81,1104);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8105,"总账",2,81,1105);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8120,"记账凭证",2,81,1120);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1121);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1122);
+
+
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(51,"项目管理",1,0,3);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(61,"工具",1,0,4);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6101,"word",2,61,1200);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6102,"excel",2,61,1211);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6103,"计算器",2,61,1212);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6104,"记事本",2,61,1213);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(41,"帮助",1,0,5);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,62,1220);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,62,1221);
 
 go build -o /E/project/007/Debug/clientService.exe ./main.go
 
 //******************************todo**********************************//
-2、创建失败时，把相应的ID恢复到原来的值，这样的话，就不浪费相应的ID资源了。1
+1、创建失败时，把相应的ID恢复到原来的值，这样的话，就不浪费相应的ID资源了。1
 
-12、为了防止退出data service情况，要确保，1分钟之内没有心跳的话，就退出data service。并且界面进程，当通过心跳获取的状态
+2、为了防止退出data service情况，要确保，1分钟之内没有心跳的话，就退出data service。并且界面进程，当通过心跳获取的状态
      如果是不是在线状态，要进行提醒。  2
 	 和上面的问题45，可以同时解决。该问题也问题14 是同一个过程。
 
-14、当用户状态检查时，用户的状态不是online时，要通过heartbeat向UI进程报告，然后UI进程进行退出。1
+3、当用户状态检查时，用户的状态不是online时，要通过heartbeat向UI进程报告，然后UI进程进行退出。1
 
-20、用户正在使用的过程中，不能被删除。优先级：1
+4、用户正在使用的过程中，不能被删除。优先级：1
 
-21、一个公司的账号，只能操作一个公司的。
-22、系统里有一个默认的管理员。
-23、系统里有一个超级管理员。
-24、其实21 ~ 23就是权限的管理。2
+5、一个公司的账号，只能操作一个公司的。
+6、系统里有一个默认的管理员。
+7、系统里有一个超级管理员。
+8、其实21 ~ 23就是权限的管理。2
      关于权限管理的部分，管理员的那部分已经做好了。只有业务那部分没有做好。
 
-8、在voucherRecordInfo表里存储的subId,可以转换成，保存commonID的组合，这样的话，凭证记录，也就可以不用限制科目名字，都有几个级别组成了。
+9、在voucherRecordInfo表里存储的subId,可以转换成，保存commonID的组合，这样的话，凭证记录，也就可以不用限制科目名字，都有几个级别组成了。
     另外一种方案，在科目信息表里，commonId 和 companyId 是可以确定一条记录的。所以在选取凭证记录时，可以先通过companyId选择voucherId，然后再
 	根据该ID，进行like commonId  也是可以的。我觉得该方案会更合适一些。
 	另外一种方案，在voucherRecordInfo表里只存储一个subId，如果要找其父节点，则通过accSub表里的commonID， 目前的代码实现，就是该方案。
 
-37、启动多个服务程序
+10、启动多个服务程序
     暂时，先不考虑该问题。等以后系统正常运行了，在考虑该问题。
 
-41、初始化的资源信息，是否普通用户就可以。首先判断资源信息里，是否有数据，如果没有数据，就直接登录管理员进行初始化，或者使用单独的应用程序进行初始化。
+11、初始化的资源信息，是否普通用户就可以。首先判断资源信息里，是否有数据，如果没有数据，就直接登录管理员进行初始化，或者使用单独的应用程序进行初始化。
 	是否把初始化菜单，也放在初始化资源信息程序里？？？
 	 优先级：2
-43、请求的trace_id一直都是一样的，该问题是由实现导致的，目前暂不修改。优先级：1
-44、重复登录时，如果发现还在线，则直接返回登录成功。
+12、请求的trace_id一直都是一样的，该问题是由实现导致的，目前暂不修改。优先级：1
+13、重复登录时，如果发现还在线，则直接返回登录成功。
      以后把clientService.exe编译成动态库了，该问题就不存在了。
-45、UI ,hearbeat,如果处理错误时，则不进行重新登录。和上面的问题12，可以同时解决
+14、UI ,hearbeat,如果处理错误时，则不进行重新登录。和上面的问题12，可以同时解决
 	该问题，等以后把clientService.exe编译成动态库了，再进行修改。  优先级：1
 
 
-48、优化的部分：填制凭证，当增加或修改了凭证后，就触发重新加载最近月份的凭证信息。修改为，当关闭了填制凭证对话框时，再进行触发。如果没有其他的功能需要
+15、优化的部分：填制凭证，当增加或修改了凭证后，就触发重新加载最近月份的凭证信息。修改为，当关闭了填制凭证对话框时，再进行触发。如果没有其他的功能需要
                 实时的最近月份的凭证信息，就可以这样进行修改。优先级：2
+				
+16、凭证明细功能，在获取相应的数据时，采用了分别获取voucherInfo和voucherRecord的操作。这中间可能会有数据的不一致。不过，以后会实现
 
-16、客户端增加一个显示版本号的地方 优先级：2
-52、工具里要增加一个重新登录的菜单 2
+17、需要增加一个，填写增加期初余额的功能。
 
-   
-	 
+//QueryVoucherDetailInfoParams...
+// type QueryVoucherDetailInfoParams struct {
+// 	CompanyID         *int  `json:"companyId"`
+// 	VoucherYear       *int  `json:"voucherYear"`
+// 	VoucherMonthBegin *int  `json:"voucherMonthBegin"`
+// 	VoucherMonthEnd   *int  `json:"voucherMonthEnd"`
+// 	IncludeCharge     *bool `json:"includeCharge"`
+// 	SubID1            *int  `json:"subId1"`
+// }
 
+//该结构体是根据报表的字段而定的。
+type VoucherDetailInfoView struct {
+	VoucherID    int `json:"voucherId"`
+	VoucherMonth int `json:"voucherMonth"`
+	NumOfMonth   int `json:"numOfMonth"`
+	VoucherDate  int `json:"voucherDate"`
+}
 	
 	////todo 
 1、要实现延迟删除。允许恢复删除的数据。
@@ -194,6 +231,10 @@ go build -o /E/project/007/Debug/clientService.exe ./main.go
  
 5、一个公司可以建立多个账套。需要增加一个账套表。 
     暂时不做该需求，等以后有需求时，再做。
+	
+6、以后要增加功能互斥的功能，也就是站点互斥。
+
+7、
 
 
 

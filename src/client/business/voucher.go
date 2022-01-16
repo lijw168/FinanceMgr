@@ -238,3 +238,17 @@ func (vg *VoucherGateway) GetVoucherTemplate(param []byte) (resData []byte, errC
 	logger.Debug("GetVoucherTemplate succeed")
 	return resData, errCode
 }
+
+// end
+// voucher report froms
+func (vg *VoucherGateway) CalculateAccumulativeMoney(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	resData, err := cSdk.CalculateAccumulativeMoney_json(param)
+	if err != nil {
+		errCode = util.ErrCalAccuMoneyFailed
+		logger.Error("the CalculateAccumulativeMoney failed,err:%v", err.Error())
+	} else {
+		logger.Debug("CalculateAccumulativeMoney succeed.")
+	}
+	return resData, errCode
+}

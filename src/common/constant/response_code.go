@@ -40,10 +40,10 @@ const (
 	CodeVoucherTemplateNotExist = -403
 )
 
-//voucher record
-// const (
-// 	CodeVoucherRecordNotExist = -501
-// )
+//the begin of year balance
+const (
+	CodeYearBalanceNotExist = -501
+)
 
 //IdInfo
 const (

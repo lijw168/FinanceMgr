@@ -53,6 +53,14 @@ type ListSubjectParams struct {
 	DescLimit  *int          `json:"desc_limit"`
 }
 
+//YearBalance ...
+type YearBalanceParams struct {
+	SubjectID        *int     `json:"subjectId"`
+	Summary          *string  `json:"summary"`
+	SubjectDirection *int     `json:"subjectDirection"`
+	Balance          *float64 `json:"balance"`
+}
+
 type CreateCompanyParams struct {
 	CompanyName        *string `json:"companyName"`
 	AbbrevName         *string `json:"abbreviationName"`
@@ -291,4 +299,13 @@ type IDInfoParams struct {
 	VoucherRecordID   *int `json:"voucherRecordId"`
 	ComGroupID        *int `json:"comGroupId"`
 	VoucherTemplateID *int `json:"voucherTemplateId"`
+}
+
+//voucher, the generate report forms, parameters type
+type CalAccuMoneyParams struct {
+	CompanyID    *int `json:"companyId"`
+	SubjectID    *int `json:"subjectId"`
+	VoucherMonth *int `json:"voucherMonth"`
+	Status       *int `json:"status"`
+	VoucherYear  *int `json:"voucherYear"`
 }

@@ -257,7 +257,7 @@ func (ah *AccountSubHandlers) DeleteAccSub(w http.ResponseWriter, r *http.Reques
 	requestId := ah.GetTraceId(r)
 	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteaccSubByName: %s]", ccErr.Detail())
+		ah.Logger.ErrorContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteAccSubByID: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}

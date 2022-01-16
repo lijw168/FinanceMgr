@@ -29,4 +29,5 @@ const (
 	ErrInitResourceInfoFailed     = 25 //init resource information,failed
 	ErrAccSubRefQueryFailed       = 27 //query account subject reference,failed
 	ErrBatchAuditVouchersFailed   = 28 // audit vouchers,failed
+	ErrCalAccuMoneyFailed         = 29 // calculate accumulative money,failed
 )

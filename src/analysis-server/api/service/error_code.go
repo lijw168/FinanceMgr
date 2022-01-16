@@ -19,6 +19,7 @@ const (
 	ErrIdInfo          = "IdInfo"
 	ErrMenuInfo        = "MenuInfo"
 	ErrResInfo         = "ResourceInfo"
+	ErrYearBalance     = "yearBalance"
 )
 
 const (
@@ -77,6 +78,8 @@ const (
 	ErrAttachParam       = "attach parameter"
 	ErrNoAuthority       = "no authority"
 	ErrAccountPeriod     = "account period"
+	ErrYearBalSummary    = "year balance summary"
+	ErrBalance           = "year balance"
 )
 
 const (

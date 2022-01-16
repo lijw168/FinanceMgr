@@ -24,6 +24,14 @@ type AccSubjectView struct {
 	SubjectStyle     string `json:"subjectStyle"`
 }
 
+//YearBalance ...
+type YearBalanceView struct {
+	SubjectID        int     `json:"subjectId"`
+	Summary          string  `json:"summary"`
+	SubjectDirection int     `json:"subjectDirection"`
+	Balance          float64 `json:"balance"`
+}
+
 type CompanyView struct {
 	CompanyID          int       `json:"companyId"`
 	CompanyName        string    `json:"companyName"`
@@ -141,4 +149,10 @@ type MenuInfoView struct {
 	MenuName     string `json:"menuName"`
 	MenuLevel    int    `json:"menuLevel"`
 	ParentMenuID int    `json:"parentMenuId"`
+}
+
+//AccuMoneyValue ...
+type AccuMoneyValueView struct {
+	AccuDebitMoney  float64 `json:"accuDebitMoney"`
+	AccuCreditMoney float64 `json:"accuCreditMoney"`
 }

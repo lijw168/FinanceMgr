@@ -43,10 +43,15 @@ const (
 	// VouRecordsDel
 	VouRecordList
 	// VouRecordUpdate
+	CalculateAccuMoney
 	VouTemplateCreate
 	VouTemplateDel
 	VouTemplateShow
 	VouTemplateList
+	YearBalanceCreate
+	YearBalanceDel
+	YearBalanceShow
+	YearBalanceUpdate
 	MenuInfoList
 )
 

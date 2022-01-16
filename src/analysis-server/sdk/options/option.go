@@ -199,8 +199,10 @@ type ModifySubjectOptions struct {
 	SubjectType      int
 }
 
-// type VoucherAuditOptions struct {
-// 	VoucherID      int
-// 	VoucherAuditor string
-// 	Status         int
-// }
+//YearBalanceOption ...
+type YearBalanceOption struct {
+	SubjectID        int
+	Summary          string
+	SubjectDirection int
+	Balance          float64
+}

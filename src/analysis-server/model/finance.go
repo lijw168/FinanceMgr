@@ -28,22 +28,6 @@ type OperatorInfo struct {
 	UpdatedAt  time.Time
 }
 
-//VoucherRecord ...
-type VoucherRecord struct {
-	RecordID    int
-	VoucherID   int
-	SubjectName string
-	DebitMoney  float64
-	CreditMoney float64
-	Summary     string
-	SubID1      int
-	SubID2      int
-	SubID3      int
-	SubID4      int
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
 //AccSubject ...
 type AccSubject struct {
 	SubjectID        int
@@ -71,6 +55,22 @@ type VoucherInfo struct {
 	Status         int
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+}
+
+//VoucherRecord ...
+type VoucherRecord struct {
+	RecordID    int
+	VoucherID   int
+	SubjectName string
+	DebitMoney  float64
+	CreditMoney float64
+	Summary     string
+	SubID1      int
+	SubID2      int
+	SubID3      int
+	SubID4      int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 //VoucherTemplate ...

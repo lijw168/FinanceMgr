@@ -121,17 +121,20 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 					break
 				}
 			}
-			if pk.OpCode >= util.UserLogin && pk.OpCode <= util.OperatorUpdate {
+			switch {
+			case pk.OpCode >= util.UserLogin && pk.OpCode <= util.OperatorUpdate:
 				proxy.processOperator(conn, pk)
-			} else if pk.OpCode >= util.CompanyCreate && pk.OpCode <= util.CompanyUpdate {
+			case pk.OpCode >= util.CompanyCreate && pk.OpCode <= util.CompanyUpdate:
 				proxy.processCompany(conn, pk)
-			} else if pk.OpCode >= util.AccSubCreate && pk.OpCode <= util.AccSubUpdate {
+			case pk.OpCode >= util.AccSubCreate && pk.OpCode <= util.AccSubUpdate:
 				proxy.processAccSub(conn, pk)
-			} else if pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouTemplateList {
+			case pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouTemplateList:
 				proxy.processVoucher(conn, pk)
-			} else if pk.OpCode == util.MenuInfoList {
+			case pk.OpCode >= util.YearBalanceCreate && pk.OpCode <= util.YearBalanceUpdate:
+				proxy.processYearBalance(conn, pk)
+			case pk.OpCode == util.MenuInfoList:
 				proxy.processMenu(conn, pk)
-			} else {
+			default:
 				proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", pk.OpCode)
 			}
 		}
@@ -316,6 +319,28 @@ func (proxy *Proxy) processMenu(conn net.Conn, reqPk *Packet) {
 	case util.MenuInfoList:
 		resData, errCode := menuGate.ListMenuInfo(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	default:
+		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
+		panic("bug")
+	}
+	return
+}
+
+func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
+	var yearBalGate business.YearBalGateway
+	switch reqPk.OpCode {
+	case util.YearBalanceCreate:
+		errCode := yearBalGate.CreateYearBalance(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceDel:
+		errCode := yearBalGate.DeleteYearBalanceByID(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceShow:
+		resData, errCode := yearBalGate.GetYearBalanceById(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.YearBalanceUpdate:
+		errCode := yearBalGate.UpdateYearBalanceById(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
 		panic("bug")

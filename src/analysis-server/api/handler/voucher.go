@@ -752,7 +752,8 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
-		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		//因为该函数即接受该字段是一个值，也可以是多个值，所以就不判断该传入参数的类型。
+		//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		//先暂时修改为一个值，如果以后确实需要，再进行添加。
 		//filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
@@ -771,10 +772,12 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
-		case "createdAt":
-			*params.Order[0].Field = "createdAt"
-		case "updatedAt":
-			*params.Order[0].Field = "updatedAt"
+		// case "createdAt":
+		// 	*params.Order[0].Field = "createdAt"
+		// case "updatedAt":
+		// 	*params.Order[0].Field = "updatedAt"
+		case "voucherId":
+			*params.Order[0].Field = "voucherId"
 		case "recordId":
 			*params.Order[0].Field = "recordId"
 		default:
@@ -811,5 +814,52 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	dataBuf := &DescData{(int64)(count), vouRecordViews}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	return
+}
+
+//该函数用于在凭证明细报表中，计算某段时间内某个科目的累计金额
+func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.CalAccuMoneyParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.SubjectID == nil || *params.SubjectID <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Status == nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	accuMoneyView, ccErr := vh.Vs.CalcAccuMoney(r.Context(), params, requestId)
+	if ccErr != nil {
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney/ServerHTTP] [Vs.CalcAccuMoney: %s]", ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyView)
 	return
 }

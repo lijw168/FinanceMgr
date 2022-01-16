@@ -22,9 +22,8 @@ type VoucherService struct {
 	Logger     *log.Logger
 	VInfoDao   *db.VoucherInfoDao
 	VRecordDao *db.VoucherRecordDao
+	VouDao     *db.VoucherDao
 	Db         *sql.DB
-	//GenVoucherId *utils.GenIdInfo
-	//GenRecordId  *utils.GenIdInfo
 }
 
 func IsDuplicateKeyError(err error) bool {
@@ -461,6 +460,8 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 }
 
 //之所以放在这，是因为list voucherInfo时，有时，可能需要访问voucher record这个表。
+//该算法有一个问题，那就是当从voucherRecord表中，获取的记录比较多，但再加上了访问voucherInfo的条件，
+//导致符合记录的条件比较少。这就浪费了资源。该算法有待于改进。
 func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	params *model.ListVoucherInfoParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
@@ -496,7 +497,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	if params.BasicFilter != nil {
 		var intervalValSlice []int
 		for _, f := range params.BasicFilter {
-			if *f.Field == "numOfMonth_interval" || *f.Field == "voucherDate_interval" {
+			if *f.Field == "numOfMonth_interval" || *f.Field == "voucherDate_interval" ||
+				*f.Field == "voucherMonth_interval" {
 				err := FormatData(f.Value, &intervalValSlice)
 				if err != nil {
 					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -522,8 +524,13 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				filterNo["status"] = f.Value
 			case "numOfMonth_interval":
 				intervalFilterFields["numOfMonth"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
 			case "voucherDate_interval":
 				intervalFilterFields["voucherDate"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
+			case "voucherMonth_interval":
+				intervalFilterFields["voucherMonth"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -544,6 +551,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				}
 			}
 			switch *f.Field {
+			case "recordId", "voucherId", "subjectName", "summary", "subId1":
+				filterRecFields[*f.Field] = f.Value
 			case "debitMoney_interval":
 				intervalFilterRecFields["debitMoney"] = intervalValSlice
 			case "creditMoney_interval":
@@ -591,6 +600,37 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 		vouInfoView := VoucherInfoModelToView(vouInfo)
 		vouInfoViewSlice = append(vouInfoViewSlice, vouInfoView)
 	}
-	vouRecordCount := len(voucherInfos)
-	return vouInfoViewSlice, vouRecordCount, nil
+	voucherInfoCount := len(voucherInfos)
+	return vouInfoViewSlice, voucherInfoCount, nil
+}
+
+func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
+	params *model.CalAccuMoneyParams, requestId string) (*model.AccuMoneyValueView, CcError) {
+	vs.Logger.InfoContext(ctx, "CalcAccuMoney method begin,companyID:%d ,subjectID:%d",
+		*params.CompanyID, *params.SubjectID)
+	FuncName := "VoucherService/service/CalcAccuMoney"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	var accuMoney *model.AccuMoneyValueView
+	accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, params)
+	if err != nil {
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "CalcAccuMoney method end")
+	return accuMoney, nil
 }
