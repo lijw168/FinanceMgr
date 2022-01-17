@@ -19,10 +19,20 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	params *model.CalAccuMoneyParams) (*model.AccuMoneyValueView, error) {
 	voucherInfoTable := GenTableName(*params.VoucherYear, voucherInfoTN)
 	voucherRecordTable := GenTableName(*params.VoucherYear, voucherRecordTN)
-	strSql := "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
-		"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
-		" where company_id = ? and voucher_month = ? and status = ?)"
-	values := []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth, *params.Status}
+	var strSql string
+	var values []interface{}
+	if *params.Status == 0 {
+		strSql = "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
+			"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
+			" where company_id = ? and voucher_month = ?)"
+		values = []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth}
+	} else {
+		strSql = "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
+			"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
+			" where company_id = ? and voucher_month = ? and status = ?)"
+		values = []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth, *params.Status}
+	}
+
 	dao.Logger.DebugContext(ctx, "[Voucher/db/CalcAccumulateAccSubSum] [sql: %s ,values: %d]", strSql, values)
 	var accValue = &model.AccuMoneyValueView{}
 	start := time.Now()
