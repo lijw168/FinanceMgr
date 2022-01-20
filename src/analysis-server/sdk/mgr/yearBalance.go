@@ -42,7 +42,7 @@ func (yb *YearBalance) CreateYearBalance_json(params []byte) error {
 }
 
 func (yb *YearBalance) DeleteYearBalanceByID(opts *options.BaseOptions) error {
-	action := "DeleteYearBalanceByID"
+	action := "DeleteYearBalance"
 	err := DeleteOpsResource(action, opts)
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (yb *YearBalance) DeleteYearBalanceByID(opts *options.BaseOptions) error {
 }
 
 func (yb *YearBalance) DeleteYearBalanceByID_json(params []byte) error {
-	action := "DeleteYearBalanceByID"
+	action := "DeleteYearBalance"
 	_, err := util.DoRequest_json(action, params)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (yb *YearBalance) DeleteYearBalanceByID_json(params []byte) error {
 }
 
 func (yb *YearBalance) GetYearBalanceById(opts *options.BaseOptions) (*model.YearBalanceView, error) {
-	action := "GetYearBalanceById"
+	action := "GetYearBalance"
 	dr, err := DescribeOpsResource(action, opts)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (yb *YearBalance) GetYearBalanceById(opts *options.BaseOptions) (*model.Yea
 }
 
 func (yb *YearBalance) GetYearBalanceById_json(params []byte) ([]byte, error) {
-	action := "GetYearBalanceById"
+	action := "GetYearBalance"
 	result, err := util.DoRequest_json(action, params)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (yb *YearBalance) GetYearBalanceById_json(params []byte) ([]byte, error) {
 // }
 
 func (yb *YearBalance) UpdateYearBalanceById_json(param []byte) error {
-	action := "UpdateYearBalanceById"
+	action := "UpdateYearBalance"
 	_, err := util.DoRequest_json(action, param)
 	return err
 }
