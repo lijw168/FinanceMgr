@@ -16,7 +16,7 @@ type YearBalanceDao struct {
 
 var (
 	yearBalanceTN       = "beginOfYearBalance"
-	yearBalanceFields   = []string{"subject_id", "summary", "subjectDirection", "balance"}
+	yearBalanceFields   = []string{"subject_id", "summary", "subject_direction", "balance"}
 	scanYearBalanceTask = func(r DbScanner, st *model.YearBalanceView) error {
 		return r.Scan(&st.SubjectID, &st.Summary, &st.SubjectDirection, &st.Balance)
 	}

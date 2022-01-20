@@ -97,14 +97,14 @@ alter table accountSubject add constraint FK_Reference_2 foreign key (company_id
 /* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类和损益类才有年初余额。*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`beginOfYearBalance`;
-create table if not exists create table `finance_mgr`.`beginOfYearBalance`
+create table if not exists `finance_mgr`.`beginOfYearBalance`
 (
-   `subjectId`            int not null,
-   `summary`              varchar(128) not null,
-   `subjectDirection`     tinyint not null,
-   `balance`              decimal(12,4) not null,
-   primary key (subjectId)
-);
+   `subject_id`            int not null,
+   `summary`               varchar(128) not null,
+   `subject_direction`     tinyint not null,
+   `balance`               decimal(12,4) not null,
+   primary key (subject_id)
+)ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 -- 之所以删除该约束，就是因为这两个表之间没有强关联性，所以删除
 -- alter table beginOfYearBalance add constraint FK_Reference_5 foreign key (subjectId)
 --       references accountSubject (subjectId) on delete restrict;
