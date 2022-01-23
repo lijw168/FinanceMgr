@@ -23,7 +23,7 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	var values []interface{}
 	if *params.Status == 0 {
 		strSql = "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
-			"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
+			" where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
 			" where company_id = ? and voucher_month = ?)"
 		values = []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth}
 	} else {

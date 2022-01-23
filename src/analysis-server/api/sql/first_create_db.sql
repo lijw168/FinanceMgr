@@ -64,7 +64,7 @@ create table if not exists `finance_mgr`.`operatorInfo`
 
 use  finance_mgr;
 alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)  
-      references companyInfo (company_id) on delete restrict;
+      references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
 /* 会计科目表 Table: accountSubject                              */
@@ -91,7 +91,7 @@ create table if not exists `finance_mgr`.`accountSubject`
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 alter table accountSubject add constraint FK_Reference_2 foreign key (company_id)
-      references companyInfo (company_id) on delete restrict;
+      references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
 /* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类和损益类才有年初余额。*/
@@ -130,7 +130,7 @@ create table if not exists `finance_mgr`.`voucherInfo`
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 alter table voucherInfo add constraint FK_Reference_3 foreign key (company_id)
-      references companyInfo (company_id) on delete restrict;
+      references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
 /* 凭证信息表 Table: voucherRecordInfo                               */

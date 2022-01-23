@@ -291,9 +291,12 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 	case util.VouRecordList:
 		resData, errCode := voucherGate.ListVoucherRecords(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-		// case util.VouRecordUpdate:
-		// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
-		// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+	// case util.VouRecordUpdate:
+	// 	errCode := voucherGate.UpdateVoucherRecordByID(reqPk.Buf)
+	// 	proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.CalculateAccuMoney:
+		resData, errCode := voucherGate.CalculateAccumulativeMoney(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.VouTemplateCreate:
 		resData, errCode := voucherGate.CreateVoucherTemplate(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)

@@ -28,7 +28,7 @@ const (
 	ErrInvalid       = "invalid"
 	ErrMiss          = "miss"
 	ErrMalformed     = "malformed"
-	ErrNotFound      = "notfound"
+	ErrNotFound      = "not found"
 	ErrInuse         = "inuse"
 	ErrConflict      = "conflict"
 	ErrUnsupported   = "unsupported"
