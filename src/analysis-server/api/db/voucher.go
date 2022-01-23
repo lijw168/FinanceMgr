@@ -39,7 +39,7 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
-	row := do.QueryRowContext(ctx, strSql, values)
+	row := do.QueryRowContext(ctx, strSql, values...)
 	switch err := row.Scan(&accValue.AccuDebitMoney, &accValue.AccuCreditMoney); err {
 	case nil:
 		return accValue, nil
