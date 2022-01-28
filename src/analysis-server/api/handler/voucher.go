@@ -750,26 +750,26 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
-	if params.Filter != nil {
-		filterMap := map[string]utils.Attribute{}
-		//因为该函数即接受该字段是一个值，也可以是多个值，所以就不判断该传入参数的类型。
-		//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		//先暂时修改为一个值，如果以后确实需要，再进行添加。
-		//filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["recordId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["subId1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		// filterMap["subId2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		// filterMap["subId3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		// filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		if !utils.ValiFilter(filterMap, params.Filter) {
-			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
-		}
-	}
+	// if params.Filter != nil {
+	// 	filterMap := map[string]utils.Attribute{}
+	// 	//因为该函数即接受该字段是一个值，也可以是多个值。所以也不进行参数类型检查了。
+	// 	//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	//先暂时修改为一个值，如果以后确实需要，再进行添加。
+	// 	//filterMap["recordId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	filterMap["recordId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["subjectName"] = utils.Attribute{Type: utils.T_String, Val: nil}
+	// 	filterMap["summary"] = utils.Attribute{Type: utils.T_String, Val: nil}
+	// 	filterMap["subId1"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	// filterMap["subId2"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	// filterMap["subId3"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	// filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	if !utils.ValiFilter(filterMap, params.Filter) {
+	// 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
+	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+	// 		return
+	// 	}
+	// }
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
 		// case "createdAt":

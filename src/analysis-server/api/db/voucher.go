@@ -22,12 +22,12 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	var strSql string
 	var values []interface{}
 	if *params.Status == 0 {
-		strSql = "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
+		strSql = "select COALESCE(abs(sum(debit_money)), 0), COALESCE(abs(sum(credit_money)), 0) from " + voucherRecordTable +
 			" where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
 			" where company_id = ? and voucher_month = ?)"
 		values = []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth}
 	} else {
-		strSql = "select sum(debit_money),sum(credit_money) from " + voucherRecordTable +
+		strSql = "select COALESCE(abs(sum(debit_money)), 0), COALESCE(abs(sum(credit_money)), 0) from " + voucherRecordTable +
 			"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
 			" where company_id = ? and voucher_month = ? and status = ?)"
 		values = []interface{}{*params.SubjectID, *params.CompanyID, *params.VoucherMonth, *params.Status}
@@ -46,7 +46,7 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/Get] [scanVoucherRecord: %s]", err.Error())
+		dao.Logger.ErrorContext(ctx, "[Voucher/db/Get] [Scan: %s]", err.Error())
 		return nil, err
 	}
 }
