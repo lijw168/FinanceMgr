@@ -38,6 +38,10 @@ type ModifySubjectParams struct {
 	SubjectStyle     *string `json:"subjectStyle"`
 }
 
+type YearBalanceParams struct {
+	SubjectID *int     `json:"subjectId"`
+	Balance   *float64 `json:"balance"`
+}
 type DeleteSubjectParams struct {
 	ID *int `json:"id"`
 }
@@ -54,12 +58,12 @@ type ListSubjectParams struct {
 }
 
 //YearBalance ...
-type YearBalanceParams struct {
-	SubjectID        *int     `json:"subjectId"`
-	Summary          *string  `json:"summary"`
-	SubjectDirection *int     `json:"subjectDirection"`
-	Balance          *float64 `json:"balance"`
-}
+// type YearBalanceParams struct {
+// 	SubjectID        *int     `json:"subjectId"`
+// 	Summary          *string  `json:"summary"`
+// 	SubjectDirection *int     `json:"subjectDirection"`
+// 	Balance          *float64 `json:"balance"`
+// }
 
 type CreateCompanyParams struct {
 	CompanyName        *string `json:"companyName"`

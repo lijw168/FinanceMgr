@@ -41,6 +41,11 @@ type AccSubject struct {
 	SubjectStyle     string
 }
 
+type YearBalance struct {
+	SubjectID int
+	Balance   float64
+}
+
 //VoucherInfo ...
 type VoucherInfo struct {
 	VoucherID int

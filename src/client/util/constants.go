@@ -25,6 +25,9 @@ const (
 	AccSubList
 	AccSubShow
 	AccSubDel
+	YearBalanceList
+	YearBalanceShow
+	YearBalanceUpdate
 	AccSubUpdate
 	VoucherCreate
 	VoucherUpdate
@@ -48,10 +51,6 @@ const (
 	VouTemplateDel
 	VouTemplateShow
 	VouTemplateList
-	YearBalanceCreate
-	YearBalanceDel
-	YearBalanceShow
-	YearBalanceUpdate
 	MenuInfoList
 )
 

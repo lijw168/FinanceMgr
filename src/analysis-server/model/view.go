@@ -26,10 +26,8 @@ type AccSubjectView struct {
 
 //YearBalance ...
 type YearBalanceView struct {
-	SubjectID        int     `json:"subjectId"`
-	Summary          string  `json:"summary"`
-	SubjectDirection int     `json:"subjectDirection"`
-	Balance          float64 `json:"balance"`
+	SubjectID int     `json:"subjectId"`
+	Balance   float64 `json:"balance"`
 }
 
 type CompanyView struct {

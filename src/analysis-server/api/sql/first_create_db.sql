@@ -85,6 +85,7 @@ create table if not exists `finance_mgr`.`accountSubject`
    `subject_type`          tinyint not null,
    `mnemonic_code`         varchar(10) not null,
    `subject_style`         varchar(10) not null,
+   `balance`               decimal(12,4) DEFAULT 0,
    primary key (subject_id)
    /*unique key `subjectName` (`subject_name`),*/
    /*unique key `commonId` (`common_id`)*/

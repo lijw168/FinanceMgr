@@ -95,3 +95,30 @@ func (ag *AccSubGateway) QueryAccSubReference(param []byte) (resData []byte, err
 	}
 	return resData, errCode
 }
+
+func (ag *AccSubGateway) ListYearBalance(param []byte) (resData []byte, errCode int) {
+	return listCmdJson(resource_type_year_balance, param, cSdk.ListYearBalance_json)
+}
+
+func (ag *AccSubGateway) UpdateYearBalance(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	if err := cSdk.UpdateAccSub_json(param); err != nil {
+		errCode = util.ErrUpdateFailed
+		logger.Error("the UpdateYearBalance failed,err:%v", err.Error())
+	} else {
+		logger.Debug("UpdateYearBalance succeed")
+	}
+	return errCode
+}
+
+func (ag *AccSubGateway) GetYearBalance(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if resData, err = cSdk.GetYearBalanceById_json(param); err != nil {
+		errCode = util.ErrShowFailed
+		logger.Error("the GetYearBalanceById_json failed,err:%v", err.Error())
+	} else {
+		logger.Debug("GetYearBalanceById_json succeed.")
+	}
+	return resData, errCode
+}

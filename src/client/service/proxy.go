@@ -130,8 +130,8 @@ func (proxy *Proxy) handleConn(conn net.Conn) {
 				proxy.processAccSub(conn, pk)
 			case pk.OpCode >= util.VoucherCreate && pk.OpCode <= util.VouTemplateList:
 				proxy.processVoucher(conn, pk)
-			case pk.OpCode >= util.YearBalanceCreate && pk.OpCode <= util.YearBalanceUpdate:
-				proxy.processYearBalance(conn, pk)
+			// case pk.OpCode >= util.YearBalanceCreate && pk.OpCode <= util.YearBalanceUpdate:
+			// 	proxy.processYearBalance(conn, pk)
 			case pk.OpCode == util.MenuInfoList:
 				proxy.processMenu(conn, pk)
 			default:
@@ -226,6 +226,15 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 	case util.AccSubDel:
 		errCode := accSubGate.DeleteAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceShow:
+		resData, errCode := accSubGate.GetYearBalance(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.YearBalanceUpdate:
+		errCode := accSubGate.UpdateYearBalance(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceList:
+		resData, errCode := accSubGate.ListYearBalance(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.AccSubUpdate:
 		errCode := accSubGate.UpdateAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
@@ -329,27 +338,27 @@ func (proxy *Proxy) processMenu(conn net.Conn, reqPk *Packet) {
 	return
 }
 
-func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
-	var yearBalGate business.YearBalGateway
-	switch reqPk.OpCode {
-	case util.YearBalanceCreate:
-		errCode := yearBalGate.CreateYearBalance(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-	case util.YearBalanceDel:
-		errCode := yearBalGate.DeleteYearBalanceByID(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-	case util.YearBalanceShow:
-		resData, errCode := yearBalGate.GetYearBalanceById(reqPk.Buf)
-		proxy.respOptResWithData(conn, reqPk, errCode, resData)
-	case util.YearBalanceUpdate:
-		errCode := yearBalGate.UpdateYearBalanceById(reqPk.Buf)
-		proxy.respOptResWithoutData(conn, reqPk, errCode)
-	default:
-		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
-		panic("bug")
-	}
-	return
-}
+// func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
+// 	var yearBalGate business.YearBalGateway
+// 	switch reqPk.OpCode {
+// 	case util.YearBalanceCreate:
+// 		errCode := yearBalGate.CreateYearBalance(reqPk.Buf)
+// 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+// 	case util.YearBalanceDel:
+// 		errCode := yearBalGate.DeleteYearBalanceByID(reqPk.Buf)
+// 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+// 	case util.YearBalanceShow:
+// 		resData, errCode := yearBalGate.GetYearBalanceById(reqPk.Buf)
+// 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+// 	case util.YearBalanceUpdate:
+// 		errCode := yearBalGate.UpdateYearBalanceById(reqPk.Buf)
+// 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+// 	default:
+// 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)
+// 		panic("bug")
+// 	}
+// 	return
+// }
 
 func (proxy *Proxy) quitApp(pk *Packet) int {
 	//fmt.Println("quitApp,begin")

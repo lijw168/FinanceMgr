@@ -24,7 +24,6 @@ type CcSdk struct {
 	mgr.Voucher
 	mgr.Authen
 	mgr.MenuInfo
-	mgr.YearBalance
 	Logger *log.Logger
 }
 

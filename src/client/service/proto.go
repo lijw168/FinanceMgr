@@ -110,9 +110,11 @@ func (p *Packet) isConvertToUtf8() bool {
 		break
 	case util.AccSubReferenceQuery:
 		break
-	case util.YearBalanceDel:
+	case util.YearBalanceList:
 		break
 	case util.YearBalanceShow:
+		break
+	case util.YearBalanceUpdate:
 		break
 	default:
 		bRet = true

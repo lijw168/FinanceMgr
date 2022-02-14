@@ -9,6 +9,7 @@ import (
 
 const (
 	resource_type_account_sub = iota
+	resource_type_year_balance
 	resource_type_company
 	resource_type_voucher
 	resource_type_voucher_record
@@ -58,6 +59,8 @@ func getResourceName(rsT int) string {
 	switch rsT {
 	case resource_type_account_sub:
 		return "accSub"
+	case resource_type_year_balance:
+		return "yearBalance"
 	case resource_type_company:
 		return "company"
 	case resource_type_voucher:

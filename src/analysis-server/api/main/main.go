@@ -116,7 +116,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		CompanyGroupDao: companygroupDao,
 		Db:              _db}
 
-	registerYearBalance(logger, httpRouter, _db)
+	//registerYearBalance(logger, httpRouter, _db)
 	registerVoucherTemplate(logger, httpRouter, _db)
 	registerComGroup(logger, httpRouter, companygroupDao, _db)
 	registerCompany(logger, httpRouter, comService, _db)

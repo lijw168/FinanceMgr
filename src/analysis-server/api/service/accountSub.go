@@ -207,6 +207,79 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 	return nil
 }
 
+func (as *AccountSubService) UpdateYearBalanceById(ctx context.Context, subjectID int,
+	dYearBalance float64) CcError {
+	FuncName := "AccountSubService/accountSub/UpdateYearBalanceById"
+	bIsRollBack := true
+	tx, err := as.Db.Begin()
+	if err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, as.Logger, FuncName, tx)
+		}
+	}()
+	updateFields := make(map[string]interface{})
+	updateFields["balance"] = dYearBalance
+	err = as.AccSubDao.UpdateBySubID(ctx, tx, subjectID, updateFields)
+	if err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	return nil
+}
+
+func (as *AccountSubService) ListYearBalance(ctx context.Context,
+	params *model.ListParams) ([]*model.YearBalanceView, int, CcError) {
+	balViewSlice := make([]*model.YearBalanceView, 0)
+	filterFields := make(map[string]interface{})
+	limit, offset := -1, 0
+	if params.Filter != nil {
+		for _, f := range params.Filter {
+			switch *f.Field {
+			case "subjectId", "companyId", "subjectName", "subjectLevel", "commonId":
+				fallthrough
+			case "subjectDirection", "subjectType", "mnemonicCode", "subjectStyle":
+				filterFields[*f.Field] = f.Value
+			default:
+				return balViewSlice, 0, NewError(ErrAccSub, ErrUnsupported, ErrField, *f.Field)
+			}
+		}
+	}
+	if params.DescLimit != nil {
+		limit = *params.DescLimit
+		if params.DescOffset != nil {
+			offset = *params.DescOffset
+		}
+	}
+	orderField := ""
+	orderDirection := 0
+	if params.Order != nil {
+		orderField = *params.Order[0].Field
+		orderDirection = *params.Order[0].Direction
+	}
+	yearBals, err := as.AccSubDao.ListYearBalance(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
+	if err != nil {
+		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListYearBalance] [AccSubDao.ListYearBalance: %s, filterFields: %v]", err.Error(), filterFields)
+		return balViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+
+	for _, yearBal := range yearBals {
+		yearBalView := new(model.YearBalanceView)
+		yearBalView.SubjectID = yearBal.SubjectID
+		yearBalView.Balance = yearBal.Balance
+		balViewSlice = append(balViewSlice, yearBalView)
+	}
+	yearBalsCount := len(yearBals)
+	return balViewSlice, yearBalsCount, nil
+}
+
 func (as *AccountSubService) ListAccSub(ctx context.Context,
 	params *model.ListSubjectParams) ([]*model.AccSubjectView, int, CcError) {
 	accSubViewSlice := make([]*model.AccSubjectView, 0)
@@ -273,4 +346,13 @@ func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, su
 	bIsRollBack = false
 	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
 	return iCount, nil
+}
+
+func (as *AccountSubService) GetYearBalanceById(ctx context.Context, subjectID int,
+	requestId string) (float64, CcError) {
+	if dBalanceValue, err := as.AccSubDao.GetBalanceByID(ctx, as.Db, subjectID); err != nil {
+		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	} else {
+		return dBalanceValue, nil
+	}
 }

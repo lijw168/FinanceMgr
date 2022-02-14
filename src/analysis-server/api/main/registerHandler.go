@@ -9,15 +9,15 @@ import (
 	"database/sql"
 )
 
-func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
-	yearBalanceDao := &db.YearBalanceDao{Logger: logger}
-	yearBalService := &service.YearBalanceService{Logger: logger, YearBalDao: yearBalanceDao, Db: _db}
-	yearBalHandlers := &handler.YearBalHandlers{Logger: logger, YearBalService: yearBalService}
-	httpRouter.RegisterFunc("GetYearBalance", yearBalHandlers.GetYearBalance)
-	httpRouter.RegisterFunc("CreateYearBalance", yearBalHandlers.CreateYearBalance)
-	httpRouter.RegisterFunc("UpdateYearBalance", yearBalHandlers.UpdateYearBalance)
-	httpRouter.RegisterFunc("DeleteYearBalance", yearBalHandlers.DeleteYearBalance)
-}
+// func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
+// 	yearBalanceDao := &db.YearBalanceDao{Logger: logger}
+// 	yearBalService := &service.YearBalanceService{Logger: logger, YearBalDao: yearBalanceDao, Db: _db}
+// 	yearBalHandlers := &handler.YearBalHandlers{Logger: logger, YearBalService: yearBalService}
+// 	httpRouter.RegisterFunc("GetYearBalance", yearBalHandlers.GetYearBalance)
+// 	httpRouter.RegisterFunc("CreateYearBalance", yearBalHandlers.CreateYearBalance)
+// 	httpRouter.RegisterFunc("UpdateYearBalance", yearBalHandlers.UpdateYearBalance)
+// 	httpRouter.RegisterFunc("DeleteYearBalance", yearBalHandlers.DeleteYearBalance)
+// }
 
 //register voucher template
 func registerVoucherTemplate(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
@@ -68,8 +68,11 @@ func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.Co
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
 	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
+	httpRouter.RegisterFunc("ListYearBalance", accSubHandlers.ListYearBalance)
 	httpRouter.RegisterFunc("GetAccSub", accSubHandlers.GetAccSub)
+	httpRouter.RegisterFunc("GetYearBalance", accSubHandlers.GetYearBalance)
 	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
+	httpRouter.RegisterFunc("UpdateYearBalance", accSubHandlers.UpdateYearBalance)
 	httpRouter.RegisterFunc("QueryAccSubReference", accSubHandlers.QueryAccSubReference)
 }
 
