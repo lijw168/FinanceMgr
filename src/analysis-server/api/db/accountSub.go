@@ -148,8 +148,10 @@ var scanBalanceTask = func(r DbScanner, st *model.YearBalance) error {
 func (dao *AccSubDao) ListYearBalance(ctx context.Context, do DbOperator, filter map[string]interface{},
 	limit int, offset int, order string, od int) ([]*model.YearBalance, error) {
 	var yearBalSlice []*model.YearBalance
+	filterNo := map[string]interface{}{"balance": 0}
 	resFields := []string{"subject_id", "balance"}
-	strSql, values := transferListSql(accSubInfoTN, filter, resFields, limit, offset, order, od)
+	strSql, values := transferListSqlWithNo(accSubInfoTN, filter, filterNo, resFields, limit, offset, order, od)
+	//strSql, values := transferListSql(accSubInfoTN, filter, resFields, limit, offset, order, od)
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/ListYearBalance] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
@@ -206,13 +208,13 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 }
 
 func (dao *AccSubDao) GetBalanceByID(ctx context.Context, do DbOperator, subjectID int) (float64, error) {
-	strSql := "select balance  from " + accSubInfoTN + " where subject_id=?"
+	strSql := "select balance from " + accSubInfoTN + " where subject_id=?"
 	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetBalanceByID] [sql: %s ,values: %d]", strSql, subjectID)
 	var dBalanceValue float64
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetBalanceByID] [SqlElapsed: %v]", time.Since(start))
 	}()
-	err := do.QueryRowContext(ctx, strSql).Scan(&dBalanceValue)
+	err := do.QueryRowContext(ctx, strSql, subjectID).Scan(&dBalanceValue)
 	return dBalanceValue, err
 }

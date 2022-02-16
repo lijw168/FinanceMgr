@@ -170,7 +170,11 @@ func (as *AccSub) GetYearBalanceById_json(params []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(result.Data)
+	balValue, err := json.Marshal(result.Data)
+	if err != nil {
+		return nil, err
+	}
+	return balValue, nil
 }
 
 func (as *AccSub) UpdateYearBalance_json(params []byte) error {

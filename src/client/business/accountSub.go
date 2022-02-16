@@ -6,6 +6,7 @@ import (
 	"client/util"
 	"encoding/binary"
 	"encoding/json"
+	//"math"
 )
 
 type AccSubGateway struct {
@@ -102,7 +103,7 @@ func (ag *AccSubGateway) ListYearBalance(param []byte) (resData []byte, errCode 
 
 func (ag *AccSubGateway) UpdateYearBalance(param []byte) (errCode int) {
 	errCode = util.ErrNull
-	if err := cSdk.UpdateAccSub_json(param); err != nil {
+	if err := cSdk.UpdateYearBalance_json(param); err != nil {
 		errCode = util.ErrUpdateFailed
 		logger.Error("the UpdateYearBalance failed,err:%v", err.Error())
 	} else {
