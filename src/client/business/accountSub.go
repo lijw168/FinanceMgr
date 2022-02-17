@@ -123,3 +123,23 @@ func (ag *AccSubGateway) GetYearBalance(param []byte) (resData []byte, errCode i
 	}
 	return resData, errCode
 }
+
+func (ag *AccSubGateway) CopyAccSubTemplate(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		logger.Error("the id param is: %d", id)
+		errCode = util.ErrInvalidParam
+		return nil, errCode
+	}
+	var opts options.BaseOptions
+	opts.ID = id
+	var err error
+	if resData, err = cSdk.CopyAccSubTemplate(&opts); err != nil {
+		errCode = util.ErrCopyAccSubTemplateFailed
+		logger.Error("the CopyAccSubTemplate failed,err:%v", err.Error())
+	} else {
+		logger.Debug("CopyAccSubTemplate succeed")
+	}
+	return resData, errCode
+}

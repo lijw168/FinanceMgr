@@ -235,6 +235,9 @@ func (proxy *Proxy) processAccSub(conn net.Conn, reqPk *Packet) {
 	case util.YearBalanceList:
 		resData, errCode := accSubGate.ListYearBalance(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.CopyAccSubTemplate:
+		resData, errCode := accSubGate.CopyAccSubTemplate(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.AccSubUpdate:
 		errCode := accSubGate.UpdateAccSub(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)

@@ -143,8 +143,11 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8105,"总账",2,81,1105);
 
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8120,"记账凭证",2,81,1120);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1121);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1122);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1121);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1122);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"期初余额",2,81,1123);
 
 
 
@@ -156,8 +159,8 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6103,"计算器",2,61,1212);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6104,"记事本",2,61,1213);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(41,"帮助",1,0,5);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,62,1220);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,62,1221);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,41,1220);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,41,1221);
 
 go build -o /E/project/007/Debug/clientService.exe ./main.go
 
@@ -199,9 +202,18 @@ go build -o /E/project/007/Debug/clientService.exe ./main.go
 15、优化的部分：填制凭证，当增加或修改了凭证后，就触发重新加载最近月份的凭证信息。修改为，当关闭了填制凭证对话框时，再进行触发。如果没有其他的功能需要
                 实时的最近月份的凭证信息，就可以这样进行修改。优先级：2
 				
-16、凭证明细功能，在获取相应的数据时，采用了分别获取voucherInfo和voucherRecord的操作。这中间可能会有数据的不一致。不过，以后会实现
+16、凭证明细功能，在获取相应的数据时，采用了分别获取voucherInfo和voucherRecord的操作。这中间可能会有数据的不一致。不过，可以依照redis的事务实现方式>，避免
+    该功能的数据不一致。比如：做该功能时，暂停其他公司用户的操作，或者该操作完成后，再执行其他任务的操作。
 
 17、需要增加一个，填写增加期初余额的功能。
+    目前的实现方式有问题，因为目前的实现方式，没有区别公司，是否可以把期初余额的值保存在accountSubject表里呢？此时也就区别了不同公司的会计科目
+    新的实现方式：只需要在db/accountSubject.go中，增加一个获取期初余额的方法即可，在获取期初余额时,调用该函数即可。至于更新可以还使用已经存在的update函数,即可。
+                  客户端在设置期初余额的功能里，只需要调用两次调用即可，一是获取目前的会计科目的字段，而是获取有期初余额的记录。
+18  需要增加一个功能，就是会计科目的模板功能和拷贝其他公司科目的功能。
+
+19、发请求（ProcessRequest）里加的有锁，需要处理一下。
+
+
 
 //QueryVoucherDetailInfoParams...
 // type QueryVoucherDetailInfoParams struct {

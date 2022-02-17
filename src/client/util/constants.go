@@ -28,6 +28,7 @@ const (
 	YearBalanceList
 	YearBalanceShow
 	YearBalanceUpdate
+	CopyAccSubTemplate
 	AccSubUpdate
 	VoucherCreate
 	VoucherUpdate

@@ -74,6 +74,7 @@ func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.Co
 	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
 	httpRouter.RegisterFunc("UpdateYearBalance", accSubHandlers.UpdateYearBalance)
 	httpRouter.RegisterFunc("QueryAccSubReference", accSubHandlers.QueryAccSubReference)
+	httpRouter.RegisterFunc("CopyAccSubTemplate", accSubHandlers.CopyAccSubTemplate)
 }
 
 //register operatorHander and authenHandler

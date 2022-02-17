@@ -411,3 +411,30 @@ func (ah *AccountSubHandlers) QueryAccSubReference(w http.ResponseWriter, r *htt
 	ah.Response(r.Context(), ah.Logger, w, nil, iCount)
 	return
 }
+
+func (ah *AccountSubHandlers) CopyAccSubTemplate(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeIdParams)
+	err := ah.HttpRequestParse(r, params)
+	if err != nil {
+		ah.Logger.ErrorContext(r.Context(), "[accSub/CopyAccSubTemplate] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := ah.GetTraceId(r)
+	accSubViews, count, ccErr := ah.AccSubService.CopyAccSubTemplate(r.Context(), *params.ID, requestId)
+	if ccErr != nil {
+		ah.Logger.WarnContext(r.Context(), "[accSub/CopyAccSubTemplate/ServerHTTP] [AccSubService.CopyAccSubTemplate: %s]", ccErr.Detail())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	dataBuf := &DescData{(int64)(count), accSubViews}
+	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
+	return
+}

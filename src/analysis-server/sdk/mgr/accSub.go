@@ -187,3 +187,19 @@ func (as *AccSub) ListYearBalance_json(params []byte) ([]byte, error) {
 	action := "ListYearBalance"
 	return ListOpsResources_json(action, params)
 }
+
+func (as *AccSub) CopyAccSubTemplate(opts *options.BaseOptions) ([]byte, error) {
+	action := "CopyAccSubTemplate"
+	switch {
+	case opts.ID <= 0:
+		return nil, errors.New("ID is required")
+	}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
+	result, err := util.DoRequest(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+}
