@@ -203,3 +203,20 @@ func (as *AccSub) CopyAccSubTemplate(opts *options.BaseOptions) ([]byte, error) 
 	}
 	return json.Marshal(result.Data)
 }
+
+func (as *AccSub) GenerateAccSubTemplate(opts *options.BaseOptions) error {
+	action := "GenerateAccSubTemplate"
+	switch {
+	case opts.ID <= 0:
+		return errors.New("ID is required")
+	}
+	params := &model.BaseParams{
+		ID: &opts.ID,
+	}
+	_, err := util.DoRequest(action, params)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("GenerateAccSubTemplate succeed")
+	return nil
+}

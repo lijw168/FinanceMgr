@@ -16,6 +16,7 @@ func NewAccSubCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newAccSubListCmd())
 	cmd.AddCommand(newAccSubShowCmd())
 	cmd.AddCommand(newAccSubUpdateCmd())
+	cmd.AddCommand(newAccSubCreateTemplateCmd())
 }
 
 func newAccSubCreateCmd() *cobra.Command {
@@ -177,6 +178,25 @@ func newAccSubUpdateCmd() *cobra.Command {
 			}
 
 			if err := Sdk.UpdateAccSub(&opts); err != nil {
+				util.FormatErrorOutput(err)
+			}
+		},
+	}
+	return cmd
+}
+
+func newAccSubCreateTemplateCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "accSub-createTemplate [OPTIONS] companyId",
+		Short: "Create a accSub template",
+		Run: func(cmd *cobra.Command, args []string) {
+			var opts options.BaseOptions
+			if id, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change to int fail", args[0])
+			} else {
+				opts.ID = id
+			}
+			if err := Sdk.GenerateAccSubTemplate(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},

@@ -438,3 +438,28 @@ func (ah *AccountSubHandlers) CopyAccSubTemplate(w http.ResponseWriter, r *http.
 	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
 	return
 }
+
+func (ah *AccountSubHandlers) GenerateAccSubTemplate(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeIdParams)
+	err := ah.HttpRequestParse(r, params)
+	if err != nil {
+		ah.Logger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := ah.GetTraceId(r)
+	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
+	if ccErr != nil {
+		ah.Logger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate/ServerHTTP] [AccSubService.GenerateAccSubTemplate: %s]", ccErr.Detail())
+		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		return
+	}
+	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+	return
+}

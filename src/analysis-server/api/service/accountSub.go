@@ -111,7 +111,7 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 	limit, offset := -1, 0
 	orderField := ""
 	orderDirection := 0
-	accSubInfos, err := as.AccSubDao.List(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
+	accSubInfos, err := as.AccSubDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -137,6 +137,51 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 	accSubInfoCount := len(accSubViewSlice)
 	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%s", iCompanyId)
 	return accSubViewSlice, accSubInfoCount, nil
+}
+
+func (as *AccountSubService) GenerateAccSubTemplate(ctx context.Context, sourceCompanyId int,
+	requestId string) CcError {
+	as.Logger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
+	FuncName := "AccountSubService/accountSub/GenerateAccSubTemplate"
+	bIsRollBack := true
+	tx, err := as.Db.Begin()
+	if err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, as.Logger, FuncName, tx)
+		}
+	}()
+	//list template account subject
+	filterFields := make(map[string]interface{})
+	//把超级管理所在公司的会计科目作为会计科目的模板。
+	filterFields["companyId"] = sourceCompanyId
+	limit, offset := -1, 0
+	orderField := ""
+	orderDirection := 0
+	accSubInfos, err := as.AccSubDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+	if err != nil {
+		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	for _, accSubInfo := range accSubInfos {
+		//generate new account subject
+		accSubInfo.CompanyID = sourceCompanyId
+		accSubInfo.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
+		if err = as.AccSubDao.Create(ctx, tx, accSubInfo); err != nil {
+			as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	as.Logger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
+	return nil
 }
 
 func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
