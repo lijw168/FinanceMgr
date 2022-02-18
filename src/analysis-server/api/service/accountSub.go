@@ -168,7 +168,7 @@ func (as *AccountSubService) GenerateAccSubTemplate(ctx context.Context, sourceC
 	}
 	for _, accSubInfo := range accSubInfos {
 		//generate new account subject
-		accSubInfo.CompanyID = sourceCompanyId
+		accSubInfo.CompanyID = 1
 		accSubInfo.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
 		if err = as.AccSubDao.Create(ctx, tx, accSubInfo); err != nil {
 			as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())

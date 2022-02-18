@@ -41,6 +41,8 @@ func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) 
 	case "AssociatedCompanyGroup":
 		fallthrough
 	case "ListCompany":
+		fallthrough
+	case "GenerateAccSubTemplate":
 		if !GAccessTokenH.isRootToken(accessToken) {
 			bIsPass = false
 			err = errors.New("No authority,access the function")

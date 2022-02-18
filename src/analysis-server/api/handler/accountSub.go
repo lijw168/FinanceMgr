@@ -454,7 +454,7 @@ func (ah *AccountSubHandlers) GenerateAccSubTemplate(w http.ResponseWriter, r *h
 		return
 	}
 	requestId := ah.GetTraceId(r)
-	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
+	ccErr := ah.AccSubService.GenerateAccSubTemplate(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		ah.Logger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate/ServerHTTP] [AccSubService.GenerateAccSubTemplate: %s]", ccErr.Detail())
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
