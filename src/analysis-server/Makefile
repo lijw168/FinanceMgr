@@ -5,7 +5,7 @@ endif
 API_TARGET := $(TARGET_DIR)/analysis_server
 CLI_TARGET := $(TARGET_DIR)/analysis_cli
 DEPENDCY := $(shell find . -name "*.go")
-API_SOURCE:= api/main.go
+API_SOURCE:= analysis-server/api/main 
 CLI_SOURCE:= cli/main.go
 
 #BRANCH=`git rev-parse --abbrev-ref --symbolic-full-name @{u}`
