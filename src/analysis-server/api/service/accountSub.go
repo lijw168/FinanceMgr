@@ -116,7 +116,7 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	accSubViewSlice := make([]*model.AccSubjectView, len(accSubInfos))
+	accSubViewSlice := make([]*model.AccSubjectView, 0, len(accSubInfos))
 	for _, accSubInfo := range accSubInfos {
 		//generate new account subject
 		accSubInfo.CompanyID = iCompanyId
@@ -134,7 +134,7 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	accSubInfoCount := len(accSubInfos)
+	accSubInfoCount := len(accSubViewSlice)
 	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%s", iCompanyId)
 	return accSubViewSlice, accSubInfoCount, nil
 }
