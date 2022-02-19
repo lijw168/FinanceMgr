@@ -78,7 +78,7 @@ const (
 	ErrAttachParam       = "attach parameter"
 	ErrNoAuthority       = "no authority"
 	ErrAccountPeriod     = "account period"
-	ErrYearBalSummary    = "year balance summary"
+	ErrYear              = "year"
 	ErrBalance           = "year balance"
 )
 

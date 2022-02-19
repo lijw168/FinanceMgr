@@ -164,29 +164,29 @@ func (as *AccSub) QueryAccSubReference(opts *options.BaseOptions) (int64, error)
 	//return 0, errors.New("the type of result.Data is wrong")
 }
 
-func (as *AccSub) GetYearBalanceById_json(params []byte) ([]byte, error) {
-	action := "GetYearBalance"
-	result, err := util.DoRequest_json(action, params)
-	if err != nil {
-		return nil, err
-	}
-	balValue, err := json.Marshal(result.Data)
-	if err != nil {
-		return nil, err
-	}
-	return balValue, nil
-}
+// func (as *AccSub) GetYearBalanceById_json(params []byte) ([]byte, error) {
+// 	action := "GetYearBalance"
+// 	result, err := util.DoRequest_json(action, params)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	balValue, err := json.Marshal(result.Data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return balValue, nil
+// }
 
-func (as *AccSub) UpdateYearBalance_json(params []byte) error {
-	action := "UpdateYearBalance"
-	_, err := util.DoRequest_json(action, params)
-	return err
-}
+// func (as *AccSub) UpdateYearBalance_json(params []byte) error {
+// 	action := "UpdateYearBalance"
+// 	_, err := util.DoRequest_json(action, params)
+// 	return err
+// }
 
-func (as *AccSub) ListYearBalance_json(params []byte) ([]byte, error) {
-	action := "ListYearBalance"
-	return ListOpsResources_json(action, params)
-}
+// func (as *AccSub) ListYearBalance_json(params []byte) ([]byte, error) {
+// 	action := "ListYearBalance"
+// 	return ListOpsResources_json(action, params)
+// }
 
 func (as *AccSub) CopyAccSubTemplate(opts *options.BaseOptions) ([]byte, error) {
 	action := "CopyAccSubTemplate"

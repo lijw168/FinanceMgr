@@ -43,6 +43,7 @@ type AccSubject struct {
 
 type YearBalance struct {
 	SubjectID int
+	Year      int
 	Balance   float64
 }
 
