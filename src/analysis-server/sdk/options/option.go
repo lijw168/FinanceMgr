@@ -201,8 +201,12 @@ type ModifySubjectOptions struct {
 
 //YearBalanceOption ...
 type YearBalanceOption struct {
-	SubjectID        int
-	Summary          string
-	SubjectDirection int
-	Balance          float64
+	SubjectID int
+	Year      int
+	Balance   float64
+}
+
+type BasicYearBalance struct {
+	SubjectID int
+	Year      int
 }

@@ -38,10 +38,17 @@ type ModifySubjectParams struct {
 	SubjectStyle     *string `json:"subjectStyle"`
 }
 
-type YearBalanceParams struct {
+type OptYearBalanceParams struct {
 	SubjectID *int     `json:"subjectId"`
+	Year      *int     `json:"year"`
 	Balance   *float64 `json:"balance"`
 }
+
+type BasicYearBalanceParams struct {
+	SubjectID *int `json:"subjectId"`
+	Year      *int `json:"year"`
+}
+
 type DeleteSubjectParams struct {
 	ID *int `json:"id"`
 }
@@ -56,14 +63,6 @@ type ListSubjectParams struct {
 	DescOffset *int          `json:"desc_offset"`
 	DescLimit  *int          `json:"desc_limit"`
 }
-
-//YearBalance ...
-// type YearBalanceParams struct {
-// 	SubjectID        *int     `json:"subjectId"`
-// 	Summary          *string  `json:"summary"`
-// 	SubjectDirection *int     `json:"subjectDirection"`
-// 	Balance          *float64 `json:"balance"`
-// }
 
 type CreateCompanyParams struct {
 	CompanyName        *string `json:"companyName"`
