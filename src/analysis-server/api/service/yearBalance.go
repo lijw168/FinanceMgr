@@ -27,6 +27,38 @@ func (ys *YearBalanceService) CreateYearBalance(ctx context.Context, params *mod
 	return nil
 }
 
+func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params []*model.OptYearBalanceParams,
+	requestId string) CcError {
+	ys.Logger.InfoContext(ctx, "BatchCreateYearBalance method start, create params:%v", params)
+
+	FuncName := "YearBalanceService/service/BatchUpdateYearBalance"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	for _, param := range params {
+		err := ys.YearBalDao.CreateYearBalance(ctx, tx, param)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "BatchCreateYearBalance method end, create params:%v", params)
+	return nil
+}
+
 func (ys *YearBalanceService) GetYearBalance(ctx context.Context, iYear, subjectID int,
 	requestId string) (float64, CcError) {
 	if dBalanceValue, err := ys.YearBalDao.GetYearBalance(ctx, ys.Db, iYear, subjectID); err != nil {
@@ -53,6 +85,37 @@ func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, iYear, subj
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
+	return nil
+}
+
+func (ys *YearBalanceService) BatchUpdateYearBalance(ctx context.Context, params []*model.OptYearBalanceParams,
+	requestId string) CcError {
+	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method begin")
+	FuncName := "YearBalanceService/service/BatchUpdateYearBalance"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	for _, param := range params {
+		err := ys.YearBalDao.UpdateBalance(ctx, tx, param)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method end")
 	return nil
 }
 

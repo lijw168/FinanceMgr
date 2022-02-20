@@ -15,7 +15,9 @@ func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql
 	yearBalHandlers := &handler.YearBalHandlers{Logger: logger, YearBalService: yearBalService}
 	httpRouter.RegisterFunc("GetYearBalance", yearBalHandlers.GetYearBalance)
 	httpRouter.RegisterFunc("CreateYearBalance", yearBalHandlers.CreateYearBalance)
+	httpRouter.RegisterFunc("BatchCreateYearBalance", yearBalHandlers.BatchCreateYearBalance)
 	httpRouter.RegisterFunc("UpdateYearBalance", yearBalHandlers.UpdateYearBalance)
+	httpRouter.RegisterFunc("BatchUpdateYearBalance", yearBalHandlers.BatchUpdateYearBalance)
 	httpRouter.RegisterFunc("DeleteYearBalance", yearBalHandlers.DeleteYearBalance)
 	httpRouter.RegisterFunc("ListYearBalance", yearBalHandlers.ListYearBalance)
 }

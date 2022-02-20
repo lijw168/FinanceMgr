@@ -64,6 +64,7 @@ func (dao *YearBalanceDao) DeleteYearBalance(ctx context.Context, do DbOperator,
 	return nil
 }
 
+//可以更新yearBalanceTN中的所有字段，为以后增加字段保留的接口
 func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator, iYear, subjectID int,
 	params map[string]interface{}) error {
 	strSql := "update " + yearBalanceTN + " set "
@@ -90,6 +91,21 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	dao.Logger.InfoContext(ctx, "[yearBalance/db/UpdateYearBalance] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/UpdateYearBalance] [do.Exec: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
+//仅更新年初余额这一个字段
+func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {
+	strSql := "update " + yearBalanceTN + " set balance = ? where subject_id = ? and year=?"
+	values := []interface{}{st.Balance, st.SubjectID, st.Year}
+	start := time.Now()
+	dao.Logger.DebugContext(ctx, "[yearBalance/db/BatchUpdateBalance] [sql: %s, values: %v]", strSql, values)
+	_, err := do.ExecContext(ctx, strSql, values...)
+	dao.Logger.InfoContext(ctx, "[yearBalance/db/BatchUpdateBalance] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		dao.Logger.ErrorContext(ctx, "[yearBalance/db/BatchUpdateBalance] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil

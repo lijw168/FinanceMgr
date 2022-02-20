@@ -31,6 +31,18 @@ func (yg *YearBalGateway) CreateYearBalance(param []byte) (errCode int) {
 	return errCode
 }
 
+func (yg *YearBalGateway) BatchCreateYearBalance(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if err = cSdk.BatchCreateYearBalance_json(param); err != nil {
+		errCode = util.ErrCreateFailed
+		logger.Error("the BatchCreateYearBalance failed,err:%v", err.Error())
+	} else {
+		logger.Debug("BatchCreateYearBalance succeed;")
+	}
+	return errCode
+}
+
 func (yg *YearBalGateway) UpdateYearBalance(param []byte) (errCode int) {
 	errCode = util.ErrNull
 	if err := cSdk.UpdateYearBalance_json(param); err != nil {
@@ -38,6 +50,17 @@ func (yg *YearBalGateway) UpdateYearBalance(param []byte) (errCode int) {
 		logger.Error("the UpdateYearBalance failed,err:%v", err.Error())
 	} else {
 		logger.Debug("UpdateYearBalance succeed")
+	}
+	return errCode
+}
+
+func (yg *YearBalGateway) BatchUpdateYearBalance(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	if err := cSdk.BatchUpdateYearBalance_json(param); err != nil {
+		errCode = util.ErrUpdateFailed
+		logger.Error("the BatchUpdateYearBalance failed,err:%v", err.Error())
+	} else {
+		logger.Debug("BatchUpdateYearBalance succeed")
 	}
 	return errCode
 }

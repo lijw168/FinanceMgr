@@ -82,6 +82,44 @@ func (yh *YearBalHandlers) CreateYearBalance(w http.ResponseWriter, r *http.Requ
 	return
 }
 
+func (yh *YearBalHandlers) BatchCreateYearBalance(w http.ResponseWriter, r *http.Request) {
+	var params []*model.OptYearBalanceParams
+	err := yh.HttpRequestParse(r, params)
+	if err != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/BatchCreateYearBalance] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	for _, param := range params {
+		if param.Year == nil || *(param.Year) <= 0 {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+		if param.SubjectID == nil || *(param.SubjectID) <= 0 {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+		if param.Balance == nil {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrBalance, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+	}
+	requestId := yh.GetTraceId(r)
+	ccErr := yh.YearBalService.BatchCreateYearBalance(r.Context(), params, requestId)
+	yh.Logger.InfoContext(r.Context(), "YearBalService.BatchCreateYearBalance in BatchCreateYearBalance.")
+	if ccErr != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/BatchCreateYearBalance/ServerHTTP] [YearBalService.BatchCreateYearBalance: %s]", ccErr.Detail())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	yh.Response(r.Context(), yh.Logger, w, nil, nil)
+	return
+}
+
 func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.OptYearBalanceParams)
 	err := yh.HttpRequestParse(r, params)
@@ -113,6 +151,46 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 	ccErr := yh.YearBalService.UpdateYearBalance(r.Context(), *(params.Year), *(params.SubjectID), updateFields)
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.UpdateYearBalanceById: %s]", ccErr.Detail())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	yh.Response(r.Context(), yh.Logger, w, nil, nil)
+	return
+}
+
+func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http.Request) {
+	var params []*model.OptYearBalanceParams
+	err := yh.HttpRequestParse(r, params)
+	if err != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	for _, param := range params {
+		if param.SubjectID == nil || *param.SubjectID <= 0 {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+		if param.Year == nil || *param.Year <= 0 {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+		updateFields := make(map[string]interface{})
+		if param.Balance != nil {
+			updateFields["balance"] = *param.Balance
+		} else {
+			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
+			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+			return
+		}
+	}
+	requestId := yh.GetTraceId(r)
+	ccErr := yh.YearBalService.BatchUpdateYearBalance(r.Context(), params, requestId)
+	if ccErr != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.BatchUpdateYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}

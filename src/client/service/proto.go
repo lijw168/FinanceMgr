@@ -116,6 +116,14 @@ func (p *Packet) isConvertToUtf8() bool {
 		break
 	case util.YearBalanceUpdate:
 		break
+	case util.YearBalanceBatchUpdate:
+		break
+	case util.YearBalanceBatchCreate:
+		break
+	case util.YearBalanceCreate:
+		break
+	case util.YearBalanceDel:
+		break
 	default:
 		bRet = true
 		break
