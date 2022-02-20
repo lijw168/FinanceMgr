@@ -347,6 +347,9 @@ func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
 	case util.YearBalanceCreate:
 		errCode := yearBalGate.CreateYearBalance(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceBatchCreate:
+		errCode := yearBalGate.BatchCreateYearBalance(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	case util.YearBalanceDel:
 		errCode := yearBalGate.DeleteYearBalance(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
@@ -356,8 +359,11 @@ func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
 	case util.YearBalanceList:
 		resData, errCode := yearBalGate.ListYearBalance(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.YearBalanceBatchUpdate:
+		errCode := yearBalGate.BatchUpdateYearBalance(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	case util.YearBalanceUpdate:
-		errCode := yearBalGate.UpdateYearBalanceById(reqPk.Buf)
+		errCode := yearBalGate.UpdateYearBalance(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	default:
 		proxy.logger.LogError("opcode is mistake,the mistake operation code is: \r\n", reqPk.OpCode)

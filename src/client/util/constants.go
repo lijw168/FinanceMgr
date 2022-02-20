@@ -50,9 +50,11 @@ const (
 	VouTemplateShow
 	VouTemplateList
 	YearBalanceCreate
+	YearBalanceBatchCreate
 	YearBalanceList
 	YearBalanceShow
 	YearBalanceDel
+	YearBalanceBatchUpdate
 	YearBalanceUpdate
 	MenuInfoList
 )
