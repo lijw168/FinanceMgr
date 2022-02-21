@@ -45,6 +45,15 @@ func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params
 		}
 	}()
 	for _, param := range params {
+		if param.Year == nil || *(param.Year) <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
+		}
+		if param.SubjectID == nil || *(param.SubjectID) <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
+		}
+		if param.Balance == nil {
+			return NewError(ErrYearBalance, ErrMiss, ErrBalance, ErrNull)
+		}
 		err := ys.YearBalDao.CreateYearBalance(ctx, tx, param)
 		if err != nil {
 			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -90,7 +99,7 @@ func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, iYear, subj
 
 func (ys *YearBalanceService) BatchUpdateYearBalance(ctx context.Context, params []*model.OptYearBalanceParams,
 	requestId string) CcError {
-	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method begin")
+	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method begin, update params:%v", params)
 	FuncName := "YearBalanceService/service/BatchUpdateYearBalance"
 	bIsRollBack := true
 	// Begin transaction
@@ -105,6 +114,15 @@ func (ys *YearBalanceService) BatchUpdateYearBalance(ctx context.Context, params
 		}
 	}()
 	for _, param := range params {
+		if param.SubjectID == nil || *param.SubjectID <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
+		}
+		if param.Year == nil || *param.Year <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
+		}
+		if param.Balance == nil {
+			return NewError(ErrYearBalance, ErrMiss, ErrChangeContent, ErrNull)
+		}
 		err := ys.YearBalDao.UpdateBalance(ctx, tx, param)
 		if err != nil {
 			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -115,7 +133,7 @@ func (ys *YearBalanceService) BatchUpdateYearBalance(ctx context.Context, params
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method end")
+	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method end, update params:%v", params)
 	return nil
 }
 

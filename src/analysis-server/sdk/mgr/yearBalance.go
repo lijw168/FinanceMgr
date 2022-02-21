@@ -94,11 +94,12 @@ func (yb *YearBalance) GetYearBalance(opts *options.BasicYearBalance) (float64, 
 	if err != nil {
 		return 0, err
 	}
-	var yearBal float64 = result.Data.(float64)
-	// err = util.FormatView(result.Data, &yearBal)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	//var yearBal float64 = result.Data.(float64)
+	var yearBal float64
+	err = util.FormatView(result.Data, &yearBal)
+	if err != nil {
+		return 0, err
+	}
 	return yearBal, nil
 }
 
