@@ -30,7 +30,7 @@ func (dao *YearBalanceDao) GetYearBalance(ctx context.Context, do DbOperator, iY
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetYearBalance] [SqlElapsed: %v]", time.Since(start))
 	}()
-	err := do.QueryRowContext(ctx, strSql, subjectID).Scan(&dBalanceValue)
+	err := do.QueryRowContext(ctx, strSql, subjectID, iYear).Scan(&dBalanceValue)
 	return dBalanceValue, err
 }
 
@@ -101,11 +101,11 @@ func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st 
 	strSql := "update " + yearBalanceTN + " set balance = ? where subject_id = ? and year=?"
 	values := []interface{}{st.Balance, st.SubjectID, st.Year}
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[yearBalance/db/BatchUpdateBalance] [sql: %s, values: %v]", strSql, values)
+	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateBalance] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[yearBalance/db/BatchUpdateBalance] [SqlElapsed: %v]", time.Since(start))
+	dao.Logger.InfoContext(ctx, "[yearBalance/db/UpdateBalance] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[yearBalance/db/BatchUpdateBalance] [do.Exec: %s]", err.Error())
+		dao.Logger.ErrorContext(ctx, "[yearBalance/db/UpdateBalance] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil

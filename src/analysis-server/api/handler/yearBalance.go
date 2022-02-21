@@ -2,7 +2,7 @@ package handler
 
 import (
 	"analysis-server/api/service"
-	"analysis-server/api/utils"
+	//"analysis-server/api/utils"
 	"analysis-server/model"
 	cons "common/constant"
 	"common/log"
@@ -38,7 +38,7 @@ func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request
 
 	yearBal, ccErr := yh.YearBalService.GetYearBalance(r.Context(), *(params.Year), *(params.SubjectID), requestId)
 	if ccErr != nil {
-		yh.Logger.WarnContext(r.Context(), "[yearBalance/GetYearBalance/ServerHTTP] [YearBalService.GetYearBalanceById: %s]", ccErr.Detail())
+		yh.Logger.WarnContext(r.Context(), "[yearBalance/GetYearBalance/ServerHTTP] [YearBalService.GetYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
@@ -83,7 +83,7 @@ func (yh *YearBalHandlers) CreateYearBalance(w http.ResponseWriter, r *http.Requ
 }
 
 func (yh *YearBalHandlers) BatchCreateYearBalance(w http.ResponseWriter, r *http.Request) {
-	var params []*model.OptYearBalanceParams
+	var params = new(model.OptYearBalsParams)
 	err := yh.HttpRequestParse(r, params)
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/BatchCreateYearBalance] [HttpRequestParse: %v]", err)
@@ -91,25 +91,25 @@ func (yh *YearBalHandlers) BatchCreateYearBalance(w http.ResponseWriter, r *http
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	for _, param := range params {
-		if param.Year == nil || *(param.Year) <= 0 {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-		if param.SubjectID == nil || *(param.SubjectID) <= 0 {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-		if param.Balance == nil {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrBalance, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-	}
+	// for _, param := range params {
+	// 	if param.Year == nil || *(param.Year) <= 0 {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// 	if param.SubjectID == nil || *(param.SubjectID) <= 0 {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// 	if param.Balance == nil {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrBalance, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// }
 	requestId := yh.GetTraceId(r)
-	ccErr := yh.YearBalService.BatchCreateYearBalance(r.Context(), params, requestId)
+	ccErr := yh.YearBalService.BatchCreateYearBalance(r.Context(), params.OptYearBals, requestId)
 	yh.Logger.InfoContext(r.Context(), "YearBalService.BatchCreateYearBalance in BatchCreateYearBalance.")
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/BatchCreateYearBalance/ServerHTTP] [YearBalService.BatchCreateYearBalance: %s]", ccErr.Detail())
@@ -159,7 +159,7 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 }
 
 func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http.Request) {
-	var params []*model.OptYearBalanceParams
+	var params = new(model.OptYearBalsParams)
 	err := yh.HttpRequestParse(r, params)
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers] [HttpRequestParse: %v]", err)
@@ -167,28 +167,28 @@ func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	for _, param := range params {
-		if param.SubjectID == nil || *param.SubjectID <= 0 {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-		if param.Year == nil || *param.Year <= 0 {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-		updateFields := make(map[string]interface{})
-		if param.Balance != nil {
-			updateFields["balance"] = *param.Balance
-		} else {
-			ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-			return
-		}
-	}
+	// for _, param := range params {
+	// 	if param.SubjectID == nil || *param.SubjectID <= 0 {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// 	if param.Year == nil || *param.Year <= 0 {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// 	updateFields := make(map[string]interface{})
+	// 	if param.Balance != nil {
+	// 		updateFields["balance"] = *param.Balance
+	// 	} else {
+	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+	// 		return
+	// 	}
+	// }
 	requestId := yh.GetTraceId(r)
-	ccErr := yh.YearBalService.BatchUpdateYearBalance(r.Context(), params, requestId)
+	ccErr := yh.YearBalService.BatchUpdateYearBalance(r.Context(), params.OptYearBals, requestId)
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.BatchUpdateYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -233,26 +233,28 @@ func (yh *YearBalHandlers) ListYearBalance(w http.ResponseWriter, r *http.Reques
 	err := yh.HttpRequestParse(r, params)
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[accSub/ListYearBalance] [HttpRequestParse: %v]", err)
-		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
 		yh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
-		ce := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
+		ce := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ce, nil)
 		return
 	}
-	if params.Filter != nil {
-		filterMap := map[string]utils.Attribute{}
-		filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["year"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		if !utils.ValiFilter(filterMap, params.Filter) {
-			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
-			yh.Response(r.Context(), yh.Logger, w, ce, nil)
-			return
-		}
-	}
+	// if params.Filter != nil {
+	// 	filterMap := map[string]utils.Attribute{}
+	// 	//对通过c++库的jsoncpp 编码成的整型数组进行验证，有问题。所有此处不再验证该参数。
+	//问题是：//从客户端发过来的整型数据，go解析json时，会解析成float64
+	// 	filterMap["subjectId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	filterMap["year"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	if !utils.ValiFilter(filterMap, params.Filter) {
+	// 		ce := service.NewError(service.ErrYearBalance, service.ErrValue, service.ErrField, service.ErrNull)
+	// 		yh.Response(r.Context(), yh.Logger, w, ce, nil)
+	// 		return
+	// 	}
+	// }
 	if (params.Order != nil) && (len(params.Order) > 0) {
 		switch *params.Order[0].Field {
 		case "subjectId":

@@ -116,7 +116,7 @@ func newYearBalanceUpdateCmd() *cobra.Command {
 		Use:   "yearBal-update [OPTIONS] subjectID year balance",
 		Short: "update a year balance of a accountSubject",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 5 {
+			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
@@ -146,12 +146,12 @@ func newYearBalanceUpdateCmd() *cobra.Command {
 func newYearBalanceListCmd() *cobra.Command {
 	defCs := []string{"SubjectID", "year", "yearBalance"}
 	cmd := &cobra.Command{
-		Use:   "yearBal-list year",
+		Use:   "yearBal-list [OPTIONS] subjectID year",
 		Short: "List account subjects Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
+		if len(args) < 2 {
 			cmd.Help()
 			return
 		}
@@ -160,8 +160,13 @@ func newYearBalanceListCmd() *cobra.Command {
 		opts.Offset = 0
 		//for test
 		opts.Filter = make(map[string]interface{})
-		if iYear, err := strconv.Atoi(args[0]); err != nil {
+		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+		} else {
+			opts.Filter["subjectId"] = id
+		}
+		if iYear, err := strconv.Atoi(args[1]); err != nil {
+			fmt.Println("change to int fail", args[1])
 		} else {
 			opts.Filter["year"] = iYear
 		}

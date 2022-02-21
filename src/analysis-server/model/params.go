@@ -44,6 +44,10 @@ type OptYearBalanceParams struct {
 	Balance   *float64 `json:"balance"`
 }
 
+type OptYearBalsParams struct {
+	OptYearBals []*OptYearBalanceParams `json:"optYearBals"`
+}
+
 type BasicYearBalanceParams struct {
 	SubjectID *int `json:"subjectId"`
 	Year      *int `json:"year"`
