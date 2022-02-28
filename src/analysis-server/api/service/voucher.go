@@ -634,3 +634,92 @@ func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 	vs.Logger.InfoContext(ctx, "CalcAccuMoney method end")
 	return accuMoney, nil
 }
+
+//批量计算多个accSubId所对应的累计金额
+func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
+	params *model.BatchCalAccuMoneyParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
+	vs.Logger.InfoContext(ctx, "BatchCalcAccuMoney method begin")
+	FuncName := "VoucherService/service/BatchCalcAccuMoney"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	resData := make([]*model.AccuMoneyValueView, 0, len(params.SubjectIDArr))
+	for _, subId := range params.SubjectIDArr {
+		var calcAccuMoneyParam model.CalAccuMoneyParams
+		*calcAccuMoneyParam.CompanyID = *params.CompanyID
+		*calcAccuMoneyParam.SubjectID = subId
+		*calcAccuMoneyParam.VoucherMonth = *params.VoucherMonth
+		*calcAccuMoneyParam.VoucherYear = *params.VoucherYear
+		*calcAccuMoneyParam.Status = *params.Status
+		var accuMoney *model.AccuMoneyValueView
+		accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, &calcAccuMoneyParam)
+		if err != nil {
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		accuMoney.SubjectID = subId
+		resData = append(resData, accuMoney)
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "BatchCalcAccuMoney method end")
+	return resData, nil
+}
+
+//批量计算多个accSubId所对应的本期发生额
+func (vs *VoucherService) CalcAccountOfPeriod(ctx context.Context,
+	params *model.CalAmountOfPeriodParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
+	vs.Logger.InfoContext(ctx, "CalcAccountOfPeriod method begin")
+	FuncName := "VoucherService/service/CalcAccountOfPeriod"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := vs.Db.Begin()
+	if err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, vs.Logger, FuncName, tx)
+		}
+	}()
+	recData, err := vs.VouDao.GetPartialVouRecords(ctx, tx, params)
+	if err != nil {
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	resDataMap := make(map[int]*model.AccuMoneyValueView, len(recData))
+	for _, accPeriod := range recData {
+		if itemPtr, ok := resDataMap[accPeriod.SubjectID]; ok {
+			itemPtr.AccuDebitMoney += accPeriod.PeriodDebitMoney
+			itemPtr.AccuCreditMoney += accPeriod.PeriodCreditMoney
+		} else {
+			accPeriodView := new(model.AccuMoneyValueView)
+			accPeriodView.SubjectID = accPeriod.SubjectID
+			accPeriodView.AccuDebitMoney = accPeriod.PeriodDebitMoney
+			accPeriodView.AccuCreditMoney = accPeriod.PeriodCreditMoney
+			resDataMap[accPeriod.SubjectID] = accPeriodView
+		}
+	}
+	accPeriodViewSlice := make([]*model.AccuMoneyValueView, len(resDataMap))
+	for _, accPeriodPtr := range resDataMap {
+		accPeriodViewSlice = append(accPeriodViewSlice, accPeriodPtr)
+	}
+	if err = tx.Commit(); err != nil {
+		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	vs.Logger.InfoContext(ctx, "CalcAccountOfPeriod method end")
+	return accPeriodViewSlice, nil
+}

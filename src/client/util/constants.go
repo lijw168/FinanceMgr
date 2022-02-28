@@ -45,6 +45,8 @@ const (
 	VouRecordList
 	// VouRecordUpdate
 	CalculateAccuMoney
+	BatchCalcAccuMoney
+	CalcAccountOfPeriod
 	VouTemplateCreate
 	VouTemplateDel
 	VouTemplateShow

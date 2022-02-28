@@ -142,7 +142,8 @@ func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 	httpRouter.RegisterFunc("UpdateVoucherInfo", voucherHandlers.UpdateVoucherInfo)
 	httpRouter.RegisterFunc("BatchAuditVouchers", voucherHandlers.BatchAuditVouchers)
 	httpRouter.RegisterFunc("CalculateAccumulativeMoney", voucherHandlers.CalculateAccumulativeMoney)
-
+	httpRouter.RegisterFunc("BatchCalcAccuMoney", voucherHandlers.BatchCalcAccuMoney)
+	httpRouter.RegisterFunc("CalcAccountOfPeriod", voucherHandlers.CalcAccountOfPeriod)
 }
 
 //register menuHandler

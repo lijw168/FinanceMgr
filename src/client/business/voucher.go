@@ -240,7 +240,7 @@ func (vg *VoucherGateway) GetVoucherTemplate(param []byte) (resData []byte, errC
 }
 
 // end
-// voucher report froms
+// voucher report froms, begin
 func (vg *VoucherGateway) CalculateAccumulativeMoney(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
 	resData, err := cSdk.CalculateAccumulativeMoney_json(param)
@@ -252,3 +252,29 @@ func (vg *VoucherGateway) CalculateAccumulativeMoney(param []byte) (resData []by
 	}
 	return resData, errCode
 }
+
+func (vg *VoucherGateway) BatchCalcAccuMoney(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	resData, err := cSdk.BatchCalcAccuMoney_json(param)
+	if err != nil {
+		errCode = util.ErrBatchCalAccuMoneyFailed
+		logger.Error("the BatchCalcAccuMoney failed,err:%v", err.Error())
+	} else {
+		logger.Debug("BatchCalcAccuMoney succeed.")
+	}
+	return resData, errCode
+}
+
+func (vg *VoucherGateway) CalcAccountOfPeriod(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	resData, err := cSdk.CalcAccountOfPeriod_json(param)
+	if err != nil {
+		errCode = util.ErrCalAccPeriodFailed
+		logger.Error("the CalcAccountOfPeriod failed,err:%v", err.Error())
+	} else {
+		logger.Debug("CalcAccountOfPeriod succeed.")
+	}
+	return resData, errCode
+}
+
+// voucher report froms, end

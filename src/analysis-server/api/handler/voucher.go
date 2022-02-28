@@ -817,7 +817,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	return
 }
 
-//该函数用于在凭证明细报表中，计算某段时间内某个科目的累计金额
+//该函数用于在凭证明细报表中，计算截止到某个时间的某个科目的累计金额
 func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
@@ -861,5 +861,104 @@ func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyView)
+	return
+}
+
+//批量计算截止到某个时间的多个科目的累计金额，该函数用于统计“发生额及余额表”
+func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.BatchCalAccuMoneyParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.SubjectIDArr == nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Status == nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	accuMoneyViewSlice, ccErr := vh.Vs.BatchCalcAccuMoney(r.Context(), params, requestId)
+	if ccErr != nil {
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney/ServerHTTP] [Vs.BatchCalcAccuMoney: %s]", ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyViewSlice)
+	return
+}
+
+////批量计算多个accSubId所对应的本期发生额,该函数用于统计“发生额及余额表”
+func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.CalAmountOfPeriodParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.SubjectIDArr == nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.StartMonth == nil || *params.StartMonth <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, "startMonth", service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.StartMonth == nil || *params.EndMonth <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, "EndMonth", service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Status == nil {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	accPeriodViewSlice, ccErr := vh.Vs.CalcAccountOfPeriod(r.Context(), params, requestId)
+	if ccErr != nil {
+		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod/ServerHTTP] [Vs.CalcAccountOfPeriod: %s]", ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, accPeriodViewSlice)
 	return
 }

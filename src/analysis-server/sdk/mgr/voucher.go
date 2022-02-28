@@ -519,4 +519,22 @@ func (vr *Voucher) CalculateAccumulativeMoney_json(params []byte) ([]byte, error
 	return json.Marshal(result.Data)
 }
 
+func (vr *Voucher) BatchCalcAccuMoney_json(params []byte) ([]byte, error) {
+	action := "BatchCalcAccuMoney"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+}
+
+func (vr *Voucher) CalcAccountOfPeriod_json(params []byte) ([]byte, error) {
+	action := "CalcAccountOfPeriod"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result.Data)
+}
+
 //voucher generate report forms,end
