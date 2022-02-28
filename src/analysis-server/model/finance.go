@@ -141,3 +141,10 @@ type CommResp struct {
 	Detail  string      `json:"detail"`
 	Data    interface{} `json:"data"`
 }
+
+//AccountOfPeriod
+type AccountOfPeriod struct {
+	SubjectID         int
+	PeriodDebitMoney  float64
+	PeriodCreditMoney float64
+}

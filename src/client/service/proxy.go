@@ -309,6 +309,12 @@ func (proxy *Proxy) processVoucher(conn net.Conn, reqPk *Packet) {
 	case util.CalculateAccuMoney:
 		resData, errCode := voucherGate.CalculateAccumulativeMoney(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.BatchCalcAccuMoney:
+		resData, errCode := voucherGate.BatchCalcAccuMoney(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
+	case util.CalcAccountOfPeriod:
+		resData, errCode := voucherGate.CalcAccountOfPeriod(reqPk.Buf)
+		proxy.respOptResWithData(conn, reqPk, errCode, resData)
 	case util.VouTemplateCreate:
 		resData, errCode := voucherGate.CreateVoucherTemplate(reqPk.Buf)
 		proxy.respOptResWithData(conn, reqPk, errCode, resData)

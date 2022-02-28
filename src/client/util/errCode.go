@@ -30,5 +30,7 @@ const (
 	ErrAccSubRefQueryFailed       = 27 //query account subject reference,failed
 	ErrBatchAuditVouchersFailed   = 28 // audit vouchers,failed
 	ErrCalAccuMoneyFailed         = 29 // calculate accumulative money,failed
-	ErrCopyAccSubTemplateFailed   = 30 // copy account subject template,failed
+	ErrBatchCalAccuMoneyFailed    = 30 // batch calculate accumulative money,failed
+	ErrCopyAccSubTemplateFailed   = 31 // copy account subject template,failed
+	ErrCalAccPeriodFailed         = 32 // calculate account of period,failed
 )

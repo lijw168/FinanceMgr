@@ -308,11 +308,28 @@ type IDInfoParams struct {
 	VoucherTemplateID *int `json:"voucherTemplateId"`
 }
 
-//voucher, the generate report forms, parameters type
+//以下参数用于报表统计时的参数类型
 type CalAccuMoneyParams struct {
 	CompanyID    *int `json:"companyId"`
 	SubjectID    *int `json:"subjectId"`
 	VoucherMonth *int `json:"voucherMonth"`
 	Status       *int `json:"status"`
 	VoucherYear  *int `json:"voucherYear"`
+}
+
+type BatchCalAccuMoneyParams struct {
+	CompanyID    *int  `json:"companyId"`
+	SubjectIDArr []int `json:"subjectIdArr"`
+	VoucherMonth *int  `json:"voucherMonth"`
+	Status       *int  `json:"status"`
+	VoucherYear  *int  `json:"voucherYear"`
+}
+
+type CalAmountOfPeriodParams struct {
+	CompanyID    *int  `json:"companyId"`
+	SubjectIDArr []int `json:"subjectIdArr"`
+	StartMonth   *int  `json:"startMonth"`
+	EndMonth     *int  `json:"endMonth"`
+	Status       *int  `json:"status"`
+	VoucherYear  *int  `json:"voucherYear"`
 }

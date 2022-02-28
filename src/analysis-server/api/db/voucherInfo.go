@@ -161,7 +161,7 @@ func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter
 		voucherInfo := new(model.VoucherInfo)
 		err = scanVoucherInfo(result, voucherInfo)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/SimpleList] [ScanSnapshot: %s]", err.Error())
+			dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/SimpleList] [scanVoucherInfo: %s]", err.Error())
 			return voucherInfoSlice, err
 		}
 		voucherInfoSlice = append(voucherInfoSlice, voucherInfo)

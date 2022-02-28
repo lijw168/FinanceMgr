@@ -152,6 +152,14 @@ type MenuInfoView struct {
 
 //AccuMoneyValue ...
 type AccuMoneyValueView struct {
+	SubjectID       int     `json:"subjectId"`
 	AccuDebitMoney  float64 `json:"accuDebitMoney"`
 	AccuCreditMoney float64 `json:"accuCreditMoney"`
 }
+
+//AccountOfPeriod
+// type AccountOfPeriodView struct {
+// 	SubjectID            int     `json:"subjectId"`
+// 	PeriodDebitMoneySum  float64 `json:"periodDebitMoneySum"`
+// 	PeriodCreditMoneySum float64 `json:"periodCreditMoneySum"`
+// }
