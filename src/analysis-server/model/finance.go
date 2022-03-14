@@ -148,3 +148,11 @@ type AccountOfPeriod struct {
 	PeriodDebitMoney  float64
 	PeriodCreditMoney float64
 }
+
+type CalAccuMoney struct {
+	CompanyID    int
+	SubjectID    int
+	VoucherMonth int
+	Status       int
+	VoucherYear  int
+}

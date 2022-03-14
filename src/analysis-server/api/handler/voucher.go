@@ -942,7 +942,7 @@ func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Re
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.StartMonth == nil || *params.EndMonth <= 0 {
+	if params.EndMonth == nil || *params.EndMonth <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, "EndMonth", service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return

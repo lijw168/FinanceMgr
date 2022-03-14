@@ -621,8 +621,14 @@ func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
+	var calcAccuMoney model.CalAccuMoney
+	calcAccuMoney.CompanyID = *params.CompanyID
+	calcAccuMoney.SubjectID = *params.SubjectID
+	calcAccuMoney.VoucherMonth = *params.VoucherMonth
+	calcAccuMoney.VoucherYear = *params.VoucherYear
+	calcAccuMoney.Status = *params.Status
 	var accuMoney *model.AccuMoneyValueView
-	accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, params)
+	accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, &calcAccuMoney)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -654,14 +660,14 @@ func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 	}()
 	resData := make([]*model.AccuMoneyValueView, 0, len(params.SubjectIDArr))
 	for _, subId := range params.SubjectIDArr {
-		var calcAccuMoneyParam model.CalAccuMoneyParams
-		*calcAccuMoneyParam.CompanyID = *params.CompanyID
-		*calcAccuMoneyParam.SubjectID = subId
-		*calcAccuMoneyParam.VoucherMonth = *params.VoucherMonth
-		*calcAccuMoneyParam.VoucherYear = *params.VoucherYear
-		*calcAccuMoneyParam.Status = *params.Status
+		var calcAccuMoney model.CalAccuMoney
+		calcAccuMoney.CompanyID = *params.CompanyID
+		calcAccuMoney.SubjectID = subId
+		calcAccuMoney.VoucherMonth = *params.VoucherMonth
+		calcAccuMoney.VoucherYear = *params.VoucherYear
+		calcAccuMoney.Status = *params.Status
 		var accuMoney *model.AccuMoneyValueView
-		accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, &calcAccuMoneyParam)
+		accuMoney, err = vs.VouDao.CalcAccuMoney(ctx, tx, &calcAccuMoney)
 		if err != nil {
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
