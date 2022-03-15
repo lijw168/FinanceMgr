@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	//"database/sql"
+	"database/sql"
 	"strings"
 	"time"
 
@@ -30,8 +30,16 @@ func (dao *YearBalanceDao) GetYearBalance(ctx context.Context, do DbOperator, iY
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetYearBalance] [SqlElapsed: %v]", time.Since(start))
 	}()
-	err := do.QueryRowContext(ctx, strSql, subjectID, iYear).Scan(&dBalanceValue)
-	return dBalanceValue, err
+	switch err := do.QueryRowContext(ctx, strSql, subjectID, iYear).Scan(&dBalanceValue); err {
+	case nil:
+		return dBalanceValue, nil
+	case sql.ErrNoRows:
+		//根据业务的规则，如果是没有获取到相应的数据，则可以返回0值，0值在前端也表示没有相应的数据。
+		return 0, nil
+	default:
+		dao.Logger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByID] [scanAccSubTask: %s]", err.Error())
+		return 0, err
+	}
 }
 
 func (dao *YearBalanceDao) CreateYearBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {

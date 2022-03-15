@@ -443,12 +443,3 @@ func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, su
 	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
 	return iCount, nil
 }
-
-// func (as *AccountSubService) GetYearBalanceById(ctx context.Context, subjectID int,
-// 	requestId string) (float64, CcError) {
-// 	if dBalanceValue, err := as.AccSubDao.GetBalanceByID(ctx, as.Db, subjectID); err != nil {
-// 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-// 	} else {
-// 		return dBalanceValue, nil
-// 	}
-// }
