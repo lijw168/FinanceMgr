@@ -907,7 +907,8 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyViewSlice)
+	dataBuf := &DescData{(int64)(len(accuMoneyViewSlice)), accuMoneyViewSlice}
+	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 	return
 }
 
@@ -959,6 +960,7 @@ func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Re
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, accPeriodViewSlice)
+	dataBuf := &DescData{(int64)(len(accPeriodViewSlice)), accPeriodViewSlice}
+	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 	return
 }

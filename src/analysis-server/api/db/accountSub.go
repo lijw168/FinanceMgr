@@ -206,15 +206,3 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 	}
 	return nil
 }
-
-func (dao *AccSubDao) GetBalanceByID(ctx context.Context, do DbOperator, subjectID int) (float64, error) {
-	strSql := "select balance from " + accSubInfoTN + " where subject_id=?"
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetBalanceByID] [sql: %s ,values: %d]", strSql, subjectID)
-	var dBalanceValue float64
-	start := time.Now()
-	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetBalanceByID] [SqlElapsed: %v]", time.Since(start))
-	}()
-	err := do.QueryRowContext(ctx, strSql, subjectID).Scan(&dBalanceValue)
-	return dBalanceValue, err
-}
