@@ -119,6 +119,10 @@ func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st 
 	return nil
 }
 
+// var scanBalanceTask = func(r DbScanner, st *model.YearBalance) error {
+// 	return r.Scan(&st.SubjectID, &st.Balance)
+// }
+
 func (dao *YearBalanceDao) ListYearBalance(ctx context.Context, do DbOperator, filter map[string]interface{},
 	limit int, offset int, order string, od int) ([]*model.YearBalance, error) {
 	var yearBalSlice []*model.YearBalance
