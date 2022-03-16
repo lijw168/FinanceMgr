@@ -72,7 +72,6 @@ alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)
 /* 在一个公司内，1级科目名称不能重复，但二级以后的科目名称是可以重复的。*/
 /*subject_type:科目的类型;0:不选择；1:资产;2:负债;3:权益;4:成本;5:损益*/
 /*subject_direction:科目的性质;1:debit;2:credit*/
-/*balance是年初余额，不是期初余额*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`accountSubject`;
 create table if not exists `finance_mgr`.`accountSubject`
@@ -86,7 +85,6 @@ create table if not exists `finance_mgr`.`accountSubject`
    `subject_type`          tinyint not null,
    `mnemonic_code`         varchar(10) not null,
    `subject_style`         varchar(10) not null,
-   `balance`               decimal(12,4) DEFAULT 0,
    primary key (subject_id)
    /*unique key `subjectName` (`subject_name`),*/
    /*unique key `commonId` (`common_id`)*/
