@@ -82,16 +82,15 @@ func (auth *Authen) OnlineCheck() int {
 			if resErr.Code == -2 {
 				auth.setAuthenInfo("", "", 0, util.Offline)
 				cSdk.SetAccessToken("")
-				logger.Debug("the user status has been to convert to the %v", util.Offline)
+				logger.Debug("the user status has been to convert to the %d", util.Offline)
 			}
 		}
 
 	} else {
-		//userStatus = view.Status
 		if auth.GetUserStatus() != view.Status {
 			auth.setAuthenInfo("", "", 0, view.Status)
 			cSdk.SetAccessToken("")
-			logger.Debug("OnlineCheck succeed;the user status has been to convert to the %v", view)
+			logger.Debug("OnlineCheck succeed;the user status has been to convert to the %d", view)
 		}
 	}
 	return errCode
