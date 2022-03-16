@@ -141,40 +141,6 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 	return accountSubjectSlice, nil
 }
 
-// var scanBalanceTask = func(r DbScanner, st *model.YearBalance) error {
-// 	return r.Scan(&st.SubjectID, &st.Balance)
-// }
-
-// func (dao *AccSubDao) ListYearBalance(ctx context.Context, do DbOperator, filter map[string]interface{},
-// 	limit int, offset int, order string, od int) ([]*model.YearBalance, error) {
-// 	var yearBalSlice []*model.YearBalance
-// 	filterNo := map[string]interface{}{"balance": 0}
-// 	resFields := []string{"subject_id", "balance"}
-// 	strSql, values := transferListSqlWithNo(accSubInfoTN, filter, filterNo, resFields, limit, offset, order, od)
-// 	//strSql, values := transferListSql(accSubInfoTN, filter, resFields, limit, offset, order, od)
-// 	dao.Logger.DebugContext(ctx, "[accountSubject/db/ListYearBalance] sql %s with values %v", strSql, values)
-// 	start := time.Now()
-// 	defer func() {
-// 		dao.Logger.InfoContext(ctx, "[accountSubject/db/ListYearBalance] [SqlElapsed: %v]", time.Since(start))
-// 	}()
-// 	result, err := do.QueryContext(ctx, strSql, values...)
-// 	if err != nil {
-// 		dao.Logger.ErrorContext(ctx, "[accountSubject/db/ListYearBalance] [do.Query: %s]", err.Error())
-// 		return yearBalSlice, err
-// 	}
-// 	defer result.Close()
-// 	for result.Next() {
-// 		yearBal := new(model.YearBalance)
-// 		err = scanBalanceTask(result, yearBal)
-// 		if err != nil {
-// 			dao.Logger.ErrorContext(ctx, "[accountSubject/db/List] [ScanSnapshot: %s]", err.Error())
-// 			return yearBalSlice, err
-// 		}
-// 		yearBalSlice = append(yearBalSlice, yearBal)
-// 	}
-// 	return yearBalSlice, nil
-// }
-
 func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectID int,
 	params map[string]interface{}) error {
 	//var keyMap = map[string]string{"SubjectID": "subject_id", "SubjectName": "subject_name", "SubjectLevel": "subject_level"}
