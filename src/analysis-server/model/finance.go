@@ -54,7 +54,7 @@ type VoucherInfo struct {
 	//oucherYear    int
 	VoucherMonth   int
 	NumOfMonth     int
-	VoucherDate    time.Time
+	VoucherDate    int
 	VoucherFiller  string
 	VoucherAuditor string
 	BillCount      int

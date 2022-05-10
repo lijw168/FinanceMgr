@@ -118,7 +118,7 @@ create table if not exists `finance_mgr`.`voucherInfo`
    `company_id`            int not null, 
    `voucher_month`         int not null COMMENT '制证月份',
    `num_of_month`          int not null COMMENT '本月第几次记录凭证',
-   `voucher_date`          date not null COMMENT '制证日期',
+   `voucher_date`          int not null COMMENT '制证日期',
    `voucher_filler`        varchar(10) COMMENT '制证者',
    `voucher_auditor`       varchar(10) COMMENT '审核者',
    `bill_count`            int DEFAULT 0 COMMENT '该张凭证的单据个数',

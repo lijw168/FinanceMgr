@@ -164,6 +164,8 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 
 go build -o /E/project/007/Debug/clientService.exe ./main.go
 
+go build -o /E/project/007/Release/clientService.exe ./main.go
+
 //******************************todo**********************************//
 1、创建失败时，把相应的ID恢复到原来的值，这样的话，就不浪费相应的ID资源了。1
 
@@ -244,7 +246,7 @@ type VoucherDetailInfoView struct {
 	
 6、以后要增加功能互斥的功能，也就是站点互斥。
 
-7、
+7、年度转结
 
 
 

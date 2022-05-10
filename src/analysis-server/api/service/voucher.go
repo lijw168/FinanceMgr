@@ -51,24 +51,27 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 
 	vInfo := new(model.VoucherInfo)
 	infoParams := params.InfoParams
+	var iYear, iMonth int
 	if infoParams.VoucherDate != nil {
 		iDate := *infoParams.VoucherDate
-		iYear := iDate / 10000
-		iMonth := (iDate - iYear*10000) / 100
-		iDay := iDate % 100
-		t := time.Date(iYear, time.Month(iMonth), iDay, 0, 0, 0, 0, time.Local)
-		vInfo.VoucherDate = t
+		iYear = iDate / 10000
+		iMonth = (iDate - iYear*10000) / 100
+		vInfo.VoucherDate = iDate
 	} else {
-		vInfo.VoucherDate = time.Now()
+		curTime := time.Now()
+		var iDay int
+		var month time.Month
+		iYear, month, iDay = curTime.Date()
+		iMonth = int(month)
+		vInfo.VoucherDate = iYear*10000 + iMonth*100 + iDay
 	}
-	year, month, _ := vInfo.VoucherDate.Date()
-	vInfo.VoucherMonth = int(month)
+	vInfo.VoucherMonth = iMonth
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
 	filterFields["voucherMonth"] = vInfo.VoucherMonth
 	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d",
 		*infoParams.CompanyID, vInfo.VoucherMonth)
-	count, err := vs.VInfoDao.CountByFilter(ctx, tx, year, filterFields)
+	count, err := vs.VInfoDao.CountByFilter(ctx, tx, iYear, filterFields)
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -113,7 +116,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		// 	vRecord.SubID4 = *recParam.SubID4
 		// }
 		vRecord.CreatedAt = time.Now()
-		if err = vs.VRecordDao.Create(ctx, tx, year, vRecord); err != nil {
+		if err = vs.VRecordDao.Create(ctx, tx, iYear, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}

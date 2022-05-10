@@ -83,7 +83,7 @@ func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOpera
 }
 
 func (dao *VoucherInfoDao) Create(ctx context.Context, do DbOperator, st *model.VoucherInfo) error {
-	tableName := GenTableName(st.VoucherDate.Year(), voucherInfoTN)
+	tableName := GenTableName(st.VoucherDate/10000, voucherInfoTN)
 	strSql := "insert into " + tableName + " (" + strings.Join(voucherInfoFields, ",") +
 		") values (?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?)"
 	values := []interface{}{st.VoucherID, st.CompanyID, st.VoucherMonth, st.NumOfMonth, st.VoucherFiller,

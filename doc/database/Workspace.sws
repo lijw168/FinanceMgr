@@ -4,6 +4,7 @@
 
 <Workspace>
 	<Local Expanded="Yes">
+		<Model Expanded="Yes" ID="{D3D18E5E-12D0-4990-BC96-081D50D1D110}" Loaded="No" Name="Database" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="Database.pdm"/>
 		<Model Expanded="Yes" ID="{D3D18E5E-12D0-4990-BC96-081D50D1D110}" Name="Database" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="Database.pdm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
