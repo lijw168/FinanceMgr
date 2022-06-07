@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "net/http/pprof"
-	"runtime"
+	//"runtime"
 	"strconv"
 
 	"common/config"
