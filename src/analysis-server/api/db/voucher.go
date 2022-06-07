@@ -28,7 +28,7 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherMonth}
 	} else {
 		strSql = "select COALESCE(abs(sum(debit_money)), 0), COALESCE(abs(sum(credit_money)), 0) from " + voucherRecordTable +
-			"where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
+			" where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
 			" where company_id = ? and voucher_month <= ? and status = ?)"
 		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherMonth, params.Status}
 	}

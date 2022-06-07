@@ -63,7 +63,7 @@ func waitDaemonExit() {
 
 func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 
-	runtime.GOMAXPROCS(serverConf.Cores)
+	//runtime.GOMAXPROCS(serverConf.Cores)
 
 	http.Handle(serverConf.BaseUrl, router)
 	go func() {

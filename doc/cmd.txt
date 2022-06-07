@@ -147,7 +147,8 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1121);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1122);
 
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1123);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8124,"年度结算",2,81,1123);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1124);
 
 
 
@@ -247,6 +248,7 @@ type VoucherDetailInfoView struct {
 6、以后要增加功能互斥的功能，也就是站点互斥。
 
 7、年度转结
+8、资源的初始化，怎样能保证新增了新的年份的凭证之后，怎样能自动进行资源的初始化呢？
 
 
 
