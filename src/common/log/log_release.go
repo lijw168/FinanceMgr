@@ -374,7 +374,7 @@ func (l *Logger) OutputContext(calldepth int, ctx context.Context, level int, fo
 	}
 	traceId := "-"
 	if ctx != nil {
-		traceId, _ = ctx.Value("trace_id").(string)
+		traceId, _ = ctx.Value("Trace-Id").(string)
 	}
 
 	traceIdArea := fmt.Sprintf("[%s] ", traceId)
