@@ -1,0 +1,5 @@
+go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
+
+cd D:\Program Files\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64
+lib.exe /DEF:E:\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\financeMgr\src\client\out\clientProxy.lib
+
