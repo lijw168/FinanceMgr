@@ -1,7 +1,7 @@
 package business
 
 import (
-	"client/util"
+	"financeMgr/src/client/util"
 )
 
 type YearBalGateway struct {

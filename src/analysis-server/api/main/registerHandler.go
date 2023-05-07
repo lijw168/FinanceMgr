@@ -1,12 +1,12 @@
 package main
 
 import (
-	"analysis-server/api/db"
-	"analysis-server/api/handler"
-	"analysis-server/api/service"
-	"common/log"
-	"common/url"
 	"database/sql"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/api/handler"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/common/log"
+	"financeMgr/src/common/url"
 )
 
 func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {

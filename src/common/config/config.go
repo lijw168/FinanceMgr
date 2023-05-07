@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"common/log"
+	"financeMgr/src/common/log"
 
 	_ "github.com/go-sql-driver/mysql"
 )

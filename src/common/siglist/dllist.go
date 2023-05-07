@@ -1,7 +1,7 @@
 package siglist
 
 import (
-	"common/utils"
+	"financeMgr/src/common/utils"
 	"sync"
 )
 

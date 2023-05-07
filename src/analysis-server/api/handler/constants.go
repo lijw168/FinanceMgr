@@ -7,5 +7,5 @@ var (
 
 var (
 	//600 seconds
-	keepOnlineTime = 600
+	keepOnlineTime = 2 * 60 * 60
 )

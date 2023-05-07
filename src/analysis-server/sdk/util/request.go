@@ -8,9 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"analysis-server/model"
-	"common/log"
-	"common/utils"
+	"financeMgr/src/analysis-server/model"
+	"financeMgr/src/common/log"
+	"financeMgr/src/common/utils"
 )
 
 var (

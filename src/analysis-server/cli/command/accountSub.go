@@ -1,11 +1,12 @@
 package command
 
 import (
-	"analysis-server/cli/util"
-	"analysis-server/sdk/options"
+	"financeMgr/src/analysis-server/cli/util"
+	"financeMgr/src/analysis-server/sdk/options"
+
 	"github.com/spf13/cobra"
 
-	//"analysis-server/model"
+	//"financeMgr/src/analysis-server/model"
 	"fmt"
 	"strconv"
 )

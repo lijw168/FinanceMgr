@@ -2,13 +2,14 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"unicode/utf8"
 
-	"analysis-server/api/service"
-	"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 )
 
 type OperatorInfoHandlers struct {
@@ -62,7 +63,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 		switch *params.Order[0].Direction {
 		case cons.Order_Asc, cons.Order_Desc:
 		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			oh.Response(r.Context(), oh.Logger, w, ce, nil)
 			return
 		}

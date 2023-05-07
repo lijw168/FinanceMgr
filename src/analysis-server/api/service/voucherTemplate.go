@@ -1,12 +1,12 @@
 package service
 
 import (
-	"analysis-server/api/db"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
 	"context"
 	"database/sql"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 	"fmt"
 	"time"
 )
@@ -65,7 +65,7 @@ func (vs *VoucherTemplateService) DeleteVoucherTemplate(ctx context.Context, vou
 	//delete voucher template
 	err := vs.VTemplateDao.Delete(ctx, vs.Db, voucherTemplateID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Delete voucher template failed,errInfo:", err.Error())
+		errMsg := fmt.Sprintf("Delete voucher template failed,errInfo:%s", err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, errMsg)
 	}
 	vs.Logger.InfoContext(ctx, "DeleteVoucherTemplate method end")

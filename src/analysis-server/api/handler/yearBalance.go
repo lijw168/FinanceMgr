@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"analysis-server/api/service"
-	//"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 	"net/http"
+	"strconv"
 )
 
 type YearBalHandlers struct {
@@ -267,7 +267,7 @@ func (yh *YearBalHandlers) ListYearBalance(w http.ResponseWriter, r *http.Reques
 		switch *params.Order[0].Direction {
 		case cons.Order_Asc, cons.Order_Desc:
 		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			yh.Response(r.Context(), yh.Logger, w, ce, nil)
 			return
 		}

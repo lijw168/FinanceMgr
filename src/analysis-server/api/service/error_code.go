@@ -127,7 +127,6 @@ func (e *CcErrObj) GetCode() int {
 
 func (e *CcErrObj) SetCode(errCode int) {
 	e.C = errCode
-	return
 }
 
 func NewError(r, t, p, d string) CcError {

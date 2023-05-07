@@ -4,11 +4,12 @@ import (
 	"net/http"
 	//"unicode/utf8"
 
-	"analysis-server/api/service"
-	"analysis-server/api/utils"
-	"analysis-server/model"
-	//cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+
+	//cons "financeMgr/src/commonconstant"
+	"financeMgr/src/common/log"
 )
 
 type MenuInfoHandlers struct {

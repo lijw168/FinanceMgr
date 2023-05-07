@@ -1,13 +1,11 @@
 package main
 
 import (
+	"financeMgr/src/analysis-server/cli/command"
+	"financeMgr/src/analysis-server/sdk"
+	"financeMgr/src/common/tag"
 	"flag"
 	"os"
-
-	//_ "common/tag"
-	"analysis-server/cli/command"
-	"analysis-server/sdk"
-	"common/tag"
 )
 
 func main() {

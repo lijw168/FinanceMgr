@@ -1,13 +1,12 @@
 package service
 
 import (
-	"analysis-server/api/db"
-	//"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
 	"context"
 	"database/sql"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 )
 
 type AccountSubService struct {
@@ -199,12 +198,12 @@ func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 }
 
 func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID int,
-	tx *sql.Tx, isCalTotal bool) (error, int) {
+	tx *sql.Tx, isCalTotal bool) (int, error) {
 	iTotalCount := 0
 	//get company info
 	comInfo, err := as.CompanyDao.GetCompanyByAccSubId(ctx, tx, subjectID)
 	if err != nil {
-		return err, iTotalCount
+		return iTotalCount, err
 	}
 	//获取有数据的会计年度
 	iStartAccountYear := comInfo.StartAccountPeriod / 100
@@ -221,17 +220,17 @@ func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID in
 		iCount, err = as.VRecordDao.CountByFilter(ctx, tx, year, filterFields)
 		if err != nil {
 			as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
-			return err, 0
+			return 0, err
 		}
 		if iCount > 0 {
 			if isCalTotal {
 				iTotalCount += int(iCount)
 			} else {
-				return nil, int(iCount)
+				return int(iCount), nil
 			}
 		}
 	}
-	return nil, iTotalCount
+	return iTotalCount, nil
 }
 
 func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int,
@@ -250,7 +249,7 @@ func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int
 		}
 	}()
 	iCount := 0
-	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
+	if iCount, err = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if iCount > 0 {
@@ -285,7 +284,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 	}()
 
 	iCount := 0
-	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
+	if iCount, err = as.getRefsOfAccSubID(ctx, subjectID, tx, false); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if iCount > 0 {
@@ -436,7 +435,7 @@ func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, su
 	}()
 
 	iCount := 0
-	if err, iCount = as.getRefsOfAccSubID(ctx, subjectID, tx, true); err != nil {
+	if iCount, err = as.getRefsOfAccSubID(ctx, subjectID, tx, true); err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false

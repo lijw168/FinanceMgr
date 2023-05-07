@@ -1,14 +1,14 @@
 package service
 
 import (
-	"analysis-server/api/db"
-	"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
-	comUtils "common/utils"
 	"context"
 	"database/sql"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
+	comUtils "financeMgr/src/common/utils"
 	"time"
 )
 

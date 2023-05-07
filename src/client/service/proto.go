@@ -1,9 +1,9 @@
 package service
 
 import (
-	"client/util"
 	"encoding/binary"
 	"errors"
+	"financeMgr/src/client/util"
 	"fmt"
 	"io"
 	"net"

@@ -1,8 +1,8 @@
 package business
 
 import (
-	"analysis-server/sdk"
-	"common/log"
+	"financeMgr/src/analysis-server/sdk"
+	"financeMgr/src/common/log"
 )
 
 var (

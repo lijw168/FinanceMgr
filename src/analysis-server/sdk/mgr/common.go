@@ -3,10 +3,10 @@ package mgr
 import (
 	"errors"
 
-	"analysis-server/model"
-	"analysis-server/sdk/options"
-	"analysis-server/sdk/util"
 	"encoding/json"
+	"financeMgr/src/analysis-server/model"
+	"financeMgr/src/analysis-server/sdk/options"
+	"financeMgr/src/analysis-server/sdk/util"
 )
 
 func ListOpsResources(action string, opts *options.ListOptions) (*model.DescData, error) {

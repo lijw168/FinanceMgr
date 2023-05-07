@@ -2,7 +2,7 @@ package encoding
 
 import (
 	"encoding/binary"
-	"common/utils"
+	"financeMgr/src/common/utils"
 )
 
 func MarshalBool(buf []byte, b bool) int {

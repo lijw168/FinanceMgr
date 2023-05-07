@@ -1,8 +1,8 @@
 package main
 
 import (
-	"client/service"
-	"common/log"
+	"financeMgr/src/client/service"
+	"financeMgr/src/common/log"
 	"flag"
 	"fmt"
 	_ "net/http/pprof"

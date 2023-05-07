@@ -3,11 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
+	"financeMgr/src/common/log"
 	"strings"
 	"time"
 
-	"analysis-server/model"
-	"common/log"
+	"financeMgr/src/analysis-server/model"
 )
 
 type LoginInfoDao struct {

@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"analysis-server/api/db"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 	"time"
 )
 

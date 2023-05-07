@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"analysis-server/api/service"
-	"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 	"unicode/utf8"
 )
@@ -152,7 +153,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		switch *params.Order[0].Direction {
 		case cons.Order_Asc, cons.Order_Desc:
 		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
@@ -216,7 +217,7 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 		switch *params.Order[0].Direction {
 		case cons.Order_Asc, cons.Order_Desc:
 		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			vh.Response(r.Context(), vh.Logger, w, ce, nil)
 			return
 		}
@@ -789,7 +790,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 			switch *params.Order[0].Direction {
 			case cons.Order_Asc, cons.Order_Desc:
 			default:
-				ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+				ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 				vh.Response(r.Context(), vh.Logger, w, ce, nil)
 				return
 			}

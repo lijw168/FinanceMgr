@@ -3,7 +3,7 @@ package handler
 import (
 	//"errors"
 	//"net/http"
-	"analysis-server/model"
+	"financeMgr/src/analysis-server/model"
 )
 
 // func Auth(secretIds []string) bool {

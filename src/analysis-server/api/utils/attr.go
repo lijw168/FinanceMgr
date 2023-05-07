@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"analysis-server/model"
+	"financeMgr/src/analysis-server/model"
 )
 
 type Attribute struct {

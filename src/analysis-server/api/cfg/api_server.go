@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	"common/config"
+	"financeMgr/src/common/config"
 )
 
 type ApiServerConf struct {

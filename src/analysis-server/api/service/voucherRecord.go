@@ -4,12 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"analysis-server/api/db"
-	//"analysis-server/api/utils"
-	"analysis-server/model"
-	//cons "common/constant"
-	"common/log"
-	//"time"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/model"
+	"financeMgr/src/common/log"
 )
 
 type VoucherRecordService struct {

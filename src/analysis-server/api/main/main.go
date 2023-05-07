@@ -10,20 +10,20 @@ import (
 	//"runtime"
 	"strconv"
 
-	"common/config"
-	"common/log"
-	"common/tag"
-	"common/url"
-	"common/utils"
+	"financeMgr/src/common/config"
+	"financeMgr/src/common/log"
+	"financeMgr/src/common/tag"
+	"financeMgr/src/common/url"
+	"financeMgr/src/common/utils"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"analysis-server/api/cfg"
-	"analysis-server/api/db"
-	"analysis-server/api/handler"
-	"analysis-server/api/service"
-	//aUtils "analysis-server/api/utils"
+	"financeMgr/src/analysis-server/api/cfg"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/api/handler"
+	"financeMgr/src/analysis-server/api/service"
+	//aUtils "financeMgr/src/analysis-server/api/utils"
 )
 
 var (
@@ -71,11 +71,10 @@ func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 			fmt.Println("[Init] http server exit, error: ", err)
 		}
 	}()
-	return
 }
 
 func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *cfg.ApiServerConf) error {
-	var err error
+	//var err error
 	// if serverConf.IsUserApiServer() {
 	// 	err = initUserApiServer(serverConf.UserServerCfg, logger, httpRouter, copySnpCfg)
 	// 	if err != nil {
@@ -83,7 +82,7 @@ func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *c
 	// 	}
 	// 	logger.LogInfo("init user api server")
 	// }
-	err = initApiServer(apiServerConf.MysqlConf, logger, httpRouter)
+	err := initApiServer(apiServerConf.MysqlConf, logger, httpRouter)
 	if err != nil {
 		return err
 	}
@@ -169,5 +168,4 @@ func main() {
 	startServer(httpRouter, apiServerConf.ServerConf)
 	waitDaemonExit()
 	logger.Close()
-	return
 }

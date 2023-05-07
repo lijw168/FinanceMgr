@@ -1,12 +1,10 @@
 package business
 
-import (
-//"analysis-server/model"
-// "analysis-server/sdk/options"
-// "client/util"
+//"financeMgr/src/analysis-server/model"
+// "financeMgr/src/analysis-server/sdk/options"
+// "financeMgr/src/client/util"
 // "encoding/binary"
 // "encoding/json"
-)
 
 type MenuInfoGateway struct {
 }

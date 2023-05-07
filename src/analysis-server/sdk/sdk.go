@@ -1,12 +1,12 @@
 package sdk
 
 import (
+	"financeMgr/src/common/log"
 	"net/http"
 	"time"
 
-	"analysis-server/sdk/mgr"
-	"analysis-server/sdk/util"
-	"common/log"
+	"financeMgr/src/analysis-server/sdk/mgr"
+	"financeMgr/src/analysis-server/sdk/util"
 )
 
 type CcSdk struct {

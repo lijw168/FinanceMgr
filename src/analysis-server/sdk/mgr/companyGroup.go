@@ -1,10 +1,10 @@
 package mgr
 
 import (
-	"analysis-server/model"
-	"analysis-server/sdk/options"
-	"analysis-server/sdk/util"
 	"errors"
+	"financeMgr/src/analysis-server/model"
+	"financeMgr/src/analysis-server/sdk/options"
+	"financeMgr/src/analysis-server/sdk/util"
 	"fmt"
 )
 

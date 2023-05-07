@@ -1,11 +1,12 @@
 package command
 
 import (
-	"analysis-server/cli/util"
-	"analysis-server/sdk/options"
+	"financeMgr/src/analysis-server/cli/util"
+	"financeMgr/src/analysis-server/sdk/options"
 	"fmt"
-	"github.com/spf13/cobra"
 	"strconv"
+
+	"github.com/spf13/cobra"
 )
 
 func NewCompanyCommand(cmd *cobra.Command) {

@@ -1,10 +1,10 @@
 package business
 
 import (
-	//"analysis-server/model"
-	"analysis-server/sdk/options"
-	sUtil "analysis-server/sdk/util"
-	"client/util"
+	//"financeMgr/src/analysis-server/model"
+	"financeMgr/src/analysis-server/sdk/options"
+	sUtil "financeMgr/src/analysis-server/sdk/util"
+	"financeMgr/src/client/util"
 	"sync"
 )
 

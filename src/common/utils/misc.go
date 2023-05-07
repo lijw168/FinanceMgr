@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"financeMgr/src/common/constant"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,8 +16,6 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
-
-	"common/constant"
 )
 
 const (

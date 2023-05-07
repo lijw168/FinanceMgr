@@ -4,7 +4,8 @@ import (
 	"os"
 	"strconv"
 
-	"analysis-server/sdk"
+	"financeMgr/src/analysis-server/sdk"
+
 	"github.com/spf13/cobra"
 )
 

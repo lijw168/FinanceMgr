@@ -5,8 +5,8 @@ import (
 
 	_ "net/http/pprof"
 
-	"common/log"
-	"common/tag"
+	"financeMgr/src/common/log"
+	"financeMgr/src/common/tag"
 )
 
 func InitCommonUrlRouter(l *log.Logger, funcs map[string]http.HandlerFunc) {

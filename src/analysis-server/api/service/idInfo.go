@@ -3,11 +3,11 @@ package service
 import (
 	"database/sql"
 
-	"analysis-server/api/db"
-	aUtils "analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/db"
+	aUtils "financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 )
 
 type IDInfoService struct {

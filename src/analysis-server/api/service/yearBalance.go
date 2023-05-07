@@ -1,12 +1,11 @@
 package service
 
 import (
-	"analysis-server/api/db"
-	"analysis-server/model"
-	//cons "common/constant"
-	"common/log"
 	"context"
 	"database/sql"
+	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/model"
+	"financeMgr/src/common/log"
 )
 
 type YearBalanceService struct {

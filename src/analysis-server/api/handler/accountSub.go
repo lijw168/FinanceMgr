@@ -3,13 +3,14 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"unicode/utf8"
 
-	"analysis-server/api/service"
-	"analysis-server/api/utils"
-	"analysis-server/model"
-	cons "common/constant"
-	"common/log"
+	"financeMgr/src/analysis-server/api/service"
+	"financeMgr/src/analysis-server/api/utils"
+	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
+	"financeMgr/src/common/log"
 )
 
 type AccountSubHandlers struct {
@@ -64,7 +65,8 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		switch *params.Order[0].Direction {
 		case cons.Order_Asc, cons.Order_Desc:
 		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd,
+				strconv.Itoa(*params.Order[0].Direction))
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
 			return
 		}
@@ -125,7 +127,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 // 		switch *params.Order[0].Direction {
 // 		case cons.Order_Asc, cons.Order_Desc:
 // 		default:
-// 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, string(*params.Order[0].Direction))
+// 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 // 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
 // 			return
 // 		}

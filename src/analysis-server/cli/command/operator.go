@@ -6,12 +6,13 @@ import (
 	// "strings"
 	// "time"
 
-	"analysis-server/cli/util"
-	//"analysis-server/model"
-	"analysis-server/sdk/options"
-	//cons "common/constant"
-	"github.com/spf13/cobra"
+	"financeMgr/src/analysis-server/cli/util"
+	//"financeMgr/src/analysis-server/model"
+	"financeMgr/src/analysis-server/sdk/options"
+	//cons "financeMgr/src/commonconstant"
 	"strconv"
+
+	"github.com/spf13/cobra"
 )
 
 func NewOperatorCommand(cmd *cobra.Command) {
