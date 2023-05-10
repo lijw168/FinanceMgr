@@ -43,7 +43,6 @@ func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, yearBal)
-	return
 }
 
 func (yh *YearBalHandlers) CreateYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +78,6 @@ func (yh *YearBalHandlers) CreateYearBalance(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
-	return
 }
 
 func (yh *YearBalHandlers) BatchCreateYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +115,6 @@ func (yh *YearBalHandlers) BatchCreateYearBalance(w http.ResponseWriter, r *http
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
-	return
 }
 
 func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +152,6 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
-	return
 }
 
 func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +191,25 @@ func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
-	return
+}
+
+func (yh *YearBalHandlers) BatchDeleteYearBalance(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.BasicYearBalsParams)
+	err := yh.HttpRequestParse(r, params)
+	if err != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := yh.GetTraceId(r)
+	ccErr := yh.YearBalService.BatchDeleteYearBalance(r.Context(), params.BasicYearBals, requestId)
+	if ccErr != nil {
+		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.BatchDeleteYearBalance: %s]", ccErr.Detail())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	yh.Response(r.Context(), yh.Logger, w, nil, nil)
 }
 
 func (yh *YearBalHandlers) DeleteYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +239,6 @@ func (yh *YearBalHandlers) DeleteYearBalance(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
-	return
 }
 
 func (yh *YearBalHandlers) ListYearBalance(w http.ResponseWriter, r *http.Request) {
@@ -280,5 +293,4 @@ func (yh *YearBalHandlers) ListYearBalance(w http.ResponseWriter, r *http.Reques
 	}
 	dataBuf := &DescData{(int64)(count), yearBalViews}
 	yh.Response(r.Context(), yh.Logger, w, nil, dataBuf)
-	return
 }

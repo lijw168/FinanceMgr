@@ -2,7 +2,7 @@ package util
 
 const SplitStr string = ";"
 
-//operation code
+// operation code
 const (
 	QuitApp = 1 + iota
 	Heartbeat
@@ -56,6 +56,7 @@ const (
 	YearBalanceList
 	YearBalanceShow
 	YearBalanceDel
+	YearBalanceBatchDel
 	YearBalanceBatchUpdate
 	YearBalanceUpdate
 	MenuInfoList

@@ -87,6 +87,43 @@ func (ys *YearBalanceService) DeleteYearBalance(ctx context.Context, iYear, subj
 	return nil
 }
 
+func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params []*model.BasicYearBalanceParams,
+	requestId string) CcError {
+	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method begin, update params:%v", params)
+	FuncName := "YearBalanceService/service/BatchDeleteYearBalance"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	for _, param := range params {
+		if param.SubjectID == nil || *param.SubjectID <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
+		}
+		if param.Year == nil || *param.Year <= 0 {
+			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
+		}
+		err := ys.YearBalDao.DeleteYearBalance(ctx, ys.Db, *param.Year, *param.SubjectID)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method end, update params:%v", params)
+	return nil
+}
+
 func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, iYear, subjectID int,
 	params map[string]interface{}) CcError {
 	err := ys.YearBalDao.UpdateYearBalance(ctx, ys.Db, iYear, subjectID, params)

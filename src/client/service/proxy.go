@@ -27,7 +27,7 @@ type Proxy struct {
 	//tr           *http.Transport
 }
 
-//Init ...
+// Init ...
 func (proxy *Proxy) Init(iListenPort, iServerPort int, strServerHost string, uTimeout uint64, logger *log.Logger) {
 	proxy.iListenPort = iListenPort
 	domain := fmt.Sprintf("http://%s:%d/analysis_server", strServerHost, iServerPort)
@@ -356,6 +356,9 @@ func (proxy *Proxy) processYearBalance(conn net.Conn, reqPk *Packet) {
 	case util.YearBalanceBatchCreate:
 		errCode := yearBalGate.BatchCreateYearBalance(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
+	case util.YearBalanceBatchDel:
+		errCode := yearBalGate.BatchDeleteYearBalance(reqPk.Buf)
+		proxy.respOptResWithoutData(conn, reqPk, errCode)
 	case util.YearBalanceDel:
 		errCode := yearBalGate.DeleteYearBalance(reqPk.Buf)
 		proxy.respOptResWithoutData(conn, reqPk, errCode)
@@ -384,7 +387,7 @@ func (proxy *Proxy) quitApp(pk *Packet) int {
 	return util.ErrNull
 }
 
-//login/logout information;user status + errCode
+// login/logout information;user status + errCode
 func (proxy *Proxy) respAuthResInfo(conn net.Conn, reqPk *Packet, errCode int) (err error) {
 	reqPk.Size = 8
 	reqPk.Buf = reqPk.Buf[0:0]
@@ -398,7 +401,7 @@ func (proxy *Proxy) respAuthResInfo(conn net.Conn, reqPk *Packet, errCode int) (
 	return
 }
 
-//errCode
+// errCode
 func (proxy *Proxy) respOptResWithoutData(conn net.Conn, reqPk *Packet, errCode int) (err error) {
 	reqPk.Size = 4
 	reqPk.Buf = reqPk.Buf[0:0]
@@ -425,7 +428,7 @@ func (proxy *Proxy) isConvertToGbk(reqPk *Packet) bool {
 	return bRet
 }
 
-//errCode + data
+// errCode + data
 func (proxy *Proxy) respOptResWithData(conn net.Conn, reqPk *Packet, errCode int, resData []byte) (err error) {
 	if proxy.isConvertToGbk(reqPk) {
 		tmpBuf := make([]byte, 0)
@@ -461,7 +464,7 @@ func (proxy *Proxy) respOptResWithData(conn net.Conn, reqPk *Packet, errCode int
 	return
 }
 
-//user status
+// user status
 func (proxy *Proxy) respHeartbeatInfo(conn net.Conn, reqPk *Packet) (err error) {
 	reqPk.Size = 4
 	reqPk.Buf = reqPk.Buf[0:0]
@@ -494,7 +497,7 @@ end:
 	return
 }
 
-//http://127.0.0.1:8888/setLogLevel?level=Info
+// http://127.0.0.1:8888/setLogLevel?level=Info
 func (proxy *Proxy) setLogLevel(w http.ResponseWriter, r *http.Request) {
 	levelVal := r.FormValue("level")
 	if len(levelVal) == 0 {

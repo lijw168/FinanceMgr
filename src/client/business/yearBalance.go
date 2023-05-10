@@ -43,6 +43,18 @@ func (yg *YearBalGateway) BatchCreateYearBalance(param []byte) (errCode int) {
 	return errCode
 }
 
+func (yg *YearBalGateway) BatchDeleteYearBalance(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if err = cSdk.BatchDeleteYearBalance_json(param); err != nil {
+		errCode = util.ErrDeleteFailed
+		logger.Error("the BatchDeleteYearBalance failed,err:%v", err.Error())
+	} else {
+		logger.Debug("BatchDeleteYearBalance succeed;")
+	}
+	return errCode
+}
+
 func (yg *YearBalGateway) UpdateYearBalance(param []byte) (errCode int) {
 	errCode = util.ErrNull
 	if err := cSdk.UpdateYearBalance_json(param); err != nil {

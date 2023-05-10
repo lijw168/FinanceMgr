@@ -48,6 +48,10 @@ type OptYearBalsParams struct {
 	OptYearBals []*OptYearBalanceParams `json:"optYearBals"`
 }
 
+type BasicYearBalsParams struct {
+	BasicYearBals []*BasicYearBalanceParams `json:"BasicYearBals"`
+}
+
 type BasicYearBalanceParams struct {
 	SubjectID *int `json:"subjectId"`
 	Year      *int `json:"year"`
@@ -190,7 +194,7 @@ type VoucherTemplateParams struct {
 	Illustration *string `json:"illustration"`
 }
 
-//VoucherInfoParams ...  BillCount:该参数暂未使用，如果使用时，前端会传入该值。
+// VoucherInfoParams ...  BillCount:该参数暂未使用，如果使用时，前端会传入该值。
 type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
 	VoucherDate   *int    `json:"voucherDate"`
@@ -198,7 +202,7 @@ type VoucherInfoParams struct {
 	BillCount     *int    `json:"billCount"`
 }
 
-//QueryMaxNumOfMonthParams 查询最大的凭证号...
+// QueryMaxNumOfMonthParams 查询最大的凭证号...
 type QueryMaxNumOfMonthParams struct {
 	CompanyID    *int `json:"companyId"`
 	VoucherYear  *int `json:"voucherYear"`
@@ -212,7 +216,7 @@ type BatchAuditParams struct {
 	VoucherAuditor *string `json:"voucherAuditor"`
 }
 
-//ModifyVoucherInfoParams ...
+// ModifyVoucherInfoParams ...
 type ModifyVoucherInfoParams struct {
 	VoucherYear    *int    `json:"voucherYear"`
 	VoucherID      *int    `json:"voucherId"`
@@ -224,7 +228,7 @@ type ModifyVoucherInfoParams struct {
 	Status         *int    `json:"status"`
 }
 
-//CreateVoucherRecordParams ...
+// CreateVoucherRecordParams ...
 type CreateVoucherRecordParams struct {
 	VoucherID   *int     `json:"voucherId"`
 	SubjectName *string  `json:"subjectName"`
@@ -237,7 +241,7 @@ type CreateVoucherRecordParams struct {
 	SubID4      *int     `json:"subId4"`
 }
 
-//ModifyVoucherRecordParams ...
+// ModifyVoucherRecordParams ...
 type ModifyVoucherRecordParams struct {
 	VouRecordID *int     `json:"vouRecordId"`
 	SubjectName *string  `json:"subjectName"`
@@ -250,7 +254,7 @@ type ModifyVoucherRecordParams struct {
 	SubID4      *int     `json:"subId4"`
 }
 
-//CreateVoucherParams...
+// CreateVoucherParams...
 type CreateVoucherParams struct {
 	InfoParams    *VoucherInfoParams           `json:"infoParams"`
 	RecordsParams []*CreateVoucherRecordParams `json:"recordsParams"`
@@ -271,7 +275,7 @@ type UpdateVoucherParams struct {
 // 	Status         *int    `json:"status"`
 // }
 
-//VoucherArrangeParams 凭证整理参数
+// VoucherArrangeParams 凭证整理参数
 type VoucherArrangeParams struct {
 	VoucherYear       *int  `json:"voucherYear"`
 	CompanyID         *int  `json:"companyId"`
@@ -308,7 +312,7 @@ type IDInfoParams struct {
 	VoucherTemplateID *int `json:"voucherTemplateId"`
 }
 
-//以下参数用于报表统计时的参数类型
+// 以下参数用于报表统计时的参数类型
 type CalAccuMoneyParams struct {
 	CompanyID    *int `json:"companyId"`
 	SubjectID    *int `json:"subjectId"`

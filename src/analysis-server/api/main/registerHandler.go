@@ -19,10 +19,11 @@ func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql
 	httpRouter.RegisterFunc("UpdateYearBalance", yearBalHandlers.UpdateYearBalance)
 	httpRouter.RegisterFunc("BatchUpdateYearBalance", yearBalHandlers.BatchUpdateYearBalance)
 	httpRouter.RegisterFunc("DeleteYearBalance", yearBalHandlers.DeleteYearBalance)
+	httpRouter.RegisterFunc("BatchDeleteYearBalance", yearBalHandlers.BatchDeleteYearBalance)
 	httpRouter.RegisterFunc("ListYearBalance", yearBalHandlers.ListYearBalance)
 }
 
-//register voucher template
+// register voucher template
 func registerVoucherTemplate(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
 	voucherTempDao := &db.VoucherTemplateDao{Logger: logger}
 	voucherTempService := &service.VoucherTemplateService{Logger: logger, VTemplateDao: voucherTempDao, Db: _db}
@@ -33,7 +34,7 @@ func registerVoucherTemplate(logger *log.Logger, httpRouter *url.UrlRouter, _db 
 	httpRouter.RegisterFunc("ListVoucherTemplate", voucherTempHandlers.ListVoucherTemplate)
 }
 
-//register company group
+// register company group
 func registerComGroup(logger *log.Logger, httpRouter *url.UrlRouter, comGroupDao *db.CompanyGroupDao,
 	_db *sql.DB) {
 	comGroupService := &service.CompanyGroupService{Logger: logger, ComGroupDao: comGroupDao, Db: _db}
@@ -45,7 +46,7 @@ func registerComGroup(logger *log.Logger, httpRouter *url.UrlRouter, comGroupDao
 	httpRouter.RegisterFunc("UpdateCompanyGroup", comGroupHandlers.UpdateCompanyGroup)
 }
 
-//register companyHander
+// register companyHander
 func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *service.CompanyService,
 	_db *sql.DB) {
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
@@ -57,7 +58,7 @@ func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *
 	httpRouter.RegisterFunc("AssociatedCompanyGroup", comHandlers.AssociatedCompanyGroup)
 }
 
-//register account subject
+// register account subject
 func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.CompanyDao,
 	voucherRecordDao *db.VoucherRecordDao, _db *sql.DB) {
 	accSubDao := &db.AccSubDao{Logger: logger}
@@ -81,7 +82,7 @@ func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.Co
 	httpRouter.RegisterFunc("GenerateAccSubTemplate", accSubHandlers.GenerateAccSubTemplate)
 }
 
-//register operatorHander and authenHandler
+// register operatorHander and authenHandler
 func registerOptAndAuthenHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 	comService *service.CompanyService, _db *sql.DB) {
 	optInfoDao := &db.OperatorInfoDao{Logger: logger}
@@ -108,7 +109,7 @@ func registerOptAndAuthenHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 
 }
 
-//register resHander and voucherHandler
+// register resHander and voucherHandler
 func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.CompanyDao,
 	voucherRecordDao *db.VoucherRecordDao, _db *sql.DB) {
 	//voucher
@@ -146,7 +147,7 @@ func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 	httpRouter.RegisterFunc("CalcAccountOfPeriod", voucherHandlers.CalcAccountOfPeriod)
 }
 
-//register menuHandler
+// register menuHandler
 func registerMenuHandler(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
 	menuInfoDao := &db.MenuInfoDao{Logger: logger}
 	menuService := &service.MenuInfoService{Logger: logger, MenuDao: menuInfoDao, Db: _db}

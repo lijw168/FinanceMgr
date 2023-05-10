@@ -46,6 +46,12 @@ func (yb *YearBalance) BatchCreateYearBalance_json(params []byte) error {
 	return err
 }
 
+func (yb *YearBalance) BatchDeleteYearBalance_json(params []byte) error {
+	action := "BatchDeleteYearBalance"
+	_, err := util.DoRequest_json(action, params)
+	return err
+}
+
 func (yb *YearBalance) DeleteYearBalance(opts *options.BasicYearBalance) error {
 	action := "DeleteYearBalance"
 	switch {
