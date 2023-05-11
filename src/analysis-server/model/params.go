@@ -57,10 +57,6 @@ type BasicYearBalanceParams struct {
 	Year      *int `json:"year"`
 }
 
-type YearParams struct {
-	Year *int `json:"year"`
-}
-
 type DeleteSubjectParams struct {
 	ID *int `json:"id"`
 }

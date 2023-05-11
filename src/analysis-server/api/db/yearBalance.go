@@ -72,22 +72,7 @@ func (dao *YearBalanceDao) DeleteYearBalance(ctx context.Context, do DbOperator,
 	return nil
 }
 
-func (dao *YearBalanceDao) DeleteYearBalanceOneYear(ctx context.Context, do DbOperator, iYear int) error {
-	strSql := "delete from " + yearBalanceTN + " where subject_id = ?"
-
-	dao.Logger.DebugContext(ctx, "[yearBalance/db/DeleteYearBalance] [sql: %s, year: %d]", strSql, iYear)
-	start := time.Now()
-	defer func() {
-		dao.Logger.InfoContext(ctx, "[yearBalance/db/DeleteYearBalance] [SqlElapsed: %v]", time.Since(start))
-	}()
-	if _, err := do.ExecContext(ctx, strSql, iYear); err != nil {
-		dao.Logger.ErrorContext(ctx, "[yearBalance/db/DeleteYearBalance] [do.Exec: %s]", err.Error())
-		return err
-	}
-	return nil
-}
-
-// 可以更新yearBalanceTN中的所有字段，为以后增加字段保留的接口
+//可以更新yearBalanceTN中的所有字段，为以后增加字段保留的接口
 func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator, iYear, subjectID int,
 	params map[string]interface{}) error {
 	strSql := "update " + yearBalanceTN + " set "
@@ -119,7 +104,7 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	return nil
 }
 
-// 仅更新年初余额这一个字段
+//仅更新年初余额这一个字段
 func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {
 	strSql := "update " + yearBalanceTN + " set balance = ? where subject_id = ? and year=?"
 	values := []interface{}{st.Balance, st.SubjectID, st.Year}
