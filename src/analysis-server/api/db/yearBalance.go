@@ -16,7 +16,7 @@ type YearBalanceDao struct {
 
 var (
 	yearBalanceTN       = "beginOfYearBalance"
-	yearBalanceFields   = []string{"subject_id", "year", "balance"}
+	yearBalanceFields   = []string{"subject_id", "year", "balance", "created_at", "updated_at"}
 	scanYearBalanceTask = func(r DbScanner, st *model.YearBalance) error {
 		return r.Scan(&st.SubjectID, &st.Year, &st.Balance)
 	}
@@ -44,8 +44,8 @@ func (dao *YearBalanceDao) GetYearBalance(ctx context.Context, do DbOperator, iY
 
 func (dao *YearBalanceDao) CreateYearBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {
 	strSql := "insert into " + yearBalanceTN +
-		" (" + strings.Join(yearBalanceFields, ",") + ") values (?, ?, ?)"
-	values := []interface{}{st.SubjectID, st.Year, st.Balance}
+		" (" + strings.Join(yearBalanceFields, ",") + ") values (?, ?, ?, ?, ?)"
+	values := []interface{}{st.SubjectID, st.Year, st.Balance, time.Now(), time.Now()}
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/CreateYearBalance] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -72,7 +72,21 @@ func (dao *YearBalanceDao) DeleteYearBalance(ctx context.Context, do DbOperator,
 	return nil
 }
 
-//可以更新yearBalanceTN中的所有字段，为以后增加字段保留的接口
+func (dao *YearBalanceDao) BatchDeleteYearBalance(ctx context.Context, do DbOperator, filter map[string]interface{}) error {
+	strSql, values := transferDeleteSql(yearBalanceTN, filter)
+	dao.Logger.DebugContext(ctx, "[yearBalance/db/BatchDeleteYearBalance] sql %s with values %v", strSql, values)
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[yearBalance/db/BatchDeleteYearBalance] [SqlElapsed: %v]", time.Since(start))
+	}()
+	if _, err := do.ExecContext(ctx, strSql, values...); err != nil {
+		dao.Logger.ErrorContext(ctx, "[yearBalance/db/BatchDeleteYearBalance] [do.Exec: %s]", err.Error())
+		return err
+	}
+	return nil
+}
+
+// 可以更新yearBalanceTN中的所有字段，为以后增加字段保留的接口
 func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator, iYear, subjectID int,
 	params map[string]interface{}) error {
 	strSql := "update " + yearBalanceTN + " set "
@@ -91,8 +105,8 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	if first {
 		return nil
 	}
-	strSql += " where subject_id = ? and year=?"
-	values = append(values, subjectID, iYear)
+	strSql += " updated_at=?  where subject_id = ? and year=?"
+	values = append(values, time.Now(), subjectID, iYear)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateYearBalance] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -104,10 +118,10 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	return nil
 }
 
-//仅更新年初余额这一个字段
+// 仅更新年初余额这一个字段
 func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {
-	strSql := "update " + yearBalanceTN + " set balance = ? where subject_id = ? and year=?"
-	values := []interface{}{st.Balance, st.SubjectID, st.Year}
+	strSql := "update " + yearBalanceTN + " set balance = ?  updated_at=? where subject_id = ? and year=?"
+	values := []interface{}{st.Balance, time.Now(), st.SubjectID, st.Year}
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateBalance] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

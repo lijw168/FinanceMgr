@@ -194,7 +194,7 @@ func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http
 }
 
 func (yh *YearBalHandlers) BatchDeleteYearBalance(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.BasicYearBalsParams)
+	var params = new(model.BatchDelYearBalsParams)
 	err := yh.HttpRequestParse(r, params)
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers] [HttpRequestParse: %v]", err)
@@ -202,8 +202,18 @@ func (yh *YearBalHandlers) BatchDeleteYearBalance(w http.ResponseWriter, r *http
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
+	if len(params.SubjectID) <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrIds, service.ErrNull)
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Year == nil || *(params.Year) <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
 	requestId := yh.GetTraceId(r)
-	ccErr := yh.YearBalService.BatchDeleteYearBalance(r.Context(), params.BasicYearBals, requestId)
+	ccErr := yh.YearBalService.BatchDeleteYearBalance(r.Context(), params, requestId)
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.BatchDeleteYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-//LoginInfo ...
+// LoginInfo ...
 type LoginInfo struct {
 	OperatorID int
 	Name       string
@@ -14,7 +14,7 @@ type LoginInfo struct {
 	EndedAt    time.Time
 }
 
-//OperatorInfo ...
+// OperatorInfo ...
 type OperatorInfo struct {
 	OperatorID int
 	CompanyID  int
@@ -28,7 +28,7 @@ type OperatorInfo struct {
 	UpdatedAt  time.Time
 }
 
-//AccSubject ...
+// AccSubject ...
 type AccSubject struct {
 	SubjectID        int
 	CompanyID        int
@@ -45,9 +45,11 @@ type YearBalance struct {
 	SubjectID int
 	Year      int
 	Balance   float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-//VoucherInfo ...
+// VoucherInfo ...
 type VoucherInfo struct {
 	VoucherID int
 	CompanyID int
@@ -63,7 +65,7 @@ type VoucherInfo struct {
 	UpdatedAt      time.Time
 }
 
-//VoucherRecord ...
+// VoucherRecord ...
 type VoucherRecord struct {
 	RecordID    int
 	VoucherID   int
@@ -79,7 +81,7 @@ type VoucherRecord struct {
 	UpdatedAt   time.Time
 }
 
-//VoucherTemplate ...
+// VoucherTemplate ...
 type VoucherTemplate struct {
 	VoucherTemplateID int
 	RefVoucherID      int
@@ -88,7 +90,7 @@ type VoucherTemplate struct {
 	CreatedAt         time.Time
 }
 
-//CompanyInfo ...
+// CompanyInfo ...
 type CompanyInfo struct {
 	CompanyID          int
 	CompanyName        string
@@ -105,7 +107,7 @@ type CompanyInfo struct {
 	CompanyGroupID     int
 }
 
-//CompanyGroup ...
+// CompanyGroup ...
 type CompanyGroup struct {
 	CompanyGroupID int
 	GroupName      string
@@ -114,7 +116,7 @@ type CompanyGroup struct {
 	UpdatedAt      time.Time
 }
 
-//IDInfo ...
+// IDInfo ...
 type IDInfo struct {
 	VoucherID         int
 	OperatorID        int
@@ -125,7 +127,7 @@ type IDInfo struct {
 	VoucherTemplateID int
 }
 
-//MenuInfo ...
+// MenuInfo ...
 type MenuInfo struct {
 	MenuID        int
 	MenuName      string
@@ -134,7 +136,7 @@ type MenuInfo struct {
 	MenuSerialNum int
 }
 
-//CommResp ...
+// CommResp ...
 type CommResp struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
@@ -142,7 +144,7 @@ type CommResp struct {
 	Data    interface{} `json:"data"`
 }
 
-//AccountOfPeriod
+// AccountOfPeriod
 type AccountOfPeriod struct {
 	SubjectID         int
 	PeriodDebitMoney  float64

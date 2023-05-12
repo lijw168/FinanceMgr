@@ -102,6 +102,8 @@ create table if not exists `finance_mgr`.`beginOfYearBalance`
    `subject_id`            int not null,
    `year`                  int not null,
    `balance`               decimal(12,4) not null,
+   `created_at`            datetime,
+   `updated_at`            datetime,
    primary key (subject_id, year)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 -- 之所以删除该约束，就是因为这两个表之间没有强关联性，所以删除

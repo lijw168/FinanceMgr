@@ -87,7 +87,7 @@ func (ys *YearBalanceService) DeleteYearBalance(ctx context.Context, iYear, subj
 	return nil
 }
 
-func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params []*model.BasicYearBalanceParams,
+func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params *model.BatchDelYearBalsParams,
 	requestId string) CcError {
 	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method begin, update params:%v", params)
 	FuncName := "YearBalanceService/service/BatchDeleteYearBalance"
@@ -103,17 +103,11 @@ func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params
 			RollbackLog(ctx, ys.Logger, FuncName, tx)
 		}
 	}()
-	for _, param := range params {
-		if param.SubjectID == nil || *param.SubjectID <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
-		}
-		if param.Year == nil || *param.Year <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
-		}
-		err := ys.YearBalDao.DeleteYearBalance(ctx, ys.Db, *param.Year, *param.SubjectID)
-		if err != nil {
-			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-		}
+	filterFields := make(map[string]interface{})
+	filterFields["subject_id"] = params.SubjectID
+	filterFields["year"] = params.Year
+	if err = ys.YearBalDao.BatchDeleteYearBalance(ctx, ys.Db, filterFields); err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
 		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
@@ -207,6 +201,7 @@ func (ys *YearBalanceService) ListYearBalance(ctx context.Context,
 	}
 
 	for _, yearBal := range yearBals {
+		//这里没有把科目的创建和更新时间返回到前段，这两个字段，仅在查数据时使用。
 		yearBalView := new(model.YearBalanceView)
 		yearBalView.SubjectID = yearBal.SubjectID
 		yearBalView.Balance = yearBal.Balance
