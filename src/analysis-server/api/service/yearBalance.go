@@ -104,7 +104,7 @@ func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params
 		}
 	}()
 	filterFields := make(map[string]interface{})
-	filterFields["subject_id"] = params.SubjectID
+	filterFields["subject_id"] = params.SubjectIDs
 	filterFields["year"] = params.Year
 	if err = ys.YearBalDao.BatchDeleteYearBalance(ctx, ys.Db, filterFields); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())

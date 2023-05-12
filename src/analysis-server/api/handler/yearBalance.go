@@ -202,7 +202,7 @@ func (yh *YearBalHandlers) BatchDeleteYearBalance(w http.ResponseWriter, r *http
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	if len(params.SubjectID) <= 0 {
+	if len(params.SubjectIDs) <= 0 {
 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrIds, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return

@@ -49,8 +49,8 @@ type OptYearBalsParams struct {
 }
 
 type BatchDelYearBalsParams struct {
-	SubjectID []int `json:"subjectIds"`
-	Year      *int  `json:"year"`
+	SubjectIDs []int `json:"subjectIds"`
+	Year       *int  `json:"year"`
 }
 
 type BasicYearBalanceParams struct {
