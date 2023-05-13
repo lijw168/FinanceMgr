@@ -1,0 +1,6 @@
+LIBRARY clientProxy.dll;
+EXPORTS
+	InitProxy
+	FreeByteSlice
+	GetUserStatus
+	ProcessClientRequest

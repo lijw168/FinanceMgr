@@ -3,14 +3,15 @@ package url
 import (
 	"bytes"
 	"context"
-	"financeMgr/src/common/log"
-	"financeMgr/src/common/utils"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"financeMgr/src/common/log"
+	"financeMgr/src/common/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -54,10 +55,10 @@ func (p *RestUrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if requestId == "" {
 		requestId = utils.Uuid()
 	}
-	w.Header().Set("trace_id", requestId)
-	// add trace_id
+	w.Header().Set("Trace-Id", requestId)
+	// add Trace-Id
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, "trace_id", requestId)
+	ctx = context.WithValue(ctx, "Trace-Id", requestId)
 	r = r.WithContext(ctx)
 	start := time.Now()
 	w.Header().Set("Content-Type", "application/json")
@@ -88,8 +89,8 @@ func UrlUnFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	requestId := ""
 	ctx := r.Context()
-	if ctx.Value("trace_id") != nil {
-		requestId = ctx.Value("trace_id").(string)
+	if ctx.Value("Trace-Id") != nil {
+		requestId = ctx.Value("Trace-Id").(string)
 	}
 	w.Write([]byte(fmt.Sprintf(UrlUmatchErrStr, requestId, http.StatusNotFound)))
 }

@@ -1,3 +1,11 @@
+compile clientProxy.dll的方法
+
+go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
+
+cd D:\Program Files\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64
+lib.exe /DEF:E:\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\financeMgr\src\client\out\clientProxy.lib
+
+
 下面的cli命令要添加上--token 4c3bqpmc63  这个参数。
 
 //获取版本号
@@ -148,7 +156,9 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1122);
 
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8124,"年度结算",2,81,1123);
-insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1124);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8125,"取消年度结算",2,81,1124);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1125);
+
 
 
 
