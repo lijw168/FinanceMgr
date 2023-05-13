@@ -18,7 +18,7 @@ var (
 	yearBalanceTN       = "beginOfYearBalance"
 	yearBalanceFields   = []string{"subject_id", "year", "balance", "created_at", "updated_at"}
 	scanYearBalanceTask = func(r DbScanner, st *model.YearBalance) error {
-		return r.Scan(&st.SubjectID, &st.Year, &st.Balance)
+		return r.Scan(&st.SubjectID, &st.Year, &st.Balance, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
