@@ -5,8 +5,9 @@ endif
 API_TARGET := $(TARGET_DIR)/analysis_server
 CLI_TARGET := $(TARGET_DIR)/analysis_cli
 DEPENDCY := $(shell find . -name "*.go")
-API_SOURCE:= analysis-server/api/main 
-CLI_SOURCE:= cli/main.go
+CURRENTDIR := $(shell pwd)
+API_SOURCE:= $(CURRENTDIR)/src/analysis-server/api/main 
+CLI_SOURCE:= $(CURRENTDIR)/src/analysis-server/cli/main.go
 
 #BRANCH=`git rev-parse --abbrev-ref --symbolic-full-name @{u}`
 BRANCH=`git branch | sed -n -e 's/^\* \(.*\)/\1/p'`
