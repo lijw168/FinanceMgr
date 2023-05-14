@@ -105,7 +105,7 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	if first {
 		return nil
 	}
-	strSql += " updated_at=?  where subject_id = ? and year=?"
+	strSql += ", updated_at=?  where subject_id = ? and year=?"
 	values = append(values, time.Now(), subjectID, iYear)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateYearBalance] [sql: %s, values: %v]", strSql, values)
@@ -120,7 +120,7 @@ func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 
 // 仅更新年初余额这一个字段
 func (dao *YearBalanceDao) UpdateBalance(ctx context.Context, do DbOperator, st *model.OptYearBalanceParams) error {
-	strSql := "update " + yearBalanceTN + " set balance = ?  updated_at=? where subject_id = ? and year=?"
+	strSql := "update " + yearBalanceTN + " set balance = ? , updated_at=? where subject_id = ? and year=?"
 	values := []interface{}{st.Balance, time.Now(), st.SubjectID, st.Year}
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateBalance] [sql: %s, values: %v]", strSql, values)
