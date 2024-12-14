@@ -45,7 +45,7 @@ func (dao *VoucherInfoDao) Get(ctx context.Context, do DbOperator, voucherId, iY
 	}
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator, iYear int) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + GenTableName(iYear, voucherInfoTN)
@@ -55,7 +55,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator, iYear int) 
 	return c, err
 }
 
-//list count by filter ...
+// list count by filter ...
 func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
@@ -67,7 +67,7 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, iYe
 	return c, err
 }
 
-//通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号
+// 通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号
 func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOperator,
 	iYear, iVoucherMonth, iVoucherID int) (int64, error) {
 	tableName := GenTableName(iYear, voucherInfoTN)
@@ -140,7 +140,7 @@ func (dao *VoucherInfoDao) BatchDelete(ctx context.Context, do DbOperator, iYear
 	return nil
 }
 
-//没有复杂的匹配条件
+// 没有复杂的匹配条件
 func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
 	iYear, limit, offset, od int, order string) ([]*model.VoucherInfo, error) {
 	var voucherInfoSlice []*model.VoucherInfo
@@ -169,7 +169,7 @@ func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter
 	return voucherInfoSlice, nil
 }
 
-//在where条件里增加between ... and
+// 在where条件里增加between ... and
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{},
 	iYear, limit, offset, od int, order string) ([]*model.VoucherInfo, error) {
@@ -206,14 +206,14 @@ func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, 
 	tableName := GenTableName(iYear, voucherInfoTN)
 	var voucherInfoSlice []*model.VoucherInfo
 	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + tableName +
-		" where voucher_month in (select  max(voucher_month) from " +
+		" where company_id = ? and voucher_month = (select  max(voucher_month) from " +
 		tableName + " where company_id = ?) order by num_of_month "
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [SqlElapsed: %v]", time.Since(start))
 	}()
-	result, err := do.QueryContext(ctx, strSql, iCompanyID)
+	result, err := do.QueryContext(ctx, strSql, iCompanyID, iCompanyID)
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [do.Query: %s]", err.Error())
 		return voucherInfoSlice, err
@@ -273,7 +273,7 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId,
 	return nil
 }
 
-//用于批量审核/取消凭证。
+// 用于批量审核/取消凭证。
 func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iYear, iStatus int,
 	strVoucherAuditor string, voucherIds []int) error {
 	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
