@@ -1,0 +1,3 @@
+v2.6所修改的地方
+1、修改GetLatestVoucherInfoByCompanyID,fix the sql bug
+2、在beginOfYearBalance 、voucherTemplate  里增加了company_id，并且在在beginOfYearBalance增加了自增id
