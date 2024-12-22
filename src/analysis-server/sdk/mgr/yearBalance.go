@@ -15,14 +15,17 @@ type YearBalance struct {
 func (yb *YearBalance) CreateYearBalance(opts *options.YearBalanceOption) error {
 	action := "CreateYearBalance"
 	switch {
+	case opts.CompanyID <= 0:
+		return errors.New("CompanyID is required")
 	case opts.SubjectID <= 0:
 		return errors.New("SubjectID is required")
 	// case opts.Balance == "":
 	// 	return errors.New("Summary is required")
 	case opts.Year <= 0:
-		return errors.New("Year is required")
+		return errors.New("year is required")
 	}
 	params := model.OptYearBalanceParams{
+		CompanyID: &opts.CompanyID,
 		SubjectID: &opts.SubjectID,
 		Year:      &opts.Year,
 		Balance:   &opts.Balance}
@@ -55,14 +58,17 @@ func (yb *YearBalance) BatchDeleteYearBalance_json(params []byte) error {
 func (yb *YearBalance) DeleteYearBalance(opts *options.BasicYearBalance) error {
 	action := "DeleteYearBalance"
 	switch {
+	case opts.CompanyID <= 0:
+		return errors.New("CompanyID is required")
 	case opts.SubjectID <= 0:
 		return errors.New("SubjectID is required")
 	// case opts.Balance == "":
 	// 	return errors.New("Summary is required")
 	case opts.Year <= 0:
-		return errors.New("Year is required")
+		return errors.New("year is required")
 	}
 	params := model.BasicYearBalanceParams{
+		CompanyID: &opts.CompanyID,
 		SubjectID: &opts.SubjectID,
 		Year:      &opts.Year}
 	_, err := util.DoRequest(action, params)
@@ -86,14 +92,17 @@ func (yb *YearBalance) DeleteYearBalance_json(params []byte) error {
 func (yb *YearBalance) GetYearBalance(opts *options.BasicYearBalance) (float64, error) {
 	action := "GetYearBalance"
 	switch {
+	case opts.CompanyID <= 0:
+		return 0, errors.New("CompanyID is required")
 	case opts.SubjectID <= 0:
 		return 0, errors.New("SubjectID is required")
 	// case opts.Balance == "":
 	// 	return errors.New("Summary is required")
 	case opts.Year <= 0:
-		return 0, errors.New("Year is required")
+		return 0, errors.New("year is required")
 	}
 	params := model.BasicYearBalanceParams{
+		CompanyID: &opts.CompanyID,
 		SubjectID: &opts.SubjectID,
 		Year:      &opts.Year}
 	result, err := util.DoRequest(action, params)
@@ -126,7 +135,7 @@ func (yb *YearBalance) UpdateYearBalance(opts *options.YearBalanceOption) error 
 	// case opts.Balance == "":
 	// 	return errors.New("Summary is required")
 	case opts.Year <= 0:
-		return errors.New("Year is required")
+		return errors.New("year is required")
 	}
 	params := model.OptYearBalanceParams{
 		SubjectID: &opts.SubjectID,

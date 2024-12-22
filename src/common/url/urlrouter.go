@@ -3,7 +3,7 @@ package url
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -95,10 +95,10 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Request-Id
 	// 中间层请求是Request-Id
 	// 主机过来的Trace-Id
-	traceIds, ok := r.Header["Client-Token"]
+	traceIds, ok := r.Header["Trace-Id"]
 	if !ok {
 		if traceIds, ok = r.Header["Request-Id"]; !ok {
-			traceIds, _ = r.Header["Trace-Id"]
+			traceIds, _ = r.Header["Client-Token"]
 		}
 	}
 
@@ -156,13 +156,13 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		p.Logger.ErrorContext(r.Context(), "[url/handler] [method: %v, url: %v, remote_addr:%v, action: %v, x-forwarded-for: %v]", r.Method,
 			r.URL.RequestURI(), r.RemoteAddr, action, r.Header.Get("X-Forwarded-For"))
 		return
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	p.Logger.InfoContext(r.Context(), "[url/handler] [method: %v, url: %v, body: %v, remote_addr:%v, action: %v, header : %v ]", r.Method,
 		r.URL.RequestURI(), strings.Replace(string(body), "\n", " ", -1), r.RemoteAddr, action, r.Header)

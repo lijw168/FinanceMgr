@@ -14,7 +14,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-//默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
+// 默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
 const (
 	MaxRecordLimit = 100
 )
@@ -134,7 +134,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	return IdValSli, nil
 }
 
-//UpdateVoucher  该函数用于修改voucher ...
+// UpdateVoucher  该函数用于修改voucher ...
 func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.UpdateVoucherParams,
 	requestID string) ([]int, CcError) {
 	vs.Logger.InfoContext(ctx, "UpdateVoucher method begin")
@@ -344,7 +344,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, 
 	return voucherView, nil
 }
 
-//VoucherArrange
+// VoucherArrange
 func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.VoucherArrangeParams,
 	requestID string) CcError {
 	vs.Logger.InfoContext(ctx, "ArrangeVoucher method begin,companyID:%d ,month:%d",
@@ -463,9 +463,9 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 	return nil
 }
 
-//之所以放在这，是因为list voucherInfo时，有时，可能需要访问voucher record这个表。
-//该算法有一个问题，那就是当从voucherRecord表中，获取的记录比较多，但再加上了访问voucherInfo的条件，
-//导致符合记录的条件比较少。这就浪费了资源。该算法有待于改进。
+// 之所以放在这，是因为list voucherInfo时，有时，可能需要访问voucher record这个表。
+// 该算法有一个问题，那就是当从voucherRecord表中，获取的记录比较多，但再加上了访问voucherInfo的条件，
+// 导致符合记录的条件比较少。这就浪费了资源。该算法有待于改进。
 func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 	params *model.ListVoucherInfoParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
@@ -513,11 +513,13 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				{
 					switch f.Value.(type) {
 					case float64:
-						//从客户端发过来的，解析json时，会解析成float64
+						//从客户端发过来的，解析json时，会解析成float64 (经验证该结论是错误的)
+						//正确的结论是，文档显示当把json解析成interface{}时，把number解析成float64
 						iVoucherYear = int(f.Value.(float64))
 					case int:
-						//从cli发过来的，解析json时，会解析成int
-						iVoucherYear = f.Value.(int)
+						panic("the iVoucherYear is int")
+						//从cli发过来的，解析json时，会解析成int (经验证该结论是错误的)
+						//iVoucherYear = f.Value.(int)
 					}
 				}
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate", "voucherFiller":
@@ -645,7 +647,7 @@ func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 	return accuMoney, nil
 }
 
-//批量计算多个accSubId所对应的累计金额
+// 批量计算多个accSubId所对应的累计金额
 func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 	params *model.BatchCalAccuMoneyParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
 	vs.Logger.InfoContext(ctx, "BatchCalcAccuMoney method begin")
@@ -687,7 +689,7 @@ func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 	return resData, nil
 }
 
-//批量计算多个accSubId所对应的本期发生额
+// 批量计算多个accSubId所对应的本期发生额
 func (vs *VoucherService) CalcAccountOfPeriod(ctx context.Context,
 	params *model.CalAmountOfPeriodParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
 	vs.Logger.InfoContext(ctx, "CalcAccountOfPeriod method begin")

@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+
 	//"unicode/utf8"
 
 	"financeMgr/src/analysis-server/api/service"
@@ -30,6 +31,7 @@ func (vt *VoucherTemplateHandlers) ListVoucherTemplate(w http.ResponseWriter, r 
 	if params.Filter != nil {
 		filterMap := map[string]utils.Attribute{}
 		filterMap["voucherTemplateId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["refVoucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 		filterMap["illustration"] = utils.Attribute{Type: utils.T_String, Val: nil}
@@ -104,7 +106,7 @@ func (vt *VoucherTemplateHandlers) GetVoucherTemplate(w http.ResponseWriter, r *
 		return
 	}
 	vt.Response(r.Context(), vt.Logger, w, nil, tmpView)
-	return
+	//return
 }
 
 func (vt *VoucherTemplateHandlers) CreateVoucherTemplate(w http.ResponseWriter, r *http.Request) {
@@ -113,6 +115,11 @@ func (vt *VoucherTemplateHandlers) CreateVoucherTemplate(w http.ResponseWriter, 
 	if err != nil {
 		vt.Logger.ErrorContext(r.Context(), "[voucherTemplate/CreateVoucherTemplate] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherTemplate, service.ErrMalformed, service.ErrNull, err.Error())
+		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
+		return
+	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrId, service.ErrNull)
 		vt.Response(r.Context(), vt.Logger, w, ccErr, nil)
 		return
 	}
@@ -135,7 +142,7 @@ func (vt *VoucherTemplateHandlers) CreateVoucherTemplate(w http.ResponseWriter, 
 		return
 	}
 	vt.Response(r.Context(), vt.Logger, w, nil, voucherTemplateID)
-	return
+	//return
 }
 
 func (vt *VoucherTemplateHandlers) DeleteVoucherTemplate(w http.ResponseWriter, r *http.Request) {
@@ -161,5 +168,5 @@ func (vt *VoucherTemplateHandlers) DeleteVoucherTemplate(w http.ResponseWriter, 
 		return
 	}
 	vt.Response(r.Context(), vt.Logger, w, nil, nil)
-	return
+	//return
 }

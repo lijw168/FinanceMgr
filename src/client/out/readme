@@ -1,5 +1,6 @@
-go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
+1、install mingw-w64
+2、在client目录下执行： CGO_ENABLED=1  go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
 
-cd D:\Program Files\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64
-lib.exe /DEF:E:\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\financeMgr\src\client\out\clientProxy.lib
+cd D:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64
+lib.exe /DEF:E:\project_go\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\project_go\financeMgr\src\client\out\clientProxy.lib
 

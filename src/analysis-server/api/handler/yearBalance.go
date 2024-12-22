@@ -24,6 +24,11 @@ func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
 	if params.Year == nil || *(params.Year) <= 0 {
 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -36,7 +41,7 @@ func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request
 	}
 	requestId := yh.GetTraceId(r)
 
-	yearBal, ccErr := yh.YearBalService.GetYearBalance(r.Context(), *(params.Year), *(params.SubjectID), requestId)
+	yearBal, ccErr := yh.YearBalService.GetYearBalance(r.Context(), params, requestId)
 	if ccErr != nil {
 		yh.Logger.WarnContext(r.Context(), "[yearBalance/GetYearBalance/ServerHTTP] [YearBalService.GetYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -51,6 +56,11 @@ func (yh *YearBalHandlers) CreateYearBalance(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/CreateYearBalance] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
@@ -126,6 +136,11 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
 	if params.SubjectID == nil || *params.SubjectID <= 0 {
 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -145,7 +160,7 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	ccErr := yh.YearBalService.UpdateYearBalance(r.Context(), *(params.Year), *(params.SubjectID), updateFields)
+	ccErr := yh.YearBalService.UpdateYearBalance(r.Context(), params)
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers/ServerHTTP] [YearBalService.UpdateYearBalanceById: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -154,6 +169,7 @@ func (yh *YearBalHandlers) UpdateYearBalance(w http.ResponseWriter, r *http.Requ
 	yh.Response(r.Context(), yh.Logger, w, nil, nil)
 }
 
+// 仅更新年初余额这一个字段
 func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.OptYearBalsParams)
 	err := yh.HttpRequestParse(r, params)
@@ -163,26 +179,7 @@ func (yh *YearBalHandlers) BatchUpdateYearBalance(w http.ResponseWriter, r *http
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	// for _, param := range params {
-	// 	if param.SubjectID == nil || *param.SubjectID <= 0 {
-	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
-	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-	// 		return
-	// 	}
-	// 	if param.Year == nil || *param.Year <= 0 {
-	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrYear, service.ErrNull)
-	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-	// 		return
-	// 	}
-	// 	updateFields := make(map[string]interface{})
-	// 	if param.Balance != nil {
-	// 		updateFields["balance"] = *param.Balance
-	// 	} else {
-	// 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-	// 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
-	// 		return
-	// 	}
-	// }
+	//参数的判断移到service中。
 	requestId := yh.GetTraceId(r)
 	ccErr := yh.YearBalService.BatchUpdateYearBalance(r.Context(), params.OptYearBals, requestId)
 	if ccErr != nil {
@@ -199,6 +196,11 @@ func (yh *YearBalHandlers) BatchDeleteYearBalance(w http.ResponseWriter, r *http
 	if err != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/YearBalHandlers] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
+		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
@@ -242,7 +244,7 @@ func (yh *YearBalHandlers) DeleteYearBalance(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	requestId := yh.GetTraceId(r)
-	ccErr := yh.YearBalService.DeleteYearBalance(r.Context(), *(params.Year), *(params.SubjectID), requestId)
+	ccErr := yh.YearBalService.DeleteYearBalance(r.Context(), params, requestId)
 	if ccErr != nil {
 		yh.Logger.ErrorContext(r.Context(), "[yearBalance/DeleteYearBalance/ServerHTTP] [YearBalService.DeleteYearBalance: %s]", ccErr.Detail())
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
@@ -260,7 +262,7 @@ func (yh *YearBalHandlers) ListYearBalance(w http.ResponseWriter, r *http.Reques
 		yh.Response(r.Context(), yh.Logger, w, ccErr, nil)
 		return
 	}
-	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
+	if isLackBaseParams([]string{"subjectId", "companyId", "year"}, params.Filter) {
 		yh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
 		ce := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
 		yh.Response(r.Context(), yh.Logger, w, ce, nil)

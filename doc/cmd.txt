@@ -260,6 +260,18 @@ type VoucherDetailInfoView struct {
 7、年度转结
 8、资源的初始化，怎样能保证新增了新的年份的凭证之后，怎样能自动进行资源的初始化呢？
 
+9、voucherInfo voucherRecord 表里的ID，当进行新增每个年度的新表时，可以把Id ,再进行从头开始。
+
+10、把voucher_template_id 设置为自增ID，不需要专门弄一个Id 生成器。
+
+
+11、下次修改client库时，顺便把Verbose也作为一个参数，控制是否输出详细信息。
+
+
+12、把FinanceMgr服务里的requestId打印出来，以便查找错误时，跟踪相应的函数调用。 
+
+
+
 
 
 

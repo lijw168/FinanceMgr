@@ -125,11 +125,13 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 				{
 					switch f.Value.(type) {
 					case float64:
-						//从客户端发过来的，解析json时，会解析成float64
+						//从客户端发过来的，解析json时，会解析成float64 (经验证该结论是错误的)
+						//正确的结论是，文档显示当把json解析成interface{}时，把number解析成float64
 						iVoucherYear = int(f.Value.(float64))
 					case int:
-						//从cli发过来的，解析json时，会解析成int
-						iVoucherYear = f.Value.(int)
+						panic("the iVoucherYear is int")
+						//从cli发过来的，解析json时，会解析成int (经验证该结论是错误的)
+						//iVoucherYear = f.Value.(int)
 					}
 				}
 			case "recordId", "voucherId", "subjectName", "summary", "subId1":

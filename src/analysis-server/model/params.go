@@ -39,6 +39,7 @@ type ModifySubjectParams struct {
 }
 
 type OptYearBalanceParams struct {
+	CompanyID *int     `json:"companyId"`
 	SubjectID *int     `json:"subjectId"`
 	Year      *int     `json:"year"`
 	Balance   *float64 `json:"balance"`
@@ -49,11 +50,13 @@ type OptYearBalsParams struct {
 }
 
 type BatchDelYearBalsParams struct {
+	CompanyID  *int  `json:"companyId"`
 	SubjectIDs []int `json:"subjectIds"`
 	Year       *int  `json:"year"`
 }
 
 type BasicYearBalanceParams struct {
+	CompanyID *int `json:"companyId"`
 	SubjectID *int `json:"subjectId"`
 	Year      *int `json:"year"`
 }
@@ -190,6 +193,7 @@ type DeleteYearAndIDParams struct {
 }
 
 type VoucherTemplateParams struct {
+	CompanyID    *int    `json:"companyId"`
 	RefVoucherID *int    `json:"refVoucherId"`
 	VoucherYear  *int    `json:"voucherYear"`
 	Illustration *string `json:"illustration"`

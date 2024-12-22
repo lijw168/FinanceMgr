@@ -29,7 +29,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 		return
 	}
 	if isLackBaseParams([]string{"operatorId", "companyId"}, params.Filter) {
-		oh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		oh.Logger.ErrorContext(r.Context(), "lack base param  operatorId or companyId")
 		ce := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrField, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ce, nil)
 		return

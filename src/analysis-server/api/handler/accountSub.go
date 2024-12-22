@@ -29,7 +29,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
-		ah.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		ah.Logger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
 		ce := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
 		return
@@ -92,7 +92,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 // 		return
 // 	}
 // 	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
-// 		ah.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+// 		ah.Logger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
 // 		ce := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
 // 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
 // 		return
@@ -158,6 +158,7 @@ func (ah *AccountSubHandlers) GetAccSub(w http.ResponseWriter, r *http.Request) 
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
+	//根据分析requestId是traceId,其实在urlrouter中，设置了r中的ctx，该ctx中带有traceId的值，在打印日志时，都会打印。
 	requestId := ah.GetTraceId(r)
 
 	accSubView, ccErr := ah.AccSubService.GetAccSubById(r.Context(), *params.ID, requestId)

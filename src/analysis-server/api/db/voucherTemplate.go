@@ -17,9 +17,9 @@ type VoucherTemplateDao struct {
 
 var (
 	voucherTemplateTN     = "voucherTemplate"
-	voucherTemplateFields = []string{"voucher_template_id", "reference_voucher_id", "voucher_year", "illustration", "created_at"}
+	voucherTemplateFields = []string{"voucher_template_id", "company_id", "reference_voucher_id", "voucher_year", "illustration", "created_at"}
 	scanVoucherTemplate   = func(r DbScanner, st *model.VoucherTemplate) error {
-		return r.Scan(&st.VoucherTemplateID, &st.RefVoucherID, &st.VoucherYear, &st.Illustration, &st.CreatedAt)
+		return r.Scan(&st.VoucherTemplateID, &st.CompanyID, &st.RefVoucherID, &st.VoucherYear, &st.Illustration, &st.CreatedAt)
 	}
 )
 
@@ -42,7 +42,7 @@ func (dao *VoucherTemplateDao) Get(ctx context.Context, do DbOperator, voucherTe
 	}
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *VoucherTemplateDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + voucherTemplateTN
@@ -52,7 +52,7 @@ func (dao *VoucherTemplateDao) Count(ctx context.Context, do DbOperator) (int64,
 	return c, err
 }
 
-//list count by filter ...
+// list count by filter ...
 func (dao *VoucherTemplateDao) CountByFilter(ctx context.Context, do DbOperator,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
@@ -66,8 +66,8 @@ func (dao *VoucherTemplateDao) CountByFilter(ctx context.Context, do DbOperator,
 
 func (dao *VoucherTemplateDao) Create(ctx context.Context, do DbOperator, st *model.VoucherTemplate) error {
 	strSql := "insert into " + voucherTemplateTN + " (" + strings.Join(voucherTemplateFields, ",") +
-		") values (?, ?, ?, ?, ?)"
-	values := []interface{}{st.VoucherTemplateID, st.RefVoucherID, st.VoucherYear, st.Illustration, st.CreatedAt}
+		") values (?, ?, ?, ?, ?, ?)"
+	values := []interface{}{st.VoucherTemplateID, st.CompanyID, st.RefVoucherID, st.VoucherYear, st.Illustration, st.CreatedAt}
 	dao.Logger.DebugContext(ctx, "[VoucherTemplate/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -93,7 +93,7 @@ func (dao *VoucherTemplateDao) Delete(ctx context.Context, do DbOperator, vouche
 	return nil
 }
 
-//没有复杂的匹配条件
+// 没有复杂的匹配条件
 func (dao *VoucherTemplateDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
 	limit, offset, od int, order string) ([]*model.VoucherTemplate, error) {
 	var comVoucherSlice []*model.VoucherTemplate

@@ -81,7 +81,7 @@ func newYearBalanceDeleteCmd() *cobra.Command {
 
 func newYearBalanceShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "yearBal-show [OPTIONS] subjectId year",
+		Use:   "yearBal-show [OPTIONS] companyId year subjectId",
 		Short: "Show the begin of year balance ",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 2 {
@@ -89,15 +89,20 @@ func newYearBalanceShowCmd() *cobra.Command {
 				return
 			}
 			var opts options.BasicYearBalance
-			if subjectId, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
+			if companyId, err := strconv.Atoi(args[0]); err != nil {
+				fmt.Println("change companyId to int fail", args[0])
 			} else {
-				opts.SubjectID = subjectId
+				opts.CompanyID = companyId
 			}
 			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
+				fmt.Println("change iYear to int fail", args[1])
 			} else {
 				opts.Year = iYear
+			}
+			if subjectId, err := strconv.Atoi(args[2]); err != nil {
+				fmt.Println("change subjectId to int fail", args[2])
+			} else {
+				opts.SubjectID = subjectId
 			}
 			dYearBal, err := Sdk.GetYearBalance(&opts)
 			if err != nil {

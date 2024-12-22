@@ -45,11 +45,17 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 				{
 					switch f.Value.(type) {
 					case float64:
-						//从客户端发过来的，解析json时，会解析成float64
+						//从客户端发过来的，解析json时，会解析成float64 (经验证该结论是错误的)
+						//正确的结论是，文档显示当把json解析成interface{}时，把number解析成float64
 						iVoucherYear = int(f.Value.(float64))
+						//测试代码
+						//vs.Logger.ErrorContext(ctx, "the iVoucherYear is float64")
 					case int:
-						//从cli发过来的，解析json时，会解析成int
-						iVoucherYear = f.Value.(int)
+						panic("the iVoucherYear is int")
+						//从cli发过来的，解析json时，会解析成int (经验证该结论是错误的)
+						//iVoucherYear = f.Value.(int)
+						//测试代码
+						//vs.Logger.ErrorContext(ctx, "the iVoucherYear is int")
 					}
 				}
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
@@ -126,7 +132,7 @@ func VoucherInfoModelToView(vInfo *model.VoucherInfo) *model.VoucherInfoView {
 	return vInfoView
 }
 
-//该函数也可以用于审核、取消审核、作废凭证等功能 ...
+// 该函数也可以用于审核、取消审核、作废凭证等功能 ...
 func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucherID, iYear int,
 	params map[string]interface{}) CcError {
 	FuncName := "VoucherInfoService/UpdateVoucherInfoByID"

@@ -107,7 +107,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  Id")
+		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or companyId")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
@@ -189,7 +189,7 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.BasicFilter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param Id")
+		vh.Logger.ErrorContext(r.Context(), "lack base param voucherId or companyId")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
@@ -274,7 +274,7 @@ func (vh *VoucherHandlers) GetVoucherInfo(w http.ResponseWriter, r *http.Request
 	return
 }
 
-//update voucher information,exclude "numOfMonth";exclude "voucherMonth",该字段是在UpdateVoucher接口里修改。
+// update voucher information,exclude "numOfMonth";exclude "voucherMonth",该字段是在UpdateVoucher接口里修改。
 func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.ModifyVoucherInfoParams)
 	err := vh.HttpRequestParse(r, params)
@@ -393,7 +393,7 @@ func (vh *VoucherHandlers) GetVoucher(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//CreateVoucher ... 创建voucher时，创建的voucher record不会太多。
+// CreateVoucher ... 创建voucher时，创建的voucher record不会太多。
 func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CreateVoucherParams)
 	err := vh.HttpRequestParse(r, params)
@@ -461,7 +461,7 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 	return
 }
 
-//update voucher,include:voucherInfo,voucherRecord
+// update voucher,include:voucherInfo,voucherRecord
 func (vh *VoucherHandlers) UpdateVoucher(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.UpdateVoucherParams)
 	err := vh.HttpRequestParse(r, params)
@@ -740,7 +740,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "recordId"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or recordId")
 		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
@@ -818,7 +818,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	return
 }
 
-//该函数用于在凭证明细报表中，计算截止到某个时间的某个科目的累计金额
+// 该函数用于在凭证明细报表中，计算截止到某个时间的某个科目的累计金额
 func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
@@ -865,7 +865,7 @@ func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *
 	return
 }
 
-//批量计算截止到某个时间的多个科目的累计金额，该函数用于统计“发生额及余额表”
+// 批量计算截止到某个时间的多个科目的累计金额，该函数用于统计“发生额及余额表”
 func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.BatchCalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
@@ -913,7 +913,7 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 	return
 }
 
-////批量计算多个accSubId所对应的本期发生额,该函数用于统计“发生额及余额表”
+// //批量计算多个accSubId所对应的本期发生额,该函数用于统计“发生额及余额表”
 func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CalAmountOfPeriodParams)
 	err := vh.HttpRequestParse(r, params)

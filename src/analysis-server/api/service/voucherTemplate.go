@@ -34,10 +34,7 @@ func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, par
 	}()
 
 	vTemplate := new(model.VoucherTemplate)
-	// count, err := vs.VTemplateDao.Count(ctx, tx)
-	// if err != nil {
-	// 	return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	// }
+	vTemplate.CompanyID = *params.CompanyID
 	vTemplate.VoucherTemplateID = GIdInfoService.genvVouTempIdInfo.GetNextId()
 	vTemplate.RefVoucherID = *params.RefVoucherID
 	vTemplate.VoucherYear = *params.VoucherYear
@@ -93,7 +90,7 @@ func (vs *VoucherTemplateService) ListVoucherTemplate(ctx context.Context, param
 	if params.Filter != nil {
 		for _, f := range params.Filter {
 			switch *f.Field {
-			case "voucher_template_id", "reference_voucher_id", "voucher_year", "illustration", "status":
+			case "voucherTemplateId", "companyId", "referenceVoucherId", "voucherYear", "illustration", "status":
 				filterFields[*f.Field] = f.Value
 			default:
 				return voucherTemplateSlice, 0, NewError(ErrVoucherTemplate, ErrUnsupported, ErrField, *f.Field)

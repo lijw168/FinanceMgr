@@ -5,7 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -69,7 +69,7 @@ func QueryVersion(host string) (*VersionInfo, error) {
 		return nil, errors.New("empty response")
 	}
 
-	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
+	if buf, err = io.ReadAll(rsp.Body); err != nil {
 		return nil, err
 	}
 

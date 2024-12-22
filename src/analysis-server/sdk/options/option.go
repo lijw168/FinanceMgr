@@ -1,6 +1,6 @@
 package options
 
-//common information
+// common information
 type CommResp struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
@@ -18,7 +18,7 @@ type ListOptions struct {
 	Orders map[string]int
 }
 
-//login information
+// login information
 type AuthenInfoOptions struct {
 	Name      string
 	Password  string
@@ -30,7 +30,7 @@ type LogoutOptions struct {
 	AccessToken string
 }
 
-//operator information
+// operator information
 type CreateOptInfoOptions struct {
 	CompanyID  int
 	Name       string
@@ -61,14 +61,14 @@ type QueryMaxNumOfMonthOption struct {
 	VoucherMonth int
 }
 
-//voucher begin;VoucherInfoOptions ...
+// voucher begin;VoucherInfoOptions ...
 type VoucherInfoOptions struct {
 	CompanyID     int
 	VoucherMonth  int
 	VoucherFiller string
 }
 
-//ModifyVoucherInfoOptions ...
+// ModifyVoucherInfoOptions ...
 type ModifyVoucherInfoOptions struct {
 	VoucherYear    int
 	VoucherID      int
@@ -80,7 +80,7 @@ type ModifyVoucherInfoOptions struct {
 	Status         int
 }
 
-//VoucherRecordOptions ...
+// VoucherRecordOptions ...
 type CreateVoucherRecordOptions struct {
 	VoucherID   int
 	SubjectName string
@@ -94,7 +94,7 @@ type CreateVoucherRecordOptions struct {
 	BillCount   int
 }
 
-//ModifyVoucherRecordOptions ...
+// ModifyVoucherRecordOptions ...
 type ModifyVoucherRecordOptions struct {
 	VouRecordID int
 	SubjectName string
@@ -109,13 +109,13 @@ type ModifyVoucherRecordOptions struct {
 	Status      int
 }
 
-//VoucherOptions...
+// VoucherOptions...
 type VoucherOptions struct {
 	InfoOptions    VoucherInfoOptions
 	RecordsOptions []CreateVoucherRecordOptions
 }
 
-//VoucherArrangeOptions 凭证整理参数
+// VoucherArrangeOptions 凭证整理参数
 type VoucherArrangeOptions struct {
 	CompanyID         int
 	VoucherYear       int
@@ -135,7 +135,7 @@ type DeleteYearAndIDOptions struct {
 
 //voucher end
 
-//commpany option
+// commpany option
 type CreateCompanyOptions struct {
 	CompanyName        string
 	AbbrevName         string
@@ -199,14 +199,16 @@ type ModifySubjectOptions struct {
 	SubjectType      int
 }
 
-//YearBalanceOption ...
+// YearBalanceOption ...
 type YearBalanceOption struct {
+	CompanyID int
 	SubjectID int
 	Year      int
 	Balance   float64
 }
 
 type BasicYearBalance struct {
+	CompanyID int
 	SubjectID int
 	Year      int
 }

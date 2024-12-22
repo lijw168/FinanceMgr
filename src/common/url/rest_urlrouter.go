@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -64,7 +65,7 @@ func (p *RestUrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Requst-Host-Trace", p.hostname)
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		p.Logger.ErrorContext(r.Context(), "[url/handler] [method: %v, url: %v, remote_addr:%v, x-forwarded-for: %v]", r.Method,
 			r.URL.RequestURI(), r.RemoteAddr, r.Header.Get("X-Forwarded-For"))

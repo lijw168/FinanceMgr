@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -52,7 +52,7 @@ func (h *CCHandler) GetTraceId(r *http.Request) string {
 }
 
 func (h *CCHandler) HttpRequestParse(r *http.Request, param interface{}) error {
-	jsonReq, err := ioutil.ReadAll(r.Body)
+	jsonReq, err := io.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}

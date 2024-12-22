@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net"
 	"regexp"
 	"unicode/utf8"
@@ -213,7 +212,7 @@ func (s *SchemaValidator) validate_fo(fs []interface{}, attrs map[string]*Schema
 }
 
 func (s *SchemaValidator) Validate(attrs map[string]*SchemaItem, rr io.Reader, r string, d interface{}) CcError {
-	bt, err := ioutil.ReadAll(rr)
+	bt, err := io.ReadAll(rr)
 	if err != nil {
 		return NewError(r, ErrMalformed, ErrNull, err.Error())
 	}

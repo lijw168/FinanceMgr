@@ -14,7 +14,8 @@ type CcSdk struct {
 	//Tenant  string
 	Verbose bool
 	Admin   bool
-	TraceId string
+	//由于需要每一个req，一个traceId，所以删除共用的traceId.
+	//TraceId string
 	Timeout uint64
 	//AccessToken string
 	mgr.AccSub
@@ -35,7 +36,7 @@ func (c *CcSdk) Setup() {
 	util.Admin = c.Admin
 	util.Client = new(http.Client)
 	util.Client.Timeout = time.Duration(c.Timeout) * time.Millisecond
-	util.TraceId = c.TraceId
+	//util.TraceId = c.TraceId
 	util.Logger = c.Logger
 }
 

@@ -62,6 +62,8 @@ create table if not exists `finance_mgr`.`operatorInfo`
    primary key (operator_id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
+create index comId_name on `finance_mgr`.`operatorInfo` (company_id,name);
+
 use  finance_mgr;
 alter table operatorInfo add constraint FK_Reference_1 foreign key (company_id)  
       references companyInfo (company_id) on delete restrict  on update restrict;
@@ -99,13 +101,18 @@ alter table accountSubject add constraint FK_Reference_2 foreign key (company_id
 drop table if exists `finance_mgr`.`beginOfYearBalance`;
 create table if not exists `finance_mgr`.`beginOfYearBalance`
 (
+   `id`                    int not null AUTO_INCREMENT,
+   `company_id`            int not null,
    `subject_id`            int not null,
    `year`                  int not null,
    `balance`               decimal(12,4) not null,
    `created_at`            datetime,
    `updated_at`            datetime,
-   primary key (subject_id, year)
+   primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+create index comId_subId_year_index on `finance_mgr`.`beginOfYearBalance` (company_id,year,subject_id);
+
 -- 之所以删除该约束，就是因为这两个表之间没有强关联性，所以删除
 -- alter table beginOfYearBalance add constraint FK_Reference_5 foreign key (subjectId)
 --       references accountSubject (subjectId) on delete restrict;
@@ -134,7 +141,7 @@ alter table voucherInfo add constraint FK_Reference_3 foreign key (company_id)
       references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
-/* 凭证信息表 Table: voucherRecordInfo                               */
+/* 凭证信息表 Table: voucherRecordInfo                          */
 /*==============================================================*/
 drop table if exists `finance_mgr`.`voucherRecordInfo`;
 create table  if not exists `finance_mgr`.`voucherRecordInfo`
@@ -159,18 +166,24 @@ alter table voucherRecordInfo add constraint FK_Reference_4 foreign key (voucher
 
 
 /*==============================================================*/
-/* Table: voucherTemplate                                         */
+/* Table: voucherTemplate                                */
+/* 之所以增加company_id,为了方便获取某个公司的voucherTemplate*/
+/* 可以增加一个非唯一索引，在company_id字段上，因为list时，是通过company_id*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`voucherTemplate`; 
 create table if not exists `finance_mgr`.`voucherTemplate`
 (
    `voucher_template_id`    int not null,
+   `company_id`             int not null,
    `reference_voucher_id`   int not null COMMENT '所引用的凭证ID',
    `voucher_year`           int not null COMMENT '所引用的凭证数据年度',
    `illustration`           varchar(24),
    `created_at`             datetime,
-   primary key (voucher_template_id)
+   primary key (voucher_template_id),
+   index comId_Year_name (company_id,voucher_year)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+create index comId_index on `finance_mgr`.`voucherTemplate` (company_id);
 
 /*==============================================================*/
 /* Table: IDInfo                                           */

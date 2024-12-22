@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"financeMgr/src/analysis-server/model"
@@ -14,12 +14,12 @@ import (
 )
 
 var (
-	Domain      string
-	Tenant      string
-	Verbose     bool
-	Admin       bool
-	Client      *http.Client
-	TraceId     string
+	Domain  string
+	Tenant  string
+	Verbose bool
+	Admin   bool
+	Client  *http.Client
+	//TraceId     string
 	AccessToken string
 	Logger      *log.Logger
 )
@@ -70,10 +70,7 @@ func DoRequestwithToken(accessToken, action string,
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "MgrClient")
-	if TraceId == "" {
-		TraceId = utils.Uuid()
-	}
-	req.Header.Set("Trace-Id", TraceId)
+	req.Header.Set("Trace-Id", utils.Uuid())
 	if Admin {
 		req.Header.Set("Secret-Id", "MgrClientSecretId")
 	}
@@ -90,7 +87,7 @@ func DoRequestwithToken(accessToken, action string,
 	if err != nil {
 		return nil, &RespErr{Code: -1, Err: err}
 	}
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
 
 	if Verbose {
@@ -128,7 +125,7 @@ func DoRequest_json(action string, params []byte) (*model.CommResp, error) {
 	return DoRequestwithToken_json(AccessToken, action, params)
 }
 
-//为前端传的params参数是json格式的请求数据，而特殊添加的。
+// 为前端传的params参数是json格式的请求数据，而特殊添加的。
 func DoRequestwithToken_json(accessToken, action string,
 	params []byte) (*model.CommResp, error) {
 	//input, _ := json.Marshal(params)
@@ -139,10 +136,7 @@ func DoRequestwithToken_json(accessToken, action string,
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "MgrClient")
-	if TraceId == "" {
-		TraceId = utils.Uuid()
-	}
-	req.Header.Set("Trace-Id", TraceId)
+	req.Header.Set("Trace-Id", utils.Uuid())
 	if Admin {
 		req.Header.Set("Secret-Id", "MgrClientSecretId")
 	}
@@ -159,7 +153,7 @@ func DoRequestwithToken_json(accessToken, action string,
 	if err != nil {
 		return nil, &RespErr{Code: -1, Err: err}
 	}
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
 
 	if Verbose {

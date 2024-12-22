@@ -29,7 +29,7 @@ func (ah *MenuInfoHandlers) ListMenuInfo(w http.ResponseWriter, r *http.Request)
 	}
 	//暂时先不添加这个功能
 	// if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
-	// 	ah.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
+	// 	ah.Logger.ErrorContext(r.Context(), "lack base param  companyId or subjectId")
 	// 	ce := service.NewError(service.ErrMenuInfo, service.ErrMiss, service.ErrId, service.ErrNull)
 	// 	ah.Response(r.Context(), ah.Logger, w, ce, nil)
 	// 	return

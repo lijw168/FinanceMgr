@@ -42,6 +42,7 @@ type AccSubject struct {
 }
 
 type YearBalance struct {
+	CompanyID int
 	SubjectID int
 	Year      int
 	Balance   float64
@@ -51,9 +52,8 @@ type YearBalance struct {
 
 // VoucherInfo ...
 type VoucherInfo struct {
-	VoucherID int
-	CompanyID int
-	//oucherYear    int
+	VoucherID      int
+	CompanyID      int
 	VoucherMonth   int
 	NumOfMonth     int
 	VoucherDate    int
@@ -84,6 +84,7 @@ type VoucherRecord struct {
 // VoucherTemplate ...
 type VoucherTemplate struct {
 	VoucherTemplateID int
+	CompanyID         int
 	RefVoucherID      int
 	VoucherYear       int
 	Illustration      string

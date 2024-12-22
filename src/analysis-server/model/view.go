@@ -11,7 +11,7 @@ type DescData struct {
 	Elements interface{} `json:"elements"`
 }
 
-//AccSubjectView ...
+// AccSubjectView ...
 type AccSubjectView struct {
 	SubjectID        int    `json:"subjectId"`
 	CompanyID        int    `json:"companyId"`
@@ -24,7 +24,7 @@ type AccSubjectView struct {
 	SubjectStyle     string `json:"subjectStyle"`
 }
 
-//YearBalance ...
+// YearBalance ...
 type YearBalanceView struct {
 	SubjectID int     `json:"subjectId"`
 	Year      int     `json:"year"`
@@ -55,7 +55,7 @@ type CompanyGroupView struct {
 	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
-//LoginInfoView ...
+// LoginInfoView ...
 type LoginInfoView struct {
 	OperatorID  int       `json:"operatorId"`
 	Name        string    `json:"name"`
@@ -105,7 +105,7 @@ type VoucherTemplateView struct {
 	CreatedAt         time.Time `json:"createdAt"`
 }
 
-//VoucherRecordView ...
+// VoucherRecordView ...
 type VoucherRecordView struct {
 	RecordID    int     `json:"recordId"`
 	VoucherID   int     `json:"voucherId"`
@@ -119,7 +119,7 @@ type VoucherRecordView struct {
 	SubID4      int     `json:"subId4"`
 }
 
-//表示符合条件的voucher records的总数，通过该变量，客户端用于判断，是否再次获取voucher records
+// 表示符合条件的voucher records的总数，通过该变量，客户端用于判断，是否再次获取voucher records
 type VoucherView struct {
 	VouInfoView         VoucherInfoView     `json:"voucherInfoView"`
 	VouRecordTotalCount int                 `json:"vouRecordCount"`
@@ -142,7 +142,7 @@ type ResourceInfoView struct {
 	YearSlice   []int  `json:"year"`
 }
 
-//MenuInfo ...
+// MenuInfo ...
 type MenuInfoView struct {
 	MenuID       int    `json:"menuId"`
 	MenuName     string `json:"menuName"`
@@ -150,7 +150,7 @@ type MenuInfoView struct {
 	ParentMenuID int    `json:"parentMenuId"`
 }
 
-//AccuMoneyValue ...
+// AccuMoneyValue ...
 type AccuMoneyValueView struct {
 	SubjectID       int     `json:"subjectId"`
 	AccuDebitMoney  float64 `json:"accuDebitMoney"`
