@@ -19,3 +19,15 @@ const (
 	InvalidCompanyGroup = 0 // 该公司组无效
 	ValidCompanyGroup   = 1 // 该公司组有效
 )
+
+// order
+const (
+	OrderAsc  = 0
+	OrderDesc = 1
+)
+
+//beginOfYearBalance status
+const (
+	NoAnnualClosing = 0
+	AnnualClosing   = 1
+)

@@ -1,0 +1,26 @@
+
+1、去掉requestId ，因为在它是requestId，它在context中，已经保存了。
+
+2、正确使用cobra.Command
+   cmd.Flags().Float64Var(&opts.Balance, "balance", 0, "annual closing status")
+   这种情况，获取不到正确的值。都是默认值。
+   
+3、把client Api中的错误码去掉，直接使用从服务端返回的错误码，这样可以解决根据根据不同的错误码，进行相应的操作。
+
+
+4、下次修改client库时，顺便把Verbose也作为一个参数，控制是否输出详细信息。
+
+5、// 由于把json解析成interface{}时，把number解析成float64
+// 所以为了判断是否是传过来的整形类型数据，就增加了是否float类型的判断。该函数有bug，需要修改
+func validate_int_arr(d interface{}) bool {
+	if l, ok := d.([]interface{}); !ok {
+		return false
+	} else {
+		for _, i := range l {
+			if _, ok := i.(int); !ok {
+				return validate_float64(d)
+			}
+		}
+	}
+	return true
+}

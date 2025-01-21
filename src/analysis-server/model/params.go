@@ -43,22 +43,41 @@ type OptYearBalanceParams struct {
 	SubjectID *int     `json:"subjectId"`
 	Year      *int     `json:"year"`
 	Balance   *float64 `json:"balance"`
+	Status    *int     `json:"status"`
 }
 
-type OptYearBalsParams struct {
-	OptYearBals []*OptYearBalanceParams `json:"optYearBals"`
+type OptSubAndBalParam struct {
+	SubjectID *int     `json:"subjectId"`
+	Balance   *float64 `json:"balance"`
+}
+
+type BatchCreateYearBalsParams struct {
+	CompanyID     *int                 `json:"companyId"`
+	Year          *int                 `json:"year"`
+	OptSubAndBals []*OptSubAndBalParam `json:"optSubAndBals"`
 }
 
 type BatchDelYearBalsParams struct {
 	CompanyID  *int  `json:"companyId"`
-	SubjectIDs []int `json:"subjectIds"`
 	Year       *int  `json:"year"`
+	SubjectIDs []int `json:"subjectIds"`
 }
 
 type BasicYearBalanceParams struct {
 	CompanyID *int `json:"companyId"`
-	SubjectID *int `json:"subjectId"`
 	Year      *int `json:"year"`
+	SubjectID *int `json:"subjectId"`
+}
+
+// type UpdateItem struct {
+// 	Field *string     `json:"field"`
+// 	Value interface{} `json:"value"`
+// }
+
+type BatchUpdateBalsParams struct {
+	CompanyID     *int                 `json:"companyId"`
+	Year          *int                 `json:"year"`
+	OptSubAndBals []*OptSubAndBalParam `json:"optSubAndBals"`
 }
 
 type DeleteSubjectParams struct {

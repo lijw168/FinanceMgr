@@ -32,7 +32,7 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 	if isLackBaseParams([]string{"operatorId"}, params.Filter) {
 		if !GAccessTokenH.isRootRequest(r) {
 			ah.Logger.ErrorContext(r.Context(), "lack base param  operatorId")
-			ce := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrId, service.ErrNull)
+			ce := service.NewError(service.ErrLogin, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
 			return
 		}
@@ -62,7 +62,7 @@ func (ah *AuthenHandlers) ListLoginInfo(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
+		case utils.OrderAsc, utils.OrderDesc:
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			ah.Response(r.Context(), ah.Logger, w, ce, nil)

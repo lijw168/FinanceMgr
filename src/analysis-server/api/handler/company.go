@@ -8,7 +8,6 @@ import (
 	"financeMgr/src/analysis-server/api/service"
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
-	cons "financeMgr/src/common/constant"
 	"financeMgr/src/common/log"
 )
 
@@ -58,7 +57,7 @@ func (ch *CompanyHandlers) ListCompany(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
+		case utils.OrderAsc, utils.OrderDesc:
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			ch.Response(r.Context(), ch.Logger, w, ce, nil)

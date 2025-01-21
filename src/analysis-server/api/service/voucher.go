@@ -321,7 +321,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, 
 	// 	limit = MaxRecordLimit
 	// }
 	orderField := "recordId"
-	orderDirection := cons.Order_Asc
+	orderDirection := utils.OrderAsc
 	voucherRecords, err := vs.VRecordDao.SimpleList(ctx, tx, filterFields, iYear, limit, offset, orderDirection, orderField)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
@@ -463,11 +463,13 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 	return nil
 }
 
-// 之所以放在这，是因为list voucherInfo时，有时，可能需要访问voucher record这个表。
-// 该算法有一个问题，那就是当从voucherRecord表中，获取的记录比较多，但再加上了访问voucherInfo的条件，
-// 导致符合记录的条件比较少。这就浪费了资源。该算法有待于改进。
-func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
+// 在该函数实现中，增加了如下的功能
+// 1、在where条件里增加between ... and
+// 2、增加了like
+// 3、增加了多列排序。
+func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	params *model.ListVoucherInfoParams) ([]*model.VoucherInfoView, int, CcError) {
+
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
 	filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
@@ -479,14 +481,13 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			offset = *params.DescOffset
 		}
 	}
-	orderField := ""
-	orderDirection := 0
-	if params.Order != nil {
-		orderField = *params.Order[0].Field
-		orderDirection = *params.Order[0].Direction
+	orderFilter := make(map[string]int)
+	for _, v := range params.Order {
+		orderFilter[*v.Field] = *v.Direction
 	}
+
 	iVoucherYear := 0
-	FuncName := "VoucherService/ListVoucherInfoByMulCondition"
+	FuncName := "VoucherService/ListVoucherInfoWithAuxCondition"
 	bIsRollBack := true
 	tx, err := vs.Db.Begin()
 	if err != nil {
@@ -498,6 +499,7 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			RollbackLog(ctx, vs.Logger, FuncName, tx)
 		}
 	}()
+	//这是对voucherInfo 的list
 	if params.BasicFilter != nil {
 		var intervalValSlice []int
 		for _, f := range params.BasicFilter {
@@ -542,8 +544,9 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 			}
 		}
 	}
+	//这是对voucherRecord 的list,根据其结果作为voucherInfo的过滤条件。
 	if params.AuxiFilter != nil {
-		filterRecNo := make(map[string]interface{})
+		//filterRecNo := make(map[string]interface{})
 		filterRecFields := make(map[string]interface{})
 		intervalFilterRecFields := make(map[string]interface{})
 		fuzzyMatchFields := make(map[string]string)
@@ -574,11 +577,11 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
-		voucherRecords, err := vs.VRecordDao.List(ctx, tx, filterRecNo, filterRecFields, intervalFilterRecFields,
-			fuzzyMatchFields, iVoucherYear, limit, offset, orderDirection, orderField)
+		voucherRecords, err := vs.VRecordDao.List(ctx, tx, nil, filterRecFields, intervalFilterRecFields,
+			fuzzyMatchFields, nil, iVoucherYear, limit, offset)
 		if err != nil {
-			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoByMulCondition] [VRecordDao.List: %s, filterFields: %v]",
-				err.Error(), filterFields)
+			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoWithAuxCondition] [VRecordDao.List: %s, filterRecFields: %v]",
+				err.Error(), filterRecFields)
 			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 		voucherIds := make([]int, 1)
@@ -590,8 +593,8 @@ func (vs *VoucherService) ListVoucherInfoByMulCondition(ctx context.Context,
 		}
 	}
 
-	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields,
-		iVoucherYear, limit, offset, orderDirection, orderField)
+	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields, nil,
+		orderFilter, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

@@ -112,7 +112,7 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	params *model.ListParams) ([]*model.VoucherRecordView, int, CcError) {
 	recordViewSlice := make([]*model.VoucherRecordView, 0)
-	filterNo := make(map[string]interface{})
+	//filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
 	fuzzyMatchFields := make(map[string]string)
@@ -125,7 +125,6 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 				{
 					switch f.Value.(type) {
 					case float64:
-						//从客户端发过来的，解析json时，会解析成float64 (经验证该结论是错误的)
 						//正确的结论是，文档显示当把json解析成interface{}时，把number解析成float64
 						iVoucherYear = int(f.Value.(float64))
 					case int:
@@ -157,14 +156,12 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 			offset = *params.DescOffset
 		}
 	}
-	orderField := ""
-	orderDirection := 0
-	if params.Order != nil {
-		orderField = *params.Order[0].Field
-		orderDirection = *params.Order[0].Direction
+	orderFilter := make(map[string]int)
+	for _, v := range params.Order {
+		orderFilter[*v.Field] = *v.Direction
 	}
-	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields, fuzzyMatchFields,
-		iVoucherYear, limit, offset, orderDirection, orderField)
+	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, nil, filterFields, intervalFilterFields,
+		fuzzyMatchFields, orderFilter, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return recordViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

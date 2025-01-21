@@ -4,6 +4,7 @@ const (
 	ErrNull = ""
 )
 
+// the error is which module
 const (
 	ErrSystem          = "system"
 	ErrAccSub          = "accountSubject"
@@ -22,6 +23,7 @@ const (
 	ErrYearBalance     = "yearBalance"
 )
 
+// no business error
 const (
 	ErrError         = "error"
 	ErrMantaining    = "mantaining"
@@ -45,6 +47,7 @@ const (
 	ErrDismatch      = "dismatch"
 )
 
+// business error
 const (
 	ErrId                = "id"
 	ErrIds               = "ids"
@@ -80,6 +83,8 @@ const (
 	ErrAccountPeriod     = "account period"
 	ErrYear              = "year"
 	ErrBalance           = "year balance"
+	ErrBaseParam         = "base param"
+	ErrUpdateParam       = "update param"
 )
 
 const (

@@ -8,7 +8,6 @@ import (
 	"financeMgr/src/analysis-server/api/service"
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
-	cons "financeMgr/src/common/constant"
 	"financeMgr/src/common/log"
 )
 
@@ -30,7 +29,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 	}
 	if isLackBaseParams([]string{"operatorId", "companyId"}, params.Filter) {
 		oh.Logger.ErrorContext(r.Context(), "lack base param  operatorId or companyId")
-		ce := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrField, service.ErrNull)
+		ce := service.NewError(service.ErrOperator, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 		oh.Response(r.Context(), oh.Logger, w, ce, nil)
 		return
 	}
@@ -61,7 +60,7 @@ func (oh *OperatorInfoHandlers) ListOperatorInfo(w http.ResponseWriter, r *http.
 			return
 		}
 		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
+		case utils.OrderAsc, utils.OrderDesc:
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
 			oh.Response(r.Context(), oh.Logger, w, ce, nil)

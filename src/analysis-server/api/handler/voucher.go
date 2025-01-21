@@ -4,7 +4,6 @@ import (
 	"financeMgr/src/analysis-server/api/service"
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
-	cons "financeMgr/src/common/constant"
 	"financeMgr/src/common/log"
 	"fmt"
 	"math"
@@ -61,7 +60,6 @@ func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, count)
-	return
 }
 
 func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +92,6 @@ func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.R
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
 func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Request) {
@@ -108,54 +105,49 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.Filter) {
 		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or companyId")
-		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherYear"}, params.Filter) {
 		vh.Logger.ErrorContext(r.Context(), "lack base param  voucher year")
-		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
+		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
-	if params.Filter != nil {
-		filterMap := map[string]utils.Attribute{}
-		//先暂时修改为一个值，如果以后确实需要，再进行添加。
-		//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
-		filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["status"] = utils.Attribute{Type: utils.T_Int, Val: nil}
-		filterMap["voucherFiller"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		filterMap["voucherAuditor"] = utils.Attribute{Type: utils.T_String, Val: nil}
-		if !utils.ValiFilter(filterMap, params.Filter) {
-			ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
-		}
-	}
+	// if params.Filter != nil {
+	// 	filterMap := map[string]utils.Attribute{}
+	// 	//先暂时修改为一个值，如果以后确实需要，再进行添加。
+	// 	//filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	filterMap["voucherId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["companyId"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["voucherYear"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["voucherMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["numOfMonth"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["voucherDate"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["status"] = utils.Attribute{Type: utils.T_Int, Val: nil}
+	// 	filterMap["voucherFiller"] = utils.Attribute{Type: utils.T_String, Val: nil}
+	// 	//bug fix,然后再修改
+	// 	// filterMap["numOfMonth_interval"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	// filterMap["voucherDate_interval"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	// filterMap["voucherMonth_interval"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
+	// 	if !utils.ValiFilter(filterMap, params.Filter) {
+	// 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
+	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+	// 		return
+	// 	}
+	// }
 	if (params.Order != nil) && (len(params.Order) > 0) {
-		switch *params.Order[0].Field {
-		case "voucherId":
-			*params.Order[0].Field = "voucherId"
-		case "createdAt":
-			*params.Order[0].Field = "createdAt"
-		case "updatedAt":
-			*params.Order[0].Field = "updatedAt"
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
-		}
-		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
+		for _, v := range params.Order {
+			if v.Direction != nil {
+				switch *(v.Direction) {
+				case utils.OrderAsc, utils.OrderDesc:
+				default:
+					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
+					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					return
+				}
+			}
 		}
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
@@ -176,21 +168,21 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
-func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, r *http.Request) {
+// 该函数的实现，获取voucherInfo时，利用了voucherRecord 的信息作为辅助条件
+func (vh *VoucherHandlers) ListVoucherInfoWithAuxCondition(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.ListVoucherInfoParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfoByMulCondition] [HttpRequestParse: %v]", err)
+		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfoWithAuxCondition] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.BasicFilter) {
 		vh.Logger.ErrorContext(r.Context(), "lack base param voucherId or companyId")
-		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
@@ -202,24 +194,16 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 	}
 	//由于出现了个别字段的值的类型，不确定，所以就不进行参数值的类型检查了。，比如：numOfMonth和 voucherDate可能是一个值，也可能是多个值
 	if (params.Order != nil) && (len(params.Order) > 0) {
-		switch *params.Order[0].Field {
-		case "voucherId":
-			*params.Order[0].Field = "voucherId"
-		case "createdAt":
-			*params.Order[0].Field = "createdAt"
-		case "updatedAt":
-			*params.Order[0].Field = "updatedAt"
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
-		}
-		switch *params.Order[0].Direction {
-		case cons.Order_Asc, cons.Order_Desc:
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
+		for _, v := range params.Order {
+			if v.Direction != nil {
+				switch *(v.Direction) {
+				case utils.OrderAsc, utils.OrderDesc:
+				default:
+					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
+					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					return
+				}
+			}
 		}
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
@@ -232,15 +216,14 @@ func (vh *VoucherHandlers) ListVoucherInfoByMulCondition(w http.ResponseWriter, 
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
-	vouInfoViews, count, ccErr := vh.Vs.ListVoucherInfoByMulCondition(r.Context(), params)
+	vouInfoViews, count, ccErr := vh.Vs.ListVoucherInfoWithAuxCondition(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/ListVoucherInfoByMulCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/ListVoucherInfoWithAuxCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
 func (vh *VoucherHandlers) GetVoucherInfo(w http.ResponseWriter, r *http.Request) {
@@ -271,7 +254,6 @@ func (vh *VoucherHandlers) GetVoucherInfo(w http.ResponseWriter, r *http.Request
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, voucherView)
-	return
 }
 
 // update voucher information,exclude "numOfMonth";exclude "voucherMonth",该字段是在UpdateVoucher接口里修改。
@@ -319,7 +301,6 @@ func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
-	return
 }
 
 func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Request) {
@@ -341,7 +322,7 @@ func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Req
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.IDs == nil || len(params.IDs) == 0 {
+	if len(params.IDs) == 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
@@ -359,7 +340,6 @@ func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Req
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
-	return
 }
 
 func (vh *VoucherHandlers) GetVoucher(w http.ResponseWriter, r *http.Request) {
@@ -390,7 +370,6 @@ func (vh *VoucherHandlers) GetVoucher(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, voucherView)
-	return
 }
 
 // CreateVoucher ... 创建voucher时，创建的voucher record不会太多。
@@ -458,7 +437,6 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 	}
 	dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
 // update voucher,include:voucherInfo,voucherRecord
@@ -498,7 +476,6 @@ func (vh *VoucherHandlers) UpdateVoucher(w http.ResponseWriter, r *http.Request)
 	} else {
 		vh.Response(r.Context(), vh.Logger, w, nil, nil)
 	}
-	return
 }
 
 func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request) {
@@ -528,7 +505,6 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
-	return
 }
 
 func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request) {
@@ -563,7 +539,6 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
-	return
 }
 
 // func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.Request) {
@@ -741,7 +716,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if isLackBaseParams([]string{"voucherId", "recordId"}, params.Filter) {
 		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or recordId")
-		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
+		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
 		return
 	}
@@ -772,27 +747,15 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	// 	}
 	// }
 	if (params.Order != nil) && (len(params.Order) > 0) {
-		switch *params.Order[0].Field {
-		// case "createdAt":
-		// 	*params.Order[0].Field = "createdAt"
-		// case "updatedAt":
-		// 	*params.Order[0].Field = "updatedAt"
-		case "voucherId":
-			*params.Order[0].Field = "voucherId"
-		case "recordId":
-			*params.Order[0].Field = "recordId"
-		default:
-			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-			vh.Response(r.Context(), vh.Logger, w, ce, nil)
-			return
-		}
-		if params.Order[0].Direction != nil {
-			switch *params.Order[0].Direction {
-			case cons.Order_Asc, cons.Order_Desc:
-			default:
-				ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
-				vh.Response(r.Context(), vh.Logger, w, ce, nil)
-				return
+		for _, v := range params.Order {
+			if v.Direction != nil {
+				switch *(v.Direction) {
+				case utils.OrderAsc, utils.OrderDesc:
+				default:
+					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
+					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					return
+				}
 			}
 		}
 	}
@@ -815,7 +778,6 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	dataBuf := &DescData{(int64)(count), vouRecordViews}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
 // 该函数用于在凭证明细报表中，计算截止到某个时间的某个科目的累计金额
@@ -862,7 +824,6 @@ func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *
 		return
 	}
 	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyView)
-	return
 }
 
 // 批量计算截止到某个时间的多个科目的累计金额，该函数用于统计“发生额及余额表”
@@ -910,7 +871,6 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 	}
 	dataBuf := &DescData{(int64)(len(accuMoneyViewSlice)), accuMoneyViewSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }
 
 // //批量计算多个accSubId所对应的本期发生额,该函数用于统计“发生额及余额表”
@@ -963,5 +923,4 @@ func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Re
 	}
 	dataBuf := &DescData{(int64)(len(accPeriodViewSlice)), accPeriodViewSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
-	return
 }

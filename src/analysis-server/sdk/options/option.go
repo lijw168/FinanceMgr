@@ -205,6 +205,7 @@ type YearBalanceOption struct {
 	SubjectID int
 	Year      int
 	Balance   float64
+	Status    int
 }
 
 type BasicYearBalance struct {

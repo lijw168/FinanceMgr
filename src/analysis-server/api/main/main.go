@@ -31,9 +31,9 @@ var (
 )
 
 func interceptSignal() {
-	daemonExitCh := make(chan os.Signal)
-	signal.Notify(daemonExitCh, syscall.SIGTERM, syscall.SIGKILL,
-		syscall.SIGQUIT, syscall.SIGINT, syscall.SIGHUP)
+	daemonExitCh := make(chan os.Signal, 1)
+	signal.Notify(daemonExitCh, syscall.SIGTERM, syscall.SIGQUIT,
+		syscall.SIGINT, syscall.SIGHUP)
 	go func() {
 		for {
 			sig := <-daemonExitCh
@@ -118,7 +118,7 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 	registerYearBalance(logger, httpRouter, _db)
 	registerVoucherTemplate(logger, httpRouter, _db)
 	registerComGroup(logger, httpRouter, companygroupDao, _db)
-	registerCompany(logger, httpRouter, comService, _db)
+	registerCompany(logger, httpRouter, comService)
 	registerAccSub(logger, httpRouter, companyDao, voucherRecordDao, _db)
 	registerOptAndAuthenHandler(logger, httpRouter, comService, _db)
 	registerResAndVoucherHandler(logger, httpRouter, companyDao, voucherRecordDao, _db)

@@ -18,11 +18,11 @@ type ResouceInfoService struct {
 	Db         *sql.DB
 }
 
-//可以优化一下GetCompanyByOperatorId这个函数的返回值。
+// 可以优化一下GetCompanyByOperatorId这个函数的返回值。
 func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId int,
 	requestId string) ([]*model.ResourceInfoView, CcError) {
 	//create
-	rs.Logger.InfoContext(ctx, "GetResouceByOptId method start, "+"operator:%s", operatorId)
+	rs.Logger.InfoContext(ctx, "GetResouceByOptId method start, "+"operator:%d", operatorId)
 	FuncName := "ResouceInfoService/Resource/GetResouceByOptId"
 	bIsRollBack := true
 	// Begin transaction
@@ -85,7 +85,7 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 	return resInfoSlice, nil
 }
 
-//这是中间计算的函数
+// 这是中间计算的函数
 func (rs *ResouceInfoService) getResourceData(ctx context.Context,
 	pComView *model.CompanyInfo) (*model.ResourceInfoView, CcError) {
 	resInfo := new(model.ResourceInfoView)
@@ -98,5 +98,6 @@ func (rs *ResouceInfoService) getResourceData(ctx context.Context,
 		yearSlice = append(yearSlice, i)
 	}
 	resInfo.YearSlice = yearSlice
+	rs.Logger.InfoContext(ctx, "getResourceData has finished")
 	return resInfo, nil
 }

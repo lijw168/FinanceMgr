@@ -11,7 +11,7 @@ import (
 type VoucherGateway struct {
 }
 
-//beigin voucher
+// beigin voucher
 func (vg *VoucherGateway) CreateVoucher(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
 	var err error
@@ -127,7 +127,7 @@ func (vg *VoucherGateway) ListVoucherRecords(param []byte) (resData []byte, errC
 
 //end voucher records
 
-//begin voucher info
+// begin voucher info
 func (vg *VoucherGateway) GetVoucherInfo(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
 	var err error
@@ -171,8 +171,8 @@ func (vg *VoucherGateway) ListVoucherInfo(param []byte) (resData []byte, errCode
 	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfo_json)
 }
 
-func (vg *VoucherGateway) ListVoucherInfoByMulCondition(param []byte) (resData []byte, errCode int) {
-	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfoByMulCondition_json)
+func (vg *VoucherGateway) ListVoucherInfoWithAuxCondition(param []byte) (resData []byte, errCode int) {
+	return listCmdJson(resource_type_voucher_info, param, cSdk.ListVoucherInfoWithAuxCondition_json)
 }
 
 func (vg *VoucherGateway) UpdateVoucherInfo(param []byte) (errCode int) {
@@ -197,7 +197,7 @@ func (vg *VoucherGateway) BatchAuditVouchers(param []byte) (errCode int) {
 	return errCode
 }
 
-//beigin voucher template
+// beigin voucher template
 func (vg *VoucherGateway) CreateVoucherTemplate(param []byte) (resData []byte, errCode int) {
 	errCode = util.ErrNull
 	if iSerialNum, err := cSdk.CreateVoucherTemplate_json(param); err != nil {

@@ -89,7 +89,7 @@ func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.A
 
 func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId int,
 	requestId string) ([]*model.AccSubjectView, int, CcError) {
-	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method start, companyId:%s", iCompanyId)
+	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method start, companyId:%d", iCompanyId)
 	bIsRollBack := true
 	FuncName := "AccountSubService/accountSub/CopyAccSubTemplate"
 	// Begin transaction
@@ -134,7 +134,7 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 	}
 	bIsRollBack = false
 	accSubInfoCount := len(accSubViewSlice)
-	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%s", iCompanyId)
+	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%d", iCompanyId)
 	return accSubViewSlice, accSubInfoCount, nil
 }
 

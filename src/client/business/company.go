@@ -70,8 +70,8 @@ func (cg *CompanyGateway) DeleteCompany(param []byte) (errCode int) {
 }
 
 func (cg *CompanyGateway) InitResourceInfo(operateID int) (resData []byte, errCode int) {
-	var opts options.BaseOptions
-	opts.ID = operateID
+	//var opts options.BaseOptions
+	//opts.ID = operateID
 	errCode = util.ErrNull
 	// if descData, err := cSdk.CreateVoucher_json(param); err != nil {
 	// 	errCode = util.ErrCreateFailed

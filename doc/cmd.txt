@@ -130,8 +130,10 @@ curl -H "Content-Type:application/json" -X POST --data '{"vouRecordId":1003,"Sub
 //list voucher records  
 analysis_cli vouRecord-list
 curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"subject_name","value":"test"}],"orders":null,"desc_offset":0,"desc_limit":-1}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
-curl -H "Content-Type:application/json" -X POST --data '{"filter":[{"field":"voucher_id","value":510}],"orders":[{"field":"record_id","direction":1}],"desc_offset":100,"desc_limit":107}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
+curl -H "Content-Type:application/json" -X POST --damenuInfota '{"filter":[{"field":"voucher_id","value":510}],"orders":[{"field":"record_id","direction":1}],"desc_offset":100,"desc_limit":107}' http://127.0.0.1:7500/analysis_server?Action=ListVoucherRecords
 
+
+//*************************menuInfo*****************************//
 select * from voucherInfo where voucher_month in (select  max(voucher_month) from voucherInfo where company_id = 1) order by num_of_month desc;
 
 insert into voucherInfo(voucher_id,company_id,voucher_month,num_of_month,voucher_date) value(2,1,12,4,now());
@@ -173,9 +175,36 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,41,1220);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,41,1221);
 
-go build -o /E/project/007/Debug/clientService.exe ./main.go
+//*************************year balance*****************************//
+ ./cli.exe yearBal-create 3 2023 509 --balance 200 --token 24l5mk8ps1 -v
+Request:
+curl -X POST http://127.0.0.1:9999/analysis_server?Action=CreateYearBalance -H 'Content-Type: application/json' -H 'User-Agent: MgrClient' -H 'Trace-Id: bycndtykg4' -H 'Cookie: access_token=24l5mk8ps1' -d '{"companyId":3,"subjectId":509,"year":2023,"balance":0,"status":null}'
 
-go build -o /E/project/007/Release/clientService.exe ./main.go
+./cli.exe yearBal-show 3 2023 509  --token 3boajztcsv  -v
+Request:
+curl -X POST http://127.0.0.1:9999/analysis_server?Action=GetYearBalance -H 'Cookie: access_token=3boajztcsv' -H 'Content-Type: application/json' -H 'User-Agent: MgrClient' -H 'Trace-Id: vbg2ymzxaj' -d '{"companyId":3,"year":2023,"subjectId":509}'
+
+
+
+./cli.exe yearBal-update 3 2023 508 --Status 1 --token h00agc95c9 -v
+Request:
+curl -X POST http://127.0.0.1:9999/analysis_server?Action=UpdateYearBalance -H 'Cookie: access_token=h00agc95c9' -H 'Content-Type: application/json' -H 'User-Agent: MgrClient' -H 'Trace-Id: 5z9vkeolli' -d '{"companyId":3,"subjectId":508,"year":2023,"balance":0,"status":1}'
+
+
+
+
+
+./cli.exe yearBal-delete 3 2023 508 --token h00agc95c9 -v
+Request:
+curl -X POST http://127.0.0.1:9999/analysis_server?Action=DeleteYearBalance -H 'Content-Type: application/json' -H 'User-Agent: MgrClient' -H 'Trace-Id: h60d69ep1p' -H 'Cookie: access_token=h00agc95c9' -d '{"companyId":3,"year":2023,"subjectId":508}'
+
+
+ ./cli.exe yearBal-accSubBal-show  3 2021 507 --token tjrm2ovne6 -v
+Request:
+curl -X POST http://127.0.0.1:9999/analysis_server?Action=GetAccSubYearBalValue -H 'Content-Type: application/json' -H 'User-Agent: MgrClient' -H 'Trace-Id: 3id5l2kmpk' -H 'Cookie: access_token=tjrm2ovne6' -d '{"companyId":3,"year":2021,"subjectId":507}'
+
+
+
 
 //******************************todo**********************************//
 1、创建失败时，把相应的ID恢复到原来的值，这样的话，就不浪费相应的ID资源了。1
@@ -257,7 +286,7 @@ type VoucherDetailInfoView struct {
 	
 6、以后要增加功能互斥的功能，也就是站点互斥。
 
-7、年度转结
+
 8、资源的初始化，怎样能保证新增了新的年份的凭证之后，怎样能自动进行资源的初始化呢？
 
 9、voucherInfo voucherRecord 表里的ID，当进行新增每个年度的新表时，可以把Id ,再进行从头开始。
@@ -268,10 +297,8 @@ type VoucherDetailInfoView struct {
 11、下次修改client库时，顺便把Verbose也作为一个参数，控制是否输出详细信息。
 
 
-12、把FinanceMgr服务里的requestId打印出来，以便查找错误时，跟踪相应的函数调用。 
 
 
-
-
-
-
+ go build -o analysis_server.exe ../src/analysis-server/api/main/
+ 
+ go build -o cli.exe ../src/analysis-server/cli/main.go

@@ -169,20 +169,22 @@ func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter
 	return voucherInfoSlice, nil
 }
 
-// 在where条件里增加between ... and
+// 1、在where条件里增加between ... and
+// 2、该函数没有增加like，因为暂时没有用，所以没有增加该参数
+// 3、增加了多列排序。
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
-	filter map[string]interface{}, intervalFilter map[string]interface{},
-	iYear, limit, offset, od int, order string) ([]*model.VoucherInfo, error) {
-	var voucherInfoSlice []*model.VoucherInfo
-	fuzzyMatchFilter := map[string]string{}
-	//strSql, values := transferListSql(voucherInfoTN, filter, voucherInfoFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(GenTableName(iYear, voucherInfoTN), filterNo, filter,
-		intervalFilter, fuzzyMatchFilter, voucherInfoFields, limit, offset, order, od)
+	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
+	orderFiler map[string]int, iYear, limit, offset int) ([]*model.VoucherInfo, error) {
+
+	strSql, values := makeListSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), voucherInfoFields,
+		filterNo, filter, intervalFilter, fuzzyMatchFilter, orderFiler, limit, offset)
+
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/List] [SqlElapsed: %v]", time.Since(start))
 	}()
+	var voucherInfoSlice []*model.VoucherInfo
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/List] [do.Query: %s]", err.Error())

@@ -365,7 +365,7 @@ func (vr *Voucher) UpdateVoucherInfo(opts *options.ModifyVoucherInfoOptions) err
 	return err
 }
 
-//该参数直接就是相应的json格式的数据。所以不需要转换了。
+// 该参数直接就是相应的json格式的数据。所以不需要转换了。
 func (vr *Voucher) CreateVoucher_json(params []byte) ([]byte, error) {
 	action := "CreateVoucher"
 	result, err := util.DoRequest_json(action, params)
@@ -375,7 +375,7 @@ func (vr *Voucher) CreateVoucher_json(params []byte) ([]byte, error) {
 	return json.Marshal(result.Data)
 }
 
-//该参数直接就是相应的json格式的数据。所以不需要转换了。
+// 该参数直接就是相应的json格式的数据。所以不需要转换了。
 func (vr *Voucher) UpdateVoucher_json(params []byte) ([]byte, error) {
 	action := "UpdateVoucher"
 	result, err := util.DoRequest_json(action, params)
@@ -446,8 +446,8 @@ func (vr *Voucher) ListVoucherInfo_json(params []byte) ([]byte, error) {
 	return ListOpsResources_json(action, params)
 }
 
-func (vr *Voucher) ListVoucherInfoByMulCondition_json(params []byte) ([]byte, error) {
-	action := "ListVoucherInfoByMulCondition"
+func (vr *Voucher) ListVoucherInfoWithAuxCondition_json(params []byte) ([]byte, error) {
+	action := "ListVoucherInfoWithAuxCondition"
 	return ListOpsResources_json(action, params)
 }
 
@@ -468,7 +468,7 @@ func (vr *Voucher) BatchAuditVouchers_json(params []byte) error {
 	return err
 }
 
-//voucher template begin
+// voucher template begin
 func (vr *Voucher) CreateVoucherTemplate_json(params []byte) (int, error) {
 	action := "CreateVoucherTemplate"
 	result, err := util.DoRequest_json(action, params)
@@ -482,7 +482,7 @@ func (vr *Voucher) CreateVoucherTemplate_json(params []byte) (int, error) {
 	return iSerialNum, nil
 }
 
-//该参数直接就是相应的json格式的数据。所以不需要转换了。
+// 该参数直接就是相应的json格式的数据。所以不需要转换了。
 func (vr *Voucher) ListVoucherTemplate_json(params []byte) ([]byte, error) {
 	action := "ListVoucherTemplate"
 	return ListOpsResources_json(action, params)
@@ -509,7 +509,7 @@ func (vr *Voucher) GetVoucherTemplate(opts *options.BaseOptions) ([]byte, error)
 
 //voucher template end
 
-//voucher generate report forms,begin
+// voucher generate report forms,begin
 func (vr *Voucher) CalculateAccumulativeMoney_json(params []byte) ([]byte, error) {
 	action := "CalculateAccumulativeMoney"
 	result, err := util.DoRequest_json(action, params)

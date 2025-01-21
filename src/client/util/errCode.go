@@ -33,4 +33,6 @@ const (
 	ErrBatchCalAccuMoneyFailed    = 30 // batch calculate accumulative money,failed
 	ErrCopyAccSubTemplateFailed   = 31 // copy account subject template,failed
 	ErrCalAccPeriodFailed         = 32 // calculate account of period,failed
+	ErrAnnualClosing              = 33 // annual closing,failed
+	ErrCancelAnnualClosing        = 34 // calcel annual closing,failed
 )

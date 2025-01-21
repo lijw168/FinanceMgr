@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"financeMgr/src/analysis-server/api/db"
+	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
+	cons "financeMgr/src/common/constant"
 	"financeMgr/src/common/log"
 	"time"
 )
@@ -19,8 +21,18 @@ func (ys *YearBalanceService) CreateYearBalance(ctx context.Context, params *mod
 	requestId string) CcError {
 	ys.Logger.InfoContext(ctx, "CreateYearBalance method start, create params:%v", params)
 	FuncName := "YearBalanceService/yearBalance/CreateYearBalance"
-	bIsRollBack := true
+	yearBal := new(model.YearBalance)
+	yearBal.CompanyID = *params.CompanyID
+	yearBal.SubjectID = *params.SubjectID
+	yearBal.Year = *params.Year
+	yearBal.Balance = *params.Balance
+	//未结算状态
+	yearBal.Status = utils.NoAnnualClosing
+	yearBal.UpdatedAt = time.Now()
+	yearBal.CreatedAt = time.Now()
+
 	// Begin transaction
+	bIsRollBack := true
 	tx, err := ys.Db.Begin()
 	if err != nil {
 		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
@@ -31,14 +43,6 @@ func (ys *YearBalanceService) CreateYearBalance(ctx context.Context, params *mod
 			RollbackLog(ctx, ys.Logger, FuncName, tx)
 		}
 	}()
-
-	yearBal := new(model.YearBalance)
-	yearBal.CompanyID = *params.CompanyID
-	yearBal.SubjectID = *params.SubjectID
-	yearBal.Year = *params.Year
-	yearBal.Balance = *params.Balance
-	yearBal.UpdatedAt = time.Now()
-	yearBal.CreatedAt = time.Now()
 
 	if err := ys.YearBalDao.CreateYearBalance(ctx, tx, yearBal); err != nil {
 
@@ -54,8 +58,7 @@ func (ys *YearBalanceService) CreateYearBalance(ctx context.Context, params *mod
 	return nil
 }
 
-func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params []*model.OptYearBalanceParams,
-	requestId string) CcError {
+func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params *model.BatchCreateYearBalsParams) CcError {
 	ys.Logger.InfoContext(ctx, "BatchCreateYearBalance method start, create params:%v", params)
 
 	FuncName := "YearBalanceService/service/BatchUpdateYearBalance"
@@ -71,27 +74,18 @@ func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params
 			RollbackLog(ctx, ys.Logger, FuncName, tx)
 		}
 	}()
-	yearBal := new(model.YearBalance)
-	for _, param := range params {
-		if param.CompanyID == nil || *param.CompanyID <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrCompanyId, ErrNull)
-		}
-		if param.Year == nil || *param.Year <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
-		}
-		if param.SubjectID == nil || *param.SubjectID <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
-		}
-		if param.Balance == nil {
-			return NewError(ErrYearBalance, ErrMiss, ErrBalance, ErrNull)
-		}
-		yearBal.CompanyID = *param.CompanyID
-		yearBal.SubjectID = *param.SubjectID
-		yearBal.Year = *param.Year
-		yearBal.Balance = *param.Balance
+	//以后优化时，可以通过insert into table(col1,...) values ()  进行优化
+	yearBal := model.YearBalance{}
+	for _, optSubAndBal := range params.OptSubAndBals {
+		yearBal.CompanyID = *params.CompanyID
+		yearBal.Year = *params.Year
+		yearBal.SubjectID = *optSubAndBal.SubjectID
+		yearBal.Balance = *optSubAndBal.Balance
+		//未结算状态
+		yearBal.Status = utils.NoAnnualClosing
 		yearBal.UpdatedAt = time.Now()
 		yearBal.CreatedAt = time.Now()
-		err := ys.YearBalDao.CreateYearBalance(ctx, tx, yearBal)
+		err = ys.YearBalDao.CreateYearBalance(ctx, tx, &yearBal)
 		if err != nil {
 			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -105,13 +99,72 @@ func (ys *YearBalanceService) BatchCreateYearBalance(ctx context.Context, params
 	return nil
 }
 
-func (ys *YearBalanceService) GetYearBalance(ctx context.Context, params *model.BasicYearBalanceParams,
+func (ys *YearBalanceService) GetAccSubYearBalValue(ctx context.Context, params *model.BasicYearBalanceParams,
 	requestId string) (float64, CcError) {
-	if dBalanceValue, err := ys.YearBalDao.GetYearBalance(ctx, ys.Db, params); err != nil {
-		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	} else {
-		return dBalanceValue, nil
+	FuncName := "YearBalanceService/service/GetAccSubYearBalValue"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	var dBalanceValue float64
+	if dBalanceValue, err = ys.YearBalDao.GetAccSubYearBalValue(ctx, ys.Db, params); err != nil {
+		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "GetAccSubYearBalValue method end")
+	return dBalanceValue, nil
+}
+
+func (ys *YearBalanceService) GetYearBalance(ctx context.Context, params *model.BasicYearBalanceParams,
+	requestId string) (*model.YearBalanceView, CcError) {
+
+	FuncName := "YearBalanceService/service/GetYearBalance"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	var yearBal *model.YearBalance
+	if yearBal, err = ys.YearBalDao.GetYearBalance(ctx, ys.Db, params); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, NewCcError(cons.CodeYearBalanceNotExist, ErrYearBalance, ErrNotFound, ErrNull, "the year balance record is not exist")
+		default:
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	//这里没有把科目的创建和更新时间以及公司ID返回到前段，那两个时间字段，仅在查数据时使用，companyId在前端已经知晓，无需返回。
+	yearBalView := new(model.YearBalanceView)
+	yearBalView.SubjectID = yearBal.SubjectID
+	yearBalView.Balance = yearBal.Balance
+	yearBalView.Year = yearBal.Year
+	yearBalView.Status = yearBal.Status
+	ys.Logger.InfoContext(ctx, "GetYearBalance method end")
+	return yearBalView, nil
 }
 
 func (ys *YearBalanceService) DeleteYearBalance(ctx context.Context, params *model.BasicYearBalanceParams,
@@ -144,9 +197,8 @@ func (ys *YearBalanceService) DeleteYearBalance(ctx context.Context, params *mod
 	return nil
 }
 
-func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params *model.BatchDelYearBalsParams,
-	requestId string) CcError {
-	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method begin, update params:%v", params)
+func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, filter map[string]interface{}) CcError {
+	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method begin, update params:%v", filter)
 	FuncName := "YearBalanceService/service/BatchDeleteYearBalance"
 	bIsRollBack := true
 	// Begin transaction
@@ -160,11 +212,7 @@ func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params
 			RollbackLog(ctx, ys.Logger, FuncName, tx)
 		}
 	}()
-	filterFields := make(map[string]interface{})
-	filterFields["companyId"] = params.CompanyID
-	filterFields["year"] = params.Year
-	filterFields["subject_id"] = params.SubjectIDs
-	if err = ys.YearBalDao.BatchDeleteYearBalance(ctx, ys.Db, filterFields); err != nil {
+	if err = ys.YearBalDao.BatchDeleteYearBalance(ctx, ys.Db, filter); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
@@ -176,8 +224,46 @@ func (ys *YearBalanceService) BatchDeleteYearBalance(ctx context.Context, params
 	return nil
 }
 
-func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, params *model.OptYearBalanceParams) CcError {
-	ys.Logger.InfoContext(ctx, "UpdateYearBalance method begin, update params:%v", params)
+// 该函数仅仅批量更新balance这一个字段。
+func (ys *YearBalanceService) BatchUpdateBals(ctx context.Context, params *model.BatchUpdateBalsParams) CcError {
+	ys.Logger.InfoContext(ctx, "BatchUpdateBals method begin, params:%v", params)
+	FuncName := "YearBalanceService/service/BatchUpdateBals"
+	bIsRollBack := true
+	filter := make(map[string]interface{})
+	filter["companyId"] = *params.CompanyID
+	filter["year"] = *params.Year
+	updateField := map[string]interface{}{}
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	for _, v := range params.OptSubAndBals {
+		filter["subjectId"] = *v.SubjectID
+		updateField["balance"] = *v.Balance
+		err = ys.YearBalDao.UpdateYearBalance(ctx, tx, filter, updateField)
+		if err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "UpdateYearBalance method end")
+	return nil
+}
+
+func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, filter map[string]interface{},
+	updateField map[string]interface{}) CcError {
+	ys.Logger.InfoContext(ctx, "UpdateYearBalance method begin, filter:%v,updateField:%v", filter, updateField)
 	FuncName := "YearBalanceService/service/UpdateYearBalance"
 	bIsRollBack := true
 	// Begin transaction
@@ -191,60 +277,15 @@ func (ys *YearBalanceService) UpdateYearBalance(ctx context.Context, params *mod
 			RollbackLog(ctx, ys.Logger, FuncName, tx)
 		}
 	}()
-	err = ys.YearBalDao.UpdateBalance(ctx, tx, params)
-	if err != nil {
+	if err = ys.YearBalDao.UpdateYearBalance(ctx, tx, filter, updateField); err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-
 	if err = tx.Commit(); err != nil {
 		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
 	ys.Logger.InfoContext(ctx, "UpdateYearBalance method end")
-	return nil
-}
-
-func (ys *YearBalanceService) BatchUpdateYearBalance(ctx context.Context, params []*model.OptYearBalanceParams,
-	requestId string) CcError {
-	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method begin, update params:%v", params)
-	FuncName := "YearBalanceService/service/BatchUpdateYearBalance"
-	bIsRollBack := true
-	// Begin transaction
-	tx, err := ys.Db.Begin()
-	if err != nil {
-		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
-		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
-	}
-	defer func() {
-		if bIsRollBack {
-			RollbackLog(ctx, ys.Logger, FuncName, tx)
-		}
-	}()
-	for _, param := range params {
-		if param.CompanyID == nil || *param.CompanyID <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrCompanyId, ErrNull)
-		}
-		if param.SubjectID == nil || *param.SubjectID <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrId, ErrNull)
-		}
-		if param.Year == nil || *param.Year <= 0 {
-			return NewError(ErrYearBalance, ErrMiss, ErrYear, ErrNull)
-		}
-		if param.Balance == nil {
-			return NewError(ErrYearBalance, ErrMiss, ErrChangeContent, ErrNull)
-		}
-		err := ys.YearBalDao.UpdateBalance(ctx, tx, param)
-		if err != nil {
-			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
-		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
-	}
-	bIsRollBack = false
-	ys.Logger.InfoContext(ctx, "BatchUpdateYearBalance method end")
 	return nil
 }
 
@@ -275,20 +316,162 @@ func (ys *YearBalanceService) ListYearBalance(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	yearBals, err := ys.YearBalDao.ListYearBalance(ctx, ys.Db, filterFields, limit, offset, orderField, orderDirection)
+	FuncName := "YearBalanceService/service/ListYearBalance"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	yearBals, err := ys.YearBalDao.ListYearBalance(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
 		ys.Logger.ErrorContext(ctx, "[AccountSubService/service/ListYearBalance] [AccSubDao.ListYearBalance: %s, filterFields: %v]", err.Error(), filterFields)
-		return balViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
 	for _, yearBal := range yearBals {
 		//这里没有把科目的创建和更新时间以及公司ID返回到前段，那两个时间字段，仅在查数据时使用，companyId在前端已经知晓，无需返回。
 		yearBalView := new(model.YearBalanceView)
 		yearBalView.SubjectID = yearBal.SubjectID
 		yearBalView.Balance = yearBal.Balance
 		yearBalView.Year = yearBal.Year
+		yearBalView.Status = yearBal.Status
 		balViewSlice = append(balViewSlice, yearBalView)
 	}
 	yearBalsCount := len(yearBals)
 	return balViewSlice, yearBalsCount, nil
+}
+
+func (ys *YearBalanceService) AnnualClosing(ctx context.Context, params *model.BatchCreateYearBalsParams) CcError {
+	ys.Logger.InfoContext(ctx, "AnnualClosing method start, create params:%v", params)
+
+	FuncName := "YearBalanceService/service/AnnualClosing"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	//generate next year QC balance
+	subIdSlice := []int{}
+	yearBal := model.YearBalance{}
+	for _, optSubAndBal := range params.OptSubAndBals {
+		yearBal.CompanyID = *params.CompanyID
+		yearBal.Year = *params.Year
+		yearBal.SubjectID = *optSubAndBal.SubjectID
+		yearBal.Balance = *optSubAndBal.Balance
+		//未结算状态
+		yearBal.Status = utils.NoAnnualClosing
+		yearBal.UpdatedAt = time.Now()
+		yearBal.CreatedAt = time.Now()
+		//generate next year QC balance，optimization:use insert into table(...) values (...),(...)
+		if err = ys.YearBalDao.CreateYearBalance(ctx, tx, &yearBal); err != nil {
+			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		subIdSlice = append(subIdSlice, *optSubAndBal.SubjectID)
+	}
+	//modify the year data's status,ananual closing status
+	filter := make(map[string]interface{})
+	filter["companyId"] = *params.CompanyID
+	//年度结算是增加的下一年的年度余额，所以更新的上一年的结算状态
+	filter["year"] = *params.Year - 1
+	filter["subjectId"] = subIdSlice
+	updateField := map[string]interface{}{"status": utils.AnnualClosing}
+	if err = ys.YearBalDao.UpdateYearBalance(ctx, tx, filter, updateField); err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "BatchCreateYearBalance method end")
+	return nil
+}
+
+func (ys *YearBalanceService) CancelAnnualClosing(ctx context.Context, params *model.BatchDelYearBalsParams) CcError {
+	ys.Logger.InfoContext(ctx, "CancelAnnualClosing method start, create params:%v", params)
+	FuncName := "YearBalanceService/service/CancelAnnualClosing"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	filterFields := make(map[string]interface{})
+	filterFields["companyId"] = *params.CompanyID
+	filterFields["year"] = *params.Year
+	filterFields["subjectId"] = params.SubjectIDs
+	if err = ys.YearBalDao.BatchDeleteYearBalance(ctx, ys.Db, filterFields); err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	//recover the year data's status
+	filterFields["year"] = *params.Year - 1
+	updateField := map[string]interface{}{"status": utils.NoAnnualClosing}
+	if err = ys.YearBalDao.UpdateYearBalance(ctx, tx, filterFields, updateField); err != nil {
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "BatchDeleteYearBalance method end")
+	return nil
+}
+
+func (ys *YearBalanceService) GetAnnualClosingStatus(ctx context.Context, companyID, year int) (int, CcError) {
+	FuncName := "YearBalanceService/service/GetAnnualClosingStatus"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := ys.Db.Begin()
+	if err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, ys.Logger, FuncName, tx)
+		}
+	}()
+	filterFields := make(map[string]interface{})
+	filterFields["companyId"] = companyID
+	filterFields["year"] = year
+	var iCount int
+	if iCount, err = ys.YearBalDao.CountByFilter(ctx, ys.Db, filterFields); err != nil {
+		return utils.NoAnnualClosing, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	if err = tx.Commit(); err != nil {
+		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	ys.Logger.InfoContext(ctx, "GetAnnualClosingStatus method end")
+	if iCount > 0 {
+		return utils.AnnualClosing, nil
+	} else {
+		return utils.NoAnnualClosing, nil
+	}
 }

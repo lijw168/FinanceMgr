@@ -33,13 +33,22 @@ func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID,
 
 func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model.ListParams) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
+
 	filterNo := make(map[string]interface{})
 	filterFields := make(map[string]interface{})
 	intervalFilterFields := make(map[string]interface{})
-	limit, offset := -1, 0
+
 	iVoucherYear := 0
 	if params.Filter != nil {
+		var intervalValSlice []int
 		for _, f := range params.Filter {
+			if *f.Field == "numOfMonth_interval" || *f.Field == "voucherDate_interval" ||
+				*f.Field == "voucherMonth_interval" {
+				err := FormatData(f.Value, &intervalValSlice)
+				if err != nil {
+					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+				}
+			}
 			switch *f.Field {
 			case "voucherYear":
 				{
@@ -50,12 +59,6 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 						iVoucherYear = int(f.Value.(float64))
 						//测试代码
 						//vs.Logger.ErrorContext(ctx, "the iVoucherYear is float64")
-					case int:
-						panic("the iVoucherYear is int")
-						//从cli发过来的，解析json时，会解析成int (经验证该结论是错误的)
-						//iVoucherYear = f.Value.(int)
-						//测试代码
-						//vs.Logger.ErrorContext(ctx, "the iVoucherYear is int")
 					}
 				}
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
@@ -65,28 +68,32 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 			case "status_no":
 				filterNo["status"] = f.Value
 			case "numOfMonth_interval":
-				intervalFilterFields["numOfMonth"] = f.Value
+				intervalFilterFields["numOfMonth"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
 			case "voucherDate_interval":
-				intervalFilterFields["voucherDate"] = f.Value
+				intervalFilterFields["voucherDate"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
+			case "voucherMonth_interval":
+				intervalFilterFields["voucherMonth"] = intervalValSlice
+				intervalValSlice = intervalValSlice[0:0]
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
 		}
 	}
+	limit, offset := -1, 0
 	if params.DescLimit != nil {
 		limit = *params.DescLimit
 		if params.DescOffset != nil {
 			offset = *params.DescOffset
 		}
 	}
-	orderField := ""
-	orderDirection := 0
-	if params.Order != nil {
-		orderField = *params.Order[0].Field
-		orderDirection = *params.Order[0].Direction
+	orderFilter := make(map[string]int)
+	for _, v := range params.Order {
+		orderFilter[*v.Field] = *v.Direction
 	}
-	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields, iVoucherYear,
-		limit, offset, orderDirection, orderField)
+	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields,
+		nil, orderFilter, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

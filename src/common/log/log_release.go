@@ -1,4 +1,5 @@
-//+build release
+//go:build release
+// +build release
 
 package log
 
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-//log level, from low to high, more high means more serious
+// log level, from low to high, more high means more serious
 const (
 	LevelTrace = iota
 	LevelDebug
@@ -50,7 +51,7 @@ type Logger struct {
 	bufs [][]byte
 }
 
-//new a logger with specified handler and flag
+// new a logger with specified handler and flag
 func New(handler Handler, flag int) *Logger {
 	var l = new(Logger)
 
@@ -72,7 +73,7 @@ func New(handler Handler, flag int) *Logger {
 	return l
 }
 
-//new a default logger with specified handler and flag: Ltime|Lfile|Llevel
+// new a default logger with specified handler and flag: Ltime|Lfile|Llevel
 func NewDefault(handler Handler) *Logger {
 	return New(handler, Ltime|Lfile|Llevel)
 }
@@ -139,18 +140,18 @@ func (l *Logger) Close() {
 	l.handler.Close()
 }
 
-//set log level, any log level less than it will not log
+// set log level, any log level less than it will not log
 func (l *Logger) SetLevel(level int) {
 	l.level = level
 }
 
-//get log level
+// get log level
 func (l *Logger) GetLevel() int {
 	return l.level
 }
 
-//a low interface, maybe you can use it for your special log format
-//but it may be not exported later......
+// a low interface, maybe you can use it for your special log format
+// but it may be not exported later......
 func (l *Logger) Output(callDepth int, level int, format string, v ...interface{}) {
 	if l.level > level {
 		return
@@ -215,7 +216,7 @@ func (l *Logger) output(callDepth int, level int, s string) {
 	l.msg <- buf
 }
 
-//convert struct param to json string
+// convert struct param to json string
 func (l *Logger) OutputJson(level int, v interface{}) {
 	if l.level > level {
 		return
@@ -374,7 +375,7 @@ func (l *Logger) OutputContext(calldepth int, ctx context.Context, level int, fo
 	}
 	traceId := "-"
 	if ctx != nil {
-		traceId, _ = ctx.Value("trace_id").(string)
+		traceId, _ = ctx.Value("Trace_id").(string)
 	}
 
 	traceIdArea := fmt.Sprintf("[%s] ", traceId)

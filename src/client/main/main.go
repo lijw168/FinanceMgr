@@ -148,7 +148,7 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 		copy(dataBuf, reqParamBuf)
 	}
 	var resultData []byte
-	logger.LogDebug("ProcessClientRequest begin ,operation code:", iOpCode, "param data:", dataBuf)
+	logger.LogDebug("ProcessClientRequest begin ,operation code:", iOpCode)
 	switch iOpCode {
 	case util.QuitApp:
 		errCode := quitApp()
@@ -160,14 +160,14 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 	case util.Heartbeat:
 		resultData = respHeartbeatInfo()
 	default:
-		if iOpCode != util.UserLogin {
+		if iOpCode != util.Login {
 			if auth.GetUserStatus() != util.Online {
 				resultData = respOptResWithoutData(util.ErrOffline)
 				break
 			}
 		}
 		switch {
-		case iOpCode >= util.UserLogin && iOpCode <= util.OperatorUpdate:
+		case iOpCode >= util.Login && iOpCode <= util.OperatorUpdate:
 			resultData = processOperator(iOpCode, dataBuf)
 		case iOpCode >= util.CompanyCreate && iOpCode <= util.CompanyUpdate:
 			resultData = processCompany(iOpCode, dataBuf)
@@ -186,7 +186,7 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 	if resultData == nil {
 		return nil
 	}
-	logger.LogInfo("ProcessClientRequest finish ,operation code:", iOpCode, "result data:", resultData)
+	logger.LogInfo("ProcessClientRequest finish ,operation code:", iOpCode)
 	//c malloc memory ,the caller free the memory
 	cBuf := makeByteSlice(len(resultData))
 	copy(cBuf, resultData)
@@ -198,7 +198,7 @@ func processOperator(iOpCode int, dataBuf []byte) []byte {
 	//var err error
 	var optGate business.OperatorGateway
 	switch iOpCode {
-	case util.UserLogin:
+	case util.Login:
 		errCode := auth.UserLogin(dataBuf)
 		if errCode == util.ErrNull {
 			go onLineLoopCheck()
@@ -207,7 +207,7 @@ func processOperator(iOpCode int, dataBuf []byte) []byte {
 	case util.LoginInfoList:
 		resData, errCode := auth.ListLoginInfo(dataBuf)
 		return respOptResWithData(iOpCode, resData, errCode)
-	case util.UserLogout:
+	case util.Logout:
 		errCode := auth.Logout()
 		quitCheckCh <- true
 		return respAuthResInfo(errCode)
@@ -283,15 +283,6 @@ func processAccSub(iOpCode int, dataBuf []byte) []byte {
 	case util.AccSubDel:
 		errCode := accSubGate.DeleteAccSub(dataBuf)
 		return respOptResWithoutData(errCode)
-	// case util.YearBalanceShow:
-	// 	resData, errCode := accSubGate.GetYearBalance(dataBuf)
-	// 	respOptResWithData(iOpCode, resData, errCode)
-	// case util.YearBalanceUpdate:
-	// 	errCode := accSubGate.UpdateYearBalance(dataBuf)
-	// 	respOptResWithoutData(errCode)
-	// case util.YearBalanceList:
-	// 	resData, errCode := accSubGate.ListYearBalance(dataBuf)
-	// 	respOptResWithData(iOpCode, resData, errCode)
 	case util.CopyAccSubTemplate:
 		resData, errCode := accSubGate.CopyAccSubTemplate(dataBuf)
 		return respOptResWithData(iOpCode, resData, errCode)
@@ -330,8 +321,8 @@ func processVoucher(iOpCode int, dataBuf []byte) []byte {
 	case util.VouInfoList:
 		resData, errCode := voucherGate.ListVoucherInfo(dataBuf)
 		return respOptResWithData(iOpCode, resData, errCode)
-	case util.VouInfoListByMulCon:
-		resData, errCode := voucherGate.ListVoucherInfoByMulCondition(dataBuf)
+	case util.VouInfoListWithAuxCond:
+		resData, errCode := voucherGate.ListVoucherInfoWithAuxCondition(dataBuf)
 		return respOptResWithData(iOpCode, resData, errCode)
 	case util.VouInfoListLatest:
 		resData, errCode := voucherGate.GetLatestVoucherInfo(dataBuf)
@@ -421,12 +412,24 @@ func processYearBalance(iOpCode int, dataBuf []byte) []byte {
 	case util.YearBalanceList:
 		resData, errCode := yearBalGate.ListYearBalance(dataBuf)
 		return respOptResWithData(iOpCode, resData, errCode)
-	case util.YearBalanceBatchUpdate:
-		errCode := yearBalGate.BatchUpdateYearBalance(dataBuf)
+	case util.AccSubYearBalValueShow:
+		resData, errCode := yearBalGate.GetAccSubYearBalValue(dataBuf)
+		return respOptResWithData(iOpCode, resData, errCode)
+	case util.AnnualClosing:
+		errCode := yearBalGate.AnnualClosing(dataBuf)
+		return respOptResWithoutData(errCode)
+	case util.CancelAnnualClosing:
+		errCode := yearBalGate.CancelAnnualClosing(dataBuf)
+		return respOptResWithoutData(errCode)
+	case util.BatchUpdateBals:
+		errCode := yearBalGate.BatchUpdateBals(dataBuf)
 		return respOptResWithoutData(errCode)
 	case util.YearBalanceUpdate:
 		errCode := yearBalGate.UpdateYearBalance(dataBuf)
 		return respOptResWithoutData(errCode)
+	case util.AnnualClosingStatusShow:
+		resData, errCode := yearBalGate.GetAnnualClosingStatus(dataBuf)
+		return respOptResWithData(iOpCode, resData, errCode)
 	default:
 		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
 		panic("bug")
@@ -503,52 +506,78 @@ func isConvertToGbk(iOpCode int) bool {
 }
 
 func isConvertToUtf8(iOperationCode int) bool {
-	bRet := false
+	start := time.Now()
+	defer func() {
+		logger.Info("[isConvertToUtf8,operationCode:%d] [SqlElapsed: %v]", iOperationCode, time.Since(start))
+	}()
+	bRet := true
 	switch iOperationCode {
-	case util.AccSubShow:
-		fallthrough
-	case util.AccSubDel:
-		fallthrough
-	case util.UserLogout:
-		fallthrough
-	case util.CompanyDel:
-		fallthrough
-	case util.CompanyShow:
-		fallthrough
-	case util.OperatorShow:
-		fallthrough
-	case util.OperatorDel:
-		fallthrough
-	case util.VoucherDel:
-		fallthrough
-	case util.VoucherShow:
-		fallthrough
-	// case util.VouRecordDel:
-	// 	fallthrough
-	case util.VouInfoShow:
-		break
-	case util.AccSubReferenceQuery:
-		break
-	case util.YearBalanceList:
-		break
-	case util.YearBalanceShow:
-		break
-	case util.YearBalanceUpdate:
-		break
-	case util.YearBalanceBatchUpdate:
-		break
-	case util.YearBalanceBatchCreate:
-		break
-	case util.YearBalanceCreate:
-		break
-	case util.YearBalanceDel:
-		break
+	case util.Login, util.LoginInfoList:
+
+	case util.OperatorCreate, util.OperatorList, util.OperatorUpdate:
+
+	case util.CompanyCreate, util.CompanyList, util.CompanyUpdate:
+
+	case util.AccSubCreate, util.AccSubList, util.CopyAccSubTemplate, util.AccSubUpdate:
+
+	case util.VoucherCreate, util.VouInfoList, util.VouInfoListWithAuxCond, util.BatchAuditVouchers, util.VouInfoUpdate, util.VouRecordList:
+
+	case util.VouTemplateCreate, util.VouTemplateList:
+
+	case util.MenuInfoList:
+
 	default:
-		bRet = true
-		break
+		bRet = false
 	}
 	return bRet
 }
+
+// func isConvertToUtf8(iOperationCode int) bool {
+// 	bRet := false
+// 	switch iOperationCode {
+// 	case util.AccSubShow:
+// 		fallthrough
+// 	case util.AccSubDel:
+// 		fallthrough
+// 	case util.Logout:
+// 		fallthrough
+// 	case util.CompanyDel:
+// 		fallthrough
+// 	case util.CompanyShow:
+// 		fallthrough
+// 	case util.OperatorShow:
+// 		fallthrough
+// 	case util.OperatorDel:
+// 		fallthrough
+// 	case util.VoucherDel:
+// 		fallthrough
+// 	case util.VoucherShow:
+// 		fallthrough
+// 	// case util.VouRecordDel:
+// 	// 	fallthrough
+// 	case util.VouInfoShow:
+// 		break
+// 	case util.AccSubReferenceQuery:
+// 		break
+// 	case util.YearBalanceList:
+// 		break
+// 	case util.YearBalanceShow:
+// 		break
+// 	case util.YearBalanceUpdate:
+// 		break
+// 	// case util.YearBalanceBatchUpdate:
+// 	// 	break
+// 	case util.YearBalanceBatchCreate:
+// 		break
+// 	case util.YearBalanceCreate:
+// 		break
+// 	case util.YearBalanceDel:
+// 		break
+// 	default:
+// 		bRet = true
+// 	}
+// 	return bRet
+// }
 
 // user status
 func respHeartbeatInfo() []byte {

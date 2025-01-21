@@ -23,8 +23,9 @@ func validate_bool(d interface{}) bool {
 	return true
 }
 
-//由于从json串中转过来的number类型，只有float，
-//所以为了判断是否是传过来的整形类型数据，就增加了是否float类型的判断。
+// 由于把json解析成interface{}时，把number解析成float64
+// 所以为了判断是否是传过来的整形类型数据，就增加了是否float类型的判断。
+// 该函数有bug，需要修改
 func validate_int(d interface{}) bool {
 	if _, ok := d.(int); !ok {
 		validate_float64(d)
@@ -52,6 +53,8 @@ func validate_str_arr(d interface{}) bool {
 	return true
 }
 
+// 由于把json解析成interface{}时，把number解析成float64
+// 所以为了判断是否是传过来的整形类型数据，就增加了是否float类型的判断。该函数有bug，需要修改
 func validate_int_arr(d interface{}) bool {
 	if l, ok := d.([]interface{}); !ok {
 		return false

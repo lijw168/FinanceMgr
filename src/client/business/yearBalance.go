@@ -19,6 +19,18 @@ func (yg *YearBalGateway) GetYearBalance(param []byte) (resData []byte, errCode 
 	return resData, errCode
 }
 
+func (yg *YearBalGateway) GetAccSubYearBalValue(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if resData, err = cSdk.GetAccSubYearBalValue_json(param); err != nil {
+		errCode = util.ErrShowFailed
+		logger.Error("the GetAccSubYearBalValue failed,err:%v", err.Error())
+	} else {
+		logger.Debug("GetAccSubYearBalValue succeed.")
+	}
+	return resData, errCode
+}
+
 func (yg *YearBalGateway) CreateYearBalance(param []byte) (errCode int) {
 	errCode = util.ErrNull
 	var err error
@@ -66,13 +78,13 @@ func (yg *YearBalGateway) UpdateYearBalance(param []byte) (errCode int) {
 	return errCode
 }
 
-func (yg *YearBalGateway) BatchUpdateYearBalance(param []byte) (errCode int) {
+func (yg *YearBalGateway) BatchUpdateBals(param []byte) (errCode int) {
 	errCode = util.ErrNull
-	if err := cSdk.BatchUpdateYearBalance_json(param); err != nil {
+	if err := cSdk.BatchUpdateBals_json(param); err != nil {
 		errCode = util.ErrUpdateFailed
-		logger.Error("the BatchUpdateYearBalance failed,err:%v", err.Error())
+		logger.Error("the BatchUpdateBals failed,err:%v", err.Error())
 	} else {
-		logger.Debug("BatchUpdateYearBalance succeed")
+		logger.Debug("BatchUpdateBals succeed")
 	}
 	return errCode
 }
@@ -90,4 +102,40 @@ func (yg *YearBalGateway) DeleteYearBalance(param []byte) (errCode int) {
 
 func (yg *YearBalGateway) ListYearBalance(param []byte) (resData []byte, errCode int) {
 	return listCmdJson(resource_type_year_balance, param, cSdk.ListYearBalance_json)
+}
+
+func (yg *YearBalGateway) AnnualClosing(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if err = cSdk.AnnualClosing_json(param); err != nil {
+		errCode = util.ErrAnnualClosing
+		logger.Error("the AnnualClosing failed,err:%v", err.Error())
+	} else {
+		logger.Debug("AnnualClosing succeed;")
+	}
+	return errCode
+}
+
+func (yg *YearBalGateway) CancelAnnualClosing(param []byte) (errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if err = cSdk.CancelAnnualClosing_json(param); err != nil {
+		errCode = util.ErrCancelAnnualClosing
+		logger.Error("the CancelAnnualClosing failed,err:%v", err.Error())
+	} else {
+		logger.Debug("CancelAnnualClosing succeed;")
+	}
+	return errCode
+}
+
+func (yg *YearBalGateway) GetAnnualClosingStatus(param []byte) (resData []byte, errCode int) {
+	errCode = util.ErrNull
+	var err error
+	if resData, err = cSdk.GetAnnualClosingStatus_json(param); err != nil {
+		errCode = util.ErrShowFailed
+		logger.Error("the GetAnnualClosingStatus failed,err:%v", err.Error())
+	} else {
+		logger.Debug("GetAnnualClosingStatus succeed.")
+	}
+	return resData, errCode
 }

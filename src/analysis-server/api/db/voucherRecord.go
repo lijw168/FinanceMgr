@@ -46,7 +46,7 @@ func (dao *VoucherRecordDao) Get(ctx context.Context, do DbOperator, recordId,
 	}
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator, iYear int) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + GenTableName(iYear, voucherRecordTN)
@@ -56,7 +56,7 @@ func (dao *VoucherRecordDao) Count(ctx context.Context, do DbOperator, iYear int
 	return c, err
 }
 
-//list count by filter
+// list count by filter
 func (d *VoucherRecordDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
@@ -126,7 +126,7 @@ func (dao *VoucherRecordDao) DeleteByMultiCondition(ctx context.Context, do DbOp
 	return nil
 }
 
-//没有复杂的匹配条件。
+// 没有复杂的匹配条件。
 func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filter map[string]interface{},
 	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
 	var voucherRecordSlice []*model.VoucherRecord
@@ -155,20 +155,20 @@ func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filt
 	return voucherRecordSlice, nil
 }
 
-//1、在where条件里增加between ... and
-//2、增加了like
+// 1、在where条件里增加between ... and
+// 2、增加了like
+// 3、增加了多列排序。
 func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
-	iYear, limit, offset, od int, order string) ([]*model.VoucherRecord, error) {
-	var voucherRecordSlice []*model.VoucherRecord
-	//strSql, values := transferListSql(GenTableName(iYear, voucherRecordTN), filter, voucherRecordFields, limit, offset, order, od)
-	strSql, values := transferListSqlWithMutiCondition(GenTableName(iYear, voucherRecordTN), filterNo, filter, intervalFilter, fuzzyMatchFilter,
-		voucherRecordFields, limit, offset, order, od)
+	orderFiler map[string]int, iYear, limit, offset int) ([]*model.VoucherRecord, error) {
+	strSql, values := makeListSqlWithMultiCondition(GenTableName(iYear, voucherRecordTN), voucherRecordFields, filterNo,
+		filter, intervalFilter, fuzzyMatchFilter, orderFiler, limit, offset)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherRecord/db/List] [SqlElapsed: %v]", time.Since(start))
 	}()
+	var voucherRecordSlice []*model.VoucherRecord
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherRecord/db/List] [do.Query: %s]", err.Error())

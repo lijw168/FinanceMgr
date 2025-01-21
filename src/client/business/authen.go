@@ -90,7 +90,7 @@ func (auth *Authen) OnlineCheck() int {
 		if auth.GetUserStatus() != view.Status {
 			auth.setAuthenInfo("", "", 0, view.Status)
 			cSdk.SetAccessToken("")
-			logger.Debug("OnlineCheck succeed;the user status has been to convert to the %d", view)
+			logger.Debug("OnlineCheck succeed;the user status is %d", view.Status)
 		}
 	}
 	return errCode

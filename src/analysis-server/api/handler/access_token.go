@@ -54,7 +54,6 @@ func (at *AccessTokenHandler) insertToken(accessToken string, iOptID int) {
 	at.expirationCheckMu.Lock()
 	at.tokenToTimeMap[accessToken] = time.Now().Unix() + (int64)(keepOnlineTime)
 	at.expirationCheckMu.Unlock()
-	return
 }
 
 func (at *AccessTokenHandler) delToken(accessToken string) {
@@ -64,7 +63,6 @@ func (at *AccessTokenHandler) delToken(accessToken string) {
 	at.expirationCheckMu.Lock()
 	delete(at.tokenToTimeMap, accessToken)
 	at.expirationCheckMu.Unlock()
-	return
 }
 
 func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
@@ -99,7 +97,6 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 		}
 		at.logger.DebugContext(ctx, "[delBatchToken] [the operator %d has been logout]", optId)
 	}
-	return
 }
 
 func (at *AccessTokenHandler) modifyTokenExpiredTime(accessToken string) {
@@ -109,7 +106,7 @@ func (at *AccessTokenHandler) modifyTokenExpiredTime(accessToken string) {
 	at.checkStatusCount = at.checkStatusCount + 1
 }
 
-//用户在线检查
+// 用户在线检查
 func (at *AccessTokenHandler) LoginCheck(action string,
 	r *http.Request) (bIsPass bool, accessToken string, err error) {
 	bIsPass = false
@@ -128,7 +125,7 @@ func (at *AccessTokenHandler) LoginCheck(action string,
 	defer at.loginCheckMu.RUnlock()
 	if _, ok := at.tokenToOptIDMap[accessToken]; ok {
 		if action == "Login" {
-			err = errors.New("The user has been to login,please logout the user first.")
+			err = errors.New("the user has been to login,please logout the user first.")
 		} else {
 			bIsPass = true
 		}

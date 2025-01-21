@@ -1,3 +1,15 @@
 v2.6所修改的地方
 1、修改GetLatestVoucherInfoByCompanyID,fix the sql bug
 2、在beginOfYearBalance 、voucherTemplate  里增加了company_id，并且在在beginOfYearBalance增加了自增id
+3、修改了计算期初、期末余额的算法。
+
+v2.7所修改的地方
+1、fix getYearBalance operateCode
+2、utilize excelize library to write exported data to excel file
+
+v2.8所修改的地方
+1、修改ListVoucherInfoByMulCondition函数实现里所使用的sql语句；并把该函数名称修改为ListVoucherInfoWithAuxCondition
+2、重新实现年度结算和取消年度结算，并增加年度结算的状态，并修改了yeanBalance的所有接口。
+3、把GetYearBalance 修改为 GetAccSubYearBalValue ，并重新实现把GetYearBalance
+4、把BatchUpdateYearBalance 修改为BatchUpdateBals
+

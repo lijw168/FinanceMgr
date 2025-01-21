@@ -6,9 +6,9 @@ const SplitStr string = ";"
 const (
 	QuitApp = 1 + iota
 	Heartbeat
-	UserLogin
+	Login
 	LoginInfoList
-	UserLogout
+	Logout
 	OperatorCreate
 	OperatorList
 	OperatorShow
@@ -34,7 +34,7 @@ const (
 	VoucherArrange
 	VouInfoShow
 	VouInfoList
-	VouInfoListByMulCon
+	VouInfoListWithAuxCond
 	VouInfoListLatest
 	VouInfoMaxNumOfMonth
 	BatchAuditVouchers
@@ -57,7 +57,11 @@ const (
 	YearBalanceShow
 	YearBalanceDel
 	YearBalanceBatchDel
-	YearBalanceBatchUpdate
+	AccSubYearBalValueShow
+	AnnualClosing
+	CancelAnnualClosing
+	AnnualClosingStatusShow
+	BatchUpdateBals
 	YearBalanceUpdate
 	MenuInfoList
 )

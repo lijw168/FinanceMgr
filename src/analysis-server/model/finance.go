@@ -46,6 +46,7 @@ type YearBalance struct {
 	SubjectID int
 	Year      int
 	Balance   float64
+	Status    byte
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

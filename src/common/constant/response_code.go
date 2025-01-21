@@ -7,13 +7,13 @@ package constant
 -101~-200:account subject error
 */
 
-//common
+// common
 const (
 	CodeNoLogin     = -2
 	CodeNoAuthority = -3
 )
 
-//account subject
+// account subject
 const (
 	CodeAccSubNotExist   = -101
 	CodeInvalAccSubLevel = -102
@@ -21,36 +21,36 @@ const (
 	CodeInvalAccSubType  = -104
 )
 
-//company information
+// company information
 const (
 	CodeComInfoNotExist = -201
 )
 
-//operator information
+// operator information
 const (
 	CodeOptInfoNotExist = -301
 	CodeUserNameWrong   = -302
 	CodePasswdWrong     = -303
 )
 
-//voucher information
+// voucher information
 const (
 	CodeVoucherInfoNotExist     = -401
 	CodeVoucherRecordNotExist   = -402
 	CodeVoucherTemplateNotExist = -403
 )
 
-//the begin of year balance
+// the begin of year balance
 const (
 	CodeYearBalanceNotExist = -501
 )
 
-//IdInfo
+// IdInfo
 const (
 	CodeIdInfoNotExist = -601
 )
 
-//companyGroup
+// companyGroup
 const (
 	CodeCompanyGroupNotExist = -701
 )

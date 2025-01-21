@@ -96,7 +96,8 @@ alter table accountSubject add constraint FK_Reference_2 foreign key (company_id
       references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
-/* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类和损益类才有年初余额。*/
+/* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类和损益类才有年初余额。
+   status : 1，已结算；0，未结算*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`beginOfYearBalance`;
 create table if not exists `finance_mgr`.`beginOfYearBalance`
@@ -106,6 +107,7 @@ create table if not exists `finance_mgr`.`beginOfYearBalance`
    `subject_id`            int not null,
    `year`                  int not null,
    `balance`               decimal(12,4) not null,
+   `status`                tinyint not null default 0,
    `created_at`            datetime,
    `updated_at`            datetime,
    primary key (id)

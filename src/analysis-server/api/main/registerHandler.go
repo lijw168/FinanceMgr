@@ -14,13 +14,17 @@ func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql
 	yearBalService := &service.YearBalanceService{Logger: logger, YearBalDao: yearBalanceDao, Db: _db}
 	yearBalHandlers := &handler.YearBalHandlers{Logger: logger, YearBalService: yearBalService}
 	httpRouter.RegisterFunc("GetYearBalance", yearBalHandlers.GetYearBalance)
+	httpRouter.RegisterFunc("GetAccSubYearBalValue", yearBalHandlers.GetAccSubYearBalValue)
 	httpRouter.RegisterFunc("CreateYearBalance", yearBalHandlers.CreateYearBalance)
 	httpRouter.RegisterFunc("BatchCreateYearBalance", yearBalHandlers.BatchCreateYearBalance)
 	httpRouter.RegisterFunc("UpdateYearBalance", yearBalHandlers.UpdateYearBalance)
-	httpRouter.RegisterFunc("BatchUpdateYearBalance", yearBalHandlers.BatchUpdateYearBalance)
+	httpRouter.RegisterFunc("BatchUpdateBals", yearBalHandlers.BatchUpdateBals)
 	httpRouter.RegisterFunc("DeleteYearBalance", yearBalHandlers.DeleteYearBalance)
 	httpRouter.RegisterFunc("BatchDeleteYearBalance", yearBalHandlers.BatchDeleteYearBalance)
 	httpRouter.RegisterFunc("ListYearBalance", yearBalHandlers.ListYearBalance)
+	httpRouter.RegisterFunc("AnnualClosing", yearBalHandlers.AnnualClosing)
+	httpRouter.RegisterFunc("CancelAnnualClosing", yearBalHandlers.CancelAnnualClosing)
+	httpRouter.RegisterFunc("GetAnnualClosingStatus", yearBalHandlers.GetAnnualClosingStatus)
 }
 
 // register voucher template
@@ -47,8 +51,7 @@ func registerComGroup(logger *log.Logger, httpRouter *url.UrlRouter, comGroupDao
 }
 
 // register companyHander
-func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *service.CompanyService,
-	_db *sql.DB) {
+func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *service.CompanyService) {
 	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
 	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
 	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)
@@ -72,11 +75,8 @@ func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.Co
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
 	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
-	//httpRouter.RegisterFunc("ListYearBalance", accSubHandlers.ListYearBalance)
 	httpRouter.RegisterFunc("GetAccSub", accSubHandlers.GetAccSub)
-	//httpRouter.RegisterFunc("GetYearBalance", accSubHandlers.GetYearBalance)
 	httpRouter.RegisterFunc("UpdateAccSub", accSubHandlers.UpdateAccSub)
-	//httpRouter.RegisterFunc("UpdateYearBalance", accSubHandlers.UpdateYearBalance)
 	httpRouter.RegisterFunc("QueryAccSubReference", accSubHandlers.QueryAccSubReference)
 	httpRouter.RegisterFunc("CopyAccSubTemplate", accSubHandlers.CopyAccSubTemplate)
 	httpRouter.RegisterFunc("GenerateAccSubTemplate", accSubHandlers.GenerateAccSubTemplate)
@@ -138,7 +138,7 @@ func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 	httpRouter.RegisterFunc("GetVoucher", voucherHandlers.GetVoucher)
 	httpRouter.RegisterFunc("GetLatestVoucherInfo", voucherHandlers.GetLatestVoucherInfo)
 	httpRouter.RegisterFunc("ListVoucherInfo", voucherHandlers.ListVoucherInfo)
-	httpRouter.RegisterFunc("ListVoucherInfoByMulCondition", voucherHandlers.ListVoucherInfoByMulCondition)
+	httpRouter.RegisterFunc("ListVoucherInfoWithAuxCondition", voucherHandlers.ListVoucherInfoWithAuxCondition)
 	httpRouter.RegisterFunc("GetMaxNumOfMonth", voucherHandlers.GetMaxNumOfMonth)
 	httpRouter.RegisterFunc("UpdateVoucherInfo", voucherHandlers.UpdateVoucherInfo)
 	httpRouter.RegisterFunc("BatchAuditVouchers", voucherHandlers.BatchAuditVouchers)

@@ -57,7 +57,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	if conflictCount > 0 {
 		return nil, NewError(ErrCompany, ErrConflict, ErrNull, ErrRecordExist)
 	}
-	//generate company
+	//generate company, 有潜在的bug，没有判断指针是否为空，就赋值了。
 	comInfo := new(model.CompanyInfo)
 	comInfo.CompanyName = *params.CompanyName
 	comInfo.AbbrevName = *params.AbbrevName
