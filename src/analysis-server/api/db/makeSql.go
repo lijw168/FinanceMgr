@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"financeMgr/src/analysis-server/model"
 	"fmt"
 	"strings"
 )
@@ -763,6 +764,12 @@ func addNoFilterCondition(filterNo map[string]interface{}) (fk []string, fv []in
 			tmpK += ")"
 			fk = append(fk, tmpK)
 			fv = append(fv, tmpValue...)
+		case []interface{}:
+			tmpK += " NOT IN ("
+			tmpValue := processCommonConditionFilter(v, &tmpK)
+			tmpK += ")"
+			fk = append(fk, tmpK)
+			fv = append(fv, tmpValue...)
 		}
 	}
 	return
@@ -791,6 +798,11 @@ func addBetweenFilterSql(intervalFilter map[string]interface{}) (fk []string, fv
 			tmpValue := processBetweenFilter(arr, &tmpK)
 			fk = append(fk, tmpK)
 			fv = append(fv, tmpValue...)
+		case []interface{}:
+			tmpK += " between "
+			tmpValue := processBetweenFilter(v, &tmpK)
+			fk = append(fk, tmpK)
+			fv = append(fv, tmpValue...)
 		default:
 			panic("invalid parameter type")
 		}
@@ -808,13 +820,17 @@ func addFuzzyMatchFilter(fuzzyMatchFilter map[string]string) (fk []string, fv []
 	return
 }
 
-func addOrderSql(orderFiler map[string]int) string {
+// order by 后面的字段的顺序要和传入的字段的顺序一致，否则会出现错误。所以修改函数参数为slice
+func addOrderSql(orderFiler []*model.OrderItem) string {
+	if len(orderFiler) == 0 {
+		return ""
+	}
 	var tmpK string
 	iCount := 0
 	orderSql := " order by "
-	for k, v := range orderFiler {
-		tmpK = camelToUnix(k)
-		if v == 1 {
+	for _, v := range orderFiler {
+		tmpK = camelToUnix(*v.Field)
+		if *v.Direction == 1 {
 			if iCount == 0 {
 				orderSql += fmt.Sprintf("%s desc ", tmpK)
 			} else {
@@ -855,7 +871,7 @@ func addLimitSql(limit, offset int) (strSql string, fv []interface{}) {
 func makeListSqlWithMultiCondition(table string, field []string,
 	filterNo map[string]interface{}, filter map[string]interface{},
 	intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
-	orderFiler map[string]int, limit int, offset int) (string, []interface{}) {
+	orderFiler []*model.OrderItem, limit int, offset int) (string, []interface{}) {
 
 	fields := strings.Join(field, ",")
 	strSql := "select " + fields + " from " + table

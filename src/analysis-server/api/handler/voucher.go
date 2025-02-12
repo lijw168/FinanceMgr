@@ -780,7 +780,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 }
 
-// 该函数用于在凭证明细报表中，计算截止到某个时间的某个科目的累计金额
+// 计算某个科目截止到某个凭证日期的累计的贷方和借方金额。该函数用于银行明细账中的累计部分。
 func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.CalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
@@ -806,8 +806,8 @@ func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 {
-		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+	if params.VoucherDate == nil || *params.VoucherDate <= 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouDate, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -852,7 +852,7 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 {
+	if params.VoucherDate == nil || *params.VoucherDate <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return

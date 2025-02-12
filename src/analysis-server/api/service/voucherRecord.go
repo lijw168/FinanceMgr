@@ -103,9 +103,9 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 	vRecordView.CreditMoney = vRecord.CreditMoney
 	vRecordView.Summary = vRecord.Summary
 	vRecordView.SubID1 = vRecord.SubID1
-	vRecordView.SubID2 = vRecord.SubID2
-	vRecordView.SubID3 = vRecord.SubID3
-	vRecordView.SubID4 = vRecord.SubID4
+	// vRecordView.SubID2 = vRecord.SubID2
+	// vRecordView.SubID3 = vRecord.SubID3
+	// vRecordView.SubID4 = vRecord.SubID4
 	return vRecordView
 }
 
@@ -134,9 +134,9 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 					}
 				}
 			case "recordId", "voucherId", "subjectName", "summary", "subId1":
-				fallthrough
-			case "subId2", "subId3", "subId4":
 				filterFields[*f.Field] = f.Value
+			// case "subId2", "subId3", "subId4":
+			// 	filterFields[*f.Field] = f.Value
 			case "debitMoney_interval":
 				intervalFilterFields["debitMoney"] = f.Value
 			case "creditMoney_interval":
@@ -156,12 +156,12 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 			offset = *params.DescOffset
 		}
 	}
-	orderFilter := make(map[string]int)
-	for _, v := range params.Order {
-		orderFilter[*v.Field] = *v.Direction
-	}
+	// orderFilter := make(map[string]int)
+	// for _, v := range params.Order {
+	// 	orderFilter[*v.Field] = *v.Direction
+	// }
 	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, nil, filterFields, intervalFilterFields,
-		fuzzyMatchFields, orderFilter, iVoucherYear, limit, offset)
+		fuzzyMatchFields, params.Order, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return recordViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

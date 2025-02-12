@@ -12,4 +12,10 @@ v2.8所修改的地方
 2、重新实现年度结算和取消年度结算，并增加年度结算的状态，并修改了yeanBalance的所有接口。
 3、把GetYearBalance 修改为 GetAccSubYearBalValue ，并重新实现把GetYearBalance
 4、把BatchUpdateYearBalance 修改为BatchUpdateBals
+5、重新写生成sql过滤条件的通用函数。
+6、修改YearBalance的各个接口，把服务端返回的错误码返回到client端。
+7、修改余额表和明细表中的数据。
+8、重新实现了明细表的实现
+9、在年度结算中，去掉了父级科目的年初余额的保存。
+10、在生成sql条件过程中，取消了对数据类型精确匹配的限制。
 

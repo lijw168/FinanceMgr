@@ -4,3 +4,6 @@ src/.vscode/
 src/github.com/
 #忽略生成的文件
 bin/
+
+#exclude file type
+.exp

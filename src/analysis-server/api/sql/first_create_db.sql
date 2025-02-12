@@ -96,8 +96,9 @@ alter table accountSubject add constraint FK_Reference_2 foreign key (company_id
       references companyInfo (company_id) on delete restrict  on update restrict;
 
 /*==============================================================*/
-/* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类和损益类才有年初余额。
-   status : 1，已结算；0，未结算*/
+/* Table: 该表保存的数据是各个科目的年初余额，一般只有资产类、负债和权益类才有年初余额，损益和成本没有。
+   status : 1，已结算；0，未结算
+   balance： 正数，表示该与该科目本身的方向一致。2、负数，表示该值与该科目本身的方向相反*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`beginOfYearBalance`;
 create table if not exists `finance_mgr`.`beginOfYearBalance`
@@ -144,6 +145,7 @@ alter table voucherInfo add constraint FK_Reference_3 foreign key (company_id)
 
 /*==============================================================*/
 /* 凭证信息表 Table: voucherRecordInfo                          */
+/* 目前该表中只使用了sub_id1 表示科目的ID。 其他三个ID字段没有使用 */
 /*==============================================================*/
 drop table if exists `finance_mgr`.`voucherRecordInfo`;
 create table  if not exists `finance_mgr`.`voucherRecordInfo`
@@ -237,6 +239,39 @@ create table if not exists `finance_mgr`.`menuInfo`
    `menu_serial_num`      int,
    primary key (menu_id)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(71,"系统",1,0,1);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7101,"系统设置",2,71,1000);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7102,"菜单管理",2,71,1001);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7103,"重新登录",2,71,1002);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7104,"修改密码",2,71,1003);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(7105,"退出",2,71,1004);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(81,"总账系统",1,0,2);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8101,"明细账",2,81,1101);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8102,"余额表",2,81,1102);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8103,"科目汇总",2,81,1103);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8104,"日记账",2,81,1104);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8105,"总账",2,81,1105);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8120,"记账凭证",2,81,1120);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1121);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1122);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8124,"年度结算",2,81,1123);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8125,"取消年度结算",2,81,1124);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1125);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(51,"项目管理",1,0,3);
+
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(61,"工具",1,0,4);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6101,"word",2,61,1200);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6102,"excel",2,61,1211);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6103,"计算器",2,61,1212);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6104,"记事本",2,61,1213);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(41,"帮助",1,0,5);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,41,1220);
+insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,41,1221);
+
 
 insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
 insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());

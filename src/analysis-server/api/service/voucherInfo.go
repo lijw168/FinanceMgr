@@ -88,12 +88,12 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 			offset = *params.DescOffset
 		}
 	}
-	orderFilter := make(map[string]int)
-	for _, v := range params.Order {
-		orderFilter[*v.Field] = *v.Direction
-	}
+	// orderFilter := make(map[string]int)
+	// for _, v := range params.Order {
+	// 	orderFilter[*v.Field] = *v.Direction
+	// }
 	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields,
-		nil, orderFilter, iVoucherYear, limit, offset)
+		nil, params.Order, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())

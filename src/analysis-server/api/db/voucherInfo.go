@@ -174,11 +174,10 @@ func (dao *VoucherInfoDao) SimpleList(ctx context.Context, do DbOperator, filter
 // 3、增加了多列排序。
 func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
-	orderFiler map[string]int, iYear, limit, offset int) ([]*model.VoucherInfo, error) {
+	orderFiler []*model.OrderItem, iYear, limit, offset int) ([]*model.VoucherInfo, error) {
 
 	strSql, values := makeListSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), voucherInfoFields,
 		filterNo, filter, intervalFilter, fuzzyMatchFilter, orderFiler, limit, offset)
-
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {

@@ -260,9 +260,9 @@ type CreateVoucherRecordParams struct {
 	CreditMoney *float64 `json:"creditMoney"`
 	Summary     *string  `json:"summary"`
 	SubID1      *int     `json:"subId1"`
-	SubID2      *int     `json:"subId2"`
-	SubID3      *int     `json:"subId3"`
-	SubID4      *int     `json:"subId4"`
+	// SubID2      *int     `json:"subId2"`
+	// SubID3      *int     `json:"subId3"`
+	// SubID4      *int     `json:"subId4"`
 }
 
 // ModifyVoucherRecordParams ...
@@ -273,9 +273,9 @@ type ModifyVoucherRecordParams struct {
 	CreditMoney *float64 `json:"creditMoney"`
 	Summary     *string  `json:"summary"`
 	SubID1      *int     `json:"subId1"`
-	SubID2      *int     `json:"subId2"`
-	SubID3      *int     `json:"subId3"`
-	SubID4      *int     `json:"subId4"`
+	// SubID2      *int     `json:"subId2"`
+	// SubID3      *int     `json:"subId3"`
+	// SubID4      *int     `json:"subId4"`
 }
 
 // CreateVoucherParams...
@@ -338,24 +338,24 @@ type IDInfoParams struct {
 
 // 以下参数用于报表统计时的参数类型
 type CalAccuMoneyParams struct {
-	CompanyID    *int `json:"companyId"`
-	SubjectID    *int `json:"subjectId"`
-	VoucherMonth *int `json:"voucherMonth"`
-	Status       *int `json:"status"`
-	VoucherYear  *int `json:"voucherYear"`
+	CompanyID   *int `json:"companyId"`
+	SubjectID   *int `json:"subjectId"`
+	VoucherDate *int `json:"VoucherDate"`
+	Status      *int `json:"status"`
+	VoucherYear *int `json:"voucherYear"`
 }
 
 type BatchCalAccuMoneyParams struct {
 	CompanyID    *int  `json:"companyId"`
-	SubjectIDArr []int `json:"subjectIdArr"`
-	VoucherMonth *int  `json:"voucherMonth"`
+	SubjectIDArr []int `json:"subId1Arr"`
+	VoucherDate  *int  `json:"VoucherDate"`
 	Status       *int  `json:"status"`
 	VoucherYear  *int  `json:"voucherYear"`
 }
 
 type CalAmountOfPeriodParams struct {
 	CompanyID    *int  `json:"companyId"`
-	SubjectIDArr []int `json:"subjectIdArr"`
+	SubjectIDArr []int `json:"subId1Arr"`
 	StartMonth   *int  `json:"startMonth"`
 	EndMonth     *int  `json:"endMonth"`
 	Status       *int  `json:"status"`

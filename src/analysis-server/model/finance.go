@@ -154,9 +154,9 @@ type AccountOfPeriod struct {
 }
 
 type CalAccuMoney struct {
-	CompanyID    int
-	SubjectID    int
-	VoucherMonth int
-	Status       int
-	VoucherYear  int
+	CompanyID   int
+	SubjectID   int
+	VoucherDate int
+	Status      int
+	VoucherYear int
 }

@@ -58,6 +58,7 @@ const (
 	ErrPasswd            = "password"
 	ErrVouYear           = "voucher_year"
 	ErrVouMon            = "voucher_month"
+	ErrVouDate           = "voucher_date"
 	ErrVouFiller         = "voucher_filler"
 	ErrVouAuditor        = "voucher_auditor"
 	ErrVouRecSub         = "voucher_record_subject"

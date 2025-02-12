@@ -115,9 +115,9 @@ type VoucherRecordView struct {
 	CreditMoney float64 `json:"creditMoney"`
 	Summary     string  `json:"summary"`
 	SubID1      int     `json:"subId1"`
-	SubID2      int     `json:"subId2"`
-	SubID3      int     `json:"subId3"`
-	SubID4      int     `json:"subId4"`
+	// SubID2      int     `json:"subId2"`
+	// SubID3      int     `json:"subId3"`
+	// SubID4      int     `json:"subId4"`
 }
 
 // 表示符合条件的voucher records的总数，通过该变量，客户端用于判断，是否再次获取voucher records

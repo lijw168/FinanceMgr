@@ -463,7 +463,7 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 	return nil
 }
 
-// 在该函数实现中，增加了如下的功能
+// 该函数时利用过滤voucherRecord的条件来过滤voucherInfo .在该函数实现中，增加了如下的功能
 // 1、在where条件里增加between ... and
 // 2、增加了like
 // 3、增加了多列排序。
@@ -481,10 +481,6 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 			offset = *params.DescOffset
 		}
 	}
-	orderFilter := make(map[string]int)
-	for _, v := range params.Order {
-		orderFilter[*v.Field] = *v.Direction
-	}
 
 	iVoucherYear := 0
 	FuncName := "VoucherService/ListVoucherInfoWithAuxCondition"
@@ -501,15 +497,8 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	}()
 	//这是对voucherInfo 的list
 	if params.BasicFilter != nil {
-		var intervalValSlice []int
+		//var intervalValSlice []int
 		for _, f := range params.BasicFilter {
-			if *f.Field == "numOfMonth_interval" || *f.Field == "voucherDate_interval" ||
-				*f.Field == "voucherMonth_interval" {
-				err := FormatData(f.Value, &intervalValSlice)
-				if err != nil {
-					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-				}
-			}
 			switch *f.Field {
 			case "voucherYear":
 				{
@@ -531,14 +520,11 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 			case "status_no":
 				filterNo["status"] = f.Value
 			case "numOfMonth_interval":
-				intervalFilterFields["numOfMonth"] = intervalValSlice
-				intervalValSlice = intervalValSlice[0:0]
+				intervalFilterFields["numOfMonth"] = f.Value
 			case "voucherDate_interval":
-				intervalFilterFields["voucherDate"] = intervalValSlice
-				intervalValSlice = intervalValSlice[0:0]
+				intervalFilterFields["voucherDate"] = f.Value
 			case "voucherMonth_interval":
-				intervalFilterFields["voucherMonth"] = intervalValSlice
-				intervalValSlice = intervalValSlice[0:0]
+				intervalFilterFields["voucherMonth"] = f.Value
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -550,29 +536,24 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 		filterRecFields := make(map[string]interface{})
 		intervalFilterRecFields := make(map[string]interface{})
 		fuzzyMatchFields := make(map[string]string)
-		//因为debitMoney_interval和creditMoney_interval只能同时出现一个，所以可以共用如下的slice
-		var intervalValSlice []float64
 		for _, f := range params.AuxiFilter {
-			if *f.Field == "debitMoney_interval" || *f.Field == "creditMoney_interval" {
-				err := FormatData(f.Value, &intervalValSlice)
-				if err != nil {
-					return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-				}
-			}
 			switch *f.Field {
 			case "recordId", "voucherId", "subjectName", "summary", "subId1":
 				filterRecFields[*f.Field] = f.Value
+			case "subId1Arr":
+				filterRecFields["subId1"] = f.Value
 			case "debitMoney_interval":
-				intervalFilterRecFields["debitMoney"] = intervalValSlice
+				intervalFilterRecFields["debitMoney"] = f.Value
 			case "creditMoney_interval":
-				intervalFilterRecFields["creditMoney"] = intervalValSlice
+				intervalFilterRecFields["creditMoney"] = f.Value
 			case "subjectName_fuzzy":
 				fuzzyMatchFields["subjectName"] = f.Value.(string)
 			case "summary_fuzzy":
 				fuzzyMatchFields["summary"] = f.Value.(string)
 			//因为此时只有单个值的时候，就是>,<的操作，所以此时的类型为string
-			case "debitMoney", "creditMoney":
-				filterRecFields[*f.Field] = f.Value.(string)
+			//这个分析是错误的，因为在数据库这两个字段是decimal类型，不能比较，等以后转换成整形后，再支持这个操作。
+			// case "debitMoney", "creditMoney":
+			// 	filterRecFields[*f.Field] = f.Value.(string)
 			default:
 				return vouInfoViewSlice, 0, NewError(ErrVoucherInfo, ErrUnsupported, ErrField, *f.Field)
 			}
@@ -584,7 +565,7 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 				err.Error(), filterRecFields)
 			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
-		voucherIds := make([]int, 1)
+		voucherIds := make([]int, 0)
 		for _, vouRecord := range voucherRecords {
 			voucherIds = append(voucherIds, vouRecord.VoucherID)
 		}
@@ -594,7 +575,7 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	}
 
 	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields, nil,
-		orderFilter, iVoucherYear, limit, offset)
+		params.Order, iVoucherYear, limit, offset)
 	if err != nil {
 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -612,6 +593,26 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	voucherInfoCount := len(voucherInfos)
 	return vouInfoViewSlice, voucherInfoCount, nil
 }
+
+// 	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields, nil,
+// 		orderFilter, iVoucherYear, limit, offset)
+// 	if err != nil {
+// 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+// 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+// 	}
+// 	if err = tx.Commit(); err != nil {
+// 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+// 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+// 	}
+// 	bIsRollBack = false
+
+// 	for _, vouInfo := range voucherInfos {
+// 		vouInfoView := VoucherInfoModelToView(vouInfo)
+// 		vouInfoViewSlice = append(vouInfoViewSlice, vouInfoView)
+// 	}
+// 	voucherInfoCount := len(voucherInfos)
+// 	return vouInfoViewSlice, voucherInfoCount, nil
+// }
 
 func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 	params *model.CalAccuMoneyParams, requestId string) (*model.AccuMoneyValueView, CcError) {
@@ -633,7 +634,7 @@ func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 	var calcAccuMoney model.CalAccuMoney
 	calcAccuMoney.CompanyID = *params.CompanyID
 	calcAccuMoney.SubjectID = *params.SubjectID
-	calcAccuMoney.VoucherMonth = *params.VoucherMonth
+	calcAccuMoney.VoucherDate = *params.VoucherDate
 	calcAccuMoney.VoucherYear = *params.VoucherYear
 	calcAccuMoney.Status = *params.Status
 	var accuMoney *model.AccuMoneyValueView
@@ -672,7 +673,7 @@ func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 		var calcAccuMoney model.CalAccuMoney
 		calcAccuMoney.CompanyID = *params.CompanyID
 		calcAccuMoney.SubjectID = subId
-		calcAccuMoney.VoucherMonth = *params.VoucherMonth
+		calcAccuMoney.VoucherDate = *params.VoucherDate
 		calcAccuMoney.VoucherYear = *params.VoucherYear
 		calcAccuMoney.Status = *params.Status
 		var accuMoney *model.AccuMoneyValueView

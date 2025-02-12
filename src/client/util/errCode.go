@@ -1,5 +1,6 @@
 package util
 
+// 在该模块定义错误码时，值不能为负值。因为负值是从后台服务传递过来的。
 const (
 	ErrNull                       = 0  //no error
 	ErrGenHttpReqFailed           = 1  //generateRequest,failed
@@ -35,4 +36,5 @@ const (
 	ErrCalAccPeriodFailed         = 32 // calculate account of period,failed
 	ErrAnnualClosing              = 33 // annual closing,failed
 	ErrCancelAnnualClosing        = 34 // calcel annual closing,failed
+	ErrGetAnnualClosingStatus     = 35 // get annual closing status,failed
 )

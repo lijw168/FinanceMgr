@@ -14,7 +14,7 @@ type VoucherDao struct {
 	Logger log.ILog
 }
 
-// 计算某个科目截止到某个月份的累计的贷方和借方金额。该函数用于银行明细账中的累计部分。
+// 计算某个科目截止到某个凭证日期的累计的贷方和借方金额。该函数用于银行明细账中的累计部分。
 func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	params *model.CalAccuMoney) (*model.AccuMoneyValueView, error) {
 	voucherInfoTable := GenTableName(params.VoucherYear, voucherInfoTN)
@@ -23,15 +23,16 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	var values []interface{}
 	//该判断应该是兼容之前，没有设置凭证状态的数据。
 	if params.Status == 0 {
-		strSql = "select COALESCE(abs(sum(debit_money)), 0), COALESCE(abs(sum(credit_money)), 0) from " + voucherRecordTable +
+		//因为有可能记账人员会在凭证中填写负数金额，所以这里不能取绝对值。
+		strSql = "select COALESCE(sum(debit_money), 0), COALESCE(sum(credit_money), 0) from " + voucherRecordTable +
 			" where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
-			" where company_id = ? and voucher_month <= ?)"
-		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherMonth}
+			" where company_id = ? and voucher_date <= ?)"
+		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherDate}
 	} else {
-		strSql = "select COALESCE(abs(sum(debit_money)), 0), COALESCE(abs(sum(credit_money)), 0) from " + voucherRecordTable +
+		strSql = "select COALESCE(sum(debit_money), 0), COALESCE(sum(credit_money), 0) from " + voucherRecordTable +
 			" where  sub_id1 = ? and voucher_id in (select voucher_id from " + voucherInfoTable +
-			" where company_id = ? and voucher_month <= ? and status = ?)"
-		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherMonth, params.Status}
+			" where company_id = ? and voucher_date <= ? and status = ?)"
+		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherDate, params.Status}
 	}
 
 	dao.Logger.DebugContext(ctx, "[Voucher/db/CalcAccumulateAccSubSum] [sql: %s ,values: %d]", strSql, values)
