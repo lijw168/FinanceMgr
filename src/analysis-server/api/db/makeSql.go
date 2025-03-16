@@ -875,40 +875,50 @@ func makeListSqlWithMultiCondition(table string, field []string,
 
 	fields := strings.Join(field, ",")
 	strSql := "select " + fields + " from " + table
-	var fk []string
-	var fv []interface{}
-	tmpKSlice, tmpVSlice := addNoFilterCondition(filterNo)
-	if len(tmpKSlice) > 0 {
-		fk = append(fk, tmpKSlice...)
+	var fk, tmpKSlice []string
+	var fv, tmpVSlice []interface{}
+	if len(filterNo) > 0 {
+		tmpKSlice, tmpVSlice := addNoFilterCondition(filterNo)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
 	}
-	if len(tmpVSlice) > 0 {
-		fv = append(fv, tmpVSlice...)
+	if len(filter) > 0 {
+		tmpKSlice, tmpVSlice = addCommonFilterCondition(filter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
 	}
-	tmpKSlice, tmpVSlice = addCommonFilterCondition(filter)
-	if len(tmpKSlice) > 0 {
-		fk = append(fk, tmpKSlice...)
+	if len(intervalFilter) > 0 {
+		tmpKSlice, tmpVSlice = addBetweenFilterSql(intervalFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
 	}
-	if len(tmpVSlice) > 0 {
-		fv = append(fv, tmpVSlice...)
-	}
-	tmpKSlice, tmpVSlice = addFuzzyMatchFilter(fuzzyMatchFilter)
-	if len(tmpKSlice) > 0 {
-		fk = append(fk, tmpKSlice...)
-	}
-	if len(tmpVSlice) > 0 {
-		fv = append(fv, tmpVSlice...)
-	}
-	tmpKSlice, tmpVSlice = addBetweenFilterSql(intervalFilter)
-	if len(tmpKSlice) > 0 {
-		fk = append(fk, tmpKSlice...)
-	}
-	if len(tmpVSlice) > 0 {
-		fv = append(fv, tmpVSlice...)
+	if len(fuzzyMatchFilter) > 0 {
+		tmpKSlice, tmpVSlice = addFuzzyMatchFilter(fuzzyMatchFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
 	}
 	if len(fk) > 0 {
 		strSql += " where " + strings.Join(fk, " and ")
 	}
-	strSql += addOrderSql(orderFiler)
+	if len(orderFiler) > 0 {
+		strSql += addOrderSql(orderFiler)
+	}
 	var tmpSql string
 	tmpSql, tmpVSlice = addLimitSql(limit, offset)
 	strSql += tmpSql
@@ -961,6 +971,75 @@ func transferCountSql(table string, filter map[string]interface{}) (string, []in
 	}
 	if len(tmpVSlice) > 0 {
 		fv = append(fv, tmpVSlice...)
+	}
+	if len(fk) > 0 {
+		strSql += " where " + strings.Join(fk, " and ")
+	}
+	return strSql, fv
+}
+
+// support multi-condition:accurate match,!= ,not,in,like,between ... and,
+// fuzzyMatchFilter,the value type is  string
+// intervalFilter,the value type is numerical value
+// filterNo,the value type is float64, int and string
+// filter,support '<' ,'>','=',but,"<,>",the value type is string
+func makeUpdateSqlWithMultiCondition(table string, updateField map[string]interface{},
+	filterNo map[string]interface{}, filter map[string]interface{},
+	intervalFilter map[string]interface{},
+	fuzzyMatchFilter map[string]string) (string, []interface{}) {
+
+	strSql := "update " + table + " set "
+	var fv, tmpVSlice []interface{}
+	var first bool = true
+	for key, value := range updateField {
+		dbKey := camelToUnix(key)
+		if first {
+			strSql += dbKey + "=?"
+			first = false
+		} else {
+			strSql += "," + dbKey + "=?"
+		}
+		fv = append(fv, value)
+	}
+	if first {
+		return "", nil
+	}
+	var fk, tmpKSlice []string
+	if len(filterNo) > 0 {
+		tmpKSlice, tmpVSlice := addNoFilterCondition(filterNo)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(filter) > 0 {
+		tmpKSlice, tmpVSlice = addCommonFilterCondition(filter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(intervalFilter) > 0 {
+		tmpKSlice, tmpVSlice = addBetweenFilterSql(intervalFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(fuzzyMatchFilter) > 0 {
+		tmpKSlice, tmpVSlice = addFuzzyMatchFilter(fuzzyMatchFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
 	}
 	if len(fk) > 0 {
 		strSql += " where " + strings.Join(fk, " and ")

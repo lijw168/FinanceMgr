@@ -46,7 +46,7 @@ func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 	}
 }
 
-//GetOptInfoById ...
+// GetOptInfoById ...
 func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
 	optID int) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where operator_id=?"
@@ -67,7 +67,7 @@ func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
 	}
 }
 
-//list count by filter
+// list count by filter
 func (dao *OperatorInfoDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
 	var c int64
 	strSql, values := transferCountSql(operatorInfoTN, filter)
@@ -164,24 +164,26 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 
 func (dao *OperatorInfoDao) Update(ctx context.Context, do DbOperator, optID int,
 	params map[string]interface{}) error {
-	strSql := "update " + operatorInfoTN + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where operator_id = ?"
-	values = append(values, optID)
+	//strSql := "update " + operatorInfoTN + " set "
+	// var values []interface{}
+	// var first bool = true
+	// for key, value := range params {
+	// 	dbKey := camelToUnix(key)
+	// 	if first {
+	// 		strSql += dbKey + "=?"
+	// 		first = false
+	// 	} else {
+	// 		strSql += "," + dbKey + "=?"
+	// 	}
+	// 	values = append(values, value)
+	// }
+	// if first {
+	// 	return nil
+	// }
+	// strSql += " where operator_id = ?"
+	// values = append(values, optID)
+	filter := map[string]any{"operator_id": optID}
+	strSql, values := makeUpdateSqlWithMultiCondition(operatorInfoTN, params, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

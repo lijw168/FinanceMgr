@@ -86,6 +86,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	vInfo.VoucherFiller = *infoParams.VoucherFiller
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.CreatedAt = time.Now()
+	vInfo.UpdatedAt = time.Now()
 	vInfo.VoucherID = GIdInfoService.genVouIdInfo.GetNextId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
 	if err = vs.VInfoDao.Create(ctx, tx, vInfo); err != nil {
@@ -117,6 +118,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		// 	vRecord.SubID4 = *recParam.SubID4
 		// }
 		vRecord.CreatedAt = time.Now()
+		vRecord.UpdatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, iYear, vRecord); err != nil {
 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -197,6 +199,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		if recParam.SubID1 != nil {
 			voucherRecordParams["subId1"] = *recParam.SubID1
 		}
+		voucherRecordParams["updatedAt"] = time.Now()
 		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, iVoucherYear, voucherRecordParams)
 		if err != nil {
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())

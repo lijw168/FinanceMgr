@@ -136,13 +136,13 @@ func FreeByteSlice(p []byte) {
 func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 	var dataBuf []byte
 	if isConvertToUtf8(iOpCode) {
-		//logger.LogDebug("before convertion ,operation code:", iOpCode, "param data:", string(reqParamBuf))
+		logger.LogDebug("before convertion ,operation code:", iOpCode, "param data:", string(reqParamBuf))
 		var err error
 		if dataBuf, err = util.GBKToUTF8(reqParamBuf); err != nil {
 			logger.LogError("covert gbk to utf8 failed")
 			return nil
 		}
-		//logger.LogDebug("after convertion ,operation code:", iOpCode, "param data:", string(dataBuf))
+		logger.LogDebug("after convertion ,operation code:", iOpCode, "param data:", string(dataBuf))
 	} else {
 		dataBuf = make([]byte, len(reqParamBuf))
 		copy(dataBuf, reqParamBuf)
@@ -194,148 +194,258 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 }
 
 func processOperator(iOpCode int, dataBuf []byte) []byte {
-	//var strRes string
-	//var err error
 	var optGate business.OperatorGateway
 	switch iOpCode {
 	case util.Login:
-		errCode := auth.UserLogin(dataBuf)
+		errCode, errMsg := auth.UserLogin(dataBuf)
 		if errCode == util.ErrNull {
 			go onLineLoopCheck()
 		}
-		return respAuthResInfo(errCode)
+		return respAuthResInfo(errCode, errMsg)
 	case util.LoginInfoList:
-		resData, errCode := auth.ListLoginInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := auth.ListLoginInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.Logout:
-		errCode := auth.Logout()
+		errCode, errMsg := auth.Logout()
 		quitCheckCh <- true
-		return respAuthResInfo(errCode)
+		return respAuthResInfo(errCode, errMsg)
 	case util.OperatorCreate:
-		resData, errCode := optGate.CreateOperator(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := optGate.CreateOperator(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.OperatorList:
-		resData, errCode := optGate.ListOperatorInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := optGate.ListOperatorInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.OperatorShow:
-		resData, errCode := optGate.GetOperatorInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := optGate.GetOperatorInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.OperatorDel:
-		errCode := optGate.DeleteOperator(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := optGate.DeleteOperator(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.OperatorUpdate:
-		errCode := optGate.UpdateOperator(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := optGate.UpdateOperator(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	default:
 		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
 		panic("bug")
-		//break
 	}
-
-	//return nil
 }
 
 func processCompany(iOpCode int, dataBuf []byte) []byte {
-	//var strRes string
 	var comGate business.CompanyGateway
 	switch iOpCode {
 	case util.CompanyCreate:
-		resData, errCode := comGate.CreateCompany(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := comGate.CreateCompany(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.CompanyList:
-		resData, errCode := comGate.ListCompany(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := comGate.ListCompany(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.CompanyDel:
-		errCode := comGate.DeleteCompany(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := comGate.DeleteCompany(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.CompanyShow:
-		resData, errCode := comGate.GetCompany(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := comGate.GetCompany(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.CompanyUpdate:
-		errCode := comGate.UpdateCompany(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := comGate.UpdateCompany(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.InitResourceInfo:
 		resData, errCode := comGate.InitResourceInfo(auth.OperatorID)
 		return respOptResWithData(iOpCode, resData, errCode)
 	default:
-		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
+		logger.Error("opcode is mistake,the mistake operation code is: %d", iOpCode)
 		panic("bug")
 	}
-	//return nil
 }
 
 func processAccSub(iOpCode int, dataBuf []byte) []byte {
-	//var strRes string
 	var accSubGate business.AccSubGateway
 	switch iOpCode {
 	case util.AccSubCreate:
-		resData, errCode := accSubGate.CreateAccSub(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := accSubGate.CreateAccSub(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubReferenceQuery:
-		resData, errCode := accSubGate.QueryAccSubReference(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := accSubGate.QueryAccSubReference(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubList:
-		resData, errCode := accSubGate.ListAccSub(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := accSubGate.ListAccSub(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubShow:
-		resData, errCode := accSubGate.GetAccSub(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := accSubGate.GetAccSub(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubDel:
-		errCode := accSubGate.DeleteAccSub(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := accSubGate.DeleteAccSub(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.CopyAccSubTemplate:
-		resData, errCode := accSubGate.CopyAccSubTemplate(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := accSubGate.CopyAccSubTemplate(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubUpdate:
-		errCode := accSubGate.UpdateAccSub(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := accSubGate.UpdateAccSub(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	default:
-		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
+		logger.Error("opcode is mistake,the mistake operation code is: %d", iOpCode)
 		panic("bug")
 	}
-	//return nil
 }
 
 func processVoucher(iOpCode int, dataBuf []byte) []byte {
-	//var strRes string
 	var voucherGate business.VoucherGateway
 	switch iOpCode {
 	case util.VoucherCreate:
-		resData, errCode := voucherGate.CreateVoucher(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.CreateVoucher(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VoucherUpdate:
-		resData, errCode := voucherGate.UpdateVoucher(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.UpdateVoucher(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VoucherDel:
-		errCode := voucherGate.DeleteVoucher(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := voucherGate.DeleteVoucher(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.VoucherShow:
-		resData, errCode := voucherGate.GetVoucher(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.GetVoucher(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VoucherArrange:
-		errCode := voucherGate.ArrangeVoucher(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := voucherGate.ArrangeVoucher(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.VouInfoShow:
-		resData, errCode := voucherGate.GetVoucherInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.GetVoucherInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouInfoList:
-		resData, errCode := voucherGate.ListVoucherInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.ListVoucherInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouInfoListWithAuxCond:
-		resData, errCode := voucherGate.ListVoucherInfoWithAuxCondition(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.ListVoucherInfoWithAuxCondition(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouInfoListLatest:
-		resData, errCode := voucherGate.GetLatestVoucherInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.GetLatestVoucherInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouInfoMaxNumOfMonth:
-		resData, errCode := voucherGate.GetMaxNumOfMonth(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.GetMaxNumOfMonth(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.BatchAuditVouchers:
-		errCode := voucherGate.BatchAuditVouchers(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := voucherGate.BatchAuditVouchers(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.VouInfoUpdate:
-		errCode := voucherGate.UpdateVoucherInfo(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := voucherGate.UpdateVoucherInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	// case util.VouRecordCreate:
 	// 	resData, errCode := voucherGate.CreateVoucherRecords(dataBuf)
 	// 	return respOptResWithData(iOpCode, resData, errCode)
@@ -346,51 +456,84 @@ func processVoucher(iOpCode int, dataBuf []byte) []byte {
 	// 	errCode := voucherGate.DeleteVoucherRecords(dataBuf)
 	// 	return respOptResWithoutData(errCode)
 	case util.VouRecordList:
-		resData, errCode := voucherGate.ListVoucherRecords(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.ListVoucherRecords(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	// case util.VouRecordUpdate:
 	// 	errCode := voucherGate.UpdateVoucherRecordByID(dataBuf)
 	// 	return respOptResWithoutData(errCode)
 	case util.CalculateAccuMoney:
-		resData, errCode := voucherGate.CalculateAccumulativeMoney(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.CalculateAccumulativeMoney(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.BatchCalcAccuMoney:
-		resData, errCode := voucherGate.BatchCalcAccuMoney(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.BatchCalcAccuMoney(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.CalcAccountOfPeriod:
-		resData, errCode := voucherGate.CalcAccountOfPeriod(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.CalcAccountOfPeriod(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouTemplateCreate:
-		resData, errCode := voucherGate.CreateVoucherTemplate(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.CreateVoucherTemplate(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouTemplateDel:
-		errCode := voucherGate.DeleteVoucherTemplate(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := voucherGate.DeleteVoucherTemplate(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithoutData(errCode)
+		}
 	case util.VouTemplateShow:
-		resData, errCode := voucherGate.GetVoucherTemplate(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.GetVoucherTemplate(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.VouTemplateList:
-		resData, errCode := voucherGate.ListVoucherTemplate(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := voucherGate.ListVoucherTemplate(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	default:
-		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
+		logger.Error("opcode is mistake,the mistake operation code is: %d", iOpCode)
 		panic("bug")
 	}
-	//return nil
 }
 
 func processMenu(iOpCode int, dataBuf []byte) []byte {
-	//var strRes string
 	var menuGate business.MenuInfoGateway
 	switch iOpCode {
 	case util.MenuInfoList:
-		resData, errCode := menuGate.ListMenuInfo(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := menuGate.ListMenuInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	default:
-		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
+		logger.Error("opcode is mistake,the mistake operation code is: %d", iOpCode)
 		panic("bug")
 	}
-	//return nil
 }
 
 func processYearBalance(iOpCode int, dataBuf []byte) []byte {
@@ -398,40 +541,84 @@ func processYearBalance(iOpCode int, dataBuf []byte) []byte {
 	var yearBalGate business.YearBalGateway
 	switch iOpCode {
 	case util.YearBalanceCreate:
-		errCode := yearBalGate.CreateYearBalance(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.CreateYearBalance(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.YearBalanceBatchCreate:
-		errCode := yearBalGate.BatchCreateYearBalance(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.BatchCreateYearBalance(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.YearBalanceDel:
-		errCode := yearBalGate.DeleteYearBalance(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.DeleteYearBalance(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.YearBalanceShow:
-		resData, errCode := yearBalGate.GetYearBalance(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := yearBalGate.GetYearBalance(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.YearBalanceList:
-		resData, errCode := yearBalGate.ListYearBalance(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := yearBalGate.ListYearBalance(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AccSubYearBalValueShow:
-		resData, errCode := yearBalGate.GetAccSubYearBalValue(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := yearBalGate.GetAccSubYearBalValue(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	case util.AnnualClosing:
-		errCode := yearBalGate.AnnualClosing(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.AnnualClosing(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.CancelAnnualClosing:
-		errCode := yearBalGate.CancelAnnualClosing(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.CancelAnnualClosing(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.BatchUpdateBals:
-		errCode := yearBalGate.BatchUpdateBals(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.BatchUpdateBals(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.YearBalanceUpdate:
-		errCode := yearBalGate.UpdateYearBalance(dataBuf)
-		return respOptResWithoutData(errCode)
+		errCode, errMsg := yearBalGate.UpdateYearBalance(dataBuf)
+		if errCode == util.ErrNull {
+			return respOptResWithoutData(errCode)
+		} else {
+			return respOptResWithErrMsg(errCode, errMsg)
+		}
 	case util.AnnualClosingStatusShow:
-		resData, errCode := yearBalGate.GetAnnualClosingStatus(dataBuf)
-		return respOptResWithData(iOpCode, resData, errCode)
+		resData, errCode, errMsg := yearBalGate.GetAnnualClosingStatus(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	default:
-		logger.LogError("opcode is mistake,the mistake operation code is: \r\n", iOpCode)
+		logger.Error("opcode is mistake,the mistake operation code is: %d\r\n", iOpCode)
 		panic("bug")
 	}
 	//return nil
@@ -444,10 +631,20 @@ func quitApp() int {
 }
 
 // login/logout information;user errCode + status
-func respAuthResInfo(errCode int) []byte {
-	dataBuf := make([]byte, 8)
+func respAuthResInfo(errCode int, errMsg string) []byte {
+	dataBuf := make([]byte, 8+len(errMsg))
 	binary.LittleEndian.PutUint32(dataBuf[0:4], uint32(errCode))
 	binary.LittleEndian.PutUint32(dataBuf[4:], uint32(auth.GetUserStatus()))
+	if errCode == util.ErrNull {
+		return dataBuf
+	}
+	if tmpBuf, err := util.UTF8ToGBK([]byte(errMsg)); err != nil {
+		errCode = util.ErrUtf8ToGbkFailed
+		logger.Error("UTF8ToGBK failed,err:%s\r\n", err.Error())
+		copy(dataBuf[8:], errMsg)
+	} else {
+		copy(dataBuf[8:], tmpBuf)
+	}
 	return dataBuf
 }
 
@@ -463,13 +660,23 @@ func respOptResWithData(iOperationCode int, resData []byte, errCode int) []byte 
 	var dataBuf []byte
 	iOpCode := int(iOperationCode)
 	if isConvertToGbk(iOpCode) {
-		tmpBuf := make([]byte, 0)
-		if errCode == util.ErrNull {
-			var err error
-			if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
-				errCode = util.ErrUtf8ToGbkFailed
-				tmpBuf = tmpBuf[0:0]
-			}
+		//tmpBuf := make([]byte, 0)
+		// if errCode == util.ErrNull {
+		// 	var err error
+		// 	if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
+		// 		logger.Error("UTF8ToGBK failed,err:%s\r\n", err.Error())
+		// 		return respOptResWithErrMsg(util.ErrUtf8ToGbkFailed, err.Error())
+		// 	}
+		// }
+		start := time.Now()
+		defer func() {
+			logger.Debug("[UTF8ToGBK,operationCode:%d] [SqlElapsed: %v]", iOperationCode, time.Since(start))
+		}()
+		var tmpBuf []byte
+		var err error
+		if tmpBuf, err = util.UTF8ToGBK(resData); err != nil {
+			logger.Error("UTF8ToGBK failed,err:%s\r\n", err.Error())
+			return respOptResWithErrMsg(util.ErrUtf8ToGbkFailed, err.Error())
 		}
 		iSize := int32(4 + len(tmpBuf))
 		dataBuf = make([]byte, iSize)
@@ -478,15 +685,32 @@ func respOptResWithData(iOperationCode int, resData []byte, errCode int) []byte 
 			copy(dataBuf[4:], tmpBuf)
 		}
 	} else {
-		if errCode != util.ErrNull {
-			resData = resData[0:0]
-		}
+		// if errCode != util.ErrNull {
+		// 	resData = resData[0:0]
+		// }
 		iSize := int32(4 + len(resData))
 		dataBuf = make([]byte, iSize)
 		binary.LittleEndian.PutUint32(dataBuf[0:4], uint32(errCode))
 		if errCode == util.ErrNull {
 			copy(dataBuf[4:], resData)
 		}
+	}
+	return dataBuf
+}
+
+// errCode + error message
+func respOptResWithErrMsg(errCode int, errMsg string) []byte {
+	dataBuf := make([]byte, 4+len(errMsg))
+	binary.LittleEndian.PutUint32(dataBuf[0:4], uint32(errCode))
+	if errCode == util.ErrNull {
+		return dataBuf
+	}
+	if tmpBuf, err := util.UTF8ToGBK([]byte(errMsg)); err != nil {
+		errCode = util.ErrUtf8ToGbkFailed
+		logger.Error("UTF8ToGBK failed,err:%s\r\n", err.Error())
+		copy(dataBuf[4:], errMsg)
+	} else {
+		copy(dataBuf[4:], tmpBuf)
 	}
 	return dataBuf
 }
@@ -506,10 +730,6 @@ func isConvertToGbk(iOpCode int) bool {
 }
 
 func isConvertToUtf8(iOperationCode int) bool {
-	start := time.Now()
-	defer func() {
-		logger.Info("[isConvertToUtf8,operationCode:%d] [SqlElapsed: %v]", iOperationCode, time.Since(start))
-	}()
 	bRet := true
 	switch iOperationCode {
 	case util.Login, util.LoginInfoList:

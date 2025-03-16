@@ -9,6 +9,6 @@ package business
 type MenuInfoGateway struct {
 }
 
-func (ag *MenuInfoGateway) ListMenuInfo(param []byte) (resData []byte, errCode int) {
+func (ag *MenuInfoGateway) ListMenuInfo(param []byte) (resData []byte, errCode int, errMsg string) {
 	return listCmdJson(resource_type_menu_info, param, cSdk.ListMenuInfo_json)
 }

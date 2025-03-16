@@ -119,9 +119,9 @@ func (dao *YearBalanceDao) BatchDeleteYearBalance(ctx context.Context, do DbOper
 // 可以更新yearBalanceTN中的所有字段，所以可以把UpdateBalance这个函数去掉。
 func (dao *YearBalanceDao) UpdateYearBalance(ctx context.Context, do DbOperator,
 	filter map[string]interface{}, updateField map[string]interface{}) error {
-	//因为需要跟新一下updated_at字段，所以把这个字段添加到updateField
+	//因为需要跟新一下updated_at字段,并且在service中，有多处调用该函数，所以在此添加更新该字段比较合适，所以把这个字段添加到updateField
 	updateField["updated_at"] = time.Now()
-	strSql, values := transferUpdateSql(yearBalanceTN, filter, updateField)
+	strSql, values := makeUpdateSqlWithMultiCondition(yearBalanceTN, updateField, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[yearBalance/db/UpdateYearBalance] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

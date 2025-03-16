@@ -3,7 +3,9 @@ package business
 import (
 	//"financeMgr/src/analysis-server/model"
 	"financeMgr/src/analysis-server/sdk/options"
+	sdkUtil "financeMgr/src/analysis-server/sdk/util"
 	"financeMgr/src/client/util"
+	"fmt"
 	//"encoding/json"
 )
 
@@ -20,39 +22,51 @@ const (
 	resource_type_menu_info
 )
 
-func deleteCmd(rsT, id int, delHandler func(*options.BaseOptions) error) (errCode int) {
+func deleteCmd(rsT, id int, delHandler func(*options.BaseOptions) error) (errCode int, errMsg string) {
 	errCode = util.ErrNull
 	if id <= 0 {
 		logger.Error("the id param is: %d", id)
 		errCode = util.ErrInvalidParam
-		return errCode
+		return errCode, errMsg
 	}
 	rsName := getResourceName(rsT)
 	var opts options.BaseOptions
 	opts.ID = id
 	if err := delHandler(&opts); err != nil {
-		errCode = util.ErrDeleteFailed
-		logger.Error("delete a %s failed,err:%v", rsName, err.Error())
+		if resErr, ok := err.(*sdkUtil.RespErr); ok {
+			errCode = resErr.Code
+			errMsg = resErr.Err.Error()
+		} else {
+			errCode = util.ErrDeleteFailed
+			errMsg = fmt.Sprintf("delete %s failed,internal error", rsName)
+		}
+		logger.Error("the delete %s failed,err:%s", rsName, errMsg)
 	} else {
 		logger.Debug("delete a %s succeed.", rsName)
 	}
-	return errCode
+	return errCode, errMsg
 }
 
 type listhandler func([]byte) ([]byte, error)
 
-//params是json格式的参数数据。
-func listCmdJson(rsT int, params []byte, handler listhandler) (resData []byte, errCode int) {
+// params是json格式的参数数据。
+func listCmdJson(rsT int, params []byte, handler listhandler) (resData []byte, errCode int, errMsg string) {
 	errCode = util.ErrNull
 	var err error
 	rsName := getResourceName(rsT)
 	if resData, err = handler(params); err != nil {
-		errCode = util.ErrListFailed
-		logger.Error("the List%s failed,err:%v", rsName, err.Error())
+		if resErr, ok := err.(*sdkUtil.RespErr); ok {
+			errCode = resErr.Code
+			errMsg = resErr.Err.Error()
+		} else {
+			errCode = util.ErrListFailed
+			errMsg = fmt.Sprintf("List %s failed,internal error", rsName)
+		}
+		logger.Error("the List %s failed,err:%s", rsName, errMsg)
 	} else {
-		logger.Debug("List%s succeed;", rsName)
+		logger.Debug("List %s succeed;", rsName)
 	}
-	return resData, errCode
+	return resData, errCode, errMsg
 }
 
 func getResourceName(rsT int) string {

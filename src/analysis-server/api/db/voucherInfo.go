@@ -277,32 +277,35 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId,
 // 用于批量审核/取消凭证。
 func (dao *VoucherInfoDao) BatchUpdate(ctx context.Context, do DbOperator, iYear, iStatus int,
 	strVoucherAuditor string, voucherIds []int) error {
-	handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
-		for i, ki := range arr {
-			if i == 0 {
-				*s += "?"
-			} else {
-				*s += ", ?"
-			}
-			fv = append(fv, ki)
-		}
-		return
-	}
-	var filterVal []interface{}
-	filterVal = append(filterVal, iStatus)
-	filterVal = append(filterVal, strVoucherAuditor)
-	filterVal = append(filterVal, time.Now())
-	strSql := "update " + GenTableName(iYear, voucherInfoTN) +
-		" set status = ?, voucher_auditor = ?, updated_at = ?  where voucher_id IN ("
-	fv := handleArrFilter(voucherIds, &strSql)
-	filterVal = append(filterVal, fv...)
-	strSql += ")"
-	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/BatchUpdate] [sql: %s, ids: %v]", strSql, voucherIds)
+	// handleArrFilter := func(arr []int, s *string) (fv []interface{}) {
+	// 	for i, ki := range arr {
+	// 		if i == 0 {
+	// 			*s += "?"
+	// 		} else {
+	// 			*s += ", ?"
+	// 		}
+	// 		fv = append(fv, ki)
+	// 	}
+	// 	return
+	// }
+	// var filterVal []interface{}
+	// filterVal = append(filterVal, iStatus)
+	// filterVal = append(filterVal, strVoucherAuditor)
+	// filterVal = append(filterVal, time.Now())
+	// strSql := "update " + GenTableName(iYear, voucherInfoTN) +
+	// 	" set status = ?, voucher_auditor = ?, updated_at = ?  where voucher_id IN ("
+	// fv := handleArrFilter(voucherIds, &strSql)
+	// filterVal = append(filterVal, fv...)
+	// strSql += ")"
+	updateField := map[string]any{"status": iStatus, "voucher_auditor": strVoucherAuditor, "updated_at": time.Now()}
+	filter := map[string]any{"voucher_id": voucherIds}
+	strSql, values := makeUpdateSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), updateField, nil, filter, nil, nil)
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/BatchUpdate] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/BatchUpdate] [SqlElapsed: %v]", time.Since(start))
 	}()
-	if _, err := do.ExecContext(ctx, strSql, filterVal...); err != nil {
+	if _, err := do.ExecContext(ctx, strSql, values...); err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/BatchUpdate] [do.Exec: %s]", err.Error())
 		return err
 	}

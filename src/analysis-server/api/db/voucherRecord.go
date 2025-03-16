@@ -189,24 +189,26 @@ func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo m
 
 func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator, recordId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where record_id = ?"
-	values = append(values, recordId)
+	// strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
+	// var values []interface{}
+	// var first bool = true
+	// for key, value := range params {
+	// 	dbKey := camelToUnix(key)
+	// 	if first {
+	// 		strSql += dbKey + "=?"
+	// 		first = false
+	// 	} else {
+	// 		strSql += "," + dbKey + "=?"
+	// 	}
+	// 	values = append(values, value)
+	// }
+	// if first {
+	// 	return nil
+	// }
+	// strSql += " where record_id = ?"
+	// values = append(values, recordId)
+	filter := map[string]any{"record_id": recordId}
+	strSql, values := makeUpdateSqlWithMultiCondition(GenTableName(iYear, voucherRecordTN), params, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/UpdateByRecordId] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -220,24 +222,26 @@ func (dao *VoucherRecordDao) UpdateByRecordId(ctx context.Context, do DbOperator
 
 func (dao *VoucherRecordDao) UpdateByVoucherId(ctx context.Context, do DbOperator, voucherId, iYear int,
 	params map[string]interface{}) error {
-	strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where voucher_id = ?"
-	values = append(values, voucherId)
+	// strSql := "update " + GenTableName(iYear, voucherRecordTN) + " set "
+	// var values []interface{}
+	// var first bool = true
+	// for key, value := range params {
+	// 	dbKey := camelToUnix(key)
+	// 	if first {
+	// 		strSql += dbKey + "=?"
+	// 		first = false
+	// 	} else {
+	// 		strSql += "," + dbKey + "=?"
+	// 	}
+	// 	values = append(values, value)
+	// }
+	// if first {
+	// 	return nil
+	// }
+	// strSql += " where voucher_id = ?"
+	// values = append(values, voucherId)
+	filter := map[string]any{"voucher_id": voucherId}
+	strSql, values := makeUpdateSqlWithMultiCondition(GenTableName(iYear, voucherRecordTN), params, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/UpdateByVoucherId] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

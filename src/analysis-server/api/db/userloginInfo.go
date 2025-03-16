@@ -42,7 +42,7 @@ func (dao *LoginInfoDao) Get(ctx context.Context, do DbOperator, optID int) (*mo
 	}
 }
 
-//list count by filter
+// list count by filter
 func (dao *LoginInfoDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
 	var c int64
 	strSql, values := transferCountSql(loginInfoTN, filter)
@@ -109,10 +109,10 @@ func (dao *LoginInfoDao) List(ctx context.Context, do DbOperator, filter map[str
 	return LoginInfoSlice, nil
 }
 
-//由于该表不能靠表中的一个字段，就可以确定一条记录，需要多个字段来确定一条记录，所以才有如下的实现方式。
+// 由于该表不能靠表中的一个字段，就可以确定一条记录，需要多个字段来确定一条记录，所以才有如下的实现方式。
 func (dao *LoginInfoDao) Update(ctx context.Context, do DbOperator, filter map[string]interface{},
 	updateField map[string]interface{}) error {
-	strSql, values := transferUpdateSql(loginInfoTN, filter, updateField)
+	strSql, values := makeUpdateSqlWithMultiCondition(loginInfoTN, updateField, nil, filter, nil, nil)
 	dao.Logger.DebugContext(ctx, "[LoginInfo/db/Update] sql %s with values %v", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

@@ -153,16 +153,11 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8105,"总账",2,81,1105);
 
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8120,"记账凭证",2,81,1120);
-
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8122,"审核凭证",2,81,1121);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8121,"会计科目",2,81,1122);
-
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8124,"年度结算",2,81,1123);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8125,"取消年度结算",2,81,1124);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(8123,"年初余额",2,81,1125);
-
-
-
 
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(51,"项目管理",1,0,3);
 

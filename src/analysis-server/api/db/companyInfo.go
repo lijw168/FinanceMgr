@@ -123,7 +123,7 @@ func (dao *CompanyDao) Delete(ctx context.Context, do DbOperator, companyId int)
 	return nil
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *CompanyDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + companyInfoTN
@@ -133,7 +133,7 @@ func (dao *CompanyDao) Count(ctx context.Context, do DbOperator) (int64, error) 
 	return c, err
 }
 
-//list count by filter
+// list count by filter
 func (dao *CompanyDao) CountByFilter(ctx context.Context, do DbOperator, filter map[string]interface{}) (int64, error) {
 	var c int64
 	strSql, values := transferCountSql(companyInfoTN, filter)
@@ -172,24 +172,26 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 
 func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	params map[string]interface{}) error {
-	strSql := "update " + companyInfoTN + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where company_id = ?"
-	values = append(values, companyId)
+	// strSql := "update " + companyInfoTN + " set "
+	// var values []interface{}
+	// var first bool = true
+	// for key, value := range params {
+	// 	dbKey := camelToUnix(key)
+	// 	if first {
+	// 		strSql += dbKey + "=?"
+	// 		first = false
+	// 	} else {
+	// 		strSql += "," + dbKey + "=?"
+	// 	}
+	// 	values = append(values, value)
+	// }
+	// if first {
+	// 	return nil
+	// }
+	// strSql += " where company_id = ?"
+	// values = append(values, companyId)
+	filter := map[string]any{"company_id": companyId}
+	strSql, values := makeUpdateSqlWithMultiCondition(companyInfoTN, params, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
@@ -201,7 +203,7 @@ func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	return nil
 }
 
-//create voucherInfo/voucherRecordInfo ...
+// create voucherInfo/voucherRecordInfo ...
 func (dao *CompanyDao) CreateNewTable(ctx context.Context, do DbOperator, oldTableName, newTableName string) error {
 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
 	//judge ,is not exist

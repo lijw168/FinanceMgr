@@ -71,7 +71,7 @@ func (dao *CompanyGroupDao) Delete(ctx context.Context, do DbOperator, companyGr
 	return nil
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *CompanyGroupDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + companyGroupTN
@@ -81,7 +81,7 @@ func (dao *CompanyGroupDao) Count(ctx context.Context, do DbOperator) (int64, er
 	return c, err
 }
 
-//list count by filter
+// list count by filter
 func (dao *CompanyGroupDao) CountByFilter(ctx context.Context, do DbOperator,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
@@ -122,25 +122,27 @@ func (dao *CompanyGroupDao) List(ctx context.Context, do DbOperator, filter map[
 
 func (dao *CompanyGroupDao) Update(ctx context.Context, do DbOperator, companyGroupId int,
 	params map[string]interface{}) error {
-	strSql := "update " + companyGroupTN + " set "
-	var values []interface{}
-	var first bool = true
-	for key, value := range params {
-		dbKey := camelToUnix(key)
-		if first {
-			strSql += dbKey + "=?"
-			first = false
-		} else {
-			strSql += "," + dbKey + "=?"
-		}
-		values = append(values, value)
-	}
-	if first {
-		return nil
-	}
-	strSql += " where company_group_id = ?"
+	// strSql := "update " + companyGroupTN + " set "
+	// var values []interface{}
+	// var first bool = true
+	// for key, value := range params {
+	// 	dbKey := camelToUnix(key)
+	// 	if first {
+	// 		strSql += dbKey + "=?"
+	// 		first = false
+	// 	} else {
+	// 		strSql += "," + dbKey + "=?"
+	// 	}
+	// 	values = append(values, value)
+	// }
+	// if first {
+	// 	return nil
+	// }
+	// strSql += " where company_group_id = ?"
 
-	values = append(values, companyGroupId)
+	// values = append(values, companyGroupId)
+	filter := map[string]any{"company_group_id": companyGroupId}
+	strSql, values := makeUpdateSqlWithMultiCondition(companyGroupTN, params, nil, filter, nil, nil)
 	start := time.Now()
 	dao.Logger.DebugContext(ctx, "[CompanyGroup/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)

@@ -107,10 +107,11 @@ func (p *UrlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		traceId = utils.Uuid()
 		p.Logger.LogTrace("[url/handler] [generate traceid]", traceId)
 		r.Header.Set("Trace-Id", traceId)
-		w.Header().Set("Trace-Id", traceId)
 	} else {
 		traceId = traceIds[0]
 	}
+	//为了在client端能够获取到traceId
+	w.Header().Set("Trace-Id", traceId)
 	// add trace_id
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, "Trace-Id", traceId)
