@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -49,6 +50,20 @@ func (h *CCHandler) GetTraceId(r *http.Request) string {
 		traceid = r.Header.Get("Trace-Id")
 		return traceid
 	}
+}
+
+// 这是第一种解决方案，把number解析成json.Number
+func (h *CCHandler) ParseHttpRequestUseNumber(r *http.Request, param interface{}) error {
+	jsonReq, err := io.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(jsonReq))
+	decoder.UseNumber()
+	if err = decoder.Decode(&param); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (h *CCHandler) HttpRequestParse(r *http.Request, param interface{}) error {

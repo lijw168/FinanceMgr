@@ -125,7 +125,7 @@ func (at *AccessTokenHandler) LoginCheck(action string,
 	defer at.loginCheckMu.RUnlock()
 	if _, ok := at.tokenToOptIDMap[accessToken]; ok {
 		if action == "Login" {
-			err = errors.New("the user has been to login,please logout the user first.")
+			err = errors.New("the user has been to login,please logout the user first")
 		} else {
 			bIsPass = true
 		}
@@ -135,11 +135,13 @@ func (at *AccessTokenHandler) LoginCheck(action string,
 
 func (at *AccessTokenHandler) ExpirationCheck() {
 	at.logger.LogDebug("expirationCheck,begin")
+	tick := time.NewTicker(time.Second * 60)
+	defer tick.Stop()
 	for {
 		select {
 		case <-at.quitCheckCh:
 			goto end
-		case <-time.Tick(time.Second * 60):
+		case <-tick.C:
 			at.expirationCheckMu.RLock()
 			var expirationToken = []string{}
 			curTime := time.Now().Unix()
@@ -155,7 +157,7 @@ func (at *AccessTokenHandler) ExpirationCheck() {
 	}
 end:
 	at.logger.LogDebug("expirationCheck,end")
-	return
+	//return
 }
 
 func (at *AccessTokenHandler) QuitExpirationCheckService() {
