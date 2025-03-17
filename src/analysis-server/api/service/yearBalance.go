@@ -116,7 +116,12 @@ func (ys *YearBalanceService) GetAccSubYearBalValue(ctx context.Context, params 
 	}()
 	var dBalanceValue float64
 	if dBalanceValue, err = ys.YearBalDao.GetAccSubYearBalValue(ctx, ys.Db, params); err != nil {
-		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		switch err {
+		case sql.ErrNoRows:
+			return 0, NewCcError(cons.CodeYearBalanceNotExist, ErrYearBalance, ErrNotFound, ErrNull, "the year balance record is not exist")
+		default:
+			return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		ys.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
@@ -389,7 +394,7 @@ func (ys *YearBalanceService) AnnualClosing(ctx context.Context, params *model.B
 	//modify the year data's status,ananual closing status
 	filter := make(map[string]interface{})
 	filter["companyId"] = *params.CompanyID
-	//年度结算是增加的下一年的年度余额，所以更新的上一年的结算状态
+	//年度结算是增加的下一年的年度余额，并且更新的上一年的结算状态
 	filter["year"] = *params.Year - 1
 	filter["subjectId"] = subIdSlice
 	updateField := map[string]interface{}{"status": utils.AnnualClosing}
@@ -459,8 +464,8 @@ func (ys *YearBalanceService) GetAnnualClosingStatus(ctx context.Context, compan
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = companyID
 	filterFields["year"] = year
-	var iCount int
-	if iCount, err = ys.YearBalDao.CountByFilter(ctx, ys.Db, filterFields); err != nil {
+	var iStatus int
+	if iStatus, err = ys.YearBalDao.GetAccSubYearStatus(ctx, ys.Db, filterFields); err != nil {
 		return utils.NoAnnualClosing, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
@@ -469,9 +474,5 @@ func (ys *YearBalanceService) GetAnnualClosingStatus(ctx context.Context, compan
 	}
 	bIsRollBack = false
 	ys.Logger.InfoContext(ctx, "GetAnnualClosingStatus method end")
-	if iCount > 0 {
-		return utils.AnnualClosing, nil
-	} else {
-		return utils.NoAnnualClosing, nil
-	}
+	return iStatus, nil
 }

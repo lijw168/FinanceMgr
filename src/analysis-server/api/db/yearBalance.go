@@ -37,6 +37,7 @@ func (dao *YearBalanceDao) GetYearBalance(ctx context.Context, do DbOperator,
 	case nil:
 		return yearBal, nil
 	case sql.ErrNoRows:
+		dao.Logger.ErrorContext(ctx, "[yearBalance/db/GetYearBalance] [scanYearBalanceTask: %s]", err.Error())
 		return nil, err
 	default:
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/GetYearBalance] [Scan: %s]", err.Error())
@@ -58,13 +59,9 @@ func (dao *YearBalanceDao) GetAccSubYearBalValue(ctx context.Context, do DbOpera
 	switch err := do.QueryRowContext(ctx, strSql, *params.CompanyID, *params.Year, *params.SubjectID).Scan(&dBalanceValue); err {
 	case nil:
 		return dBalanceValue, nil
-	//因为目前financeHelper客户端接收不到所返回的错误信息及错误码，其错误码在client api库中被替换掉了。所以该错误不能返回到client api库。
-	//等以后修改了改设计后，再返回相应的错误。
 	case sql.ErrNoRows:
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/GetAccSubYearBalValue] [scanAccSubTask: %s]", err.Error())
-		return 0, nil
-	// case sql.ErrNoRows:
-	// 	return 0, err
+		return 0, err
 	default:
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/GetAccSubYearBalValue] [scanAccSubTask: %s]", err.Error())
 		return 0, err
@@ -189,15 +186,32 @@ func (dao *YearBalanceDao) CountByFilter(ctx context.Context, do DbOperator, fil
 	switch err := do.QueryRowContext(ctx, strSql, values...).Scan(&c); err {
 	case nil:
 		return c, nil
-	//因为目前financeHelper客户端接收不到所返回的错误信息及错误码，其错误码在client api库中被替换掉了。所以该错误不能返回到client api库。
-	//等以后修改了改设计后，再返回相应的错误。
 	case sql.ErrNoRows:
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/CountByFilter] [Scan: %s]", err.Error())
-		return 0, nil
-	// case sql.ErrNoRows:
-	// 	return 0, err
+		return 0, err
 	default:
 		dao.Logger.ErrorContext(ctx, "[yearBalance/db/CountByFilter] [Scan: %s]", err.Error())
+		return 0, err
+	}
+}
+
+// get year balance status
+func (dao *YearBalanceDao) GetAccSubYearStatus(ctx context.Context, do DbOperator, filter map[string]interface{}) (int, error) {
+	field := []string{"status"}
+	strSql, values := makeSelSqlWithMultiCondition(yearBalanceTN, field, nil, filter, nil, nil, nil, 1, 0)
+	dao.Logger.DebugContext(ctx, "[yearBalance/db/GetAccSubYearStatus] sql %s with values %v", strSql, values)
+	var iStatus int = 0
+	start := time.Now()
+	defer func() {
+		dao.Logger.InfoContext(ctx, "[yearBalance/db/GetAccSubYearStatus] [SqlElapsed: %v]", time.Since(start))
+	}()
+	switch err := do.QueryRowContext(ctx, strSql, values...).Scan(&iStatus); err {
+	case nil:
+		return iStatus, nil
+	case sql.ErrNoRows:
+		return 0, nil
+	default:
+		dao.Logger.ErrorContext(ctx, "[yearBalance/db/GetAccSubYearStatus] [scanAccSubTask: %s]", err.Error())
 		return 0, err
 	}
 }

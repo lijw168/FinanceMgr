@@ -161,7 +161,7 @@ func (dao *VoucherRecordDao) SimpleList(ctx context.Context, do DbOperator, filt
 func (dao *VoucherRecordDao) List(ctx context.Context, do DbOperator, filterNo map[string]interface{},
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
 	orderFiler []*model.OrderItem, iYear, limit, offset int) ([]*model.VoucherRecord, error) {
-	strSql, values := makeListSqlWithMultiCondition(GenTableName(iYear, voucherRecordTN), voucherRecordFields, filterNo,
+	strSql, values := makeSelSqlWithMultiCondition(GenTableName(iYear, voucherRecordTN), voucherRecordFields, filterNo,
 		filter, intervalFilter, fuzzyMatchFilter, orderFiler, limit, offset)
 	dao.Logger.DebugContext(ctx, "[VoucherRecord/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()

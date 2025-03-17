@@ -176,7 +176,7 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map
 	filter map[string]interface{}, intervalFilter map[string]interface{}, fuzzyMatchFilter map[string]string,
 	orderFiler []*model.OrderItem, iYear, limit, offset int) ([]*model.VoucherInfo, error) {
 
-	strSql, values := makeListSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), voucherInfoFields,
+	strSql, values := makeSelSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), voucherInfoFields,
 		filterNo, filter, intervalFilter, fuzzyMatchFilter, orderFiler, limit, offset)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
