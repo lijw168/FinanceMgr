@@ -51,3 +51,4 @@ func validate_int_arr(d interface{}) bool {
 14、在客户端部分，把c调用go库的地方，统一制定一下返回值：错误码：错误信息，或者 错误码：数据信息
 已经解决
 	
+15、重新登录

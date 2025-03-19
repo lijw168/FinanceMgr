@@ -213,3 +213,15 @@ func (vs *VoucherInfoService) GetMaxNumOfMonthByContion(ctx context.Context,
 	}
 	return count, nil
 }
+
+func (vs *VoucherInfoService) GetNoAuditedVoucherInfoCountByContion(ctx context.Context,
+	params *model.QueryVoucherInfoStatusParams, requestId string) (int64, CcError) {
+	filterFields := make(map[string]interface{})
+	filterFields["companyId"] = *params.CompanyID
+	filterFields["status"] = *params.Status
+	count, err := vs.VInfoDao.CountByFilter(ctx, vs.Db, *params.VoucherYear, filterFields)
+	if err != nil {
+		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	return count, nil
+}

@@ -371,4 +371,24 @@ func (vg *VoucherGateway) CalcAccountOfPeriod(param []byte) (resData []byte, err
 	return resData, errCode, errMsg
 }
 
-// voucher report froms, end
+func (vg *VoucherGateway) GetNoAuditedVoucherInfoCount(param []byte) (resData []byte, errCode int, errMsg string) {
+	errCode = util.ErrNull
+	if iCount, err := cSdk.GetNoAuditedVoucherInfoCount_json(param); err != nil {
+		if resErr, ok := err.(*sdkUtil.RespErr); ok {
+			errCode = resErr.Code
+			errMsg = resErr.Err.Error()
+		} else {
+			errCode = util.ErrGetMaxNumOfMonthFailed
+			errMsg = "GetNoAuditedVoucherInfoCount_json failed,internal error"
+		}
+		logger.LogError(errMsg)
+		resData = nil
+	} else {
+		logger.Debug("GetNoAuditedVoucherInfoCount_json succeed")
+		resData = make([]byte, 4)
+		binary.LittleEndian.PutUint32(resData, uint32(iCount))
+	}
+	return resData, errCode, errMsg
+}
+
+// voucher report, end

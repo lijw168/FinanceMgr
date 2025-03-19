@@ -446,6 +446,13 @@ func processVoucher(iOpCode int, dataBuf []byte) []byte {
 		} else {
 			return respOptResWithoutData(errCode)
 		}
+	case util.VoucherInfoNoAuditedShow:
+		resData, errCode, errMsg := voucherGate.GetNoAuditedVoucherInfoCount(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	// case util.VouRecordCreate:
 	// 	resData, errCode := voucherGate.CreateVoucherRecords(dataBuf)
 	// 	return respOptResWithData(iOpCode, resData, errCode)

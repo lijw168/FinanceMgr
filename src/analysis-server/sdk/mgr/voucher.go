@@ -537,4 +537,17 @@ func (vr *Voucher) CalcAccountOfPeriod_json(params []byte) ([]byte, error) {
 	return json.Marshal(result.Data)
 }
 
+func (vr *Voucher) GetNoAuditedVoucherInfoCount_json(params []byte) (int64, error) {
+	action := "GetNoAuditedVoucherInfoCount"
+	result, err := util.DoRequest_json(action, params)
+	if err != nil {
+		return 0, err
+	}
+	var iCount int64
+	if err := util.FormatView(result.Data, &iCount); err != nil {
+		return 0, err
+	}
+	return iCount, nil
+}
+
 //voucher generate report forms,end

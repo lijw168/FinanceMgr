@@ -59,7 +59,7 @@ func (dao *VoucherInfoDao) Count(ctx context.Context, do DbOperator, iYear int) 
 func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, iYear int,
 	filter map[string]interface{}) (int64, error) {
 	var c int64
-	strSql, values := transferCountSql(GenTableName(iYear, voucherInfoTN), filter)
+	strSql, values := makeCountSqlWithMultiCondition(GenTableName(iYear, voucherInfoTN), nil, filter, nil, nil)
 	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/CountByFilter] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)

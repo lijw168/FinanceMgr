@@ -924,3 +924,39 @@ func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Re
 	dataBuf := &DescData{(int64)(len(accPeriodViewSlice)), accPeriodViewSlice}
 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
 }
+
+func (vh *VoucherHandlers) GetNoAuditedVoucherInfoCount(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.QueryVoucherInfoStatusParams)
+	err := vh.HttpRequestParse(r, params)
+	if err != nil {
+		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetNoAuditedVoucherInfoCount] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.VoucherYear == nil || *(params.VoucherYear) <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	if params.Status == nil || *params.Status < 0 {
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	requestId := vh.GetTraceId(r)
+	count, ccErr := vh.Vis.GetNoAuditedVoucherInfoCountByContion(r.Context(), params, requestId)
+	if ccErr != nil {
+		FunctionName := "voucherHandlers/GetNoAuditedVoucherInfoCount/ServerHTTP"
+		vh.Logger.ErrorContext(r.Context(), "[requestId:%s][%s] [Vis.GetNoAuditedVoucherInfoCount: %s]",
+			requestId, FunctionName, ccErr.Detail())
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
+	vh.Response(r.Context(), vh.Logger, w, nil, count)
+}

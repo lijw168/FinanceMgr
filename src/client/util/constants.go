@@ -39,6 +39,7 @@ const (
 	VouInfoMaxNumOfMonth
 	BatchAuditVouchers
 	VouInfoUpdate
+	VoucherInfoNoAuditedShow
 	// VouRecordCreate
 	// VouRecordDel
 	// VouRecordsDel

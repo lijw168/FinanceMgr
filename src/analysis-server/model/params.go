@@ -233,6 +233,13 @@ type QueryMaxNumOfMonthParams struct {
 	VoucherMonth *int `json:"voucherMonth"`
 }
 
+// QueryVoucherInfoStatusParams 查询凭证状态...
+type QueryVoucherInfoStatusParams struct {
+	CompanyID   *int `json:"companyId"`
+	VoucherYear *int `json:"voucherYear"`
+	Status      *int `json:"status"`
+}
+
 type BatchAuditParams struct {
 	VoucherYear    *int    `json:"voucherYear"`
 	IDs            []int   `json:"ids"`

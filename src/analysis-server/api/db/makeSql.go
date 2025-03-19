@@ -710,3 +710,58 @@ func makeUpdateSqlWithMultiCondition(table string, updateField map[string]interf
 	}
 	return strSql, fv
 }
+
+// support multi-condition:accurate match,!= ,not,in,like,between ... and,
+// fuzzyMatchFilter,the value type is  string
+// intervalFilter,the value type is numerical value
+// filterNo,the value type is float64, int and string
+// filter,support '<' ,'>','=',but,"<,>",the value type is string
+func makeCountSqlWithMultiCondition(table string, filterNo map[string]interface{},
+	filter map[string]interface{}, intervalFilter map[string]interface{},
+	fuzzyMatchFilter map[string]string) (string, []interface{}) {
+
+	strSql := "select count(*) from " + table
+	var fv, tmpVSlice []interface{}
+	var fk, tmpKSlice []string
+	//根据查找索引时的情况，所以先把filter放在前面
+	if len(filter) > 0 {
+		tmpKSlice, tmpVSlice = addCommonFilterCondition(filter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(filterNo) > 0 {
+		tmpKSlice, tmpVSlice := addNoFilterCondition(filterNo)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(intervalFilter) > 0 {
+		tmpKSlice, tmpVSlice = addBetweenFilterSql(intervalFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(fuzzyMatchFilter) > 0 {
+		tmpKSlice, tmpVSlice = addFuzzyMatchFilter(fuzzyMatchFilter)
+		if len(tmpKSlice) > 0 {
+			fk = append(fk, tmpKSlice...)
+		}
+		if len(tmpVSlice) > 0 {
+			fv = append(fv, tmpVSlice...)
+		}
+	}
+	if len(fk) > 0 {
+		strSql += " where " + strings.Join(fk, " and ")
+	}
+	return strSql, fv
+}
