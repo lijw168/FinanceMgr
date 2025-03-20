@@ -747,7 +747,8 @@ func isConvertToUtf8(iOperationCode int) bool {
 
 	case util.AccSubCreate, util.AccSubList, util.CopyAccSubTemplate, util.AccSubUpdate:
 
-	case util.VoucherCreate, util.VouInfoList, util.VouInfoListWithAuxCond, util.BatchAuditVouchers, util.VouInfoUpdate, util.VouRecordList:
+	case util.VoucherCreate, util.VouInfoList, util.VouInfoListWithAuxCond, util.BatchAuditVouchers:
+	case util.VoucherUpdate, util.VouInfoUpdate, util.VouRecordList:
 
 	case util.VouTemplateCreate, util.VouTemplateList:
 
@@ -758,53 +759,6 @@ func isConvertToUtf8(iOperationCode int) bool {
 	}
 	return bRet
 }
-
-// func isConvertToUtf8(iOperationCode int) bool {
-// 	bRet := false
-// 	switch iOperationCode {
-// 	case util.AccSubShow:
-// 		fallthrough
-// 	case util.AccSubDel:
-// 		fallthrough
-// 	case util.Logout:
-// 		fallthrough
-// 	case util.CompanyDel:
-// 		fallthrough
-// 	case util.CompanyShow:
-// 		fallthrough
-// 	case util.OperatorShow:
-// 		fallthrough
-// 	case util.OperatorDel:
-// 		fallthrough
-// 	case util.VoucherDel:
-// 		fallthrough
-// 	case util.VoucherShow:
-// 		fallthrough
-// 	// case util.VouRecordDel:
-// 	// 	fallthrough
-// 	case util.VouInfoShow:
-// 		break
-// 	case util.AccSubReferenceQuery:
-// 		break
-// 	case util.YearBalanceList:
-// 		break
-// 	case util.YearBalanceShow:
-// 		break
-// 	case util.YearBalanceUpdate:
-// 		break
-// 	// case util.YearBalanceBatchUpdate:
-// 	// 	break
-// 	case util.YearBalanceBatchCreate:
-// 		break
-// 	case util.YearBalanceCreate:
-// 		break
-// 	case util.YearBalanceDel:
-// 		break
-// 	default:
-// 		bRet = true
-// 	}
-// 	return bRet
-// }
 
 // user status
 func respHeartbeatInfo() []byte {

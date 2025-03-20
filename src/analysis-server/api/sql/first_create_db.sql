@@ -1,6 +1,12 @@
 drop DATABASE if exists `finance_mgr`;
-CREATE DATABASE IF NOT EXISTS `finance_mgr` DEFAULT CHARACTER SET utf8;
+CREATE DATABASE IF NOT EXISTS `finance_mgr` CHARACTER SET utf8;
 
+/*==============================================================*/
+/* 下次创建数据库时，可以使用下面的语句 
+CREATE DATABASE your_database_name
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;*/
+/*==============================================================*/
 
 /*==============================================================*/
 /* Table: companyGroup                                          */
