@@ -40,3 +40,17 @@ souce openrc
 ## 要考虑一下ID达到最大值后，怎样进行处理；需要修改初始化的ID值时，怎样进行修改？
 ## 目前先通过手动插入一下那几个ID值的最小值。
 
+## 删除公司的数据，所涉及到的表
+select start_account_period,latest_account_year from companyInfo where company_id = 7;
+
+select * from beginOfYearBalance where company_id = 7;
+delete from beginOfYearBalance where company_id = 7;
+
+select * from voucherInfo_2022 where company_id = 7;
+delete from voucherInfo_2022 where company_id = 7;
+
+select * from voucherRecordInfo_2022 where voucher_id in (select voucher_id from voucherInfo_2022 where company_id = 7);
+delete from voucherRecordInfo_2022 where voucher_id in (select voucher_id from voucherInfo_2022 where company_id = 7);
+
+select * from voucherTemplate where company_id = 7;
+
