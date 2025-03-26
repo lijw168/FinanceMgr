@@ -139,7 +139,7 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 		logger.LogDebug("before convertion ,operation code:", iOpCode, "param data:", string(reqParamBuf))
 		var err error
 		if dataBuf, err = util.GBKToUTF8(reqParamBuf); err != nil {
-			logger.LogError("covert gbk to utf8 failed")
+			logger.Error("covert gbk to utf8 failed,the err:%s", err.Error())
 			return nil
 		}
 		logger.LogDebug("after convertion ,operation code:", iOpCode, "param data:", string(dataBuf))

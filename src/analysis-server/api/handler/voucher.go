@@ -27,7 +27,7 @@ type VoucherHandlers struct {
 }
 
 func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.QueryMaxNumOfMonthParams)
+	var params = new(model.QueryMonthlyVoucherInfoAttrParameters)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/QueryMaxNumOfMonth] [HttpRequestParse: %v]", err)
@@ -45,7 +45,7 @@ func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Reque
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherMonth == nil || *(params.VoucherMonth) <= 0 {
+	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouMon, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
@@ -62,8 +62,9 @@ func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Reque
 	vh.Response(r.Context(), vh.Logger, w, nil, count)
 }
 
+// 通过公司ID以及根据登录日期获取最新的凭证信息
 func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.DescribeYearAndIDParams)
+	var params = new(model.QueryMonthlyVoucherInfoAttrParameters)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
 		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetLatestVoucherInfo] [HttpRequestParse: %v]", err)
@@ -72,8 +73,8 @@ func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if params.ID == nil || *params.ID <= 0 {
-		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+	if params.CompanyID == nil || *params.CompanyID <= 0 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
@@ -82,8 +83,14 @@ func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.R
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
+	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
+		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		return
+	}
 	requestId := vh.GetTraceId(r)
-	vouInfoViews, count, ccErr := vh.Vis.GetLatestVoucherInfoByCompanyID(r.Context(), *params.VoucherYear, *params.ID, requestId)
+	vouInfoViews, count, ccErr := vh.Vis.GetLatestVoucherInfoByCompanyID(r.Context(),
+		*params.VoucherMonth, *params.VoucherYear, *params.CompanyID, requestId)
 	if ccErr != nil {
 		FunctionName := "voucherHandlers/GetVoucherInfo/ServerHTTP"
 		vh.Logger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetVoucherInfoByID: %s]", requestId, FunctionName, ccErr.Detail())
@@ -521,7 +528,7 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}
-	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 {
+	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
@@ -853,7 +860,7 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if params.VoucherDate == nil || *params.VoucherDate <= 0 {
-		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
+		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouDate, service.ErrNull)
 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
 		return
 	}

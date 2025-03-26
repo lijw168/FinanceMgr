@@ -226,8 +226,8 @@ type VoucherInfoParams struct {
 	BillCount     *int    `json:"billCount"`
 }
 
-// QueryMaxNumOfMonthParams 查询最大的凭证号...
-type QueryMaxNumOfMonthParams struct {
+// QueryMonthlyVoucherInfoAttrParameters 查询月的凭证信息的属性参数...
+type QueryMonthlyVoucherInfoAttrParameters struct {
 	CompanyID    *int `json:"companyId"`
 	VoucherYear  *int `json:"voucherYear"`
 	VoucherMonth *int `json:"voucherMonth"`

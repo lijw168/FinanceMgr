@@ -202,19 +202,20 @@ func (dao *VoucherInfoDao) List(ctx context.Context, do DbOperator, filterNo map
 	return voucherInfoSlice, nil
 }
 
-func (dao *VoucherInfoDao) GetLatestVoucherInfoByCompanyID(ctx context.Context, do DbOperator,
-	iYear, iCompanyID int) ([]*model.VoucherInfo, error) {
+// 通过公司ID以及根据登录日期获取最新的凭证信息
+func (dao *VoucherInfoDao) GetLatestVoucherInfo(ctx context.Context, do DbOperator,
+	iMonth, iYear, iCompanyID int) ([]*model.VoucherInfo, error) {
 	tableName := GenTableName(iYear, voucherInfoTN)
 	var voucherInfoSlice []*model.VoucherInfo
 	strSql := "select " + strings.Join(voucherInfoFields, ",") + " from " + tableName +
 		" where company_id = ? and voucher_month = (select  max(voucher_month) from " +
-		tableName + " where company_id = ?) order by num_of_month "
-	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID)
+		tableName + " where company_id = ? and voucher_month <= ?) order by num_of_month "
+	dao.Logger.DebugContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] sql %s with values %v", strSql, iCompanyID, iMonth)
 	start := time.Now()
 	defer func() {
 		dao.Logger.InfoContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [SqlElapsed: %v]", time.Since(start))
 	}()
-	result, err := do.QueryContext(ctx, strSql, iCompanyID, iCompanyID)
+	result, err := do.QueryContext(ctx, strSql, iCompanyID, iCompanyID, iMonth)
 	if err != nil {
 		dao.Logger.ErrorContext(ctx, "[VoucherInfo/db/GetLatestVoucherInfoByCompanyID] [do.Query: %s]", err.Error())
 		return voucherInfoSlice, err

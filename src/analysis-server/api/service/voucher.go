@@ -153,7 +153,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		}
 	}()
 	iVoucherYear := *params.VoucherYear
-	//update voucherInfo
+	//update voucherInfo,目前在client端，暂不支持修改已存凭证的月份或者制作日期，所以下面修改凭证信息的代码，也就无用了。等以后删除。
 	if params.ModifyInfoParams != nil {
 		voucherInfoParams := make(map[string]interface{}, 3)
 		if params.ModifyInfoParams.VoucherMonth != nil {

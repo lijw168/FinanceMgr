@@ -249,7 +249,7 @@ func (vr *Voucher) GetMaxNumOfMonth(opts *options.QueryMaxNumOfMonthOption) (int
 	if opts.VoucherYear <= 0 {
 		return -1, errors.New("VoucherYear is required")
 	}
-	params := &model.QueryMaxNumOfMonthParams{
+	params := &model.QueryMonthlyVoucherInfoAttrParameters{
 		CompanyID:    &opts.CompanyID,
 		VoucherYear:  &opts.VoucherYear,
 		VoucherMonth: &opts.VoucherMonth,

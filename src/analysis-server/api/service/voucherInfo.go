@@ -107,10 +107,10 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	return vouInfoViewSlice, vouRecordCount, nil
 }
 
-func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iYear, iCompanyID int,
+func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iMonth, iYear, iCompanyID int,
 	requestId string) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
-	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfoByCompanyID(ctx, vs.Db, iYear, iCompanyID)
+	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfo(ctx, vs.Db, iMonth, iYear, iCompanyID)
 	if err != nil {
 		FunctionName := "VoucherInfoService/service/GetLatestVoucherInfo"
 		vs.Logger.ErrorContext(ctx, "[%s] [Error: %s, companyID: %d]", FunctionName, err.Error(), iCompanyID)
@@ -203,7 +203,7 @@ func (vs *VoucherInfoService) BatchAuditVoucherInfo(ctx context.Context, params 
 }
 
 func (vs *VoucherInfoService) GetMaxNumOfMonthByContion(ctx context.Context,
-	params *model.QueryMaxNumOfMonthParams, requestId string) (int64, CcError) {
+	params *model.QueryMonthlyVoucherInfoAttrParameters, requestId string) (int64, CcError) {
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *params.CompanyID
 	filterFields["voucherMonth"] = *params.VoucherMonth
