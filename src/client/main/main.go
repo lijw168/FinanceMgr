@@ -86,36 +86,25 @@ func InitProxy(iServerPort C.int, pServerHost *C.char, uTimeout C.int,
 	logFileCount := int(iLogFileCount)
 	domain := fmt.Sprintf("http://%s:%d/analysis_server", strServerHost, serverPort)
 	verbose := true
+	if dataBuf, err := util.GBKToUTF8([]byte(logFileName)); err != nil {
+		fmt.Printf("covert gbk to utf8 failed,the err:%s \r\n", err.Error())
+		return util.ErrGbkToUtf8Failed
+	} else {
+		logFileName = string(dataBuf)
+	}
 	var err error
 	logger, err = initLogger(logFileName, logFileSize, logFileCount, log.LevelDebug)
 	if err != nil {
 		fmt.Printf("Init logger err: %v \r\n", err.Error())
-		return -1
+		return util.ErrInitLogFailed
 	}
 	business.InitBusiness(logger, verbose, domain, uint64(uTimeout))
 	profPort = "20000"
 	initDebugPort()
 	auth = new(business.Authen)
 	quitCheckCh = make(chan bool)
-	return 0
+	return util.ErrNull
 }
-
-// func InitProxy(iServerPort int, strServerHost string, uTimeout uint64,
-// 	logFileName string, logFileSize, logFileCount int) int {
-// 	domain := fmt.Sprintf("http://%s:%d/analysis_server", strServerHost, iServerPort)
-// 	verbose := true
-// 	var err error
-// 	logger, err = initLogger(logFileName, logFileSize, logFileCount, log.LevelDebug)
-// 	if err != nil {
-// 		fmt.Printf("Init logger err: %v \r\n", err.Error())
-// 		return -1
-// 	}
-// 	business.InitBusiness(logger, verbose, domain, uint64(uTimeout))
-// 	profPort = "20000"
-// 	initDebugPort()
-// 	auth = new(business.Authen)
-// 	return 0
-// }
 
 //export GetUserStatus
 func GetUserStatus() C.int {
@@ -155,6 +144,9 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 		resultData = respOptResWithoutData(errCode)
 		//quitCheckCh <- true
 		close(quitCheckCh)
+		if logger != nil {
+			logger.Close()
+		}
 		time.Sleep(1 * time.Second)
 		//os.Exit(0)
 	case util.Heartbeat:
