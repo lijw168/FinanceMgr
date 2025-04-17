@@ -2,7 +2,7 @@ package handler
 
 var (
 	DescriptionMaxlen = 256
-	NameMaxLen        = 32
+	NameMaxLen        = 64
 )
 
 var (

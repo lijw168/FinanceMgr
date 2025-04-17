@@ -125,7 +125,7 @@ func FreeByteSlice(p []byte) {
 func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 	var dataBuf []byte
 	if isConvertToUtf8(iOpCode) {
-		logger.LogDebug("before convertion ,operation code:", iOpCode, "param data:", string(reqParamBuf))
+		//logger.LogDebug("before convertion ,operation code:", iOpCode, "param data:", string(reqParamBuf))
 		var err error
 		if dataBuf, err = util.GBKToUTF8(reqParamBuf); err != nil {
 			logger.Error("covert gbk to utf8 failed,the err:%s", err.Error())
@@ -142,13 +142,6 @@ func ProcessClientRequest(iOpCode int, reqParamBuf []byte) []byte {
 	case util.QuitApp:
 		errCode := quitApp()
 		resultData = respOptResWithoutData(errCode)
-		//quitCheckCh <- true
-		close(quitCheckCh)
-		if logger != nil {
-			logger.Close()
-		}
-		time.Sleep(1 * time.Second)
-		//os.Exit(0)
 	case util.Heartbeat:
 		resultData = respHeartbeatInfo()
 	default:
@@ -624,8 +617,13 @@ func processYearBalance(iOpCode int, dataBuf []byte) []byte {
 }
 
 func quitApp() int {
-	//fmt.Println("quitApp,begin")
 	logger.LogInfo("quitApp,begin")
+	close(quitCheckCh)
+	if logger != nil {
+		logger.Close()
+	}
+	time.Sleep(1 * time.Second)
+	//os.Exit(0)
 	return util.ErrNull
 }
 

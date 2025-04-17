@@ -212,7 +212,8 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
 	}
-	if utf8.RuneCountInString(*params.SubjectName) > NameMaxLen || !utils.VerStrP(*params.SubjectName) {
+	//由于在创建科目时，科目名称能包含特殊字符，所以在这里不再进行判断名称内容了，只判断长度即可。
+	if utf8.RuneCountInString(*params.SubjectName) > NameMaxLen {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrName, service.ErrNull)
 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
 		return
