@@ -274,6 +274,7 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6102,"excel",2,61,1211);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6103,"计算器",2,61,1212);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(6104,"记事本",2,61,1213);
+
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(41,"帮助",1,0,5);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4101,"在线升级",2,41,1220);
 insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num) value(4102,"关于...",2,41,1221);

@@ -1,6 +1,26 @@
 1、install mingw-w64
 2、在client目录下执行： CGO_ENABLED=1  go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
 
+--use c++17 执行时，需要在系统的命令行中或者bash中执行。
+CGO_CXXFLAGS="-std=c++17" go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
+-- use vs2019
 cd D:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64
 lib.exe /DEF:E:\project_go\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\project_go\financeMgr\src\client\out\clientProxy.lib
 
+-- use vs2022
+cd C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64
+lib.exe /DEF:E:\project_go\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\project_go\financeMgr\src\client\out\clientProxy.lib
+备注说明，无论上面哪种方式生成的库的头文件都需要手动修改符合c++17标准。修改方式之一如下：
+可以把非标准的_Fcomplex和_Dcomplex类型定义替换成标准的 C++ 复数类型。
+---
+#if defined(_MSC_VER) && _MSC_VER >= 1930 // VS2022
+#include <complex>
+using namespace std;
+typedef complex<float> GoComplex64;
+typedef complex<double> GoComplex128;
+#else
+#include <complex.h>
+typedef _Fcomplex GoComplex64;
+typedef _Dcomplex GoComplex128;
+#endif
+---
