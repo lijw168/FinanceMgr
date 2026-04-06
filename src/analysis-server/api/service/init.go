@@ -1,32 +1,36 @@
 package service
 
-import (
-	"bytes"
-	"context"
-	"database/sql"
-	"encoding/json"
-	"financeMgr/src/common/log"
-)
+import "time"
 
 var GIdInfoService = NewIDInfoService()
 
-//RollbackLog ...
-func RollbackLog(ctx context.Context, l *log.Logger, funcName string, tx *sql.Tx) {
-	if err := tx.Rollback(); err != nil {
-		l.ErrorContext(ctx, "[%s] [DB.Rollback:%v]", funcName, err)
-	}
+var (
+	quit chan bool
+)
+
+// 写一个个定时器，每隔interval将当前的id资源写入数据库，防止服务异常退出导致id资源丢失
+func StartIdResourcePersistence(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	go func() {
+		for {
+			select {
+			case <-quit:
+				ccErr := GIdInfoService.WriteIdResourceToDb()
+				if ccErr != nil {
+					GIdInfoService.logger.LogError("before quit,WriteIdResourceToDb,ErrInfo:", ccErr.Error())
+				}
+				GIdInfoService.logger.LogInfo("StartIdResourcePersistence receive quit signal, exit StartIdResourcePersistence goroutine")
+				return
+			case <-ticker.C:
+				ccErr := GIdInfoService.WriteIdResourceToDb()
+				if ccErr != nil {
+					GIdInfoService.logger.LogError("WriteIdResourceToDb,it is twice to fail,ErrInfo:", ccErr.Error())
+				}
+			}
+		}
+	}()
 }
 
-func FormatData(srcData interface{}, desData interface{}) error {
-	b, err := json.Marshal(srcData)
-	if err != nil {
-		return err
-	}
-	decoder := json.NewDecoder(bytes.NewReader(b))
-	decoder.UseNumber()
-	err = decoder.Decode(desData)
-	if err != nil {
-		return err
-	}
-	return nil
+func StopIdResourcePersistence() {
+	quit <- true
 }

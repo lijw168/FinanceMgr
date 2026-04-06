@@ -717,7 +717,7 @@ func (vs *VoucherService) CalcAccountOfPeriod(ctx context.Context,
 	if err != nil {
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
-	resDataMap := make(map[int]*model.AccuMoneyValueView, len(recData))
+	resDataMap := make(map[int]*model.AccuMoneyValueView)
 	for _, accPeriod := range recData {
 		if itemPtr, ok := resDataMap[accPeriod.SubjectID]; ok {
 			itemPtr.AccuDebitMoney += accPeriod.PeriodDebitMoney

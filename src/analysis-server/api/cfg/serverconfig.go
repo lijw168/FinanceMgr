@@ -3,7 +3,7 @@ package cfg
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type ServerConfFac struct {
@@ -11,16 +11,16 @@ type ServerConfFac struct {
 }
 
 type ServerConf struct {
-	Port    int
-	Cores   int
-	BaseUrl string
+	Port        int
+	SynDuration int
+	BaseUrl     string
 }
 
 func (c *ServerConf) CheckValid() error {
 	if c.Port <= 0 {
 		return fmt.Errorf("ServerConf need Port")
 	}
-	if c.Cores < 1 {
+	if c.SynDuration < 1 {
 		return fmt.Errorf("ServerConf need Cores")
 	}
 	if len(c.BaseUrl) == 0 {
@@ -30,7 +30,7 @@ func (c *ServerConf) CheckValid() error {
 }
 
 func (fac ServerConfFac) ParseConfig() (*ServerConf, error) {
-	data, err := ioutil.ReadFile(*fac.Path)
+	data, err := os.ReadFile(*fac.Path)
 	if err != nil {
 		return nil, err
 	}

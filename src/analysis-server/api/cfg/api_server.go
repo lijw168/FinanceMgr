@@ -1,14 +1,9 @@
-// api server 四种类型
-// 1. user 提供volume 的基本功能
-// 2. admin 提供集群管理和操作四
-// 3. heartbeat
-// 4. monitor 提供tsdb监控
 package cfg
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"reflect"
 
 	"financeMgr/src/common/config"
@@ -51,7 +46,7 @@ func (a *ApiServerConf) CheckValid() error {
 }
 
 func ParseApiServerConfig(path *string) (*ApiServerConf, error) {
-	data, err := ioutil.ReadFile(*path)
+	data, err := os.ReadFile(*path)
 	if err != nil {
 		return nil, err
 	}

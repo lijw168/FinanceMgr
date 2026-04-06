@@ -147,21 +147,36 @@ func (is *IDInfoService) UpdateIdInfo(params map[string]interface{}) CcError {
 
 func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	is.logger.Info("WriteIdResourceToDb method begin")
-	subId := is.genSubIdInfo.GetId()
-	optId := is.genOptIdInfo.GetId()
-	comId := is.genComIdInfo.GetId()
-	vouId := is.genVouIdInfo.GetId()
-	vouRecId := is.genVouRecIdInfo.GetId()
-	comGroupId := is.genComGroupIdInfo.GetId()
-	vouTempId := is.genvVouTempIdInfo.GetId()
 	updateFields := make(map[string]interface{})
-	updateFields["subjectId"] = subId
-	updateFields["operatorId"] = optId
-	updateFields["companyId"] = comId
-	updateFields["voucherId"] = vouId
-	updateFields["voucherRecordId"] = vouRecId
-	updateFields["companyGroupId"] = comGroupId
-	updateFields["voucherTemplateId"] = vouTempId
+	//下面的代码，根据是否发生变化，来决定是否更新数据库，如果没有发生变化，就不更新数据库，减少数据库的压力
+	if is.genSubIdInfo.IsChanged() {
+		subId := is.genSubIdInfo.GetId(true)
+		updateFields["subjectId"] = subId
+	}
+	if is.genComIdInfo.IsChanged() {
+		comId := is.genComIdInfo.GetId(true)
+		updateFields["companyId"] = comId
+	}
+	if is.genVouIdInfo.IsChanged() {
+		vouId := is.genVouIdInfo.GetId(true)
+		updateFields["voucherId"] = vouId
+	}
+	if is.genVouRecIdInfo.IsChanged() {
+		vouRecId := is.genVouRecIdInfo.GetId(true)
+		updateFields["voucherRecordId"] = vouRecId
+	}
+	if is.genOptIdInfo.IsChanged() {
+		optId := is.genOptIdInfo.GetId(true)
+		updateFields["operatorId"] = optId
+	}
+	if is.genComGroupIdInfo.IsChanged() {
+		comGroupId := is.genComGroupIdInfo.GetId(true)
+		updateFields["companyGroupId"] = comGroupId
+	}
+	if is.genvVouTempIdInfo.IsChanged() {
+		vouTempId := is.genvVouTempIdInfo.GetId(true)
+		updateFields["voucherTemplateId"] = vouTempId
+	}
 	ccErr := is.UpdateIdInfo(updateFields)
 	if ccErr != nil {
 		is.logger.Error("WriteIdResourceToDb failed,errInfo:%s", ccErr.Error())

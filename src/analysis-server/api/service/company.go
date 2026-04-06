@@ -27,14 +27,19 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	FuncName := "CompanyService/Company/CreateCompany"
 	//创建新表，如果存在，就不创建了。
 	iVoucherYear := (*params.StartAccountPeriod) / 100
-	baseTableName := []string{"voucherInfo", "voucherRecordInfo"}
-	for _, tn := range baseTableName {
-		err := cs.CompanyDao.CreateNewTable(ctx, cs.Db, tn, db.GenTableName(iVoucherYear, tn))
-		if err != nil {
-			errMsg := fmt.Sprintf("CreateNewTable,failed;errInfo:%s", err.Error())
-			return nil, NewError(ErrSystem, ErrError, ErrNull, errMsg)
-		}
+	err := CreateYearVoucherTable(ctx, cs.Logger, iVoucherYear, cs.Db)
+	if err != nil {
+		errMsg := fmt.Sprintf("CreateYearVoucherTable,failed;errInfo:%s", err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, errMsg)
 	}
+	// baseTableName := []string{"voucherInfo", "voucherRecordInfo"}
+	// for _, tn := range baseTableName {
+	// 	err := cs.CompanyDao.CreateNewTable(ctx, cs.Db, tn, db.GenTableName(iVoucherYear, tn))
+	// 	if err != nil {
+	// 		errMsg := fmt.Sprintf("CreateNewTable,failed;errInfo:%s", err.Error())
+	// 		return nil, NewError(ErrSystem, ErrError, ErrNull, errMsg)
+	// 	}
+	// }
 	bIsRollBack := true
 	// Begin transaction
 	tx, err := cs.Db.Begin()

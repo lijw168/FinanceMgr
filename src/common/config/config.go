@@ -48,11 +48,10 @@ func (c *MysqlConf) CheckValid() error {
 }
 
 type MysqlInstance struct {
-	Conf   *MysqlConf
-	Logger log.ILog
+	Conf *MysqlConf
 }
 
-func (ins MysqlInstance) NewMysqlInstance() (*sql.DB, error) {
+func (ins MysqlInstance) NewMysqlInstance(Logger log.ILog) (*sql.DB, error) {
 	strConn := "%s:%s@tcp(%s:%d)/%s?autocommit=true&parseTime=true&timeout=%dms&loc=Asia%%2FShanghai"
 	url := fmt.Sprintf(strConn, ins.Conf.User, ins.Conf.Passwd,
 		ins.Conf.Ip, ins.Conf.Port, ins.Conf.DB, ins.Conf.Timeout)
@@ -60,21 +59,21 @@ func (ins MysqlInstance) NewMysqlInstance() (*sql.DB, error) {
 	var err error
 	db, err = sql.Open("mysql", url)
 	if err != nil {
-		ins.Logger.Error("mysql open err: %s", err.Error())
+		Logger.Error("mysql open err: %s", err.Error())
 		return nil, err
 	}
-	ins.Logger.Info("open mysql success\n")
+	Logger.Info("open mysql success\n")
 	db.SetMaxOpenConns(ins.Conf.MaxConnection)
 	db.SetMaxIdleConns(ins.Conf.MaxConnection)
 	db.SetConnMaxLifetime(time.Second * time.Duration(ins.Conf.MaxLifetime))
 
 	err = db.Ping()
 	if err != nil {
-		ins.Logger.Error("mysql ping err(%s)\n", err.Error())
+		Logger.Error("mysql ping err(%s)\n", err.Error())
 		return nil, err
 	}
 
-	ins.Logger.Debug("[db] MySQLInit, configure: %+v", ins.Conf)
+	Logger.Debug("[db] MySQLInit, configure: %+v", ins.Conf)
 	return db, nil
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"financeMgr/src/common/log"
-	"fmt"
 	"strings"
 	"time"
 
@@ -204,22 +203,22 @@ func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 }
 
 // create voucherInfo/voucherRecordInfo ...
-func (dao *CompanyDao) CreateNewTable(ctx context.Context, do DbOperator, oldTableName, newTableName string) error {
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
-	//judge ,is not exist
-	var c int64
-	strSql := "select count(1) from information_schema.TABLES where table_name = ?"
-	err := do.QueryRowContext(ctx, strSql, newTableName).Scan(&c)
-	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.QueryRowContext: %s]", err.Error())
-		return err
-	}
-	if c == 0 {
-		//create new table
-		strCreateTableSql := fmt.Sprintf("create table %s like %s", newTableName, oldTableName)
-		if _, err = do.ExecContext(ctx, strCreateTableSql); err != nil {
-			dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.Exec: %s]", err.Error())
-		}
-	}
-	return err
-}
+// func (dao *CompanyDao) CreateNewTable(ctx context.Context, do DbOperator, oldTableName, newTableName string) error {
+// 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
+// 	//judge ,is not exist
+// 	var c int64
+// 	strSql := "select count(1) from information_schema.TABLES where table_name = ?"
+// 	err := do.QueryRowContext(ctx, strSql, newTableName).Scan(&c)
+// 	if err != nil {
+// 		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.QueryRowContext: %s]", err.Error())
+// 		return err
+// 	}
+// 	if c == 0 {
+// 		//create new table
+// 		strCreateTableSql := fmt.Sprintf("create table %s like %s", newTableName, oldTableName)
+// 		if _, err = do.ExecContext(ctx, strCreateTableSql); err != nil {
+// 			dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.Exec: %s]", err.Error())
+// 		}
+// 	}
+// 	return err
+// }

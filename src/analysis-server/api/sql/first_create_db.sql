@@ -196,13 +196,14 @@ create table if not exists `finance_mgr`.`voucherTemplate`
 create index comId_index on `finance_mgr`.`voucherTemplate` (company_id);
 
 /*==============================================================*/
-/* Table: IDInfo                                           */
-/* companyId：从1开始，设计的值是到100；operator_id:从101开始*/
-/* subjectId：从501开始，设计的值是到1000；*/
-/* voucherId：从1001开始，设计的值的最大值，是int类型的最大值； */  
-/* recordId：从5001开始。设计的值的最大值，是int类型的最大值；*/
-/* companyGroupId：从801开始。设计的值的最大值，是int类型的最大值；*/
-/* voucherTemplateId：从1开始。设计的值的最大值，是int类型的最大值；*/
+/* Table: IDInfo   每个字段设计值的最大值，是该类型的最大值；                                        */
+/* companyId：从1开始，设计的值是到100；*/
+/* companyId：operator_id:从101开始*/
+/* subjectId：从501开始*/
+/* voucherId：从1001开始 */  
+/* recordId：从5001开始*/
+/* companyGroupId：从801开始*/
+/* voucherTemplateId：从1开始*/
 /*==============================================================*/
 drop table if exists `finance_mgr`.`idInfo`;
 create table if not exists `finance_mgr`.`idInfo`

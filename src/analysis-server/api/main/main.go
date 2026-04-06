@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
 	"net/http"
@@ -27,7 +28,8 @@ import (
 )
 
 var (
-	exitCh = make(chan bool)
+	exitCh  = make(chan bool)
+	gLogger *log.Logger
 )
 
 func interceptSignal() {
@@ -37,23 +39,13 @@ func interceptSignal() {
 	go func() {
 		for {
 			sig := <-daemonExitCh
-			fmt.Printf("time:%v;the sig is %s\n", time.Now(), sig.String())
-			saveIdResource()
+			gLogger.LogInfo("receive signal: ", sig.String())
+			service.StopIdResourcePersistence()
 			handler.GAccessTokenH.QuitExpirationCheckService()
 			break
 		}
 		exitCh <- true
 	}()
-}
-
-func saveIdResource() {
-	ccErr := service.GIdInfoService.WriteIdResourceToDb()
-	if ccErr != nil {
-		ccErr := service.GIdInfoService.WriteIdResourceToDb()
-		if ccErr != nil {
-			fmt.Printf("time:%v;WriteIdResourceToDb,it is twice to fail,ErrInfo:%s", time.Now(), ccErr.Error())
-		}
-	}
 }
 
 func waitDaemonExit() {
@@ -68,12 +60,12 @@ func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 	http.Handle(serverConf.BaseUrl, router)
 	go func() {
 		if err := http.ListenAndServe(":"+strconv.Itoa(serverConf.Port), nil); err != nil {
-			fmt.Println("[Init] http server exit, error: ", err)
+			fmt.Println("[Main] http server exit, error: ", err)
 		}
 	}()
 }
 
-func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *cfg.ApiServerConf) error {
+func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, dbIns *sql.DB) error {
 	//var err error
 	// if serverConf.IsUserApiServer() {
 	// 	err = initUserApiServer(serverConf.UserServerCfg, logger, httpRouter, copySnpCfg)
@@ -82,7 +74,7 @@ func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *c
 	// 	}
 	// 	logger.LogInfo("init user api server")
 	// }
-	err := initApiServer(apiServerConf.MysqlConf, logger, httpRouter)
+	err := initApiServer(dbIns, logger, httpRouter)
 	if err != nil {
 		return err
 	}
@@ -90,15 +82,10 @@ func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, apiServerConf *c
 	return nil
 }
 
-func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *url.UrlRouter) error {
-	_db, err := config.MysqlInstance{Conf: mysqlConf, Logger: logger}.NewMysqlInstance()
-	if err != nil {
-		fmt.Println("[Init] Create Db connection error: ", err)
-		return err
-	}
+func initApiServer(dbIns *sql.DB, logger *log.Logger, httpRouter *url.UrlRouter) error {
 	//初始化ID Resource
 	idInfoDao := &db.IDInfoDao{Logger: logger}
-	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, _db)
+	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, dbIns)
 	ccErr := service.GIdInfoService.InitIdResource()
 	if ccErr != nil {
 		return ccErr
@@ -113,23 +100,23 @@ func initApiServer(mysqlConf *config.MysqlConf, logger *log.Logger, httpRouter *
 		Logger:          logger,
 		CompanyDao:      companyDao,
 		CompanyGroupDao: companygroupDao,
-		Db:              _db}
+		Db:              dbIns}
 
-	registerYearBalance(logger, httpRouter, _db)
-	registerVoucherTemplate(logger, httpRouter, _db)
-	registerComGroup(logger, httpRouter, companygroupDao, _db)
+	registerYearBalance(logger, httpRouter, dbIns)
+	registerVoucherTemplate(logger, httpRouter, dbIns)
+	registerComGroup(logger, httpRouter, companygroupDao, dbIns)
 	registerCompany(logger, httpRouter, comService)
-	registerAccSub(logger, httpRouter, companyDao, voucherRecordDao, _db)
-	registerOptAndAuthenHandler(logger, httpRouter, comService, _db)
-	registerResAndVoucherHandler(logger, httpRouter, companyDao, voucherRecordDao, _db)
-	registerMenuHandler(logger, httpRouter, _db)
+	registerAccSub(logger, httpRouter, companyDao, voucherRecordDao, dbIns)
+	registerOptAndAuthenHandler(logger, httpRouter, comService, dbIns)
+	registerResAndVoucherHandler(logger, httpRouter, companyDao, voucherRecordDao, dbIns)
+	registerMenuHandler(logger, httpRouter, dbIns)
 	return nil
 }
 
 func main() {
 
 	if utils.SetLimit() != nil {
-		fmt.Println("[Init] set max open files failed")
+		fmt.Println("[Main] set max open files failed")
 		return
 	}
 
@@ -144,7 +131,7 @@ func main() {
 
 	apiServerConf, err := cfg.ParseApiServerConfig(apiServerCfgFile)
 	if err != nil {
-		fmt.Println("[Init] parse config", *apiServerCfgFile, "err: ", err)
+		fmt.Println("[Main] parse config", *apiServerCfgFile, "err: ", err)
 		return
 	}
 	if err = apiServerConf.CheckValid(); err != nil {
@@ -152,20 +139,32 @@ func main() {
 		return
 	}
 
-	logger, err := config.LogFac{Logconf: apiServerConf.LogConf}.NewLogger()
+	gLogger, err = config.LogFac{Logconf: apiServerConf.LogConf}.NewLogger()
 	if err != nil {
-		fmt.Println("[Init] new logger err: ", err)
+		fmt.Println("[Main] new logger err: ", err)
 		return
 	}
-	url.InitCommonUrlRouter(logger, nil)
-	httpRouter := url.NewUrlRouter(logger)
-	err = handlerInit(httpRouter, logger, apiServerConf)
+	//initialize the common url router
+	url.InitCommonUrlRouter(gLogger, nil)
+	httpRouter := url.NewUrlRouter(gLogger)
+	//initialize the database connection
+	dbIns, err := config.MysqlInstance{Conf: apiServerConf.MysqlConf}.NewMysqlInstance(gLogger)
 	if err != nil {
-		fmt.Println("[Init] Handler register error: ", err)
+		fmt.Println("[Main] Create Db connection error: ", err)
+		return
+	}
+	//register the handle
+	err = handlerInit(httpRouter, gLogger, dbIns)
+	if err != nil {
+		fmt.Println("[Main] Handler register error: ", err)
 		return
 	}
 	interceptSignal()
+	service.StartIdResourcePersistence(time.Duration(apiServerConf.ServerConf.SynDuration) * time.Minute)
+	//start server
 	startServer(httpRouter, apiServerConf.ServerConf)
 	waitDaemonExit()
-	logger.Close()
+	gLogger.Close()
+	dbIns.Close()
+	fmt.Println("[Main] analysis server exit")
 }
