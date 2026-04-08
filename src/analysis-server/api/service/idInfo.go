@@ -46,6 +46,10 @@ func (is *IDInfoService) InitIdResource() CcError {
 	if ccErr != nil {
 		return ccErr
 	}
+	ccErr = is.verifyIdInfoAndUpdate(idInfoView)
+	if ccErr != nil {
+		return ccErr
+	}
 	var err error
 	is.genSubIdInfo, err = aUtils.NewGenIdInfo(idInfoView.SubjectID)
 	if err != nil {
