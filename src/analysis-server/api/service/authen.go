@@ -7,31 +7,28 @@ import (
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	comUtils "financeMgr/src/common/utils"
 	"time"
 )
 
 type AuthenService struct {
-	Logger     *log.Logger
 	LogInfoDao *db.LoginInfoDao
 	OptInfoDao *db.OperatorInfoDao
-	Db         *sql.DB
 }
 
 func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParams,
 	requestId string) (*model.LoginInfoView, CcError) {
-	as.Logger.InfoContext(ctx, "Login method start, "+"login name:%s", *params.Name)
+	gLogger.InfoContext(ctx, "Login method start, "+"login name:%s", *params.Name)
 	FuncName := "AuthenService/login"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -44,12 +41,12 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 	loginInfo.BeginedAt = time.Now()
 
 	if err := as.LogInfoDao.Create(ctx, tx, loginInfo); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [LogInfoDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [LogInfoDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	loginView := as.LoginInfoMdelToView(loginInfo)
 
-	as.Logger.InfoContext(ctx, "CreateLoginInfo method end,login name:%s", *params.Name)
+	gLogger.InfoContext(ctx, "CreateLoginInfo method end,login name:%s", *params.Name)
 	//update the operator information
 	updateParams := make(map[string]interface{}, 2)
 	updateParams["UpdatedAt"] = time.Now()
@@ -59,25 +56,25 @@ func (as *AuthenService) Login(ctx context.Context, params *model.LoginInfoParam
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	as.Logger.InfoContext(ctx, "the OptInfoDao.Update end, login name:%s", *params.Name)
+	gLogger.InfoContext(ctx, "the OptInfoDao.Update end, login name:%s", *params.Name)
 	return loginView, nil
 }
 
 func (as *AuthenService) Logout(ctx context.Context, optId int) CcError {
 	FuncName := "AuthenService/Logout"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -109,7 +106,7 @@ func (as *AuthenService) Logout(ctx context.Context, optId int) CcError {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -143,9 +140,9 @@ func (as *AuthenService) ListLoginInfo(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	optInfos, err := as.LogInfoDao.List(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
+	optInfos, err := as.LogInfoDao.List(ctx, gDb, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AuthenService/service/ListLoginInfo] [LogInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[AuthenService/service/ListLoginInfo] [LogInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return OptViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -171,7 +168,7 @@ func (as *AuthenService) LoginInfoMdelToView(loginInfo *model.LoginInfo) *model.
 }
 
 func (as *AuthenService) StatusCheckout(ctx context.Context, optId int, requestId string) (*model.StatusCheckoutView, CcError) {
-	optInfo, err := as.OptInfoDao.GetOptInfoById(ctx, as.Db, optId)
+	optInfo, err := as.OptInfoDao.GetOptInfoById(ctx, gDb, optId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:

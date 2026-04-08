@@ -4,7 +4,6 @@ import (
 	"financeMgr/src/analysis-server/api/service"
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
-	"financeMgr/src/common/log"
 	"fmt"
 	"math"
 	"net/http"
@@ -20,46 +19,46 @@ import (
 
 type VoucherHandlers struct {
 	CCHandler
-	Logger *log.Logger
-	Vis    *service.VoucherInfoService
-	Vrs    *service.VoucherRecordService
-	Vs     *service.VoucherService
+	//Logger *log.Logger
+	Vis *service.VoucherInfoService
+	Vrs *service.VoucherRecordService
+	Vs  *service.VoucherService
 }
 
 func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.QueryMonthlyVoucherInfoAttrParameters)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/QueryMaxNumOfMonth] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/QueryMaxNumOfMonth] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *(params.VoucherYear) <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouMon, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	count, ccErr := vh.Vis.GetMaxNumOfMonthByContion(r.Context(), params, requestId)
 	if ccErr != nil {
 		FunctionName := "voucherHandlers/GetMaxNumOfMonth/ServerHTTP"
-		vh.Logger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetMaxNumOfMonthByContion: %s]",
+		gLogger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetMaxNumOfMonthByContion: %s]",
 			requestId, FunctionName, ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, count)
+	vh.Response(r.Context(), gLogger, w, nil, count)
 }
 
 // 通过公司ID以及根据登录日期获取最新的凭证信息
@@ -67,25 +66,25 @@ func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.R
 	var params = new(model.QueryMonthlyVoucherInfoAttrParameters)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetLatestVoucherInfo] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/GetLatestVoucherInfo] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouMon, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
@@ -93,33 +92,33 @@ func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.R
 		*params.VoucherMonth, *params.VoucherYear, *params.CompanyID, requestId)
 	if ccErr != nil {
 		FunctionName := "voucherHandlers/GetVoucherInfo/ServerHTTP"
-		vh.Logger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetVoucherInfoByID: %s]", requestId, FunctionName, ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[requestId:%s][%s] [Vis.GetVoucherInfoByID: %s]", requestId, FunctionName, ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.ListParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfo] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfo] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or companyId")
+		gLogger.ErrorContext(r.Context(), "lack base param  voucherId or companyId")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherYear"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  voucher year")
+		gLogger.ErrorContext(r.Context(), "lack base param  voucher year")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	// if params.Filter != nil {
@@ -140,7 +139,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	// 	// filterMap["voucherMonth_interval"] = utils.Attribute{Type: utils.T_Int_Arr, Val: nil}
 	// 	if !utils.ValiFilter(filterMap, params.Filter) {
 	// 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+	// 		vh.Response(r.Context(), gLogger, w, ce, nil)
 	// 		return
 	// 	}
 	// }
@@ -151,7 +150,7 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 				case utils.OrderAsc, utils.OrderDesc:
 				default:
 					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
-					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					vh.Response(r.Context(), gLogger, w, ce, nil)
 					return
 				}
 			}
@@ -159,22 +158,22 @@ func (vh *VoucherHandlers) ListVoucherInfo(w http.ResponseWriter, r *http.Reques
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if (params.DescLimit != nil) && (*params.DescLimit < -1) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrLimit, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	vouInfoViews, count, ccErr := vh.Vis.ListVoucherInfo(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherInfo/ServerHTTP] [VoucherInfoService.ListVoucherInfo: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherInfo/ListVoucherInfo/ServerHTTP] [VoucherInfoService.ListVoucherInfo: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 // 该函数的实现，获取voucherInfo时，利用了voucherRecord 的信息作为辅助条件
@@ -182,21 +181,21 @@ func (vh *VoucherHandlers) ListVoucherInfoWithAuxCondition(w http.ResponseWriter
 	var params = new(model.ListVoucherInfoParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfoWithAuxCondition] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherInfoWithAuxCondition] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "companyId"}, params.BasicFilter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param voucherId or companyId")
+		gLogger.ErrorContext(r.Context(), "lack base param voucherId or companyId")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherYear"}, params.BasicFilter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  voucher year")
+		gLogger.ErrorContext(r.Context(), "lack base param  voucher year")
 		ce := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	//由于出现了个别字段的值的类型，不确定，所以就不进行参数值的类型检查了。，比如：numOfMonth和 voucherDate可能是一个值，也可能是多个值
@@ -207,7 +206,7 @@ func (vh *VoucherHandlers) ListVoucherInfoWithAuxCondition(w http.ResponseWriter
 				case utils.OrderAsc, utils.OrderDesc:
 				default:
 					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
-					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					vh.Response(r.Context(), gLogger, w, ce, nil)
 					return
 				}
 			}
@@ -215,52 +214,52 @@ func (vh *VoucherHandlers) ListVoucherInfoWithAuxCondition(w http.ResponseWriter
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if (params.DescLimit != nil) && (*params.DescLimit < -1) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrLimit, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	vouInfoViews, count, ccErr := vh.Vs.ListVoucherInfoWithAuxCondition(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/ListVoucherInfoWithAuxCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/ListVoucherInfoWithAuxCondition/ServerHTTP] [Error: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), vouInfoViews}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 func (vh *VoucherHandlers) GetVoucherInfo(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.DescribeYearAndIDParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetVoucherInfo] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/GetVoucherInfo] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	voucherView, ccErr := vh.Vis.GetVoucherInfoByID(r.Context(), *params.ID, *params.VoucherYear, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucherInfo/ServerHTTP] [Vis.GetVoucherInfoByID: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherHandlers/GetVoucherInfo/ServerHTTP] [Vis.GetVoucherInfoByID: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, voucherView)
+	vh.Response(r.Context(), gLogger, w, nil, voucherView)
 }
 
 // update voucher information,exclude "numOfMonth";exclude "voucherMonth",该字段是在UpdateVoucher接口里修改。
@@ -268,19 +267,19 @@ func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Requ
 	var params = new(model.ModifyVoucherInfoParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/UpdateVoucherInfo] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/UpdateVoucherInfo] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherID == nil || *params.VoucherID <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	voucherInfoParams := make(map[string]interface{})
@@ -303,80 +302,80 @@ func (vh *VoucherHandlers) UpdateVoucherInfo(w http.ResponseWriter, r *http.Requ
 	ccErr := vh.Vis.UpdateVoucherInfoByID(r.Context(), *params.VoucherID, *params.VoucherYear, voucherInfoParams)
 	if ccErr != nil {
 		errInfo := fmt.Sprintf("[voucher/UpdateVoucherInfo/ServerHTTP] [Vis.UpdateVoucherInfoByID: %s]", ccErr.Detail())
-		vh.Logger.ErrorContext(r.Context(), errInfo)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), errInfo)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+	vh.Response(r.Context(), gLogger, w, nil, nil)
 }
 
 func (vh *VoucherHandlers) BatchAuditVouchers(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.BatchAuditParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/BatchAuditVouchers] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/BatchAuditVouchers] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.Status == nil || *params.Status < 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherAuditor == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouAuditor, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if len(params.IDs) == 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	ccErr := vh.Vis.BatchAuditVoucherInfo(r.Context(), params)
 	if ccErr != nil {
 		errInfo := fmt.Sprintf("[voucher/BatchAuditVouchers/ServerHTTP] [Vis.BatchAuditVoucherInfo: %s]", ccErr.Detail())
-		vh.Logger.ErrorContext(r.Context(), errInfo)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), errInfo)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+	vh.Response(r.Context(), gLogger, w, nil, nil)
 }
 
 func (vh *VoucherHandlers) GetVoucher(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.DescribeYearAndIDParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetVoucher] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/GetVoucher] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	voucherView, ccErr := vh.Vs.GetVoucherByVoucherID(r.Context(), *params.ID, *params.VoucherYear, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/GetVoucher/ServerHTTP] [Vs.GetVoucherByVoucherID: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherHandlers/GetVoucher/ServerHTTP] [Vs.GetVoucherByVoucherID: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, voucherView)
+	vh.Response(r.Context(), gLogger, w, nil, voucherView)
 }
 
 // CreateVoucher ... 创建voucher时，创建的voucher record不会太多。
@@ -384,53 +383,53 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 	var params = new(model.CreateVoucherParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/CreateVoucher] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/CreateVoucher] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.InfoParams.CompanyID == nil || *(params.InfoParams.CompanyID) <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	//由于制证日期和制证月份是一一对应的，所以可以不判断制证月份了。因为如果不传该参数，就默认是当前日期和月份。
 	// if params.InfoParams.VoucherMonth == nil || *(params.InfoParams.VoucherMonth) <= 0 {
 	// 	ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
-	// 	vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+	// 	vh.Response(r.Context(), gLogger, w, ccErr, nil)
 	// 	return
 	// }
 	if params.InfoParams.VoucherFiller == nil || *(params.InfoParams.VoucherFiller) == "" {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouFiller, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if utf8.RuneCountInString(*(params.InfoParams.VoucherFiller)) > NameMaxLen ||
 		!utils.VerStrP(*(params.InfoParams.VoucherFiller)) {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrVouFiller, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	for _, recParam := range params.RecordsParams {
 		if recParam.Summary == nil || *recParam.Summary == "" {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouSummary, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 		if recParam.CreditMoney == nil && recParam.DebitMoney == nil {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherData, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 		if math.Abs(*recParam.CreditMoney) <= 0.001 && math.Abs(*recParam.DebitMoney) <= 0.001 {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 	}
@@ -438,12 +437,12 @@ func (vh *VoucherHandlers) CreateVoucher(w http.ResponseWriter, r *http.Request)
 
 	IdSlice, ccErr := vh.Vs.CreateVoucher(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucher/ServerHTTP] [Vs.CreateVoucher: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucher/CreateVoucher/ServerHTTP] [Vs.CreateVoucher: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 // update voucher,include:voucherInfo,voucherRecord
@@ -451,37 +450,37 @@ func (vh *VoucherHandlers) UpdateVoucher(w http.ResponseWriter, r *http.Request)
 	var params = new(model.UpdateVoucherParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/UpdateVoucher] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/UpdateVoucher] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	//除了修改之外的必要参数的判断，放在了service的接口里。
 	if params.ModifyInfoParams != nil {
 		if params.ModifyInfoParams.VoucherID == nil {
 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 	}
 	requestId := vh.GetTraceId(r)
 	IdSlice, ccErr := vh.Vs.UpdateVoucher(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/UpdateVoucher/ServerHTTP] [Vrs.UpdateVoucher: %s]",
+		gLogger.WarnContext(r.Context(), "[voucher/UpdateVoucher/ServerHTTP] [Vrs.UpdateVoucher: %s]",
 			ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if len(IdSlice) != 0 {
 		dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
-		vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+		vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 	} else {
-		vh.Response(r.Context(), vh.Logger, w, nil, nil)
+		vh.Response(r.Context(), gLogger, w, nil, nil)
 	}
 }
 
@@ -489,104 +488,104 @@ func (vh *VoucherHandlers) DeleteVoucher(w http.ResponseWriter, r *http.Request)
 	var params = new(model.DeleteYearAndIDParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucher/DeleteVoucher] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucher/DeleteVoucher] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	ccErr := vh.Vs.DeleteVoucher(r.Context(), *params.ID, *params.VoucherYear, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucher/ServerHTTP] [Vs.DeleteVoucher: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucher/DeleteVoucher/ServerHTTP] [Vs.DeleteVoucher: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+	vh.Response(r.Context(), gLogger, w, nil, nil)
 }
 
 func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.VoucherArrangeParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucher/ArrangeVoucher] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucher/ArrangeVoucher] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherMonth == nil || *params.VoucherMonth <= 0 || *params.VoucherMonth > 12 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouMon, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	ccErr := vh.Vs.ArrangeVoucher(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucher/ArrangeVoucher/ServerHTTP] [Vrs.ArrangeVoucher: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucher/ArrangeVoucher/ServerHTTP] [Vrs.ArrangeVoucher: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+	vh.Response(r.Context(), gLogger, w, nil, nil)
 }
 
 // func (vh *VoucherHandlers) CreateVoucherRecords(w http.ResponseWriter, r *http.Request) {
 // 	var recordsParams []*model.CreateVoucherRecordParams
 // 	err := vh.HttpRequestParse(r, &recordsParams)
 // 	if err != nil {
-// 		vh.Logger.ErrorContext(r.Context(), "[voucher/CreateVoucherRecords] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[voucher/CreateVoucherRecords] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	if len(recordsParams) == 0 {
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherRecord, service.ErrNull)
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 
 // 	for _, recParam := range recordsParams {
 // 		if recParam.VoucherID == nil || *recParam.VoucherID == 0 {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrIds, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 		if recParam.Summary == nil || *recParam.Summary == "" {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouSummary, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 		if recParam.SubjectName == nil || *recParam.SubjectName == "" {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouRecSub, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 		if recParam.CreditMoney == nil && recParam.DebitMoney == nil {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVoucherData, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 		if math.Abs(*recParam.CreditMoney) <= 0.001 && math.Abs(*recParam.DebitMoney) <= 0.001 {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrParam, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 	}
@@ -594,12 +593,12 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 
 // 	IdSlice, ccErr := vh.Vrs.CreateVoucherRecords(r.Context(), recordsParams, requestId)
 // 	if ccErr != nil {
-// 		vh.Logger.WarnContext(r.Context(), "[voucher/CreateVoucherRecords/ServerHTTP] [Vrs.CreateVoucherRecords: %s]", ccErr.Detail())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[voucher/CreateVoucherRecords/ServerHTTP] [Vrs.CreateVoucherRecords: %s]", ccErr.Detail())
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	dataBuf := &DescData{int64(len(IdSlice)), IdSlice}
-// 	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+// 	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 // 	return
 // }
 
@@ -607,21 +606,21 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 // 	var params = new(model.ModifyVoucherRecordParams)
 // 	err := vh.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		vh.Logger.ErrorContext(r.Context(), "[voucher/UpdateVoucherRecordByID] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[voucher/UpdateVoucherRecordByID] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	if params.VouRecordID == nil || *params.VouRecordID <= 0 {
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	updateFields := make(map[string]interface{})
 // 	if params.SubjectName != nil {
 // 		if *params.SubjectName == "" {
 // 			ccErr := service.NewError(service.ErrVoucher, service.ErrNotAllowed, service.ErrEmpty, service.ErrNull)
-// 			vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 			vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 			return
 // 		}
 // 		updateFields["subjectName"] = *params.SubjectName
@@ -649,16 +648,16 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 // 	// }
 // 	if len(updateFields) == 0 {
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	ccErr := vh.Vrs.UpdateVoucherRecordByID(r.Context(), *params.VouRecordID, updateFields)
 // 	if ccErr != nil {
-// 		vh.Logger.WarnContext(r.Context(), "[voucher/UpdateVoucherRecordByID/ServerHTTP] [Vrs.UpdateVoucherRecordByID: %s]", ccErr.Detail())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[voucher/UpdateVoucherRecordByID/ServerHTTP] [Vrs.UpdateVoucherRecordByID: %s]", ccErr.Detail())
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
-// 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+// 	vh.Response(r.Context(), gLogger, w, nil, nil)
 // 	return
 // }
 
@@ -666,24 +665,24 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 // 	var params = new(model.DeleteIDParams)
 // 	err := vh.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		vh.Logger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecord] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecord] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	if params.ID == nil || *params.ID <= 0 {
 // 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	requestId := vh.GetTraceId(r)
 // 	ccErr := vh.Vrs.DeleteVoucherRecordByID(r.Context(), *params.ID, requestId)
 // 	if ccErr != nil {
-// 		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServerHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecord/ServerHTTP] [Vrs.DeleteVoucherRecordByID: %s]", ccErr.Detail())
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
-// 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+// 	vh.Response(r.Context(), gLogger, w, nil, nil)
 // 	return
 // }
 
@@ -691,24 +690,24 @@ func (vh *VoucherHandlers) ArrangeVoucher(w http.ResponseWriter, r *http.Request
 // 	var params = new(model.IDsParams)
 // 	err := vh.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		vh.Logger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecords] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[voucher/DeleteVoucherRecords] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrVoucherRecord, service.ErrMalformed, service.ErrNull, err.Error())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	if params.IDs == nil || len(params.IDs) == 0 {
 // 		ccErr := service.NewError(service.ErrVoucherRecord, service.ErrMiss, service.ErrIds, service.ErrNull)
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	requestId := vh.GetTraceId(r)
 // 	ccErr := vh.Vrs.DeleteVoucherRecords(r.Context(), params, requestId)
 // 	if ccErr != nil {
-// 		vh.Logger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecords/ServerHTTP] [Vrs.DeleteVoucherRecords: %s]", ccErr.Detail())
-// 		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[voucher/DeleteVoucherRecords/ServerHTTP] [Vrs.DeleteVoucherRecords: %s]", ccErr.Detail())
+// 		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
-// 	vh.Response(r.Context(), vh.Logger, w, nil, nil)
+// 	vh.Response(r.Context(), gLogger, w, nil, nil)
 // 	return
 // }
 
@@ -716,21 +715,21 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	var params = new(model.ListParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherRecords] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherInfo/ListVoucherRecords] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherId", "recordId"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  voucherId or recordId")
+		gLogger.ErrorContext(r.Context(), "lack base param  voucherId or recordId")
 		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if isLackBaseParams([]string{"voucherYear"}, params.Filter) {
-		vh.Logger.ErrorContext(r.Context(), "lack base param  voucher year")
+		gLogger.ErrorContext(r.Context(), "lack base param  voucher year")
 		ce := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	// if params.Filter != nil {
@@ -749,7 +748,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	// 	// filterMap["subId4"] = utils.Attribute{Type: utils.T_Int, Val: nil}
 	// 	if !utils.ValiFilter(filterMap, params.Filter) {
 	// 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrField, service.ErrNull)
-	// 		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+	// 		vh.Response(r.Context(), gLogger, w, ce, nil)
 	// 		return
 	// 	}
 	// }
@@ -760,7 +759,7 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 				case utils.OrderAsc, utils.OrderDesc:
 				default:
 					ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*(v.Direction)))
-					vh.Response(r.Context(), vh.Logger, w, ce, nil)
+					vh.Response(r.Context(), gLogger, w, ce, nil)
 					return
 				}
 			}
@@ -768,23 +767,23 @@ func (vh *VoucherHandlers) ListVoucherRecords(w http.ResponseWriter, r *http.Req
 	}
 	if (params.DescOffset != nil) && (*params.DescOffset < 0) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrOffset, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if (params.DescLimit != nil) && (*params.DescLimit < -1) {
 		ce := service.NewError(service.ErrVoucher, service.ErrInvalid, service.ErrLimit, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ce, nil)
+		vh.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 
 	vouRecordViews, count, ccErr := vh.Vrs.ListVoucherRecords(r.Context(), params)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherInfo/ListVoucherRecords/ServerHTTP] [VoucherRecordService.ListVoucherRecords: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherInfo/ListVoucherRecords/ServerHTTP] [VoucherRecordService.ListVoucherRecords: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), vouRecordViews}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 // 计算某个科目截止到某个凭证日期的累计的贷方和借方金额。该函数用于银行明细账中的累计部分。
@@ -792,45 +791,45 @@ func (vh *VoucherHandlers) CalculateAccumulativeMoney(w http.ResponseWriter, r *
 	var params = new(model.CalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectID == nil || *params.SubjectID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherDate == nil || *params.VoucherDate <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouDate, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.Status == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	accuMoneyView, ccErr := vh.Vs.CalcAccuMoney(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney/ServerHTTP] [Vs.CalcAccuMoney: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherHandlers/CalculateAccumulativeMoney/ServerHTTP] [Vs.CalcAccuMoney: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, accuMoneyView)
+	vh.Response(r.Context(), gLogger, w, nil, accuMoneyView)
 }
 
 // 批量计算截止到某个时间的多个科目的累计金额，该函数用于统计“发生额及余额表”
@@ -838,46 +837,46 @@ func (vh *VoucherHandlers) BatchCalcAccuMoney(w http.ResponseWriter, r *http.Req
 	var params = new(model.BatchCalAccuMoneyParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectIDArr == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherDate == nil || *params.VoucherDate <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouDate, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.Status == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	accuMoneyViewSlice, ccErr := vh.Vs.BatchCalcAccuMoney(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney/ServerHTTP] [Vs.BatchCalcAccuMoney: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherHandlers/BatchCalcAccuMoney/ServerHTTP] [Vs.BatchCalcAccuMoney: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(len(accuMoneyViewSlice)), accuMoneyViewSlice}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 // //批量计算多个accSubId所对应的本期发生额,该函数用于统计“发生额及余额表”
@@ -885,85 +884,85 @@ func (vh *VoucherHandlers) CalcAccountOfPeriod(w http.ResponseWriter, r *http.Re
 	var params = new(model.CalAmountOfPeriodParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrCompanyId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectIDArr == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *params.VoucherYear <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.StartMonth == nil || *params.StartMonth <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, "startMonth", service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.EndMonth == nil || *params.EndMonth <= 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, "EndMonth", service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.Status == nil {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	accPeriodViewSlice, ccErr := vh.Vs.CalcAccountOfPeriod(r.Context(), params, requestId)
 	if ccErr != nil {
-		vh.Logger.WarnContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod/ServerHTTP] [Vs.CalcAccountOfPeriod: %s]", ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[voucherHandlers/CalcAccountOfPeriod/ServerHTTP] [Vs.CalcAccountOfPeriod: %s]", ccErr.Detail())
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(len(accPeriodViewSlice)), accPeriodViewSlice}
-	vh.Response(r.Context(), vh.Logger, w, nil, dataBuf)
+	vh.Response(r.Context(), gLogger, w, nil, dataBuf)
 }
 
 func (vh *VoucherHandlers) GetNoAuditedVoucherInfoCount(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.QueryVoucherInfoStatusParams)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
-		vh.Logger.ErrorContext(r.Context(), "[voucherHandlers/GetNoAuditedVoucherInfoCount] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[voucherHandlers/GetNoAuditedVoucherInfoCount] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMalformed, service.ErrNull, err.Error())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.CompanyID == nil || *params.CompanyID <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrId, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.VoucherYear == nil || *(params.VoucherYear) <= 0 {
 		ccErr := service.NewError(service.ErrVoucherInfo, service.ErrMiss, service.ErrVouYear, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.Status == nil || *params.Status < 0 {
 		ccErr := service.NewError(service.ErrVoucher, service.ErrMiss, service.ErrStatus, service.ErrNull)
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := vh.GetTraceId(r)
 	count, ccErr := vh.Vis.GetNoAuditedVoucherInfoCountByContion(r.Context(), params, requestId)
 	if ccErr != nil {
 		FunctionName := "voucherHandlers/GetNoAuditedVoucherInfoCount/ServerHTTP"
-		vh.Logger.ErrorContext(r.Context(), "[requestId:%s][%s] [Vis.GetNoAuditedVoucherInfoCount: %s]",
+		gLogger.ErrorContext(r.Context(), "[requestId:%s][%s] [Vis.GetNoAuditedVoucherInfoCount: %s]",
 			requestId, FunctionName, ccErr.Detail())
-		vh.Response(r.Context(), vh.Logger, w, ccErr, nil)
+		vh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	vh.Response(r.Context(), vh.Logger, w, nil, count)
+	vh.Response(r.Context(), gLogger, w, nil, count)
 }

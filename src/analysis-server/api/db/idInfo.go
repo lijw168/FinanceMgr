@@ -3,7 +3,6 @@ package db
 import (
 	//"context"
 	"database/sql"
-	"financeMgr/src/common/log"
 	"strings"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 type IDInfoDao struct {
 	// Logger *log.Logger
-	Logger log.ILog
+	//Logger log.ILog
 }
 
 var (
@@ -27,11 +26,11 @@ var (
 
 func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 	strSql := "select " + strings.Join(idInfoFields, ",") + " from " + idInfoTN
-	dao.Logger.Debug("[IDInfo/db/Get] [sql: %s ]", strSql)
+	gLogger.Debug("[IDInfo/db/Get] [sql: %s ]", strSql)
 	var idInfo = &model.IDInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.Info("[IDInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
+		gLogger.Info("[IDInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanIdInfo(do.QueryRow(strSql), idInfo); err {
 	case nil:
@@ -39,7 +38,7 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.Error("[IDInfo/db/Get] [scanIdInfo: %s]", err.Error())
+		gLogger.Error("[IDInfo/db/Get] [scanIdInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -49,12 +48,12 @@ func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 		") values (?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.OperatorID, st.SubjectID, st.VoucherID,
 		st.VoucherRecordID, st.ComGroupID, st.VoucherTemplateID}
-	dao.Logger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
+	gLogger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.Exec(strSql, values...)
-	dao.Logger.Info("[IDInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
+	gLogger.Info("[IDInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.Error("[IDInfo/db/Create] [do.Exec: %s]", err.Error())
+		gLogger.Error("[IDInfo/db/Create] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -63,25 +62,25 @@ func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 func (dao *IDInfoDao) Delete(do DbOperator) error {
 	strSql := "delete from " + idInfoTN
 
-	dao.Logger.Debug("[IDInfo/db/Delete] [sql: %s]", strSql)
+	gLogger.Debug("[IDInfo/db/Delete] [sql: %s]", strSql)
 	start := time.Now()
 	defer func() {
-		dao.Logger.Info("[IDInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+		gLogger.Info("[IDInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.Exec(strSql, nil); err != nil {
-		dao.Logger.Error("[IDInfo/db/Delete] [do.Exec: %s]", err.Error())
+		gLogger.Error("[IDInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
 }
 
-//get the count of the table
+// get the count of the table
 func (dao *IDInfoDao) Count(do DbOperator) (int64, error) {
 	var c int64
 	strSql := "select count(1) from " + idInfoTN
 	start := time.Now()
 	err := do.QueryRow(strSql).Scan(&c)
-	dao.Logger.Info("[IDInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
+	gLogger.Info("[IDInfo/db/Count] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -105,11 +104,11 @@ func (dao *IDInfoDao) Update(do DbOperator, params map[string]interface{}) error
 	// strSql += " where subjectId = ?"
 	// values = append(values, strSubID)
 	start := time.Now()
-	dao.Logger.Debug("[IDInfoDao/db/Update] [sql: %s, values: %v]", strSql, values)
+	gLogger.Debug("[IDInfoDao/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.Exec(strSql, values...)
-	dao.Logger.Info("[IDInfoDao/db/Update] [SqlElapsed: %v]", time.Since(start))
+	gLogger.Info("[IDInfoDao/db/Update] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.Error("[IDInfoDao/db/Update] [do.Exec: %s]", err.Error())
+		gLogger.Error("[IDInfoDao/db/Update] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil

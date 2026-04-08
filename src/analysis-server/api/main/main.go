@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	_ "net/http/pprof"
@@ -24,39 +25,29 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/api/handler"
 	"financeMgr/src/analysis-server/api/service"
-	//aUtils "financeMgr/src/analysis-server/api/utils"
 )
 
 var (
-	exitCh  = make(chan bool)
 	gLogger *log.Logger
 )
 
-func interceptSignal() {
+func interceptSignal(ws *sync.WaitGroup) {
 	daemonExitCh := make(chan os.Signal, 1)
 	signal.Notify(daemonExitCh, syscall.SIGTERM, syscall.SIGQUIT,
 		syscall.SIGINT, syscall.SIGHUP)
-	go func() {
-		for {
-			sig := <-daemonExitCh
-			gLogger.LogInfo("receive signal: ", sig.String())
-			service.StopIdResourcePersistence()
-			handler.GAccessTokenH.QuitExpirationCheckService()
-			break
-		}
-		exitCh <- true
-	}()
-}
-
-func waitDaemonExit() {
-	<-exitCh
-	time.Sleep(3 * time.Second)
+	for {
+		sig := <-daemonExitCh
+		close(daemonExitCh)
+		gLogger.LogInfo("receive signal: ", sig.String())
+		service.StopIdResourcePersistence()
+		handler.GAccessTokenH.QuitExpirationCheckService()
+		break
+	}
+	ws.Done()
 }
 
 func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
-
 	//runtime.GOMAXPROCS(serverConf.Cores)
-
 	http.Handle(serverConf.BaseUrl, router)
 	go func() {
 		if err := http.ListenAndServe(":"+strconv.Itoa(serverConf.Port), nil); err != nil {
@@ -65,51 +56,47 @@ func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 	}()
 }
 
-func handlerInit(httpRouter *url.UrlRouter, logger *log.Logger, dbIns *sql.DB) error {
-	//var err error
-	// if serverConf.IsUserApiServer() {
-	// 	err = initUserApiServer(serverConf.UserServerCfg, logger, httpRouter, copySnpCfg)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	logger.LogInfo("init user api server")
-	// }
-	err := initApiServer(dbIns, logger, httpRouter)
-	if err != nil {
-		return err
-	}
-	logger.LogInfo("init api server")
-	return nil
+func startBusinessWorker(ws *sync.WaitGroup) {
+	ws.Add(1)
+	go interceptSignal(ws)
+	//用户登录的过期检查服务
+	ws.Add(1)
+	go handler.GAccessTokenH.ExpirationCheck(ws)
+	ws.Add(1)
+	go service.StartIdResourcePersistence(time.Duration(5)*time.Minute, ws)
 }
 
-func initApiServer(dbIns *sql.DB, logger *log.Logger, httpRouter *url.UrlRouter) error {
-	//初始化ID Resource
-	idInfoDao := &db.IDInfoDao{Logger: logger}
-	service.GIdInfoService.InitIdInfoService(logger, idInfoDao, dbIns)
-	ccErr := service.GIdInfoService.InitIdResource()
+func releaseBusinessResource() {
+	service.ReleaseResourceInService()
+}
+
+func registerHandler(httpRouter *url.UrlRouter, logger *log.Logger, dbIns *sql.DB) error {
+	//下面的几个变量是公共使用的部分
+	/* Dao */
+	db.InitDao(logger)
+	companyDao := &db.CompanyDao{}
+	companygroupDao := &db.CompanyGroupDao{}
+	voucherRecordDao := &db.VoucherRecordDao{}
+	/*service*/
+	//初始化API service
+	ccErr := service.InitService(logger, dbIns)
 	if ccErr != nil {
 		return ccErr
 	}
-	//下面的几个变量是公共使用的部分
-	/* Dao */
-	companyDao := &db.CompanyDao{Logger: logger}
-	companygroupDao := &db.CompanyGroupDao{Logger: logger}
-	voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
-	/*service*/
 	comService := &service.CompanyService{
-		Logger:          logger,
 		CompanyDao:      companyDao,
-		CompanyGroupDao: companygroupDao,
-		Db:              dbIns}
+		CompanyGroupDao: companygroupDao}
 
-	registerYearBalance(logger, httpRouter, dbIns)
-	registerVoucherTemplate(logger, httpRouter, dbIns)
-	registerComGroup(logger, httpRouter, companygroupDao, dbIns)
-	registerCompany(logger, httpRouter, comService)
-	registerAccSub(logger, httpRouter, companyDao, voucherRecordDao, dbIns)
-	registerOptAndAuthenHandler(logger, httpRouter, comService, dbIns)
-	registerResAndVoucherHandler(logger, httpRouter, companyDao, voucherRecordDao, dbIns)
-	registerMenuHandler(logger, httpRouter, dbIns)
+	//注册handler
+	handler.InitHandler(logger)
+	registerYearBalance(httpRouter)
+	registerVoucherTemplate(httpRouter)
+	registerComGroup(httpRouter, companygroupDao)
+	registerCompany(httpRouter, comService)
+	registerAccSub(httpRouter, companyDao, voucherRecordDao)
+	registerOptAndAuthenHandler(httpRouter, comService)
+	registerResAndVoucherHandler(httpRouter, companyDao, voucherRecordDao)
+	registerMenuHandler(httpRouter)
 	return nil
 }
 
@@ -154,17 +141,20 @@ func main() {
 		return
 	}
 	//register the handle
-	err = handlerInit(httpRouter, gLogger, dbIns)
+	err = registerHandler(httpRouter, gLogger, dbIns)
 	if err != nil {
 		fmt.Println("[Main] Handler register error: ", err)
 		return
 	}
-	interceptSignal()
-	service.StartIdResourcePersistence(time.Duration(apiServerConf.ServerConf.SynDuration) * time.Minute)
+	ws := &sync.WaitGroup{}
+	startBusinessWorker(ws)
 	//start server
 	startServer(httpRouter, apiServerConf.ServerConf)
-	waitDaemonExit()
-	gLogger.Close()
+	ws.Wait()
+	gLogger.LogInfo("[Main] analysis server is exiting...")
+	//release resource
+	releaseBusinessResource()
 	dbIns.Close()
+	gLogger.Close()
 	fmt.Println("[Main] analysis server exit")
 }

@@ -7,31 +7,28 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	"time"
 )
 
 type CompanyGroupService struct {
-	Logger      *log.Logger
 	ComGroupDao *db.CompanyGroupDao
-	Db          *sql.DB
 }
 
 func (cg *CompanyGroupService) CreateCompanyGroup(ctx context.Context, params *model.CreateCompanyGroupParams,
 	requestId string) (*model.CompanyGroupView, CcError) {
 	//create
-	cg.Logger.InfoContext(ctx, "CreateCompanyGroup method start, "+"groupName:%s", *params.GroupName)
+	gLogger.InfoContext(ctx, "CreateCompanyGroup method start, "+"groupName:%s", *params.GroupName)
 	FuncName := "CompanyGroupService/Company/CreateCompanyGroup"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := cg.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		cg.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, cg.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -49,18 +46,18 @@ func (cg *CompanyGroupService) CreateCompanyGroup(ctx context.Context, params *m
 	comGroup.GroupName = *params.GroupName
 	comGroup.GroupStatus = *params.GroupStatus
 	comGroup.CreatedAt = time.Now()
-	comGroup.CompanyGroupID = GIdInfoService.genComGroupIdInfo.GetNextId()
+	comGroup.CompanyGroupID = gIdInfoService.genComGroupIdInfo.GetNextId()
 	if err = cg.ComGroupDao.Create(ctx, tx, comGroup); err != nil {
-		cg.Logger.ErrorContext(ctx, "[%s] [ComGroupDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [ComGroupDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		cg.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
 	comView := cg.CompanyGroupModelToView(comGroup)
-	cg.Logger.InfoContext(ctx, "CreateCompanyGroup method end, "+"companyGroupName:%s", *params.GroupName)
+	gLogger.InfoContext(ctx, "CreateCompanyGroup method end, "+"companyGroupName:%s", *params.GroupName)
 	return comView, nil
 }
 
@@ -77,7 +74,7 @@ func (cg *CompanyGroupService) CompanyGroupModelToView(comGroup *model.CompanyGr
 
 func (cg *CompanyGroupService) GetCompanyGroupById(ctx context.Context, companyGroupId int,
 	requestId string) (*model.CompanyGroupView, CcError) {
-	comGroupInfo, err := cg.ComGroupDao.Get(ctx, cg.Db, companyGroupId)
+	comGroupInfo, err := cg.ComGroupDao.Get(ctx, gDb, companyGroupId)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -91,12 +88,12 @@ func (cg *CompanyGroupService) GetCompanyGroupById(ctx context.Context, companyG
 
 func (cg *CompanyGroupService) DeleteCompanyGroupByID(ctx context.Context, companyGroupId int,
 	requestId string) CcError {
-	cg.Logger.InfoContext(ctx, "DeleteCompanyGroupByID method begin, company ID:%d", companyGroupId)
-	err := cg.ComGroupDao.Delete(ctx, cg.Db, companyGroupId)
+	gLogger.InfoContext(ctx, "DeleteCompanyGroupByID method begin, company ID:%d", companyGroupId)
+	err := cg.ComGroupDao.Delete(ctx, gDb, companyGroupId)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	cg.Logger.InfoContext(ctx, "DeleteCompanyGroupByID method end, company ID:%d", companyGroupId)
+	gLogger.InfoContext(ctx, "DeleteCompanyGroupByID method end, company ID:%d", companyGroupId)
 	return nil
 }
 
@@ -105,14 +102,14 @@ func (cg *CompanyGroupService) UpdateCompanyGroupById(ctx context.Context, compa
 	FuncName := "CompanyGroupService/CompanyGroup/UpdateCompanyGroupById"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := cg.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		cg.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, cg.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//insure the company exist
@@ -131,7 +128,7 @@ func (cg *CompanyGroupService) UpdateCompanyGroupById(ctx context.Context, compa
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		cg.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -165,9 +162,9 @@ func (cg *CompanyGroupService) ListCompanyGroup(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	comGroups, err := cg.ComGroupDao.List(ctx, cg.Db, filterFields, limit, offset, orderField, orderDirection)
+	comGroups, err := cg.ComGroupDao.List(ctx, gDb, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		cg.Logger.ErrorContext(ctx, "[CompanyGroupService/service/ListCompanyGroup] [ComGroupDao.List: %s, filterFields: %v]",
+		gLogger.ErrorContext(ctx, "[CompanyGroupService/service/ListCompanyGroup] [ComGroupDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
 		return comGroupViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

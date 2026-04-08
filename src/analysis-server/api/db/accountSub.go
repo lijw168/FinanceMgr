@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"financeMgr/src/common/log"
 	"strings"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 type AccSubDao struct {
 	// Logger *log.Logger
-	Logger log.ILog
+	//Logger log.ILog
 }
 
 var (
@@ -27,11 +26,11 @@ var (
 
 func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectID int) (*model.AccSubject, error) {
 	strSql := "select " + strings.Join(accSubInfoFields, ",") + " from " + accSubInfoTN + " where subject_id=?"
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %d]", strSql, subjectID)
+	gLogger.DebugContext(ctx, "[accountSubject/db/GetAccSubByID] [sql: %s ,values: %d]", strSql, subjectID)
 	var accSub = &model.AccSubject{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/GetAccSubByID] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[accountSubject/db/GetAccSubByID] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanAccSubTask(do.QueryRowContext(ctx, strSql, subjectID), accSub); err {
 	case nil:
@@ -39,7 +38,7 @@ func (dao *AccSubDao) GetAccSubByID(ctx context.Context, do DbOperator, subjectI
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByID] [scanAccSubTask: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/GetAccSubByID] [scanAccSubTask: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -50,7 +49,7 @@ func (dao *AccSubDao) CountByFilter(ctx context.Context, do DbOperator, filter m
 	strSql, values := transferCountSql(accSubInfoTN, filter)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -60,7 +59,7 @@ func (dao *AccSubDao) Count(ctx context.Context, do DbOperator) (int64, error) {
 	strSql := "select count(1) from " + accSubInfoTN
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[accountSubject/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -71,13 +70,13 @@ func (dao *AccSubDao) CheckDuplication(ctx context.Context, do DbOperator, compa
 	var c int64
 	strSql := "select count(1) from " + accSubInfoTN +
 		" where company_id = ? and (common_id = ?  or (subject_name = ? and subject_level = 1))"
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/CheckDuplication] [sql:%s,company_id: %d,commonId:%s,subject_name:%s]",
+	gLogger.DebugContext(ctx, "[accountSubject/db/CheckDuplication] [sql:%s,company_id: %d,commonId:%s,subject_name:%s]",
 		strSql, companyId, commonId, subjectName)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, companyId, commonId, subjectName).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/CheckDuplication] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[accountSubject/db/CheckDuplication] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/CheckDuplication] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/CheckDuplication] [do.Exec: %s]", err.Error())
 		return 0, err
 	}
 	return c, err
@@ -88,12 +87,12 @@ func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSu
 		" (" + strings.Join(accSubInfoFields, ",") + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.SubjectID, st.CompanyID, st.CommonID, st.SubjectName, st.SubjectLevel,
 		st.SubjectDirection, st.SubjectType, st.MnemonicCode, st.SubjectStyle}
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/Create] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[accountSubject/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/Create] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[accountSubject/db/Create] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/Create] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/Create] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -102,13 +101,13 @@ func (dao *AccSubDao) Create(ctx context.Context, do DbOperator, st *model.AccSu
 func (dao *AccSubDao) DeleteByID(ctx context.Context, do DbOperator, subjectID int) error {
 	strSql := "delete from " + accSubInfoTN + " where subject_id = ?"
 
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/DeleteByID] [sql: %s, id: %d]", strSql, subjectID)
+	gLogger.DebugContext(ctx, "[accountSubject/db/DeleteByID] [sql: %s, id: %d]", strSql, subjectID)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/DeleteByID] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[accountSubject/db/DeleteByID] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.ExecContext(ctx, strSql, subjectID); err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/DeleteByID] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/DeleteByID] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -118,14 +117,14 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 	offset int, order string, od int) ([]*model.AccSubject, error) {
 	var accountSubjectSlice []*model.AccSubject
 	strSql, values := transferListSql(accSubInfoTN, filter, accSubInfoFields, limit, offset, order, od)
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/List] sql %s with values %v", strSql, values)
+	gLogger.DebugContext(ctx, "[accountSubject/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[accountSubject/db/List] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[accountSubject/db/List] [SqlElapsed: %v]", time.Since(start))
 	}()
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/List] [do.Query: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/List] [do.Query: %s]", err.Error())
 		return accountSubjectSlice, err
 	}
 	defer result.Close()
@@ -133,7 +132,7 @@ func (dao *AccSubDao) List(ctx context.Context, do DbOperator, filter map[string
 		accountSubject := new(model.AccSubject)
 		err = scanAccSubTask(result, accountSubject)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[accountSubject/db/List] [ScanSnapshot: %s]", err.Error())
+			gLogger.ErrorContext(ctx, "[accountSubject/db/List] [ScanSnapshot: %s]", err.Error())
 			return accountSubjectSlice, err
 		}
 		accountSubjectSlice = append(accountSubjectSlice, accountSubject)
@@ -163,12 +162,32 @@ func (dao *AccSubDao) UpdateBySubID(ctx context.Context, do DbOperator, subjectI
 	strSql += " where subject_id = ?"
 	values = append(values, subjectID)
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[accountSubject/db/UpdateBySubID] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[accountSubject/db/UpdateBySubID] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[accountSubject/db/UpdateBySubID] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[accountSubject/db/UpdateBySubID] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[accountSubject/db/UpdateBySubID] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[accountSubject/db/UpdateBySubID] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
+}
+
+// get max subjectId
+func (dao *AccSubDao) GetMaxSubId(ctx context.Context, do DbOperator) (int, error) {
+	//use NullInt64 to avoid sql.ErrNoRows error,don't use companyId as filter condition,
+	// because the subjectId is unique within each company,and we want to get the maximum subjectId across all companies.
+	var maxSubId sql.NullInt64
+	strSql := "select max(subject_id) from " + accSubInfoTN
+	gLogger.DebugContext(ctx, "[accountSubject/db/GetMaxSubId] [sql: %s]", strSql)
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql).Scan(&maxSubId)
+	gLogger.InfoContext(ctx, "[accountSubject/db/GetMaxSubId] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		gLogger.ErrorContext(ctx, "[accountSubject/db/GetMaxSubId] [do.Query: %s]", err.Error())
+		return 0, err
+	}
+	if maxSubId.Valid {
+		return int(maxSubId.Int64), nil
+	}
+	return 0, nil
 }

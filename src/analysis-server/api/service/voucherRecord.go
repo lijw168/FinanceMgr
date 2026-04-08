@@ -2,24 +2,19 @@ package service
 
 import (
 	"context"
-	"database/sql"
 
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
-	"financeMgr/src/common/log"
 )
 
 type VoucherRecordService struct {
-	Logger     *log.Logger
 	VRecordDao *db.VoucherRecordDao
-	Db         *sql.DB
-	//GenRecordId *utils.GenIdInfo
 }
 
 // func (vs *VoucherRecordService) CreateVoucherRecord(ctx context.Context, params *model.CreateVoucherRecordParams,
 // 	requestId string) (int, CcError) {
 // 	//create
-// 	vs.Logger.InfoContext(ctx, "CreateVoucherRecord method start, "+"VoucherId:%d", *params.VoucherID)
+// 	gLogger.InfoContext(ctx, "CreateVoucherRecord method start, "+"VoucherId:%d", *params.VoucherID)
 
 // 	FuncName := "VoucherRecordService/CreateVoucherRecord"
 // 	vRecord := new(model.VoucherRecord)
@@ -35,29 +30,29 @@ type VoucherRecordService struct {
 // 	vRecord.SubID4 = *params.SubID4
 // 	vRecord.CreatedAt = time.Now()
 
-// 	if err := vs.VRecordDao.Create(ctx, vs.Db, vRecord); err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
+// 	if err := vs.VRecordDao.Create(ctx, gDb, vRecord); err != nil {
+// 		gLogger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 // 		return -1, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	//vRecordView := vs.VoucherRecordModelToView(vRecord)
-// 	vs.Logger.InfoContext(ctx, "CreateVoucherRecord method end ")
+// 	gLogger.InfoContext(ctx, "CreateVoucherRecord method end ")
 // 	return vRecord.RecordID, nil
 // }
 
 // func (vs *VoucherRecordService) CreateVoucherRecords(ctx context.Context, recordsParams []*model.CreateVoucherRecordParams,
 // 	requestId string) ([]int, CcError) {
 // 	//create
-// 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method start, "+"requestId:%s", requestId)
+// 	gLogger.InfoContext(ctx, "CreateVoucherRecords method start, "+"requestId:%s", requestId)
 // 	FuncName := "VoucherRecordService/CreateVoucherRecords"
 // 	bIsRollBack := true
-// 	tx, err := vs.Db.Begin()
+// 	tx, err := gDb.Begin()
 // 	if err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+// 		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 // 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 // 	}
 // 	defer func() {
 // 		if bIsRollBack {
-// 			RollbackLog(ctx, vs.Logger, FuncName, tx)
+// 			RollbackLog(ctx, FuncName, tx)
 // 		}
 // 	}()
 
@@ -77,20 +72,20 @@ type VoucherRecordService struct {
 // 		// vRecord.SubID4 = *itemParam.SubID4
 // 		vRecord.CreatedAt = time.Now()
 // 		if err = vs.VRecordDao.Create(ctx, tx, vRecord); err != nil {
-// 			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
+// 			gLogger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 // 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 		}
 // 	}
 // 	if err = tx.Commit(); err != nil && IsDuplicateKeyError(err) {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
+// 		gLogger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
 // 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	} else if err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+// 		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 // 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	bIsRollBack = false
 // 	//vRecordView := vs.VoucherRecordModelToView(vRecord)
-// 	vs.Logger.InfoContext(ctx, "CreateVoucherRecords method end ")
+// 	gLogger.InfoContext(ctx, "CreateVoucherRecords method end ")
 // 	return IdValSli, nil
 // }
 
@@ -160,10 +155,10 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 	// for _, v := range params.Order {
 	// 	orderFilter[*v.Field] = *v.Direction
 	// }
-	voucherRecords, err := vs.VRecordDao.List(ctx, vs.Db, nil, filterFields, intervalFilterFields,
+	voucherRecords, err := vs.VRecordDao.List(ctx, gDb, nil, filterFields, intervalFilterFields,
 		fuzzyMatchFields, params.Order, iVoucherYear, limit, offset)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[VoucherRecordService/service/ListVoucherRecords] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return recordViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -177,32 +172,32 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 
 // func (vs *VoucherRecordService) DeleteVoucherRecordByID(ctx context.Context, recordID int,
 // 	requestId string) CcError {
-// 	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method begin, "+"record ID:%d", recordID)
-// 	err := vs.VRecordDao.Delete(ctx, vs.Db, recordID)
+// 	gLogger.InfoContext(ctx, "DeleteVoucherRecordByID method begin, "+"record ID:%d", recordID)
+// 	err := vs.VRecordDao.Delete(ctx, gDb, recordID)
 // 	if err != nil {
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
-// 	vs.Logger.InfoContext(ctx, "DeleteVoucherRecordByID method end.")
+// 	gLogger.InfoContext(ctx, "DeleteVoucherRecordByID method end.")
 // 	return nil
 // }
 
 // func (vs *VoucherRecordService) DeleteVoucherRecords(ctx context.Context, params *model.IDsParams,
 // 	requestId string) CcError {
-// 	vs.Logger.InfoContext(ctx, "DeleteVoucherRecords method begin, "+"record IDs:%v", params.IDs)
+// 	gLogger.InfoContext(ctx, "DeleteVoucherRecords method begin, "+"record IDs:%v", params.IDs)
 // 	//var vouIds = []int{}
 // 	delConditonParams := make(map[string]interface{})
 // 	delConditonParams["recordId"] = params.IDs
-// 	err := vs.VRecordDao.DeleteByMultiCondition(ctx, vs.Db, delConditonParams)
+// 	err := vs.VRecordDao.DeleteByMultiCondition(ctx, gDb, delConditonParams)
 // 	if err != nil {
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
-// 	vs.Logger.InfoContext(ctx, "DeleteVoucherRecords method end.")
+// 	gLogger.InfoContext(ctx, "DeleteVoucherRecords method end.")
 // 	return nil
 // }
 
 // func (vs *VoucherRecordService) GetVoucherRecordByID(ctx context.Context, recordID int,
 // 	requestId string) (*model.VoucherRecordView, CcError) {
-// 	vRecord, err := vs.VRecordDao.Get(ctx, vs.Db, recordID)
+// 	vRecord, err := vs.VRecordDao.Get(ctx, gDb, recordID)
 // 	switch err {
 // 	case nil:
 // 	case sql.ErrNoRows:
@@ -218,14 +213,14 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 // 	params map[string]interface{}) CcError {
 // 	FuncName := "VoucherRecordService/UpdateVoucherRecordByID"
 // 	bIsRollBack := true
-// 	tx, err := vs.Db.Begin()
+// 	tx, err := gDb.Begin()
 // 	if err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+// 		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 // 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 // 	}
 // 	defer func() {
 // 		if bIsRollBack {
-// 			RollbackLog(ctx, vs.Logger, FuncName, tx)
+// 			RollbackLog(ctx, FuncName, tx)
 // 		}
 // 	}()
 // 	_, err = vs.VRecordDao.Get(ctx, tx, recordID)
@@ -243,7 +238,7 @@ func (vs *VoucherRecordService) ListVoucherRecords(ctx context.Context,
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	if err = tx.Commit(); err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+// 		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	bIsRollBack = false

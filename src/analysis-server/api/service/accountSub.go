@@ -6,32 +6,29 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 )
 
 type AccountSubService struct {
-	Logger     *log.Logger
 	AccSubDao  *db.AccSubDao
 	VRecordDao *db.VoucherRecordDao
 	CompanyDao *db.CompanyDao
-	Db         *sql.DB
 }
 
 func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.CreateSubjectParams,
 	requestId string) (*model.AccSubjectView, CcError) {
 	//create
-	as.Logger.InfoContext(ctx, "CreateAccSub method start, "+"subjectName:%s", *params.SubjectName)
+	gLogger.InfoContext(ctx, "CreateAccSub method start, "+"subjectName:%s", *params.SubjectName)
 	bIsRollBack := true
 	FuncName := "AccountSubService/accountSub/CreateAccSub"
 	// Begin transaction
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -56,19 +53,19 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 	} else {
 		accSub.MnemonicCode = ""
 	}
-	accSub.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
+	accSub.SubjectID = gIdInfoService.genSubIdInfo.GetNextId()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//commit
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
 	accSubView := as.AccSubMdelToView(accSub)
-	as.Logger.InfoContext(ctx, "CreateAccSub method end, "+"subjectName:%s", *params.SubjectName)
+	gLogger.InfoContext(ctx, "CreateAccSub method end, "+"subjectName:%s", *params.SubjectName)
 	return accSubView, nil
 }
 
@@ -89,18 +86,18 @@ func (as *AccountSubService) AccSubMdelToView(accSub *model.AccSubject) *model.A
 
 func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId int,
 	requestId string) ([]*model.AccSubjectView, int, CcError) {
-	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method start, companyId:%d", iCompanyId)
+	gLogger.InfoContext(ctx, "CopyAccSubTemplate method start, companyId:%d", iCompanyId)
 	bIsRollBack := true
 	FuncName := "AccountSubService/accountSub/CopyAccSubTemplate"
 	// Begin transaction
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//list template account subject
@@ -112,45 +109,45 @@ func (as *AccountSubService) CopyAccSubTemplate(ctx context.Context, iCompanyId 
 	orderDirection := 0
 	accSubInfos, err := as.AccSubDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	accSubViewSlice := make([]*model.AccSubjectView, 0, len(accSubInfos))
 	for _, accSubInfo := range accSubInfos {
 		//generate new account subject
 		accSubInfo.CompanyID = iCompanyId
-		accSubInfo.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
+		accSubInfo.SubjectID = gIdInfoService.genSubIdInfo.GetNextId()
 		accSubInfoView := as.AccSubMdelToView(accSubInfo)
 		accSubViewSlice = append(accSubViewSlice, accSubInfoView)
 		if err = as.AccSubDao.Create(ctx, tx, accSubInfo); err != nil {
-			as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
+			gLogger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 			return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 	}
 	//commit
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
 	accSubInfoCount := len(accSubViewSlice)
-	as.Logger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%d", iCompanyId)
+	gLogger.InfoContext(ctx, "CopyAccSubTemplate method end, companyId:%d", iCompanyId)
 	return accSubViewSlice, accSubInfoCount, nil
 }
 
 func (as *AccountSubService) GenerateAccSubTemplate(ctx context.Context, sourceCompanyId int,
 	requestId string) CcError {
-	as.Logger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
+	gLogger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
 	FuncName := "AccountSubService/accountSub/GenerateAccSubTemplate"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//list template account subject
@@ -162,30 +159,30 @@ func (as *AccountSubService) GenerateAccSubTemplate(ctx context.Context, sourceC
 	orderDirection := 0
 	accSubInfos, err := as.AccSubDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	for _, accSubInfo := range accSubInfos {
 		//generate new account subject
 		accSubInfo.CompanyID = 1
-		accSubInfo.SubjectID = GIdInfoService.genSubIdInfo.GetNextId()
+		accSubInfo.SubjectID = gIdInfoService.genSubIdInfo.GetNextId()
 		if err = as.AccSubDao.Create(ctx, tx, accSubInfo); err != nil {
-			as.Logger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
+			gLogger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 			return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	as.Logger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
+	gLogger.InfoContext(ctx, "GenerateAccSubTemplate method begin, companyId:%d", sourceCompanyId)
 	return nil
 }
 
 func (as *AccountSubService) GetAccSubById(ctx context.Context, subjectID int,
 	requestId string) (*model.AccSubjectView, CcError) {
-	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, as.Db, subjectID)
+	accSubject, err := as.AccSubDao.GetAccSubByID(ctx, gDb, subjectID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -212,14 +209,14 @@ func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID in
 	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {
 		yearSlice = append(yearSlice, i)
 	}
-	//判断是否在使用
+	//判断是否在使用中
 	for _, year := range yearSlice {
 		filterFields := make(map[string]interface{})
 		filterFields["subId1"] = subjectID
 		var iCount int64
 		iCount, err = as.VRecordDao.CountByFilter(ctx, tx, year, filterFields)
 		if err != nil {
-			as.Logger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
+			gLogger.ErrorContext(ctx, "[AccountSubService/service/JudgeAccSubReferenceBySubID] [VRecordDao.CountByFilter,Error info: %s", err.Error())
 			return 0, err
 		}
 		if iCount > 0 {
@@ -235,17 +232,17 @@ func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID in
 
 func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int,
 	requestId string) CcError {
-	as.Logger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%d", subjectID)
+	gLogger.InfoContext(ctx, "DeleteAccSubByID method begin, "+"subject:%d", subjectID)
 	FuncName := "AccountSubService/accountSub/DeleteAccSubByID"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	iCount := 0
@@ -260,11 +257,11 @@ func (as *AccountSubService) DeleteAccSubByID(ctx context.Context, subjectID int
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	as.Logger.InfoContext(ctx, "DeleteAccSubByID method end, "+"subject:%d", subjectID)
+	gLogger.InfoContext(ctx, "DeleteAccSubByID method end, "+"subject:%d", subjectID)
 	return nil
 }
 
@@ -272,14 +269,14 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 	params map[string]interface{}) CcError {
 	FuncName := "AccountSubService/accountSub/UpdateAccSubById"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -295,7 +292,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -308,12 +305,12 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 // 	bIsRollBack := true
 // 	tx, err := as.Db.Begin()
 // 	if err != nil {
-// 		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+// 		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 // 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 // 	}
 // 	defer func() {
 // 		if bIsRollBack {
-// 			RollbackLog(ctx, as.Logger, FuncName, tx)
+// 			RollbackLog(ctx, FuncName, tx)
 // 		}
 // 	}()
 // 	updateFields := make(map[string]interface{})
@@ -323,7 +320,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	if err = tx.Commit(); err != nil {
-// 		as.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+// 		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 // 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	bIsRollBack = false
@@ -361,7 +358,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 // 	}
 // 	yearBals, err := as.AccSubDao.ListYearBalance(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
 // 	if err != nil {
-// 		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListYearBalance] [AccSubDao.ListYearBalance: %s, filterFields: %v]", err.Error(), filterFields)
+// 		gLogger.ErrorContext(ctx, "[AccountSubService/service/ListYearBalance] [AccSubDao.ListYearBalance: %s, filterFields: %v]", err.Error(), filterFields)
 // 		return balViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 
@@ -404,9 +401,9 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	accSubInfos, err := as.AccSubDao.List(ctx, as.Db, filterFields, limit, offset, orderField, orderDirection)
+	accSubInfos, err := as.AccSubDao.List(ctx, gDb, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[AccountSubService/service/ListAccSub] [AccSubDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return accSubViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -420,17 +417,17 @@ func (as *AccountSubService) ListAccSub(ctx context.Context,
 
 func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, subjectID int,
 	requestId string) (int, CcError) {
-	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method begin, "+"subject:%d", subjectID)
+	gLogger.InfoContext(ctx, "QueryAccSubReferenceBySubID method begin, "+"subject:%d", subjectID)
 	FuncName := "AccountSubService/accountSub/QueryAccSubReferenceBySubID"
 	bIsRollBack := true
-	tx, err := as.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		as.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, as.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -439,6 +436,6 @@ func (as *AccountSubService) QueryAccSubReferenceBySubID(ctx context.Context, su
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	as.Logger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
+	gLogger.InfoContext(ctx, "QueryAccSubReferenceBySubID method end, "+"subject:%d", subjectID)
 	return iCount, nil
 }

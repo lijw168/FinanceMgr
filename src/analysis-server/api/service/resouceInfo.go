@@ -8,32 +8,29 @@ import (
 	//"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 )
 
 type ResouceInfoService struct {
-	Logger     *log.Logger
 	VInfoDao   *db.VoucherInfoDao
 	CompanyDao *db.CompanyDao
-	Db         *sql.DB
 }
 
-// 可以优化一下GetCompanyByOperatorId这个函数的返回值。
+// 可以优化一下GetCompanyByOperatorId这个函数的返回值
 func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId int,
 	requestId string) ([]*model.ResourceInfoView, CcError) {
 	//create
-	rs.Logger.InfoContext(ctx, "GetResouceByOptId method start, "+"operator:%d", operatorId)
+	gLogger.InfoContext(ctx, "GetResouceByOptId method start, "+"operator:%d", operatorId)
 	FuncName := "ResouceInfoService/Resource/GetResouceByOptId"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := rs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		rs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, rs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//get company info
@@ -56,7 +53,7 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 		orderDirection := 0
 		comInfos, err := rs.CompanyDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
 		if err != nil {
-			rs.Logger.ErrorContext(ctx, "[ResouceInfoService/service/GetResouceByOptId] [CompanyDao.List: %s, filterFields: %v]",
+			gLogger.ErrorContext(ctx, "[ResouceInfoService/service/GetResouceByOptId] [CompanyDao.List: %s, filterFields: %v]",
 				err.Error(), filterFields)
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -77,15 +74,15 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 		panic("company group id is negative")
 	}
 	if err = tx.Commit(); err != nil {
-		rs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	rs.Logger.InfoContext(ctx, "GetResouceByOptId method end")
+	gLogger.InfoContext(ctx, "GetResouceByOptId method end")
 	return resInfoSlice, nil
 }
 
-// 这是中间计算的函数
+// 这是中间计算的函
 func (rs *ResouceInfoService) getResourceData(ctx context.Context,
 	pComView *model.CompanyInfo) (*model.ResourceInfoView, CcError) {
 	resInfo := new(model.ResourceInfoView)
@@ -98,6 +95,6 @@ func (rs *ResouceInfoService) getResourceData(ctx context.Context,
 		yearSlice = append(yearSlice, i)
 	}
 	resInfo.YearSlice = yearSlice
-	rs.Logger.InfoContext(ctx, "getResourceData has finished")
+	gLogger.InfoContext(ctx, "getResourceData has finished")
 	return resInfo, nil
 }

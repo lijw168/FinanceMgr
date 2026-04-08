@@ -7,19 +7,16 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	"time"
 )
 
 type VoucherInfoService struct {
-	Logger   *log.Logger
 	VInfoDao *db.VoucherInfoDao
-	Db       *sql.DB
 }
 
 func (vs *VoucherInfoService) GetVoucherInfoByID(ctx context.Context, voucherID, iYear int,
 	requestId string) (*model.VoucherInfoView, CcError) {
-	vInfo, err := vs.VInfoDao.Get(ctx, vs.Db, voucherID, iYear)
+	vInfo, err := vs.VInfoDao.Get(ctx, gDb, voucherID, iYear)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -58,7 +55,7 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 						//正确的结论是，文档显示当把json解析成interface{}时，把number解析成float64
 						iVoucherYear = int(f.Value.(float64))
 						//测试代码
-						//vs.Logger.ErrorContext(ctx, "the iVoucherYear is float64")
+						//gLogger.ErrorContext(ctx, "the iVoucherYear is float64")
 					}
 				}
 			case "voucherId", "companyId", "voucherMonth", "numOfMonth", "voucherDate":
@@ -92,10 +89,10 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 	// for _, v := range params.Order {
 	// 	orderFilter[*v.Field] = *v.Direction
 	// }
-	voucherInfos, err := vs.VInfoDao.List(ctx, vs.Db, filterNo, filterFields, intervalFilterFields,
+	voucherInfos, err := vs.VInfoDao.List(ctx, gDb, filterNo, filterFields, intervalFilterFields,
 		nil, params.Order, iVoucherYear, limit, offset)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -110,10 +107,10 @@ func (vs *VoucherInfoService) ListVoucherInfo(ctx context.Context, params *model
 func (vs *VoucherInfoService) GetLatestVoucherInfoByCompanyID(ctx context.Context, iMonth, iYear, iCompanyID int,
 	requestId string) ([]*model.VoucherInfoView, int, CcError) {
 	vouInfoViewSlice := make([]*model.VoucherInfoView, 0)
-	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfo(ctx, vs.Db, iMonth, iYear, iCompanyID)
+	voucherInfos, err := vs.VInfoDao.GetLatestVoucherInfo(ctx, gDb, iMonth, iYear, iCompanyID)
 	if err != nil {
 		FunctionName := "VoucherInfoService/service/GetLatestVoucherInfo"
-		vs.Logger.ErrorContext(ctx, "[%s] [Error: %s, companyID: %d]", FunctionName, err.Error(), iCompanyID)
+		gLogger.ErrorContext(ctx, "[%s] [Error: %s, companyID: %d]", FunctionName, err.Error(), iCompanyID)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -144,14 +141,14 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 	params map[string]interface{}) CcError {
 	FuncName := "VoucherInfoService/UpdateVoucherInfoByID"
 	bIsRollBack := true
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//insure the voucherInfo exist
@@ -169,7 +166,7 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -179,23 +176,23 @@ func (vs *VoucherInfoService) UpdateVoucherInfoByID(ctx context.Context, voucher
 func (vs *VoucherInfoService) BatchAuditVoucherInfo(ctx context.Context, params *model.BatchAuditParams) CcError {
 	FuncName := "VoucherInfoService/BatchAuditVoucherInfo"
 	bIsRollBack := true
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//insure the voucherInfo exist  由于是批量更新，所以就不一一判断了。
-	err = vs.VInfoDao.BatchUpdate(ctx, tx, *params.VoucherYear, *params.Status, *params.VoucherAuditor, params.IDs)
+	err = vs.VInfoDao.BatchUpdateVoucherInfoStatus(ctx, tx, *params.VoucherYear, *params.Status, *params.VoucherAuditor, params.IDs)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -207,7 +204,7 @@ func (vs *VoucherInfoService) GetMaxNumOfMonthByContion(ctx context.Context,
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *params.CompanyID
 	filterFields["voucherMonth"] = *params.VoucherMonth
-	count, err := vs.VInfoDao.CountByFilter(ctx, vs.Db, *params.VoucherYear, filterFields)
+	count, err := vs.VInfoDao.CountByFilter(ctx, gDb, *params.VoucherYear, filterFields)
 	if err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
@@ -219,7 +216,7 @@ func (vs *VoucherInfoService) GetNoAuditedVoucherInfoCountByContion(ctx context.
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *params.CompanyID
 	filterFields["status"] = *params.Status
-	count, err := vs.VInfoDao.CountByFilter(ctx, vs.Db, *params.VoucherYear, filterFields)
+	count, err := vs.VInfoDao.CountByFilter(ctx, gDb, *params.VoucherYear, filterFields)
 	if err != nil {
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}

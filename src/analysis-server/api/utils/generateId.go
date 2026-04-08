@@ -27,7 +27,12 @@ func NewGenIdInfo(initId int) (*GenIdInfo, error) {
 func (info *GenIdInfo) GetNextId() int {
 	info.mu.Lock()
 	defer info.mu.Unlock()
-	info.uid = info.uid + 1
+	// 获取下一个id,并处理当前id达到最大值时的情况
+	if info.uid >= maxId {
+		info.uid = minId
+	} else {
+		info.uid = info.uid + 1
+	}
 	info.isChanged = true
 	return info.uid
 }

@@ -6,15 +6,12 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	"fmt"
 	"time"
 )
 
 type VoucherTemplateService struct {
-	Logger       *log.Logger
 	VTemplateDao *db.VoucherTemplateDao
-	Db           *sql.DB
 }
 
 func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, params *model.VoucherTemplateParams,
@@ -22,56 +19,56 @@ func (vs *VoucherTemplateService) CreateVoucherTemplate(ctx context.Context, par
 	FuncName := "VoucherTemplateService/service/CreateVoucherTemplate"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
 	vTemplate := new(model.VoucherTemplate)
 	vTemplate.CompanyID = *params.CompanyID
-	vTemplate.VoucherTemplateID = GIdInfoService.genvVouTempIdInfo.GetNextId()
+	vTemplate.VoucherTemplateID = gIdInfoService.genvVouTempIdInfo.GetNextId()
 	vTemplate.RefVoucherID = *params.RefVoucherID
 	vTemplate.VoucherYear = *params.VoucherYear
 	vTemplate.Illustration = *params.Illustration
 	vTemplate.CreatedAt = time.Now()
 	if err = vs.VTemplateDao.Create(ctx, tx, vTemplate); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [VTemplateDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [VTemplateDao.Create: %s]", FuncName, err.Error())
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil && IsDuplicateKeyError(err) {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	} else if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "CreateVoucherTemplate method end ")
+	gLogger.InfoContext(ctx, "CreateVoucherTemplate method end ")
 	return vTemplate.VoucherTemplateID, nil
 }
 
 func (vs *VoucherTemplateService) DeleteVoucherTemplate(ctx context.Context, voucherTemplateID int,
 	requestId string) CcError {
-	vs.Logger.InfoContext(ctx, "DeleteVoucherTemplate method begin")
+	gLogger.InfoContext(ctx, "DeleteVoucherTemplate method begin")
 	//delete voucher template
-	err := vs.VTemplateDao.Delete(ctx, vs.Db, voucherTemplateID)
+	err := vs.VTemplateDao.Delete(ctx, gDb, voucherTemplateID)
 	if err != nil {
 		errMsg := fmt.Sprintf("Delete voucher template failed,errInfo:%s", err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, errMsg)
 	}
-	vs.Logger.InfoContext(ctx, "DeleteVoucherTemplate method end")
+	gLogger.InfoContext(ctx, "DeleteVoucherTemplate method end")
 	return nil
 }
 
 func (vs *VoucherTemplateService) GetVoucherTemplate(ctx context.Context, voucherTemplateID int,
 	requestId string) (*model.VoucherTemplateView, CcError) {
-	vTemplate, err := vs.VTemplateDao.Get(ctx, vs.Db, voucherTemplateID)
+	vTemplate, err := vs.VTemplateDao.Get(ctx, gDb, voucherTemplateID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -109,9 +106,9 @@ func (vs *VoucherTemplateService) ListVoucherTemplate(ctx context.Context, param
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	voucherTemps, err := vs.VTemplateDao.SimpleList(ctx, vs.Db, filterFields, limit, offset, orderDirection, orderField)
+	voucherTemps, err := vs.VTemplateDao.SimpleList(ctx, gDb, filterFields, limit, offset, orderDirection, orderField)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[VoucherTemplateService/service/ListVoucherTemplate] [VTemplateDao.SimpleList: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[VoucherTemplateService/service/ListVoucherTemplate] [VTemplateDao.SimpleList: %s, filterFields: %v]", err.Error(), filterFields)
 		return voucherTemplateSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 

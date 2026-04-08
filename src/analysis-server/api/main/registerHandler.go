@@ -1,18 +1,16 @@
 package main
 
 import (
-	"database/sql"
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/api/handler"
 	"financeMgr/src/analysis-server/api/service"
-	"financeMgr/src/common/log"
 	"financeMgr/src/common/url"
 )
 
-func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
-	yearBalanceDao := &db.YearBalanceDao{Logger: logger}
-	yearBalService := &service.YearBalanceService{Logger: logger, YearBalDao: yearBalanceDao, Db: _db}
-	yearBalHandlers := &handler.YearBalHandlers{Logger: logger, YearBalService: yearBalService}
+func registerYearBalance(httpRouter *url.UrlRouter) {
+	yearBalanceDao := &db.YearBalanceDao{}
+	yearBalService := &service.YearBalanceService{YearBalDao: yearBalanceDao}
+	yearBalHandlers := &handler.YearBalHandlers{YearBalService: yearBalService}
 	httpRouter.RegisterFunc("GetYearBalance", yearBalHandlers.GetYearBalance)
 	httpRouter.RegisterFunc("GetAccSubYearBalValue", yearBalHandlers.GetAccSubYearBalValue)
 	httpRouter.RegisterFunc("CreateYearBalance", yearBalHandlers.CreateYearBalance)
@@ -28,10 +26,10 @@ func registerYearBalance(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql
 }
 
 // register voucher template
-func registerVoucherTemplate(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
-	voucherTempDao := &db.VoucherTemplateDao{Logger: logger}
-	voucherTempService := &service.VoucherTemplateService{Logger: logger, VTemplateDao: voucherTempDao, Db: _db}
-	voucherTempHandlers := &handler.VoucherTemplateHandlers{Logger: logger, VoucherTempService: voucherTempService}
+func registerVoucherTemplate(httpRouter *url.UrlRouter) {
+	voucherTempDao := &db.VoucherTemplateDao{}
+	voucherTempService := &service.VoucherTemplateService{VTemplateDao: voucherTempDao}
+	voucherTempHandlers := &handler.VoucherTemplateHandlers{VoucherTempService: voucherTempService}
 	httpRouter.RegisterFunc("CreateVoucherTemplate", voucherTempHandlers.CreateVoucherTemplate)
 	httpRouter.RegisterFunc("DeleteVoucherTemplate", voucherTempHandlers.DeleteVoucherTemplate)
 	httpRouter.RegisterFunc("GetVoucherTemplate", voucherTempHandlers.GetVoucherTemplate)
@@ -39,10 +37,9 @@ func registerVoucherTemplate(logger *log.Logger, httpRouter *url.UrlRouter, _db 
 }
 
 // register company group
-func registerComGroup(logger *log.Logger, httpRouter *url.UrlRouter, comGroupDao *db.CompanyGroupDao,
-	_db *sql.DB) {
-	comGroupService := &service.CompanyGroupService{Logger: logger, ComGroupDao: comGroupDao, Db: _db}
-	comGroupHandlers := &handler.CompanyGroupHandlers{Logger: logger, ComGroupService: comGroupService}
+func registerComGroup(httpRouter *url.UrlRouter, comGroupDao *db.CompanyGroupDao) {
+	comGroupService := &service.CompanyGroupService{ComGroupDao: comGroupDao}
+	comGroupHandlers := &handler.CompanyGroupHandlers{ComGroupService: comGroupService}
 	httpRouter.RegisterFunc("CreateCompanyGroup", comGroupHandlers.CreateCompanyGroup)
 	httpRouter.RegisterFunc("DeleteCompanyGroup", comGroupHandlers.DeleteCompanyGroup)
 	httpRouter.RegisterFunc("GetCompanyGroup", comGroupHandlers.GetCompanyGroup)
@@ -51,8 +48,8 @@ func registerComGroup(logger *log.Logger, httpRouter *url.UrlRouter, comGroupDao
 }
 
 // register companyHander
-func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *service.CompanyService) {
-	comHandlers := &handler.CompanyHandlers{Logger: logger, ComService: comService}
+func registerCompany(httpRouter *url.UrlRouter, comService *service.CompanyService) {
+	comHandlers := &handler.CompanyHandlers{ComService: comService}
 	httpRouter.RegisterFunc("CreateCompany", comHandlers.CreateCompany)
 	httpRouter.RegisterFunc("DeleteCompany", comHandlers.DeleteCompany)
 	httpRouter.RegisterFunc("GetCompany", comHandlers.GetCompany)
@@ -62,16 +59,14 @@ func registerCompany(logger *log.Logger, httpRouter *url.UrlRouter, comService *
 }
 
 // register account subject
-func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.CompanyDao,
-	voucherRecordDao *db.VoucherRecordDao, _db *sql.DB) {
-	accSubDao := &db.AccSubDao{Logger: logger}
+func registerAccSub(httpRouter *url.UrlRouter, comDao *db.CompanyDao,
+	voucherRecordDao *db.VoucherRecordDao) {
+	accSubDao := &db.AccSubDao{}
 	accSubService := &service.AccountSubService{
-		Logger:     logger,
 		AccSubDao:  accSubDao,
 		CompanyDao: comDao,
-		VRecordDao: voucherRecordDao,
-		Db:         _db}
-	accSubHandlers := &handler.AccountSubHandlers{Logger: logger, AccSubService: accSubService}
+		VRecordDao: voucherRecordDao}
+	accSubHandlers := &handler.AccountSubHandlers{AccSubService: accSubService}
 	httpRouter.RegisterFunc("CreateAccSub", accSubHandlers.CreateAccSub)
 	httpRouter.RegisterFunc("DeleteAccSub", accSubHandlers.DeleteAccSub)
 	httpRouter.RegisterFunc("ListAccSub", accSubHandlers.ListAccSub)
@@ -83,14 +78,13 @@ func registerAccSub(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.Co
 }
 
 // register operatorHander and authenHandler
-func registerOptAndAuthenHandler(logger *log.Logger, httpRouter *url.UrlRouter,
-	comService *service.CompanyService, _db *sql.DB) {
-	optInfoDao := &db.OperatorInfoDao{Logger: logger}
-	loginInfoDao := &db.LoginInfoDao{Logger: logger}
-	optInfoService := &service.OperatorInfoService{Logger: logger, OptInfoDao: optInfoDao, Db: _db}
-	authService := &service.AuthenService{Logger: logger, LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao, Db: _db}
-	optInfoHandlers := &handler.OperatorInfoHandlers{Logger: logger, ComService: comService, OptInfoService: optInfoService}
-	authHandlers := &handler.AuthenHandlers{Logger: logger, AuthService: authService, ComService: comService, OptInfoService: optInfoService}
+func registerOptAndAuthenHandler(httpRouter *url.UrlRouter, comService *service.CompanyService) {
+	optInfoDao := &db.OperatorInfoDao{}
+	loginInfoDao := &db.LoginInfoDao{}
+	optInfoService := &service.OperatorInfoService{OptInfoDao: optInfoDao}
+	authService := &service.AuthenService{LogInfoDao: loginInfoDao, OptInfoDao: optInfoDao}
+	optInfoHandlers := &handler.OperatorInfoHandlers{ComService: comService, OptInfoService: optInfoService}
+	authHandlers := &handler.AuthenHandlers{AuthService: authService, ComService: comService, OptInfoService: optInfoService}
 	httpRouter.RegisterFunc("CreateOperator", optInfoHandlers.CreateOperator)
 	httpRouter.RegisterFunc("DeleteOperator", optInfoHandlers.DeleteOperator)
 	httpRouter.RegisterFunc("GetOperatorInfo", optInfoHandlers.GetOperatorInfo)
@@ -101,28 +95,27 @@ func registerOptAndAuthenHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 	httpRouter.RegisterFunc("StatusCheckout", authHandlers.StatusCheckout)
 	httpRouter.RegisterFunc("ListLoginInfo", authHandlers.ListLoginInfo)
 	//检查是否登录
-	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService, logger)
+	handler.GAccessTokenH.InitAccessTokenHandler(authService, optInfoService)
 	httpRouter.LoginCheck = handler.GAccessTokenH.LoginCheck
 	httpRouter.InterfaceAuthorityCheck = handler.GAuthManaged.InterfaceAuthorityCheck
 	//用户登录的过期检查服务
-	go handler.GAccessTokenH.ExpirationCheck()
+	//go handler.GAccessTokenH.ExpirationCheck()
 
 }
 
 // register resHander and voucherHandler
-func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter, comDao *db.CompanyDao,
-	voucherRecordDao *db.VoucherRecordDao, _db *sql.DB) {
+func registerResAndVoucherHandler(httpRouter *url.UrlRouter, comDao *db.CompanyDao, voucherRecordDao *db.VoucherRecordDao) {
 	//voucher
-	voucherInfoDao := &db.VoucherInfoDao{Logger: logger}
-	//voucherRecordDao := &db.VoucherRecordDao{Logger: logger}
-	vouDao := &db.VoucherDao{Logger: logger}
-	vouInfoService := &service.VoucherInfoService{Logger: logger, VInfoDao: voucherInfoDao, Db: _db}
-	voucherService := &service.VoucherService{Logger: logger, VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, VouDao: vouDao, Db: _db}
-	vouRecordService := &service.VoucherRecordService{Logger: logger, VRecordDao: voucherRecordDao, Db: _db}
+	voucherInfoDao := &db.VoucherInfoDao{}
+	//voucherRecordDao := &db.VoucherRecordDao{}
+	vouDao := &db.VoucherDao{}
+	vouInfoService := &service.VoucherInfoService{VInfoDao: voucherInfoDao}
+	voucherService := &service.VoucherService{VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, VouDao: vouDao}
+	vouRecordService := &service.VoucherRecordService{VRecordDao: voucherRecordDao}
 	//resource
-	resService := &service.ResouceInfoService{Logger: logger, VInfoDao: voucherInfoDao, CompanyDao: comDao, Db: _db}
-	resHandlers := &handler.ResourceInfoHandlers{Logger: logger, ResService: resService}
-	voucherHandlers := &handler.VoucherHandlers{Logger: logger, Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
+	resService := &service.ResouceInfoService{VInfoDao: voucherInfoDao, CompanyDao: comDao}
+	resHandlers := &handler.ResourceInfoHandlers{ResService: resService}
+	voucherHandlers := &handler.VoucherHandlers{Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
 	httpRouter.RegisterFunc("InitResourceInfo", resHandlers.InitResourceInfo)
 	//voucher
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
@@ -149,9 +142,9 @@ func registerResAndVoucherHandler(logger *log.Logger, httpRouter *url.UrlRouter,
 }
 
 // register menuHandler
-func registerMenuHandler(logger *log.Logger, httpRouter *url.UrlRouter, _db *sql.DB) {
-	menuInfoDao := &db.MenuInfoDao{Logger: logger}
-	menuService := &service.MenuInfoService{Logger: logger, MenuDao: menuInfoDao, Db: _db}
-	menuHandlers := &handler.MenuInfoHandlers{Logger: logger, MenuService: menuService}
+func registerMenuHandler(httpRouter *url.UrlRouter) {
+	menuInfoDao := &db.MenuInfoDao{}
+	menuService := &service.MenuInfoService{MenuDao: menuInfoDao}
+	menuHandlers := &handler.MenuInfoHandlers{MenuService: menuService}
 	httpRouter.RegisterFunc("ListMenuInfo", menuHandlers.ListMenuInfo)
 }

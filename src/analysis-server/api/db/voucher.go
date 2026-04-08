@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"financeMgr/src/common/log"
 	"time"
 
 	"financeMgr/src/analysis-server/model"
@@ -11,7 +10,7 @@ import (
 
 // process voucher;use voucherRecordInfo and voucherInfo
 type VoucherDao struct {
-	Logger log.ILog
+	//Logger log.ILog
 }
 
 // 计算某个科目截止到某个凭证日期的累计的贷方和借方金额。该函数用于银行明细账中的累计部分。
@@ -35,11 +34,11 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 		values = []interface{}{params.SubjectID, params.CompanyID, params.VoucherDate, params.Status}
 	}
 
-	dao.Logger.DebugContext(ctx, "[Voucher/db/CalcAccumulateAccSubSum] [sql: %s ,values: %d]", strSql, values)
+	gLogger.DebugContext(ctx, "[Voucher/db/CalcAccumulateAccSubSum] [sql: %s ,values: %d]", strSql, values)
 	var accValue = &model.AccuMoneyValueView{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[VoucherRecord/db/Get] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[VoucherRecord/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
 	row := do.QueryRowContext(ctx, strSql, values...)
 	switch err := row.Scan(&accValue.AccuDebitMoney, &accValue.AccuCreditMoney); err {
@@ -48,7 +47,7 @@ func (dao *VoucherDao) CalcAccuMoney(ctx context.Context, do DbOperator,
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[Voucher/db/Get] [Scan: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[Voucher/db/Get] [Scan: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -99,10 +98,10 @@ func (dao *VoucherDao) GetPartialVouRecords(ctx context.Context, do DbOperator,
 		values = append(values, *params.CompanyID, *params.Status, *params.StartMonth, *params.EndMonth)
 	}
 	accuMoneyValSlice := []*model.AccountOfPeriod{}
-	dao.Logger.DebugContext(ctx, "[Voucher/db/GetPartialVouRecords] [sql: %s ,values: %d]", strSql, values)
+	gLogger.DebugContext(ctx, "[Voucher/db/GetPartialVouRecords] [sql: %s ,values: %d]", strSql, values)
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[Voucher/db/GetPartialVouRecords] [do.Query: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[Voucher/db/GetPartialVouRecords] [do.Query: %s]", err.Error())
 		return accuMoneyValSlice, err
 	}
 	defer result.Close()
@@ -110,7 +109,7 @@ func (dao *VoucherDao) GetPartialVouRecords(ctx context.Context, do DbOperator,
 		moneyVal := new(model.AccountOfPeriod)
 		err = scanPartialVouRecords(result, moneyVal)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[Voucher/db/GetPartialVouRecords] [ScanSnapshot: %s]", err.Error())
+			gLogger.ErrorContext(ctx, "[Voucher/db/GetPartialVouRecords] [ScanSnapshot: %s]", err.Error())
 			return accuMoneyValSlice, err
 		}
 		accuMoneyValSlice = append(accuMoneyValSlice, moneyVal)

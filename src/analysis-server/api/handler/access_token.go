@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"financeMgr/src/analysis-server/api/service"
-	"financeMgr/src/common/log"
 	"fmt"
 	"net/http"
 	"strings"
@@ -25,7 +24,7 @@ type AccessTokenHandler struct {
 	quitCheckCh       chan bool
 	authService       *service.AuthenService
 	optInfoService    *service.OperatorInfoService
-	logger            *log.Logger
+	//logger            *log.Logger
 	//for statistics;test
 	checkStatusCount int
 }
@@ -40,10 +39,9 @@ func NewAccessTokenHandler() *AccessTokenHandler {
 }
 
 func (at *AccessTokenHandler) InitAccessTokenHandler(authService *service.AuthenService,
-	optInfoService *service.OperatorInfoService, logger *log.Logger) {
+	optInfoService *service.OperatorInfoService) {
 	at.authService = authService
 	at.optInfoService = optInfoService
-	at.logger = logger
 }
 
 func (at *AccessTokenHandler) insertToken(accessToken string, iOptID int) {
@@ -76,7 +74,7 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 			expiredOptID = append(expiredOptID, usrInfo.iOperatorID)
 		} else {
 			errMsg := fmt.Sprintf("can't find the %s token in tokenToOptIDMap", token)
-			at.logger.Error(errMsg)
+			gLogger.Error(errMsg)
 			panic(errMsg)
 		}
 		delete(at.tokenToOptIDMap, token)
@@ -92,10 +90,10 @@ func (at *AccessTokenHandler) delBatchToken(accessTokenSlice []string) {
 	for _, optId := range expiredOptID {
 		ccErr := at.authService.Logout(ctx, optId)
 		if ccErr != nil {
-			at.logger.WarnContext(ctx, "[delBatchToken] [AuthService.Logout,failed,errInfo: %s]", ccErr.Detail())
+			gLogger.WarnContext(ctx, "[delBatchToken] [AuthService.Logout,failed,errInfo: %s]", ccErr.Detail())
 			return
 		}
-		at.logger.DebugContext(ctx, "[delBatchToken] [the operator %d has been logout]", optId)
+		gLogger.DebugContext(ctx, "[delBatchToken] [the operator %d has been logout]", optId)
 	}
 }
 
@@ -133,8 +131,8 @@ func (at *AccessTokenHandler) LoginCheck(action string,
 	return
 }
 
-func (at *AccessTokenHandler) ExpirationCheck() {
-	at.logger.LogDebug("expirationCheck,begin")
+func (at *AccessTokenHandler) ExpirationCheck(ws *sync.WaitGroup) {
+	gLogger.LogDebug("expirationCheck,begin")
 	tick := time.NewTicker(time.Second * 60)
 	defer tick.Stop()
 	for {
@@ -148,7 +146,7 @@ func (at *AccessTokenHandler) ExpirationCheck() {
 			for k, v := range at.tokenToTimeMap {
 				if curTime > v {
 					expirationToken = append(expirationToken, k)
-					at.logger.Debug("[has been expire.] [token:time[%s:%v];curTime:%v;times:%d][in ExpirationCheck]", k, v, curTime, at.checkStatusCount)
+					gLogger.Debug("[has been expire.] [token:time[%s:%v];curTime:%v;times:%d][in ExpirationCheck]", k, v, curTime, at.checkStatusCount)
 				}
 			}
 			at.expirationCheckMu.RUnlock()
@@ -156,7 +154,8 @@ func (at *AccessTokenHandler) ExpirationCheck() {
 		}
 	}
 end:
-	at.logger.LogDebug("expirationCheck,end")
+	ws.Done()
+	gLogger.LogDebug("expirationCheck,end")
 	//return
 }
 
@@ -192,7 +191,7 @@ func (at *AccessTokenHandler) isRootRequest(r *http.Request) bool {
 	bIsRoot := false
 	cookie, err := r.Cookie("access_token")
 	if err != nil {
-		at.logger.LogDebug("r.Cookie,failed,errMsg:", err.Error())
+		gLogger.LogDebug("r.Cookie,failed,errMsg:", err.Error())
 		return bIsRoot
 	}
 	return at.isRootToken(cookie.Value)
@@ -202,7 +201,7 @@ func (at *AccessTokenHandler) isAdminRequest(r *http.Request) bool {
 	bIsAdmin := false
 	cookie, err := r.Cookie("access_token")
 	if err != nil {
-		at.logger.LogError("r.Cookie,failed,errMsg:", err.Error())
+		gLogger.LogError("r.Cookie,failed,errMsg:", err.Error())
 		return bIsAdmin
 	}
 	return at.isAdminToken(cookie.Value)
@@ -218,7 +217,7 @@ func (at *AccessTokenHandler) getOperatorRole(accessToken string) int {
 			infoView, err := at.optInfoService.GetOperatorInfoByID(ctx, usrInfo.iOperatorID,
 				"getOperatorRole")
 			if err != nil {
-				at.logger.LogError("GetOperatorInfoByID,failed,iOperatorID:", usrInfo.iOperatorID,
+				gLogger.LogError("GetOperatorInfoByID,failed,iOperatorID:", usrInfo.iOperatorID,
 					"errMsg:", err.Error())
 				return 0
 			}

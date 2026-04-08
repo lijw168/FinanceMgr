@@ -10,12 +10,11 @@ import (
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 )
 
 type AccountSubHandlers struct {
 	CCHandler
-	Logger        *log.Logger
+	//Logger        *log.Logger
 	AccSubService *service.AccountSubService
 }
 
@@ -23,15 +22,15 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 	var params = new(model.ListSubjectParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/ListAccSub] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/ListAccSub] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
-		ah.Logger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
+		gLogger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
 		ce := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrBaseParam, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ce, nil)
+		ah.Response(r.Context(), gLogger, w, ce, nil)
 		return
 	}
 	if params.Filter != nil {
@@ -47,7 +46,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		filterMap["mnemonicCode"] = utils.Attribute{Type: utils.T_String, Val: nil}
 		if !utils.ValiFilter(filterMap, params.Filter) {
 			ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
-			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			ah.Response(r.Context(), gLogger, w, ce, nil)
 			return
 		}
 	}
@@ -59,7 +58,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 			*params.Order[0].Field = "commonId"
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			ah.Response(r.Context(), gLogger, w, ce, nil)
 			return
 		}
 		switch *params.Order[0].Direction {
@@ -67,18 +66,18 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 		default:
 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd,
 				strconv.Itoa(*params.Order[0].Direction))
-			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+			ah.Response(r.Context(), gLogger, w, ce, nil)
 			return
 		}
 	}
 	accSubViews, count, ccErr := ah.AccSubService.ListAccSub(r.Context(), params)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/ListAccSub/ServerHTTP] [AccSubService.ListAccSub: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[accSub/ListAccSub/ServerHTTP] [AccSubService.ListAccSub: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), accSubViews}
-	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
+	ah.Response(r.Context(), gLogger, w, nil, dataBuf)
 	return
 }
 
@@ -86,15 +85,15 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 // 	var params = new(model.ListParams)
 // 	err := ah.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		ah.Logger.ErrorContext(r.Context(), "[accSub/ListYearBalance] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[accSub/ListYearBalance] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	if isLackBaseParams([]string{"subjectId", "companyId"}, params.Filter) {
-// 		ah.Logger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
+// 		gLogger.ErrorContext(r.Context(), "lack base param  subjectId or companyId")
 // 		ce := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-// 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
+// 		ah.Response(r.Context(), gLogger, w, ce, nil)
 // 		return
 // 	}
 // 	//由于目前获取期初余额时的过滤条件，可能只用到subjectId和companyId，所以也就不进行参数判断了。
@@ -111,7 +110,7 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 // 	// 	filterMap["mnemonicCode"] = utils.Attribute{Type: utils.T_String, Val: nil}
 // 	// 	if !utils.ValiFilter(filterMap, params.Filter) {
 // 	// 		ce := service.NewError(service.ErrAccSub, service.ErrValue, service.ErrField, service.ErrNull)
-// 	// 		ah.Response(r.Context(), ah.Logger, w, ce, nil)
+// 	// 		ah.Response(r.Context(), gLogger, w, ce, nil)
 // 	// 		return
 // 	// 	}
 // 	// }
@@ -121,25 +120,25 @@ func (ah *AccountSubHandlers) ListAccSub(w http.ResponseWriter, r *http.Request)
 // 			*params.Order[0].Field = "subjectId"
 // 		default:
 // 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrField, *params.Order[0].Field)
-// 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+// 			ah.Response(r.Context(), gLogger, w, ce, nil)
 // 			return
 // 		}
 // 		switch *params.Order[0].Direction {
 // 		case utils.OrderAsc, utils.OrderDesc:
 // 		default:
 // 			ce := service.NewError(service.ErrOrder, service.ErrInvalid, service.ErrOd, strconv.Itoa(*params.Order[0].Direction))
-// 			ah.Response(r.Context(), ah.Logger, w, ce, nil)
+// 			ah.Response(r.Context(), gLogger, w, ce, nil)
 // 			return
 // 		}
 // 	}
 // 	yearBalViews, count, ccErr := ah.AccSubService.ListYearBalance(r.Context(), params)
 // 	if ccErr != nil {
-// 		ah.Logger.WarnContext(r.Context(), "[accSub/ListYearBalance/ServerHTTP] [AccSubService.ListYearBalance: %s]", ccErr.Detail())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[accSub/ListYearBalance/ServerHTTP] [AccSubService.ListYearBalance: %s]", ccErr.Detail())
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	dataBuf := &DescData{(int64)(count), yearBalViews}
-// 	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
+// 	ah.Response(r.Context(), gLogger, w, nil, dataBuf)
 // 	return
 // }
 
@@ -147,15 +146,15 @@ func (ah *AccountSubHandlers) GetAccSub(w http.ResponseWriter, r *http.Request) 
 	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/GetAccSub] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/GetAccSub] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	//根据分析requestId是traceId,其实在urlrouter中，设置了r中的ctx，该ctx中带有traceId的值，在打印日志时，都会打印。
@@ -163,11 +162,11 @@ func (ah *AccountSubHandlers) GetAccSub(w http.ResponseWriter, r *http.Request) 
 
 	accSubView, ccErr := ah.AccSubService.GetAccSubById(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/GetAccSub/ServerHTTP] [AccSubService.GetAccSubById: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[accSub/GetAccSub/ServerHTTP] [AccSubService.GetAccSubById: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, accSubView)
+	ah.Response(r.Context(), gLogger, w, nil, accSubView)
 	return
 }
 
@@ -175,26 +174,26 @@ func (ah *AccountSubHandlers) GetAccSub(w http.ResponseWriter, r *http.Request) 
 // 	var params = new(model.DescribeIdParams)
 // 	err := ah.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		ah.Logger.ErrorContext(r.Context(), "[accSub/GetYearBalance] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[accSub/GetYearBalance] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMalformed, service.ErrNull, err.Error())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 
 // 	if params.ID == nil || *params.ID <= 0 {
 // 		ccErr := service.NewError(service.ErrYearBalance, service.ErrMiss, service.ErrId, service.ErrNull)
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	requestId := ah.GetTraceId(r)
 
 // 	yearBal, ccErr := ah.AccSubService.GetYearBalanceById(r.Context(), *params.ID, requestId)
 // 	if ccErr != nil {
-// 		ah.Logger.WarnContext(r.Context(), "[accSub/GetYearBalance/ServerHTTP] [AccSubService.GetYearBalanceById: %s]", ccErr.Detail())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		gLogger.WarnContext(r.Context(), "[accSub/GetYearBalance/ServerHTTP] [AccSubService.GetYearBalanceById: %s]", ccErr.Detail())
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
-// 	ah.Response(r.Context(), ah.Logger, w, nil, yearBal)
+// 	ah.Response(r.Context(), gLogger, w, nil, yearBal)
 // 	return
 // }
 
@@ -202,67 +201,67 @@ func (ah *AccountSubHandlers) CreateAccSub(w http.ResponseWriter, r *http.Reques
 	var params = new(model.CreateSubjectParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/CreateAccSub] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/CreateAccSub] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectName == nil || *params.SubjectName == "" {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrName, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	//由于在创建科目时，科目名称能包含特殊字符，所以在这里不再进行判断名称内容了，只判断长度即可。
 	if utf8.RuneCountInString(*params.SubjectName) > NameMaxLen {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrName, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.CommonID == nil || *params.CommonID == "" {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrCommonId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if utf8.RuneCountInString(*params.CommonID) > 10 || !utils.VerCommonIdP(*params.CommonID) {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCommonId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.SubjectLevel == nil || *params.SubjectLevel > 4 {
 		ccErr := service.NewCcError(cons.CodeInvalAccSubLevel, service.ErrAccSub, service.ErrInvalid, service.ErrSubLevel, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectDirection == nil || *params.SubjectDirection > 2 {
 		ccErr := service.NewCcError(cons.CodeInvalAccSubDir, service.ErrAccSub, service.ErrInvalid, service.ErrSubdir, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectType == nil || *params.SubjectType > 5 {
 		ccErr := service.NewCcError(cons.CodeInvalAccSubType, service.ErrAccSub, service.ErrInvalid, service.ErrType, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.CompanyID == nil || *(params.CompanyID) <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCompanyId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.SubjectStyle == nil || *params.SubjectStyle == "" {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrSubStyle, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
 	accSubView, ccErr := ah.AccSubService.CreateAccSub(r.Context(), params, requestId)
-	ah.Logger.InfoContext(r.Context(), "AccSubService.CreateAccSub in CreateAccSub.")
+	gLogger.InfoContext(r.Context(), "AccSubService.CreateAccSub in CreateAccSub.")
 	if ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/CreateAccSub/ServerHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), "[accSub/CreateAccSub/ServerHTTP] [AccSubService.CreateAccSub: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, accSubView)
+	ah.Response(r.Context(), gLogger, w, nil, accSubView)
 	return
 }
 
@@ -270,15 +269,15 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	var params = new(model.ModifySubjectParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.SubjectID == nil || *params.SubjectID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
@@ -286,7 +285,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	if params.SubjectName != nil {
 		if utf8.RuneCountInString(*params.SubjectName) > NameMaxLen || !utils.VerStrP(*params.SubjectName) {
 			ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrSubjectName, service.ErrNull)
-			ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+			ah.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 		updateFields["subjectName"] = *params.SubjectName
@@ -294,7 +293,7 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	if params.CommonID != nil {
 		if utf8.RuneCountInString(*params.CommonID) > 10 || !utils.VerCommonIdP(*params.CommonID) {
 			ccErr := service.NewError(service.ErrAccSub, service.ErrInvalid, service.ErrCommonId, service.ErrNull)
-			ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+			ah.Response(r.Context(), gLogger, w, ccErr, nil)
 			return
 		}
 		updateFields["commonId"] = *params.CommonID
@@ -319,16 +318,16 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 	}
 	if len(updateFields) == 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	ccErr := ah.AccSubService.UpdateAccSubById(r.Context(), *params.SubjectID, updateFields)
 	if ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+	ah.Response(r.Context(), gLogger, w, nil, nil)
 	return
 }
 
@@ -337,30 +336,30 @@ func (ah *AccountSubHandlers) UpdateAccSub(w http.ResponseWriter, r *http.Reques
 // 	var params = new(model.OptYearBalanceParams)
 // 	err := ah.HttpRequestParse(r, params)
 // 	if err != nil {
-// 		ah.Logger.ErrorContext(r.Context(), "[accSub/UpdateYearBalance] [HttpRequestParse: %v]", err)
+// 		gLogger.ErrorContext(r.Context(), "[accSub/UpdateYearBalance] [HttpRequestParse: %v]", err)
 // 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 
 // 	if params.SubjectID == nil || *params.SubjectID <= 0 {
 // 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 
 // 	if params.Balance == nil {
 // 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrChangeContent, service.ErrNull)
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
 // 	ccErr := ah.AccSubService.UpdateYearBalanceById(r.Context(), *params.SubjectID, *params.Balance)
 // 	if ccErr != nil {
-// 		ah.Logger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
-// 		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+// 		gLogger.ErrorContext(r.Context(), "[accSub/AccountSubHandlers/ServerHTTP] [AccSubService.UpdateAccSubById: %s]", ccErr.Detail())
+// 		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 // 		return
 // 	}
-// 	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+// 	ah.Response(r.Context(), gLogger, w, nil, nil)
 // 	return
 // }
 
@@ -368,24 +367,24 @@ func (ah *AccountSubHandlers) DeleteAccSub(w http.ResponseWriter, r *http.Reques
 	var params = new(model.DeleteSubjectParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/DeleteAccSub] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/DeleteAccSub] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
 	ccErr := ah.AccSubService.DeleteAccSubByID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteAccSubByID: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), "[accSub/DeleteAccSub/ServerHTTP] [AccSubService.DeleteAccSubByID: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+	ah.Response(r.Context(), gLogger, w, nil, nil)
 	return
 }
 
@@ -393,26 +392,26 @@ func (ah *AccountSubHandlers) QueryAccSubReference(w http.ResponseWriter, r *htt
 	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/QueryAccSubReference] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/QueryAccSubReference] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
 	iCount, ccErr := ah.AccSubService.QueryAccSubReferenceBySubID(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
 		errInfo := fmt.Sprintf("[accSub/QueryAccSubReference/ServerHTTP] [AccSubService.JudgeAccSubReferenceBySubID: %s]", ccErr.Detail())
-		ah.Logger.ErrorContext(r.Context(), errInfo)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), errInfo)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	//dataBuf := &DescData{iCount, nil}
-	ah.Response(r.Context(), ah.Logger, w, nil, iCount)
+	ah.Response(r.Context(), gLogger, w, nil, iCount)
 	return
 }
 
@@ -420,26 +419,26 @@ func (ah *AccountSubHandlers) CopyAccSubTemplate(w http.ResponseWriter, r *http.
 	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/CopyAccSubTemplate] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/CopyAccSubTemplate] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
 	accSubViews, count, ccErr := ah.AccSubService.CopyAccSubTemplate(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.WarnContext(r.Context(), "[accSub/CopyAccSubTemplate/ServerHTTP] [AccSubService.CopyAccSubTemplate: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.WarnContext(r.Context(), "[accSub/CopyAccSubTemplate/ServerHTTP] [AccSubService.CopyAccSubTemplate: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	dataBuf := &DescData{(int64)(count), accSubViews}
-	ah.Response(r.Context(), ah.Logger, w, nil, dataBuf)
+	ah.Response(r.Context(), gLogger, w, nil, dataBuf)
 	return
 }
 
@@ -447,23 +446,23 @@ func (ah *AccountSubHandlers) GenerateAccSubTemplate(w http.ResponseWriter, r *h
 	var params = new(model.DescribeIdParams)
 	err := ah.HttpRequestParse(r, params)
 	if err != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate] [HttpRequestParse: %v]", err)
+		gLogger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate] [HttpRequestParse: %v]", err)
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMalformed, service.ErrNull, err.Error())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	if params.ID == nil || *params.ID <= 0 {
 		ccErr := service.NewError(service.ErrAccSub, service.ErrMiss, service.ErrId, service.ErrNull)
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
 	requestId := ah.GetTraceId(r)
 	ccErr := ah.AccSubService.GenerateAccSubTemplate(r.Context(), *params.ID, requestId)
 	if ccErr != nil {
-		ah.Logger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate/ServerHTTP] [AccSubService.GenerateAccSubTemplate: %s]", ccErr.Detail())
-		ah.Response(r.Context(), ah.Logger, w, ccErr, nil)
+		gLogger.ErrorContext(r.Context(), "[accSub/GenerateAccSubTemplate/ServerHTTP] [AccSubService.GenerateAccSubTemplate: %s]", ccErr.Detail())
+		ah.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
-	ah.Response(r.Context(), ah.Logger, w, nil, nil)
+	ah.Response(r.Context(), gLogger, w, nil, nil)
 	return
 }

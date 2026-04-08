@@ -7,24 +7,21 @@ import (
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	"fmt"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
 )
 
-// 默认最多返回100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来。
+// 默认最多返100条记录，如果记录超过100条，需要在客户端再把剩余的部分获取出来
 const (
 	MaxRecordLimit = 100
 )
 
 type VoucherService struct {
-	Logger     *log.Logger
 	VInfoDao   *db.VoucherInfoDao
 	VRecordDao *db.VoucherRecordDao
 	VouDao     *db.VoucherDao
-	Db         *sql.DB
 }
 
 func IsDuplicateKeyError(err error) bool {
@@ -39,14 +36,14 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	FuncName := "VoucherService/service/CreateVoucher"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -70,7 +67,7 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	filterFields := make(map[string]interface{})
 	filterFields["companyId"] = *infoParams.CompanyID
 	filterFields["voucherMonth"] = vInfo.VoucherMonth
-	vs.Logger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d",
+	gLogger.InfoContext(ctx, "CreateVoucher method start, "+"companyID:%d,VoucherMonth:%d",
 		*infoParams.CompanyID, vInfo.VoucherMonth)
 	count, err := vs.VInfoDao.CountByFilter(ctx, tx, iYear, filterFields)
 	if err != nil {
@@ -87,16 +84,16 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.CreatedAt = time.Now()
 	vInfo.UpdatedAt = time.Now()
-	vInfo.VoucherID = GIdInfoService.genVouIdInfo.GetNextId()
+	vInfo.VoucherID = gIdInfoService.genVouIdInfo.GetNextId()
 	IdValSli = append(IdValSli, vInfo.VoucherID)
 	if err = vs.VInfoDao.Create(ctx, tx, vInfo); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [VInfoDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [VInfoDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	//create voucherRecord
 	vRecord := new(model.VoucherRecord)
 	for _, recParam := range params.RecordsParams {
-		vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
+		vRecord.RecordID = gIdInfoService.genVouRecIdInfo.GetNextId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = vInfo.VoucherID
 		vRecord.SubjectName = *recParam.SubjectName
@@ -120,36 +117,36 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		vRecord.CreatedAt = time.Now()
 		vRecord.UpdatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, iYear, vRecord); err != nil {
-			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
+			gLogger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 	}
 	if err = tx.Commit(); err != nil && IsDuplicateKeyError(err) {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	} else if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "CreateVoucher method end ")
+	gLogger.InfoContext(ctx, "CreateVoucher method end ")
 	return IdValSli, nil
 }
 
 // UpdateVoucher  该函数用于修改voucher ...
 func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.UpdateVoucherParams,
 	requestID string) ([]int, CcError) {
-	vs.Logger.InfoContext(ctx, "UpdateVoucher method begin")
+	gLogger.InfoContext(ctx, "UpdateVoucher method begin")
 	FuncName := "VoucherService/UpdateVoucher"
 	bIsRollBack := true
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	iVoucherYear := *params.VoucherYear
@@ -219,7 +216,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 	var IdValSli []int
 	for _, itemParam := range params.AddRecordsParams {
 		vRecord := new(model.VoucherRecord)
-		vRecord.RecordID = GIdInfoService.genVouRecIdInfo.GetNextId()
+		vRecord.RecordID = gIdInfoService.genVouRecIdInfo.GetNextId()
 		IdValSli = append(IdValSli, vRecord.RecordID)
 		vRecord.VoucherID = *itemParam.VoucherID
 		vRecord.SubjectName = *itemParam.SubjectName
@@ -232,19 +229,19 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		// vRecord.SubID4 = *itemParam.SubID4
 		vRecord.CreatedAt = time.Now()
 		if err = vs.VRecordDao.Create(ctx, tx, iVoucherYear, vRecord); err != nil {
-			vs.Logger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
+			gLogger.ErrorContext(ctx, "[%s] [VRecordDao.Create: %s]", FuncName, err.Error())
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 	}
 	if err = tx.Commit(); err != nil && IsDuplicateKeyError(err) {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: duplicate key conflict]", FuncName)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	} else if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "UpdateVoucher method end ")
+	gLogger.InfoContext(ctx, "UpdateVoucher method end ")
 	if len(IdValSli) == 0 {
 		return nil, nil
 	}
@@ -254,16 +251,16 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID, iYear int, requestId string) CcError {
 	FuncName := "VoucherService/service/DeleteVoucher"
 	bIsRollBack := true
-	vs.Logger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%d", voucherID)
+	gLogger.InfoContext(ctx, "DeleteVoucher method begin, "+"voucher ID:%d", voucherID)
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	err = vs.VRecordDao.DeleteByVoucherId(ctx, tx, voucherID, iYear)
@@ -275,11 +272,11 @@ func (vs *VoucherService) DeleteVoucher(ctx context.Context, voucherID, iYear in
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "DeleteVoucher method end, "+"voucher ID:%d", voucherID)
+	gLogger.InfoContext(ctx, "DeleteVoucher method end, "+"voucher ID:%d", voucherID)
 	return nil
 }
 
@@ -287,16 +284,16 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, 
 	requestId string) (*model.VoucherView, CcError) {
 	FuncName := "VoucherService/service/GetVoucherByVoucherID"
 	bIsRollBack := true
-	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method begin, "+"voucher ID:%d", voucherID)
+	gLogger.InfoContext(ctx, "GetVoucherByVoucherID method begin, "+"voucher ID:%d", voucherID)
 	//Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//get voucher information
@@ -327,7 +324,7 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, 
 	orderDirection := utils.OrderAsc
 	voucherRecords, err := vs.VRecordDao.SimpleList(ctx, tx, filterFields, iYear, limit, offset, orderDirection, orderField)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[VoucherService/service/GetVoucherByVoucherID] [VRecordDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	for _, vouRecord := range voucherRecords {
@@ -339,18 +336,18 @@ func (vs *VoucherService) GetVoucherByVoucherID(ctx context.Context, voucherID, 
 	voucherView.VouRecordViewSli = append(voucherView.VouRecordViewSli, recordViewSlice...)
 
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "GetVoucherByVoucherID method end, "+"voucher ID:%d", voucherID)
+	gLogger.InfoContext(ctx, "GetVoucherByVoucherID method end, "+"voucher ID:%d", voucherID)
 	return voucherView, nil
 }
 
 // VoucherArrange
 func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.VoucherArrangeParams,
 	requestID string) CcError {
-	vs.Logger.InfoContext(ctx, "ArrangeVoucher method begin,companyID:%d ,month:%d",
+	gLogger.InfoContext(ctx, "ArrangeVoucher method begin,companyID:%d ,month:%d",
 		*params.CompanyID, *params.VoucherMonth)
 	err := vs.deleteInvalidVoucher(ctx, *params.VoucherYear, *params.CompanyID, *params.VoucherMonth)
 	if err == nil {
@@ -359,23 +356,23 @@ func (vs *VoucherService) ArrangeVoucher(ctx context.Context, params *model.Vouc
 			err = vs.arrangeVoucherNum(ctx, *params.VoucherYear, *params.CompanyID, *params.VoucherMonth)
 		}
 	}
-	vs.Logger.InfoContext(ctx, "ArrangeVoucher method end")
+	gLogger.InfoContext(ctx, "ArrangeVoucher method end")
 	return err
 }
 
 func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, iVoucherYear, companyID, voucherMonth int) CcError {
 	FuncName := "VoucherService/service/deleteInvalidVoucher"
 	bIsRollBack := true
-	vs.Logger.InfoContext(ctx, "deleteInvalidVoucher method begin,companyID:%d ,month:%d", companyID, voucherMonth)
+	gLogger.InfoContext(ctx, "deleteInvalidVoucher method begin,companyID:%d ,month:%d", companyID, voucherMonth)
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	filterFields := make(map[string]interface{}, 3)
@@ -389,7 +386,7 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, iVoucherYear
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/deleteInvalidVoucher] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
-		vs.Logger.ErrorContext(ctx, errInfo)
+		gLogger.ErrorContext(ctx, errInfo)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if len(voucherInfos) > 0 {
@@ -409,27 +406,27 @@ func (vs *VoucherService) deleteInvalidVoucher(ctx context.Context, iVoucherYear
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "deleteInvalidVoucher method end")
+	gLogger.InfoContext(ctx, "deleteInvalidVoucher method end")
 	return nil
 }
 
 func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, companyID int, voucherMonth int) CcError {
-	vs.Logger.InfoContext(ctx, "arrangeVoucherNum method begin,companyID:%d ,month:%d", companyID, voucherMonth)
+	gLogger.InfoContext(ctx, "arrangeVoucherNum method begin,companyID:%d ,month:%d", companyID, voucherMonth)
 	//Begin transaction
 	FuncName := "VoucherService/service/arrangeVoucherNum"
 	bIsRollBack := true
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//update the voucher Num
@@ -443,7 +440,7 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 	if err != nil {
 		errInfo := fmt.Sprintf("[VoucherService/service/arrangeVoucherNum] [VInfoDao.List: %s, filterFields: %v]",
 			err.Error(), filterFields)
-		vs.Logger.ErrorContext(ctx, errInfo)
+		gLogger.ErrorContext(ctx, errInfo)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	voucherInfoParams := make(map[string]interface{}, 2)
@@ -458,11 +455,11 @@ func (vs *VoucherService) arrangeVoucherNum(ctx context.Context, iVoucherYear, c
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "arrangeVoucherNum method end")
+	gLogger.InfoContext(ctx, "arrangeVoucherNum method end")
 	return nil
 }
 
@@ -488,14 +485,14 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	iVoucherYear := 0
 	FuncName := "VoucherService/ListVoucherInfoWithAuxCondition"
 	bIsRollBack := true
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	//这是对voucherInfo 的list
@@ -564,7 +561,7 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 		voucherRecords, err := vs.VRecordDao.List(ctx, tx, nil, filterRecFields, intervalFilterRecFields,
 			fuzzyMatchFields, nil, iVoucherYear, limit, offset)
 		if err != nil {
-			vs.Logger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoWithAuxCondition] [VRecordDao.List: %s, filterRecFields: %v]",
+			gLogger.ErrorContext(ctx, "[VoucherService/service/ListVoucherInfoWithAuxCondition] [VRecordDao.List: %s, filterRecFields: %v]",
 				err.Error(), filterRecFields)
 			return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
@@ -580,11 +577,11 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields, nil,
 		params.Order, iVoucherYear, limit, offset)
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
@@ -600,11 +597,11 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 // 	voucherInfos, err := vs.VInfoDao.List(ctx, tx, filterNo, filterFields, intervalFilterFields, nil,
 // 		orderFilter, iVoucherYear, limit, offset)
 // 	if err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+// 		gLogger.ErrorContext(ctx, "[VoucherInfoService/service/ListVoucherInfo] [VInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 // 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	if err = tx.Commit(); err != nil {
-// 		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+// 		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 // 		return vouInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 // 	}
 // 	bIsRollBack = false
@@ -619,19 +616,19 @@ func (vs *VoucherService) ListVoucherInfoWithAuxCondition(ctx context.Context,
 
 func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 	params *model.CalAccuMoneyParams, requestId string) (*model.AccuMoneyValueView, CcError) {
-	vs.Logger.InfoContext(ctx, "CalcAccuMoney method begin,companyID:%d ,subjectID:%d",
+	gLogger.InfoContext(ctx, "CalcAccuMoney method begin,companyID:%d ,subjectID:%d",
 		*params.CompanyID, *params.SubjectID)
 	FuncName := "VoucherService/service/CalcAccuMoney"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	var calcAccuMoney model.CalAccuMoney
@@ -646,29 +643,29 @@ func (vs *VoucherService) CalcAccuMoney(ctx context.Context,
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "CalcAccuMoney method end")
+	gLogger.InfoContext(ctx, "CalcAccuMoney method end")
 	return accuMoney, nil
 }
 
 // 批量计算多个accSubId所对应的累计金额
 func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 	params *model.BatchCalAccuMoneyParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
-	vs.Logger.InfoContext(ctx, "BatchCalcAccuMoney method begin")
+	gLogger.InfoContext(ctx, "BatchCalcAccuMoney method begin")
 	FuncName := "VoucherService/service/BatchCalcAccuMoney"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	resData := make([]*model.AccuMoneyValueView, 0, len(params.SubjectIDArr))
@@ -688,29 +685,29 @@ func (vs *VoucherService) BatchCalcAccuMoney(ctx context.Context,
 		resData = append(resData, accuMoney)
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "BatchCalcAccuMoney method end")
+	gLogger.InfoContext(ctx, "BatchCalcAccuMoney method end")
 	return resData, nil
 }
 
 // 批量计算多个accSubId所对应的本期发生额
 func (vs *VoucherService) CalcAccountOfPeriod(ctx context.Context,
 	params *model.CalAmountOfPeriodParams, requestId string) ([]*model.AccuMoneyValueView, CcError) {
-	vs.Logger.InfoContext(ctx, "CalcAccountOfPeriod method begin")
+	gLogger.InfoContext(ctx, "CalcAccountOfPeriod method begin")
 	FuncName := "VoucherService/service/CalcAccountOfPeriod"
 	bIsRollBack := true
 	// Begin transaction
-	tx, err := vs.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, vs.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	recData, err := vs.VouDao.GetPartialVouRecords(ctx, tx, params)
@@ -735,10 +732,10 @@ func (vs *VoucherService) CalcAccountOfPeriod(ctx context.Context,
 		accPeriodViewSlice = append(accPeriodViewSlice, accPeriodPtr)
 	}
 	if err = tx.Commit(); err != nil {
-		vs.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	vs.Logger.InfoContext(ctx, "CalcAccountOfPeriod method end")
+	gLogger.InfoContext(ctx, "CalcAccountOfPeriod method end")
 	return accPeriodViewSlice, nil
 }

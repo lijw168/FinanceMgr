@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"financeMgr/src/common/log"
 	"strings"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 type CompanyDao struct {
 	// Logger *log.Logger
-	Logger log.ILog
+	//Logger log.ILog
 }
 
 var (
@@ -29,11 +28,11 @@ var (
 
 func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*model.CompanyInfo, error) {
 	strSql := "select " + strings.Join(companyInfoFields, ",") + " from " + companyInfoTN + " where company_id=?"
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Get] [sql: %s ,values: %d]", strSql, companyId)
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/Get] [sql: %s ,values: %d]", strSql, companyId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[CompanyInfo/db/Get] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, companyId), compInfo); err {
 	case nil:
@@ -41,7 +40,7 @@ func (dao *CompanyDao) Get(ctx context.Context, do DbOperator, companyId int) (*
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -50,12 +49,12 @@ func (dao *CompanyDao) GetCompanyByOperatorId(ctx context.Context, do DbOperator
 	operatorId int) (*model.CompanyInfo, error) {
 	strSql := "select b." + strings.Join(companyInfoFields, ",b.") +
 		" from operatorInfo as a, companyInfo as b where a.operator_id =? and a.company_id = b.company_id"
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [sql: %s ,values: %d]",
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [sql: %s ,values: %d]",
 		strSql, operatorId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByOperatorId] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, operatorId), compInfo); err {
 	case nil:
@@ -63,7 +62,7 @@ func (dao *CompanyDao) GetCompanyByOperatorId(ctx context.Context, do DbOperator
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/Get] [scanCompanyInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -72,12 +71,12 @@ func (dao *CompanyDao) GetCompanyByAccSubId(ctx context.Context, do DbOperator,
 	subjectId int) (*model.CompanyInfo, error) {
 	strSql := "select b." + strings.Join(companyInfoFields, ",b.") +
 		" from accountSubject as a, companyInfo as b where a.subject_id =? and a.company_id = b.company_id"
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [sql: %s ,values: %d]",
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [sql: %s ,values: %d]",
 		strSql, subjectId)
 	var compInfo = &model.CompanyInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanCompanyInfo(do.QueryRowContext(ctx, strSql, subjectId), compInfo); err {
 	case nil:
@@ -85,7 +84,7 @@ func (dao *CompanyDao) GetCompanyByAccSubId(ctx context.Context, do DbOperator,
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [scanCompanyInfo: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/GetCompanyByAccSubId] [scanCompanyInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -96,12 +95,12 @@ func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.Comp
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
 		st.Email, st.CompanyAddr, st.Backup, st.StartAccountPeriod, st.LatestAccountYear,
 		st.CreatedAt, st.UpdatedAt, st.CompanyGroupID}
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[CompanyInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[CompanyInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Create] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/Create] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -110,13 +109,13 @@ func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.Comp
 func (dao *CompanyDao) Delete(ctx context.Context, do DbOperator, companyId int) error {
 	strSql := "delete from " + companyInfoTN + " where company_id = ?"
 
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Delete] [sql: %s, id: %d]", strSql, companyId)
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/Delete] [sql: %s, id: %d]", strSql, companyId)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[CompanyInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.ExecContext(ctx, strSql, companyId); err != nil {
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Delete] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -128,7 +127,7 @@ func (dao *CompanyDao) Count(ctx context.Context, do DbOperator) (int64, error) 
 	strSql := "select count(1) from " + companyInfoTN
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[CompanyInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[CompanyInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -138,7 +137,7 @@ func (dao *CompanyDao) CountByFilter(ctx context.Context, do DbOperator, filter 
 	strSql, values := transferCountSql(companyInfoTN, filter)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[CompanyInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[CompanyInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -146,14 +145,14 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 	offset int, order string, od int) ([]*model.CompanyInfo, error) {
 	var companyInfoSlice []*model.CompanyInfo
 	strSql, values := transferListSql(companyInfoTN, filter, companyInfoFields, limit, offset, order, od)
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/List] sql %s with values %v", strSql, values)
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[CompanyInfo/db/List] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[CompanyInfo/db/List] [SqlElapsed: %v]", time.Since(start))
 	}()
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/List] [do.Query: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/List] [do.Query: %s]", err.Error())
 		return companyInfoSlice, err
 	}
 	defer result.Close()
@@ -161,7 +160,7 @@ func (dao *CompanyDao) List(ctx context.Context, do DbOperator, filter map[strin
 		companyInfo := new(model.CompanyInfo)
 		err = scanCompanyInfo(result, companyInfo)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/List] [ScanSnapshot: %s]", err.Error())
+			gLogger.ErrorContext(ctx, "[CompanyInfo/db/List] [ScanSnapshot: %s]", err.Error())
 			return companyInfoSlice, err
 		}
 		companyInfoSlice = append(companyInfoSlice, companyInfo)
@@ -192,11 +191,11 @@ func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 	filter := map[string]any{"company_id": companyId}
 	strSql, values := makeUpdateSqlWithMultiCondition(companyInfoTN, params, nil, filter, nil, nil)
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/Update] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[CompanyInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[CompanyInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/Update] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/Update] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -204,21 +203,39 @@ func (dao *CompanyDao) Update(ctx context.Context, do DbOperator, companyId int,
 
 // create voucherInfo/voucherRecordInfo ...
 // func (dao *CompanyDao) CreateNewTable(ctx context.Context, do DbOperator, oldTableName, newTableName string) error {
-// 	dao.Logger.DebugContext(ctx, "[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
+// 	gLogger.DebugContext(ctx, "[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
 // 	//judge ,is not exist
 // 	var c int64
 // 	strSql := "select count(1) from information_schema.TABLES where table_name = ?"
 // 	err := do.QueryRowContext(ctx, strSql, newTableName).Scan(&c)
 // 	if err != nil {
-// 		dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.QueryRowContext: %s]", err.Error())
+// 		gLogger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.QueryRowContext: %s]", err.Error())
 // 		return err
 // 	}
 // 	if c == 0 {
 // 		//create new table
 // 		strCreateTableSql := fmt.Sprintf("create table %s like %s", newTableName, oldTableName)
 // 		if _, err = do.ExecContext(ctx, strCreateTableSql); err != nil {
-// 			dao.Logger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.Exec: %s]", err.Error())
+// 			gLogger.ErrorContext(ctx, "[CompanyInfo/db/CreateNewTable] [do.Exec: %s]", err.Error())
 // 		}
 // 	}
 // 	return err
 // }
+
+// get max companyId
+func (dao *CompanyDao) GetMaxCompanyId(ctx context.Context, do DbOperator) (int, error) {
+	var maxCompanyId sql.NullInt64
+	strSql := "select max(company_id) from " + companyInfoTN
+	gLogger.DebugContext(ctx, "[CompanyInfo/db/GetMaxCompanyId] [sql: %s]", strSql)
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql).Scan(&maxCompanyId)
+	gLogger.InfoContext(ctx, "[CompanyInfo/db/GetMaxCompanyId] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		gLogger.ErrorContext(ctx, "[CompanyInfo/db/GetMaxCompanyId] [do.Query: %s]", err.Error())
+		return 0, err
+	}
+	if maxCompanyId.Valid {
+		return int(maxCompanyId.Int64), nil
+	}
+	return 0, nil
+}

@@ -15,6 +15,14 @@ import (
 	"financeMgr/src/common/log"
 )
 
+var (
+	gLogger log.ILog
+)
+
+func InitHandler(logger *log.Logger) {
+	gLogger = logger
+}
+
 var GAccessTokenH = NewAccessTokenHandler()
 var GAuthManaged = NewAuthorityManaged()
 

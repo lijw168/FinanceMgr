@@ -7,30 +7,27 @@ import (
 	"financeMgr/src/analysis-server/api/utils"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
-	"financeMgr/src/common/log"
 	"time"
 )
 
 type OperatorInfoService struct {
-	Logger     *log.Logger
 	OptInfoDao *db.OperatorInfoDao
-	Db         *sql.DB
 }
 
 func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.CreateOptInfoParams,
 	requestId string) (*model.OperatorInfoView, CcError) {
-	ps.Logger.InfoContext(ctx, "CreateOptInfo method start, "+"operator Name:%s", *params.Name)
+	gLogger.InfoContext(ctx, "CreateOptInfo method start, "+"operator Name:%s", *params.Name)
 
 	FuncName := "OperatorInfoService/operater/CreateOptInfo"
 	bIsRollBack := true
-	tx, err := ps.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, ps.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 
@@ -58,19 +55,19 @@ func (ps *OperatorInfoService) CreateOptInfo(ctx context.Context, params *model.
 		optInfo.Department = *params.Department
 	}
 	optInfo.CreatedAt = time.Now()
-	optInfo.OperatorID = GIdInfoService.genOptIdInfo.GetNextId()
+	optInfo.OperatorID = gIdInfoService.genOptIdInfo.GetNextId()
 
 	if err = ps.OptInfoDao.Create(ctx, tx, optInfo); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [OptInfoDao.Create: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [OptInfoDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
 	optView := ps.OperateInfoMdelToView(optInfo)
-	ps.Logger.InfoContext(ctx, "CreateOptInfo method end, "+"operator Name:%s", *params.Name)
+	gLogger.InfoContext(ctx, "CreateOptInfo method end, "+"operator Name:%s", *params.Name)
 	return optView, nil
 }
 
@@ -102,9 +99,9 @@ func (ps *OperatorInfoService) ListOperators(ctx context.Context,
 		orderField = *params.Order[0].Field
 		orderDirection = *params.Order[0].Direction
 	}
-	optInfos, err := ps.OptInfoDao.List(ctx, ps.Db, filterFields, limit, offset, orderField, orderDirection)
+	optInfos, err := ps.OptInfoDao.List(ctx, gDb, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		ps.Logger.ErrorContext(ctx, "[OperatorInfoService/service/ListOperators] [OptInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[OperatorInfoService/service/ListOperators] [OptInfoDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return OptViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 
@@ -134,7 +131,7 @@ func (ps *OperatorInfoService) OperateInfoMdelToView(optInfo *model.OperatorInfo
 
 func (ps *OperatorInfoService) GetOperatorInfoByName(ctx context.Context, strName string, iCompanyID int,
 	requestId string) (*model.OperatorInfoView, CcError) {
-	optInfo, err := ps.OptInfoDao.GetOptInfoByName(ctx, ps.Db, strName, iCompanyID)
+	optInfo, err := ps.OptInfoDao.GetOptInfoByName(ctx, gDb, strName, iCompanyID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -149,7 +146,7 @@ func (ps *OperatorInfoService) GetOperatorInfoByName(ctx context.Context, strNam
 
 func (ps *OperatorInfoService) GetOperatorInfoByID(ctx context.Context, optID int,
 	requestId string) (*model.OperatorInfoView, CcError) {
-	optInfo, err := ps.OptInfoDao.GetOptInfoById(ctx, ps.Db, optID)
+	optInfo, err := ps.OptInfoDao.GetOptInfoById(ctx, gDb, optID)
 	switch err {
 	case nil:
 	case sql.ErrNoRows:
@@ -164,12 +161,12 @@ func (ps *OperatorInfoService) GetOperatorInfoByID(ctx context.Context, optID in
 
 func (ps *OperatorInfoService) DeleteOperatorInfoByID(ctx context.Context, optID int,
 	requestId string) CcError {
-	ps.Logger.InfoContext(ctx, "DeleteOperatorInfoByID method begin, "+"operator_id:%d", optID)
-	err := ps.OptInfoDao.Delete(ctx, ps.Db, optID)
+	gLogger.InfoContext(ctx, "DeleteOperatorInfoByID method begin, "+"operator_id:%d", optID)
+	err := ps.OptInfoDao.Delete(ctx, gDb, optID)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, "Delete failed")
 	}
-	ps.Logger.InfoContext(ctx, "DeleteOperatorInfoByID method end, "+"operator_id:%d", optID)
+	gLogger.InfoContext(ctx, "DeleteOperatorInfoByID method end, "+"operator_id:%d", optID)
 	return nil
 }
 
@@ -177,14 +174,14 @@ func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, optID int,
 	params map[string]interface{}) CcError {
 	FuncName := "OperatorInfoService/UpdateOperator"
 	bIsRollBack := true
-	tx, err := ps.Db.Begin()
+	tx, err := gDb.Begin()
 	if err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
 		return NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
 	}
 	defer func() {
 		if bIsRollBack {
-			RollbackLog(ctx, ps.Logger, FuncName, tx)
+			RollbackLog(ctx, FuncName, tx)
 		}
 	}()
 	_, err = ps.OptInfoDao.GetOptInfoById(ctx, tx, optID)
@@ -202,7 +199,7 @@ func (ps *OperatorInfoService) UpdateOperator(ctx context.Context, optID int,
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	if err = tx.Commit(); err != nil {
-		ps.Logger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false

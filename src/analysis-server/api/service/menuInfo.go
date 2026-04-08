@@ -2,16 +2,12 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
-	"financeMgr/src/common/log"
 )
 
 type MenuInfoService struct {
-	Logger  *log.Logger
 	MenuDao *db.MenuInfoDao
-	Db      *sql.DB
 }
 
 // convert accSubject to accSubjectView ...
@@ -52,9 +48,9 @@ func (ms *MenuInfoService) ListMenuInfo(ctx context.Context,
 	// 	orderField = *params.Order[0].Field
 	// 	orderDirection = *params.Order[0].Direction
 	// }
-	menuInfos, err := ms.MenuDao.List(ctx, ms.Db, filterFields, limit, offset, orderField, orderDirection)
+	menuInfos, err := ms.MenuDao.List(ctx, gDb, filterFields, limit, offset, orderField, orderDirection)
 	if err != nil {
-		ms.Logger.ErrorContext(ctx, "[MenuInfoService/service/ListMenuInfo] [MenuDao.List: %s, filterFields: %v]", err.Error(), filterFields)
+		gLogger.ErrorContext(ctx, "[MenuInfoService/service/ListMenuInfo] [MenuDao.List: %s, filterFields: %v]", err.Error(), filterFields)
 		return menuInfoViewSlice, 0, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 

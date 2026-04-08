@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"financeMgr/src/common/log"
 	"strings"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 type OperatorInfoDao struct {
 	// Logger *log.Logger
-	Logger log.ILog
+	//Logger log.ILog
 }
 
 var (
@@ -29,11 +28,11 @@ func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 	strName string, iCompanyID int) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " +
 		operatorInfoTN + " where name=? and company_id=?"
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [sql: %s ,name: %s,icompanyId:%d]", strSql, strName, iCompanyID)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [sql: %s ,name: %s,icompanyId:%d]", strSql, strName, iCompanyID)
 	var optInfo = &model.OperatorInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, strName, iCompanyID), optInfo); err {
 	case nil:
@@ -41,7 +40,7 @@ func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [scanOperatorInfo: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoByName] [scanOperatorInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -50,11 +49,11 @@ func (dao *OperatorInfoDao) GetOptInfoByName(ctx context.Context, do DbOperator,
 func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
 	optID int) (*model.OperatorInfo, error) {
 	strSql := "select " + strings.Join(operatorInfoFields, ",") + " from " + operatorInfoTN + " where operator_id=?"
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoById] [sql: %s ,values: %d]", strSql, optID)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/GetOptInfoById] [sql: %s ,values: %d]", strSql, optID)
 	var optInfo = &model.OperatorInfo{}
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoById] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[OperatorInfo/db/GetOptInfoById] [SqlElapsed: %v]", time.Since(start))
 	}()
 	switch err := scanOperatorInfo(do.QueryRowContext(ctx, strSql, optID), optInfo); err {
 	case nil:
@@ -62,7 +61,7 @@ func (dao *OperatorInfoDao) GetOptInfoById(ctx context.Context, do DbOperator,
 	case sql.ErrNoRows:
 		return nil, err
 	default:
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoById] [scanOperatorInfo: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/GetOptInfoById] [scanOperatorInfo: %s]", err.Error())
 		return nil, err
 	}
 }
@@ -73,7 +72,7 @@ func (dao *OperatorInfoDao) CountByFilter(ctx context.Context, do DbOperator, fi
 	strSql, values := transferCountSql(operatorInfoTN, filter)
 	start := time.Now()
 	err := do.QueryRowContext(ctx, strSql, values...).Scan(&c)
-	dao.Logger.InfoContext(ctx, "[OperatorInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[OperatorInfo/db/CountByFilter] [SqlElapsed: %v]", time.Since(start))
 	return c, err
 }
 
@@ -82,12 +81,12 @@ func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model
 		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.OperatorID, st.CompanyID, st.Name, st.Password, st.Job,
 		st.Department, st.Status, st.Role, st.CreatedAt, st.UpdatedAt}
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Create] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[OperatorInfo/db/Create] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Create] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/Create] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -96,13 +95,13 @@ func (dao *OperatorInfoDao) Create(ctx context.Context, do DbOperator, st *model
 func (dao *OperatorInfoDao) Delete(ctx context.Context, do DbOperator, optID int) error {
 	strSql := "delete from " + operatorInfoTN + " where operator_id = ?"
 
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %d]", strSql, optID)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/Delete] [sql: %s, id: %d]", strSql, optID)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[OperatorInfo/db/Delete] [SqlElapsed: %v]", time.Since(start))
 	}()
 	if _, err := do.ExecContext(ctx, strSql, optID); err != nil {
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Delete] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/Delete] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
@@ -112,14 +111,14 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 	offset int, order string, od int) ([]*model.OperatorInfo, error) {
 	var OperatorInfoSlice []*model.OperatorInfo
 	strSql, values := transferListSql(operatorInfoTN, filter, operatorInfoFields, limit, offset, order, od)
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/List] sql %s with values %v", strSql, values)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/List] sql %s with values %v", strSql, values)
 	start := time.Now()
 	defer func() {
-		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/List] [SqlElapsed: %v]", time.Since(start))
+		gLogger.InfoContext(ctx, "[OperatorInfo/db/List] [SqlElapsed: %v]", time.Since(start))
 	}()
 	result, err := do.QueryContext(ctx, strSql, values...)
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/List] [do.Query: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/List] [do.Query: %s]", err.Error())
 		return OperatorInfoSlice, err
 	}
 	defer result.Close()
@@ -127,7 +126,7 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 		OperatorInfo := new(model.OperatorInfo)
 		err = scanOperatorInfo(result, OperatorInfo)
 		if err != nil {
-			dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/List] [ScanSnapshot: %s]", err.Error())
+			gLogger.ErrorContext(ctx, "[OperatorInfo/db/List] [ScanSnapshot: %s]", err.Error())
 			return OperatorInfoSlice, err
 		}
 		OperatorInfoSlice = append(OperatorInfoSlice, OperatorInfo)
@@ -139,14 +138,14 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 // 	filterNo map[string]interface{}, limit int, offset int, order string, od int) ([]*model.OperatorInfo, error) {
 // 	var OperatorInfoSlice []*model.OperatorInfo
 // 	strSql, values := transferListSqlWithNo(operatorInfoTN, filter, filterNo, operatorInfoFields, limit, offset, order, od)
-// 	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/ListWithFilterNo] sql %s with values %v", strSql, values)
+// 	gLogger.DebugContext(ctx, "[OperatorInfo/db/ListWithFilterNo] sql %s with values %v", strSql, values)
 // 	start := time.Now()
 // 	defer func() {
-// 		dao.Logger.InfoContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [SqlElapsed: %v]", time.Since(start))
+// 		gLogger.InfoContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [SqlElapsed: %v]", time.Since(start))
 // 	}()
 // 	result, err := do.QueryContext(ctx, strSql, values...)
 // 	if err != nil {
-// 		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [do.Query: %s]", err.Error())
+// 		gLogger.ErrorContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [do.Query: %s]", err.Error())
 // 		return OperatorInfoSlice, err
 // 	}
 // 	defer result.Close()
@@ -154,7 +153,7 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 // 		OperatorInfo := new(model.OperatorInfo)
 // 		err = scanOperatorInfo(result, OperatorInfo)
 // 		if err != nil {
-// 			dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [ScanSnapshot: %s]", err.Error())
+// 			gLogger.ErrorContext(ctx, "[OperatorInfo/db/ListWithFilterNo] [ScanSnapshot: %s]", err.Error())
 // 			return OperatorInfoSlice, err
 // 		}
 // 		OperatorInfoSlice = append(OperatorInfoSlice, OperatorInfo)
@@ -164,33 +163,34 @@ func (dao *OperatorInfoDao) List(ctx context.Context, do DbOperator, filter map[
 
 func (dao *OperatorInfoDao) Update(ctx context.Context, do DbOperator, optID int,
 	params map[string]interface{}) error {
-	//strSql := "update " + operatorInfoTN + " set "
-	// var values []interface{}
-	// var first bool = true
-	// for key, value := range params {
-	// 	dbKey := camelToUnix(key)
-	// 	if first {
-	// 		strSql += dbKey + "=?"
-	// 		first = false
-	// 	} else {
-	// 		strSql += "," + dbKey + "=?"
-	// 	}
-	// 	values = append(values, value)
-	// }
-	// if first {
-	// 	return nil
-	// }
-	// strSql += " where operator_id = ?"
-	// values = append(values, optID)
+
 	filter := map[string]any{"operator_id": optID}
 	strSql, values := makeUpdateSqlWithMultiCondition(operatorInfoTN, params, nil, filter, nil, nil)
 	start := time.Now()
-	dao.Logger.DebugContext(ctx, "[OperatorInfo/db/Update] [sql: %s, values: %v]", strSql, values)
+	gLogger.DebugContext(ctx, "[OperatorInfo/db/Update] [sql: %s, values: %v]", strSql, values)
 	_, err := do.ExecContext(ctx, strSql, values...)
-	dao.Logger.InfoContext(ctx, "[OperatorInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
+	gLogger.InfoContext(ctx, "[OperatorInfo/db/Update] [SqlElapsed: %v]", time.Since(start))
 	if err != nil {
-		dao.Logger.ErrorContext(ctx, "[OperatorInfo/db/Update] [do.Exec: %s]", err.Error())
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/Update] [do.Exec: %s]", err.Error())
 		return err
 	}
 	return nil
+}
+
+// get max operatorId
+func (dao *OperatorInfoDao) GetMaxOperatorId(ctx context.Context, do DbOperator) (int, error) {
+	//use NullInt64 to avoid the problem when the table is empty
+	var maxOptId sql.NullInt64
+	strSql := "select max(operator_id) from " + operatorInfoTN
+	start := time.Now()
+	err := do.QueryRowContext(ctx, strSql).Scan(&maxOptId)
+	gLogger.InfoContext(ctx, "[OperatorInfo/db/GetMaxOperatorId] [SqlElapsed: %v]", time.Since(start))
+	if err != nil {
+		gLogger.ErrorContext(ctx, "[OperatorInfo/db/GetMaxOperatorId] [do.QueryRowContext: %s]", err.Error())
+		return 0, err
+	}
+	if maxOptId.Valid {
+		return int(maxOptId.Int64), nil
+	}
+	return 0, nil
 }
