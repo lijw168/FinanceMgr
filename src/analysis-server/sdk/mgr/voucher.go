@@ -112,8 +112,8 @@ func (vr *Voucher) ArrangeVoucher(opts *options.VoucherArrangeOptions) error {
 	param.CompanyID = &opts.CompanyID
 	param.VoucherYear = &opts.VoucherYear
 	param.VoucherMonth = &opts.VoucherMonth
-	if opts.ArrangeVoucherNum {
-		param.ArrangeVoucherNum = &opts.ArrangeVoucherNum
+	if opts.IsArrangeVoucherNum {
+		param.IsArrangeVoucherNum = &opts.IsArrangeVoucherNum
 	}
 	_, err := util.DoRequest(action, param)
 	return err
@@ -210,17 +210,20 @@ func (vr *Voucher) GetVoucherInfo(opts *options.DescribeYearAndIDOptions) (*mode
 	return view, nil
 }
 
-func (vr *Voucher) GetLatestVoucherInfo(opts *options.DescribeYearAndIDOptions) (int64, []*model.VoucherInfoView, error) {
+func (vr *Voucher) GetLatestVoucherInfo(opts *options.GetLatestVoucherInfoOptions) (int64, []*model.VoucherInfoView, error) {
 	action := "GetLatestVoucherInfo"
 	switch {
-	case opts.ID <= 0:
-		return -1, nil, errors.New("ID is required")
+	case opts.CompanyID <= 0:
+		return -1, nil, errors.New("CompanyID is required")
 	case opts.VoucherYear <= 0:
 		return -1, nil, errors.New("VoucherYear is required")
+	case opts.VoucherMonth <= 0:
+		return -1, nil, errors.New("VoucherMonth is required")
 	}
-	params := &model.DescribeYearAndIDParams{
-		ID:          &opts.ID,
-		VoucherYear: &opts.VoucherYear,
+	params := &model.QueryLatestVoucherInfoParameters{
+		CompanyID:    &opts.CompanyID,
+		VoucherYear:  &opts.VoucherYear,
+		VoucherMonth: &opts.VoucherMonth,
 	}
 	result, err := util.DoRequest(action, params)
 	if err != nil {

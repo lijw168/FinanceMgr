@@ -26,40 +26,41 @@ func newAccSubCreateCmd() *cobra.Command {
 		Use:   "accSub-create [OPTIONS] commonId subjectName subjectLevel companyId subjectDirection subjectType subjectStyle",
 		Short: "Create a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 6 {
+			if len(args) < 7 {
 				cmd.Help()
 				return
 			}
-			var (
-				err       error
-				subLevel  int
-				companyID int
-				subDir    int
-				subType   int
-			)
-
+			errMsgs := []string{}
 			opts.CommonID = args[0]
 			opts.SubjectName = args[1]
-
-			if subLevel, err = strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
+			subLevel, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectLevel转换失败: %s", args[2]))
 			}
+			companyID, err := strconv.Atoi(args[3])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyId转换失败: %s", args[3]))
+			}
+			subDir, err := strconv.Atoi(args[4])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectDirection转换失败: %s", args[4]))
+			}
+			subType, err := strconv.Atoi(args[5])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectType转换失败: %s", args[5]))
+			}
+
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+
 			opts.SubjectLevel = subLevel
-			if companyID, err = strconv.Atoi(args[3]); err != nil {
-				fmt.Println("change to int fail", args[3])
-			}
 			opts.CompanyID = companyID
-
-			if subDir, err = strconv.Atoi(args[4]); err != nil {
-				fmt.Println("change to int fail", args[4])
-			}
 			opts.SubjectDirection = subDir
-
-			if subType, err = strconv.Atoi(args[5]); err != nil {
-				fmt.Println("change to int fail", args[5])
-			}
 			opts.SubjectType = subType
-
 			opts.SubjectStyle = args[6]
 
 			if hv, err := Sdk.CreateAccSub(&opts); err != nil {
@@ -98,6 +99,7 @@ func newAccSubListCmd() *cobra.Command {
 		opts.Filter = make(map[string]interface{})
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+			return
 		} else {
 			opts.Filter["companyId"] = id
 		}
@@ -123,6 +125,7 @@ func newAccSubShowCmd() *cobra.Command {
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
@@ -143,40 +146,46 @@ func newAccSubUpdateCmd() *cobra.Command {
 		Use:   "accSub-update [OPTIONS] subjectID commonID subjectName subjectLevel companyId subjectDirection subjectType",
 		Short: "update a accSub",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 5 {
+			if len(args) < 7 {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.SubjectID = id
+			errMsgs := []string{}
+			id, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[0]))
 			}
+			subLevel, err := strconv.Atoi(args[3])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectLevel转换失败: %s", args[3]))
+			}
+			companyID, err := strconv.Atoi(args[4])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyId转换失败: %s", args[4]))
+			}
+			subDir, err := strconv.Atoi(args[5])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectDirection转换失败: %s", args[5]))
+			}
+			subType, err := strconv.Atoi(args[6])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectType转换失败: %s", args[6]))
+			}
+
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+
+			opts.SubjectID = id
 			opts.CommonID = args[1]
 			opts.SubjectName = args[2]
-
-			if subLevel, err := strconv.Atoi(args[3]); err != nil {
-				fmt.Println("change to int fail", args[3])
-			} else {
-				opts.SubjectLevel = subLevel
-			}
-			if companyID, err := strconv.Atoi(args[4]); err != nil {
-				fmt.Println("change to int fail", args[4])
-			} else {
-				opts.CompanyID = companyID
-			}
-
-			if subDir, err := strconv.Atoi(args[5]); err != nil {
-				fmt.Println("change to int fail", args[5])
-			} else {
-				opts.SubjectDirection = subDir
-			}
-
-			if subType, err := strconv.Atoi(args[6]); err != nil {
-				fmt.Println("change to int fail", args[6])
-			} else {
-				opts.SubjectType = subType
-			}
+			opts.SubjectLevel = subLevel
+			opts.CompanyID = companyID
+			opts.SubjectDirection = subDir
+			opts.SubjectType = subType
 
 			if err := Sdk.UpdateAccSub(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -194,6 +203,7 @@ func newAccSubCreateTemplateCmd() *cobra.Command {
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}

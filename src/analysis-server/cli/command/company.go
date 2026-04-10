@@ -36,7 +36,7 @@ func newCompanyCreateCmd() *cobra.Command {
 			opts.Email = args[4]
 			opts.CompanyAddr = args[5]
 			if period, err := strconv.Atoi(args[6]); err != nil {
-				fmt.Println("change to int fail", args[0])
+				fmt.Println("change to int fail", args[6])
 			} else {
 				opts.StartAccountPeriod = period
 			}
@@ -92,6 +92,7 @@ func newCompanyShowCmd() *cobra.Command {
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
@@ -118,6 +119,7 @@ func newCompanyUpdateCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.CompanyID = id
 			}
@@ -150,12 +152,14 @@ func newAssociatedCompanyGroupCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.CompanyGroupID = id
 			}
 
 			if id, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.CompanyID = id
 			}
@@ -181,6 +185,7 @@ func newInitResourceInfoCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}

@@ -117,10 +117,16 @@ type VoucherOptions struct {
 
 // VoucherArrangeOptions 凭证整理参数
 type VoucherArrangeOptions struct {
-	CompanyID         int
-	VoucherYear       int
-	VoucherMonth      int
-	ArrangeVoucherNum bool
+	CompanyID           int
+	VoucherYear         int
+	VoucherMonth        int
+	IsArrangeVoucherNum bool
+}
+
+type GetLatestVoucherInfoOptions struct {
+	CompanyID    int
+	VoucherYear  int
+	VoucherMonth int
 }
 
 type DescribeYearAndIDOptions struct {

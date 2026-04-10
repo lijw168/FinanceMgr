@@ -21,7 +21,7 @@ func (c *ServerConf) CheckValid() error {
 		return fmt.Errorf("ServerConf need Port")
 	}
 	if c.SynDuration < 1 {
-		return fmt.Errorf("ServerConf need Cores")
+		return fmt.Errorf("ServerConf need SynDuration")
 	}
 	if len(c.BaseUrl) == 0 {
 		return fmt.Errorf("ServerConf need BaseUrl")

@@ -40,12 +40,14 @@ func newVoucherCreateCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.InfoOptions.CompanyID = id
 			}
 
 			if month, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.InfoOptions.VoucherMonth = month
 			}
@@ -84,11 +86,13 @@ func newVoucherDeleteCmd() *cobra.Command {
 			var opts options.DeleteYearAndIDOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
 			if iYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = iYear
 			}
@@ -113,11 +117,13 @@ func newVoucherShowCmd() *cobra.Command {
 			var opts options.DescribeYearAndIDOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
 			if iYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = iYear
 			}
@@ -144,16 +150,19 @@ func newVoucherArrangeCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.CompanyID = id
 			}
 			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = voucherYear
 			}
 			if voucherMonth, err := strconv.Atoi(args[2]); err != nil {
 				fmt.Println("change to int fail", args[2])
+				return
 			} else {
 				opts.VoucherMonth = voucherMonth
 			}
@@ -162,7 +171,7 @@ func newVoucherArrangeCmd() *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().BoolVar(&opts.ArrangeVoucherNum, "isArrangeVoucherNum", false, "arrange voucher Num")
+	cmd.Flags().BoolVar(&opts.IsArrangeVoucherNum, "isArrangeVoucherNum", false, "arrange voucher Num")
 	return cmd
 }
 
@@ -209,8 +218,7 @@ func newVoucherArrangeCmd() *cobra.Command {
 // }
 
 func newVoucherRecordListCmd() *cobra.Command {
-	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary",
-		"SubID1", "SubID2", "SubID3", "SubID4", "BillCount", "Status"}
+	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary", "SubID1"}
 	cmd := &cobra.Command{
 		Use:   "vouRecord-list voucherId voucherYear",
 		Short: "List voucher records Support Filter",
@@ -227,11 +235,13 @@ func newVoucherRecordListCmd() *cobra.Command {
 		opts.Filter = make(map[string]interface{})
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+			return
 		} else {
 			opts.Filter["voucherId"] = id
 		}
 		if iVoucherYear, err := strconv.Atoi(args[1]); err != nil {
 			fmt.Println("change to int fail", args[1])
+			return
 		} else {
 			opts.Filter["voucherYear"] = iVoucherYear
 		}
@@ -298,11 +308,13 @@ func newVoucherInfoShowCmd() *cobra.Command {
 			var opts options.DescribeYearAndIDOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
 			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = voucherYear
 			}
@@ -321,25 +333,33 @@ func newGetLatestVouInfoCmd() *cobra.Command {
 	defCs := []string{"VoucherID", "CompanyID", "VoucherMonth", "NumOfMonth", "VoucherDate",
 		"VoucherFiller", "VoucherAuditor"}
 	cmd := &cobra.Command{
-		Use:   "vouInfo-getLatest [OPTIONS] companyID voucherYear",
+		Use:   "vouInfo-getLatest [OPTIONS] companyID voucherYear voucherMonth",
 		Short: "get latest voucher information",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
+		if len(args) < 3 {
 			cmd.Help()
 			return
 		}
-		var opts options.DescribeYearAndIDOptions
+		var opts options.GetLatestVoucherInfoOptions
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+			return
 		} else {
-			opts.ID = id
+			opts.CompanyID = id
 		}
 		if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 			fmt.Println("change to int fail", args[1])
+			return
 		} else {
 			opts.VoucherYear = voucherYear
+		}
+		if voucherMonth, err := strconv.Atoi(args[2]); err != nil {
+			fmt.Println("change to int fail", args[2])
+			return
+		} else {
+			opts.VoucherMonth = voucherMonth
 		}
 		if _, views, err := Sdk.GetLatestVoucherInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
@@ -363,16 +383,19 @@ func newGetMaxNumOfMonthCmd() *cobra.Command {
 			var opts options.QueryMaxNumOfMonthOption
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.CompanyID = id
 			}
 			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = voucherYear
 			}
 			if month, err := strconv.Atoi(args[2]); err != nil {
 				fmt.Println("change to int fail", args[2])
+				return
 			} else {
 				opts.VoucherMonth = month
 			}
@@ -406,11 +429,13 @@ func newVoucherInfoListCmd() *cobra.Command {
 		opts.Filter = make(map[string]interface{})
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+			return
 		} else {
 			opts.Filter["companyId"] = id
 		}
 		if iVoucherYear, err := strconv.Atoi(args[1]); err != nil {
 			fmt.Println("change to int fail", args[1])
+			return
 		} else {
 			opts.Filter["voucherYear"] = iVoucherYear
 		}
@@ -435,11 +460,13 @@ func newVoucherInfoUpdateCmd() *cobra.Command {
 			}
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.VoucherID = id
 			}
 			if voucherYear, err := strconv.Atoi(args[1]); err != nil {
 				fmt.Println("change to int fail", args[1])
+				return
 			} else {
 				opts.VoucherYear = voucherYear
 			}

@@ -39,6 +39,8 @@ type AccSubject struct {
 	SubjectType      int
 	MnemonicCode     string
 	SubjectStyle     string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type YearBalance struct {
@@ -127,6 +129,7 @@ type IDInfo struct {
 	VoucherRecordID   int
 	ComGroupID        int
 	VoucherTemplateID int
+	UpdatedAt         time.Time
 }
 
 // MenuInfo ...

@@ -6,6 +6,7 @@ import (
 	"financeMgr/src/analysis-server/api/db"
 	"financeMgr/src/analysis-server/model"
 	cons "financeMgr/src/common/constant"
+	"time"
 )
 
 type AccountSubService struct {
@@ -54,6 +55,8 @@ func (as *AccountSubService) CreateAccSub(ctx context.Context, params *model.Cre
 		accSub.MnemonicCode = ""
 	}
 	accSub.SubjectID = gIdInfoService.genSubIdInfo.GetNextId()
+	accSub.CreatedAt = time.Now()
+	accSub.UpdatedAt = time.Now()
 	if err = as.AccSubDao.Create(ctx, tx, accSub); err != nil {
 		gLogger.ErrorContext(ctx, "[%s] [AccSubDao.Create: %s]", FuncName, err.Error())
 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
@@ -287,6 +290,7 @@ func (as *AccountSubService) UpdateAccSubById(ctx context.Context, subjectID int
 	if iCount > 0 {
 		return NewError(ErrAccSub, ErrError, ErrNull, "the account subjectID is using, don't updated.")
 	}
+	params["updatedAt"] = time.Now()
 	err = as.AccSubDao.UpdateBySubID(ctx, tx, subjectID, params)
 	if err != nil {
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())

@@ -14,6 +14,7 @@ type YearBalHandlers struct {
 	YearBalService *service.YearBalanceService
 }
 
+// 获取一个科目的包括年度结转余额以及其他字段的一整条记录
 func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.BasicYearBalanceParams)
 	err := yh.HttpRequestParse(r, params)
@@ -39,6 +40,7 @@ func (yh *YearBalHandlers) GetYearBalance(w http.ResponseWriter, r *http.Request
 	yh.Response(r.Context(), gLogger, w, nil, yearBal)
 }
 
+// 获取一个科目的年度结转余额这个字段的值，主要是为了给财务分析系统提供数据接口，减少不必要的数据传输。
 func (yh *YearBalHandlers) GetAccSubYearBalValue(w http.ResponseWriter, r *http.Request) {
 	var params = new(model.BasicYearBalanceParams)
 	err := yh.HttpRequestParse(r, params)

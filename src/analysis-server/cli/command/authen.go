@@ -30,7 +30,8 @@ func newLoginCmd() *cobra.Command {
 			opts.Name = args[0]
 			opts.Password = args[1]
 			if id, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[0])
+				fmt.Println("change to int fail", args[2])
+				return
 			} else {
 				opts.CompanyID = id
 			}
@@ -57,6 +58,7 @@ func newLogoutCmd() *cobra.Command {
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
@@ -71,7 +73,7 @@ func newLogoutCmd() *cobra.Command {
 func newLoginListCmd() *cobra.Command {
 	defCs := []string{"OperatorID", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{
-		Use:   "loginInfo-list companyId",
+		Use:   "loginInfo-list operatorId",
 		Short: "List operators Support Filter",
 	}
 	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
@@ -88,7 +90,7 @@ func newLoginListCmd() *cobra.Command {
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
 		} else {
-			opts.Filter["companyId"] = id
+			opts.Filter["operatorId"] = id
 		}
 		if _, views, err := Sdk.ListLoginInfo(&opts); err != nil {
 			util.FormatErrorOutput(err)
@@ -99,7 +101,7 @@ func newLoginListCmd() *cobra.Command {
 	return cmd
 }
 
-//由于一个用户，可能有多条loginInfo记录，所以该函数通过list函数获取相应的数据。
+// 由于一个用户，可能有多条loginInfo记录，所以该函数通过list函数获取相应的数据。
 func newLoginShowCmd() *cobra.Command {
 	defCs := []string{"OperatorID", "Name", "Status", "ClientIp", "BeginedAt", "EndedAt"}
 	cmd := &cobra.Command{

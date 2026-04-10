@@ -93,6 +93,8 @@ create table if not exists `finance_mgr`.`accountSubject`
    `subject_type`          tinyint not null,
    `mnemonic_code`         varchar(10) not null,
    `subject_style`         varchar(10) not null,
+   `created_at`            datetime,
+   `updated_at`            datetime,
    primary key (subject_id)
    /*unique key `subjectName` (`subject_name`),*/
    /*unique key `commonId` (`common_id`)*/
@@ -214,7 +216,8 @@ create table if not exists `finance_mgr`.`idInfo`
    `voucher_id`             int not null,
    `voucher_record_id`      int not null,
    `company_group_id`       int not null,
-   `voucher_template_id`    int not null
+   `voucher_template_id`    int not null,
+   `updated_at`             datetime
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 /*==============================================================*/
@@ -284,3 +287,6 @@ insert into menuInfo(menu_id,menu_name,menu_level,parent_menu_id,menu_serial_num
 insert into companyInfo(company_id,company_name,abbre_name,corporator,phone,e_mail,company_addr,backup,created_at,updated_at) value(1,"rootManager","manager","","","","","",now(),now());
 insert into operatorInfo (operator_id,name,password,company_id,job,department,status,role,created_at,updated_at) value(101,"root","root@123",1,"maintainer","",1,255,now(),now());
 insert into idInfo (company_id,operator_id,subject_id,voucher_id,voucher_record_id,company_group_id,voucher_template_id) value(2,102,501,1001,5001,801,1);
+update idInfo set voucher_id = 2001,voucher_record_id=7001, updated_at = now();
+/*2026.4.9之前的voucher_id和record_id的设计值是从1001和5001开始的,由于idInfo service出现了bug，所以导致之前的数据在不同的年份之间不是递增的。
+2026.4.9之后修改为从2001和7001重新开始的。 */

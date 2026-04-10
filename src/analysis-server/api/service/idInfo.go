@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"financeMgr/src/analysis-server/api/db"
 	dbp "financeMgr/src/analysis-server/api/db"
@@ -30,6 +31,7 @@ type IDInfoService struct {
 	genOptIdInfo      *aUtils.GenIdInfo
 	genComGroupIdInfo *aUtils.GenIdInfo
 	genvVouTempIdInfo *aUtils.GenIdInfo
+	dbName            string
 }
 
 func NewIDInfoService() *IDInfoService {
@@ -101,6 +103,7 @@ func (is *IDInfoService) CreateIDInfo(params *model.IDInfoParams,
 	idInfo.VoucherRecordID = *params.VoucherRecordID
 	idInfo.ComGroupID = *params.ComGroupID
 	idInfo.VoucherTemplateID = *params.VoucherTemplateID
+	idInfo.UpdatedAt = time.Now()
 	if err := is.idInfoDao.Create(gDb, idInfo); err != nil {
 		gLogger.Error("[CreateIDInfo] [IdInfoDao.Create: %s]", err.Error())
 		return nil, NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
@@ -188,6 +191,7 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 		vouTempId := is.genvVouTempIdInfo.GetId(true)
 		updateFields["voucherTemplateId"] = vouTempId
 	}
+	updateFields["updatedAt"] = time.Now()
 	ccErr := is.UpdateIdInfo(updateFields)
 	if ccErr != nil {
 		gLogger.Error("WriteIdResourceToDb failed,errInfo:%s", ccErr.Error())
@@ -198,7 +202,7 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 
 func (is *IDInfoService) verifyIdInfoAndUpdate(idInfoView *model.IDInfoView) CcError {
 	//get latest voucherTable,voucherRecordTable
-	voucherInfoTab, voucherRecTab, err := getLatestYearOfVoucherTable()
+	voucherInfoTab, voucherRecTab, err := is.getLatestYearOfVoucherTable()
 	if err != nil {
 		gLogger.Error("getLatestYearOfVoucherTable failed,errInfo:%s", err.Error())
 		return NewError(ErrIdInfo, ErrError, ErrNull, err.Error())
@@ -247,44 +251,44 @@ func (is *IDInfoService) verifyIdInfoAndUpdate(idInfoView *model.IDInfoView) CcE
 	}
 	updateFields := make(map[string]interface{})
 	if idInfoView.SubjectID < maxSubId {
-		gLogger.Error("the subjectId in idInfo is invalid,subjectId should be greater than %d", maxSubId)
+		gLogger.Error("the subjectId in idInfo is invalid,subjectId should be greater than or equal to %d", maxSubId)
 		//update idInfo with maxSubId
 		idInfoView.SubjectID = maxSubId
 		updateFields["subjectId"] = maxSubId
 	}
 	if idInfoView.CompanyID < maxCompanyId {
-		gLogger.Error("the companyId in idInfo is invalid,companyId should be greater than %d", maxCompanyId)
+		gLogger.Error("the companyId in idInfo is invalid,companyId should be greater than or equal to %d", maxCompanyId)
 		//update idInfo with maxCompanyId
 		idInfoView.CompanyID = maxCompanyId
 		updateFields["companyId"] = maxCompanyId
 	}
 	if idInfoView.VoucherID < maxVoucherId {
-		gLogger.Error("the voucherId in idInfo is invalid,voucherId should be greater than %d", maxVoucherId)
+		gLogger.Error("the voucherId in idInfo is invalid,voucherId should be greater than or equal to %d", maxVoucherId)
 		//update idInfo with maxVoucherId
 		idInfoView.VoucherID = maxVoucherId
 		updateFields["voucherId"] = maxVoucherId
 	}
 	if idInfoView.VoucherRecordID < maxVoucherRecordId {
-		gLogger.Error("the voucherRecordId in idInfo is invalid,voucherRecordId should be greater than %d", maxVoucherRecordId)
+		gLogger.Error("the voucherRecordId in idInfo is invalid,voucherRecordId should be greater than or equal to %d", maxVoucherRecordId)
 		//update idInfo with maxVoucherRecordId
 		idInfoView.VoucherRecordID = maxVoucherRecordId
 		updateFields["voucherRecordId"] = maxVoucherRecordId
 
 	}
 	if idInfoView.OperatorID < maxOperatorId {
-		gLogger.Error("the operatorId in idInfo is invalid,operatorId should be greater than %d", maxOperatorId)
+		gLogger.Error("the operatorId in idInfo is invalid,operatorId should be greater than or equal to %d", maxOperatorId)
 		//update idInfo with maxOperatorId
 		idInfoView.OperatorID = maxOperatorId
 		updateFields["operatorId"] = maxOperatorId
 	}
 	if idInfoView.ComGroupID < maxCompanyGroupId {
-		gLogger.Error("the companyGroupId in idInfo is invalid,companyGroupId should be greater than %d", maxCompanyGroupId)
+		gLogger.Error("the companyGroupId in idInfo is invalid,companyGroupId should be greater than or equal to %d", maxCompanyGroupId)
 		//update idInfo with maxCompanyGroupId
 		idInfoView.ComGroupID = maxCompanyGroupId
 		updateFields["companyGroupId"] = maxCompanyGroupId
 	}
 	if idInfoView.VoucherTemplateID < maxVoucherTemplateId {
-		gLogger.Error("the voucherTemplateId in idInfo is invalid,voucherTemplateId should be greater than %d", maxVoucherTemplateId)
+		gLogger.Error("the voucherTemplateId in idInfo is invalid,voucherTemplateId should be greater than or equal to %d", maxVoucherTemplateId)
 		//update idInfo with maxVoucherTemplateId
 		idInfoView.VoucherTemplateID = maxVoucherTemplateId
 		updateFields["voucherTemplateId"] = maxVoucherTemplateId
@@ -300,9 +304,18 @@ func (is *IDInfoService) verifyIdInfoAndUpdate(idInfoView *model.IDInfoView) CcE
 /*SELECT CAST(SUBSTRING(table_name, LENGTH('voucherInfo_') + 1) AS UNSIGNED) as year
 FROM information_schema.TABLES   WHERE table_name LIKE 'voucherInfo_%' ORDER BY year DESC  LIMIT 1;*/
 // getLatestYearOfVoucherTable 获取当前最新的凭证表的年份
-func getLatestYearOfVoucherTable() (voucherInfoTab, voucherRecTab string, err error) {
+func (is *IDInfoService) getLatestYearOfVoucherTable() (voucherInfoTab, voucherRecTab string, err error) {
+	if is.dbName == "" {
+		//get dbName
+		err = gDb.QueryRow("SELECT DATABASE()").Scan(&is.dbName)
+		if err != nil {
+			gLogger.Error("[init/service/getLatestYearOfVoucherTable] [db.QueryRow: %s]", err.Error())
+			return
+		}
+		gLogger.Info("[init/service/getLatestYearOfVoucherTable] current dbName: %s", is.dbName)
+	}
 	var maxTableName string
-	strSql := "select table_name from information_schema.TABLES where table_schema = 'finance_mgr' and  table_name like 'voucherInfo_%' order by table_name  desc limit 1"
+	strSql := "select table_name from information_schema.TABLES where table_schema = '" + is.dbName + "' and  table_name like 'voucherInfo_%' order by table_name  desc limit 1"
 	err = gDb.QueryRow(strSql).Scan(&maxTableName)
 	if err != nil {
 		gLogger.Error("[init/service/getLatestYearOfVoucherTable] [db.QueryRowContext: %s]", err.Error())

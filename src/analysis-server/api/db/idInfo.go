@@ -17,10 +17,10 @@ type IDInfoDao struct {
 var (
 	idInfoTN     = "idInfo"
 	idInfoFields = []string{"company_id", "operator_id", "subject_id", "voucher_id",
-		"voucher_record_id", `company_group_id`, `voucher_template_id`}
+		"voucher_record_id", `company_group_id`, `voucher_template_id`, `updated_at`}
 	scanIdInfo = func(r DbScanner, st *model.IDInfo) error {
 		return r.Scan(&st.CompanyID, &st.OperatorID, &st.SubjectID, &st.VoucherID,
-			&st.VoucherRecordID, &st.ComGroupID, &st.VoucherTemplateID)
+			&st.VoucherRecordID, &st.ComGroupID, &st.VoucherTemplateID, &st.UpdatedAt)
 	}
 )
 
@@ -45,9 +45,9 @@ func (dao *IDInfoDao) Get(do DbOperator) (*model.IDInfo, error) {
 
 func (dao *IDInfoDao) Create(do DbOperator, st *model.IDInfo) error {
 	strSql := "insert into " + idInfoTN + " (" + strings.Join(idInfoFields, ",") +
-		") values (?, ?, ?, ?, ?, ?, ?)"
+		") values (?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.OperatorID, st.SubjectID, st.VoucherID,
-		st.VoucherRecordID, st.ComGroupID, st.VoucherTemplateID}
+		st.VoucherRecordID, st.ComGroupID, st.VoucherTemplateID, st.UpdatedAt}
 	gLogger.Debug("[IDInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.Exec(strSql, values...)

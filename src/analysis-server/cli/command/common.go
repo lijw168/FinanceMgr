@@ -32,6 +32,7 @@ func deleteCmd(rsc int, handler func(*options.BaseOptions) error) *cobra.Command
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}

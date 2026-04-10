@@ -21,34 +21,41 @@ func NewYearBalanceCommand(cmd *cobra.Command) {
 func newYearBalanceCreateCmd() *cobra.Command {
 	var opts options.YearBalanceOption
 	cmd := &cobra.Command{
-		Use:   "yearBal-create [OPTIONS] companyID year subjectID [FLAG] balance",
+		Use:   "yearBal-create [OPTIONS] companyID year subjectID ",
 		Short: "Create the record of year balance",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.CompanyID = id
+			errMsgs := []string{}
+			companyID, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
-			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
-			} else {
-				opts.Year = iYear
+			year, err := strconv.Atoi(args[1])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 			}
-			if id, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
-			} else {
-				opts.SubjectID = id
+			subjectID, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 			}
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+			opts.CompanyID = companyID
+			opts.Year = year
+			opts.SubjectID = subjectID
 			if err := Sdk.CreateYearBalance(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},
 	}
-	cmd.Flags().Float64Var(&opts.Balance, "balance", 0, "annual closing status")
+	cmd.Flags().Float64Var(&opts.Balance, "balance", 0, "year balance")
 	//testBal := *(cmd.Flags().Float64("balance", 0, "year balance"))
 	//cmd.Flags().IntVar(&opts.Status, "status", 0, "annual closing status")
 	//fmt.Printf("testBal:%f,balance:%f\r\n", testBal, opts.Balance)
@@ -66,24 +73,28 @@ func newYearBalanceDeleteCmd() *cobra.Command {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.CompanyID = id
+			errMsgs := []string{}
+			companyID, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
-
-			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
-			} else {
-				opts.Year = iYear
+			year, err := strconv.Atoi(args[1])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 			}
-
-			if subjectId, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
-			} else {
-				opts.SubjectID = subjectId
+			subjectID, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 			}
-
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+			opts.CompanyID = companyID
+			opts.Year = year
+			opts.SubjectID = subjectID
 			if err := Sdk.DeleteYearBalance(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
@@ -101,22 +112,29 @@ func newYearBalanceShowCmd() *cobra.Command {
 				cmd.Help()
 				return
 			}
+			errMsgs := []string{}
 			var opts options.BasicYearBalance
-			if companyId, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change companyId to int fail", args[0])
-			} else {
-				opts.CompanyID = companyId
+			companyID, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
-			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change iYear to int fail", args[1])
-			} else {
-				opts.Year = iYear
+			year, err := strconv.Atoi(args[1])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 			}
-			if subjectId, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change subjectId to int fail", args[2])
-			} else {
-				opts.SubjectID = subjectId
+			subjectID, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 			}
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+			opts.CompanyID = companyID
+			opts.Year = year
+			opts.SubjectID = subjectID
 			yearBalView, err := Sdk.GetYearBalance(&opts)
 			if err != nil {
 				util.FormatErrorOutput(err)
@@ -131,36 +149,42 @@ func newYearBalanceShowCmd() *cobra.Command {
 func newYearBalanceUpdateCmd() *cobra.Command {
 	var opts options.YearBalanceOption
 	cmd := &cobra.Command{
-		Use:   "yearBal-update [OPTIONS] companyID  year subjectID [flag] balance/status",
+		Use:   "yearBal-update [OPTIONS] companyID  year subjectID",
 		Short: "update a record  of year balance",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.CompanyID = id
+			errMsgs := []string{}
+			companyID, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
-			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change to int fail", args[1])
-			} else {
-				opts.Year = iYear
+			year, err := strconv.Atoi(args[1])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 			}
-			if id, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change to int fail", args[2])
-			} else {
-				opts.SubjectID = id
+			subjectID, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 			}
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+			opts.CompanyID = companyID
+			opts.Year = year
+			opts.SubjectID = subjectID
 			if err := Sdk.UpdateYearBalance(&opts); err != nil {
 				util.FormatErrorOutput(err)
 			}
 		},
 	}
-	//不清楚为何Status,是可以获取数据的，难到时因为是其第一个字符大写？下一个版本验证一下。
-	opts.Balance = *(cmd.Flags().Float64("balance", 0, "year balance"))
-	cmd.Flags().IntVar(&opts.Status, "Status", 0, "annual closing status")
+	cmd.Flags().Float64Var(&opts.Balance, "balance", 0, "year balance")
+	cmd.Flags().IntVar(&opts.Status, "status", 0, "annual closing status")
 	return cmd
 }
 func newYearBalanceListCmd() *cobra.Command {
@@ -176,26 +200,33 @@ func newYearBalanceListCmd() *cobra.Command {
 			cmd.Help()
 			return
 		}
+		errMsgs := []string{}
 		var opts options.ListOptions
 		opts.Limit = -1
 		opts.Offset = 0
 		//for test
 		opts.Filter = make(map[string]interface{})
-		if companyId, err := strconv.Atoi(args[0]); err != nil {
-			fmt.Println("change to int fail", args[0])
-		} else {
-			opts.Filter["companyId"] = companyId
+		companyID, err := strconv.Atoi(args[0])
+		if err != nil {
+			errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 		}
-		if iYear, err := strconv.Atoi(args[1]); err != nil {
-			fmt.Println("change to int fail", args[1])
-		} else {
-			opts.Filter["year"] = iYear
+		year, err := strconv.Atoi(args[1])
+		if err != nil {
+			errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 		}
-		if id, err := strconv.Atoi(args[2]); err != nil {
-			fmt.Println("change to int fail", args[2])
-		} else {
-			opts.Filter["subjectId"] = id
+		subjectID, err := strconv.Atoi(args[2])
+		if err != nil {
+			errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 		}
+		if len(errMsgs) > 0 {
+			for _, msg := range errMsgs {
+				fmt.Println(msg)
+			}
+			return
+		}
+		opts.Filter["companyId"] = companyID
+		opts.Filter["year"] = year
+		opts.Filter["subjectId"] = subjectID
 
 		if _, yearBalViews, err := Sdk.ListYearBalance(&opts); err != nil {
 			util.FormatErrorOutput(err)
@@ -210,28 +241,35 @@ func newYearBalanceListCmd() *cobra.Command {
 func newAccSubYearBalValueShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "yearBal-accSubBal-show [OPTIONS] companyId year subjectId",
-		Short: "Show the balance value of year balance ",
+		Short: "Show the balance value of year balance record ",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 3 {
 				cmd.Help()
 				return
 			}
+			errMsgs := []string{}
 			var opts options.BasicYearBalance
-			if companyId, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change companyId to int fail", args[0])
-			} else {
-				opts.CompanyID = companyId
+			companyID, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
-			if iYear, err := strconv.Atoi(args[1]); err != nil {
-				fmt.Println("change iYear to int fail", args[1])
-			} else {
-				opts.Year = iYear
+			year, err := strconv.Atoi(args[1])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("year转换失败: %s", args[1]))
 			}
-			if subjectId, err := strconv.Atoi(args[2]); err != nil {
-				fmt.Println("change subjectId to int fail", args[2])
-			} else {
-				opts.SubjectID = subjectId
+			subjectID, err := strconv.Atoi(args[2])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("subjectID转换失败: %s", args[2]))
 			}
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+			opts.CompanyID = companyID
+			opts.Year = year
+			opts.SubjectID = subjectID
 			dYearBal, err := Sdk.GetAccSubYearBalValue(&opts)
 			if err != nil {
 				util.FormatErrorOutput(err)

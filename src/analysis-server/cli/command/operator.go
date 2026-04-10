@@ -33,20 +33,29 @@ func newOperatorCreateCmd() *cobra.Command {
 				cmd.Help()
 				return
 			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-			} else {
-				opts.CompanyID = id
+			errMsgs := []string{}
+			id, err := strconv.Atoi(args[0])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("companyID转换失败: %s", args[0]))
 			}
+			role, err := strconv.Atoi(args[5])
+			if err != nil {
+				errMsgs = append(errMsgs, fmt.Sprintf("role转换失败: %s", args[5]))
+			}
+
+			if len(errMsgs) > 0 {
+				for _, msg := range errMsgs {
+					fmt.Println(msg)
+				}
+				return
+			}
+
+			opts.CompanyID = id
 			opts.Name = args[1]
 			opts.Password = args[2]
 			opts.Job = args[3]
 			opts.Department = args[4]
-			if role, err := strconv.Atoi(args[5]); err != nil {
-				fmt.Println("change to int fail", args[5])
-			} else {
-				opts.Role = role
-			}
+			opts.Role = role
 
 			if view, err := Sdk.CreateOperator(&opts); err != nil {
 				util.FormatErrorOutput(err)
@@ -81,6 +90,7 @@ func newOperatorListCmd() *cobra.Command {
 		opts.Filter = make(map[string]interface{})
 		if id, err := strconv.Atoi(args[0]); err != nil {
 			fmt.Println("change to int fail", args[0])
+			return
 		} else {
 			opts.Filter["companyId"] = id
 		}
@@ -105,6 +115,7 @@ func newOperatorShowCmd() *cobra.Command {
 			var opts options.BaseOptions
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.ID = id
 			}
@@ -132,6 +143,7 @@ func newOperatorUpdateCmd() *cobra.Command {
 			//opts.Name = args[0]
 			if id, err := strconv.Atoi(args[0]); err != nil {
 				fmt.Println("change to int fail", args[0])
+				return
 			} else {
 				opts.OperatorID = id
 			}

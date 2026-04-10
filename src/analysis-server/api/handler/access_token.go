@@ -164,6 +164,7 @@ func (at *AccessTokenHandler) QuitExpirationCheckService() {
 	close(at.quitCheckCh)
 }
 
+// 此处的判断需要修改，不能写死在代码里。
 func (at *AccessTokenHandler) isRootToken(accessToken string) bool {
 	bIsRoot := false
 	at.loginCheckMu.RLock()

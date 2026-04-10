@@ -99,3 +99,10 @@ v4.2所修改的地方
 1. 优化凭证界面。
 2.优化打印凭证的设置。
 3.在打印凭证时，增加进度条
+
+v4.3所修改的地方
+1、增加一个当启动analysis-server程序时，校验idInfo里的数据是否与实际在voucherInfo/voucherRecordInfo表里的数据保持一致，
+  并且开启一个goroutine,没隔一段时间，同步一次数据。 之前没有做校验和实时，导致idInfo里的ID与实际使用的ID不一致。
+2、统一管理analysis程序所启动的goroutine。
+3、优化后台代码，把handler/service/db包里所使用的日志和数据库连接对象都提升为包级别的对象。
+4、优化analysis-cli的代码

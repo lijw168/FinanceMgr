@@ -61,9 +61,9 @@ func (vh *VoucherHandlers) GetMaxNumOfMonth(w http.ResponseWriter, r *http.Reque
 	vh.Response(r.Context(), gLogger, w, nil, count)
 }
 
-// 通过公司ID以及根据登录日期获取最新的凭证信息
+// 通过公司ID以及根据年份、月份获取最新的凭证信息
 func (vh *VoucherHandlers) GetLatestVoucherInfo(w http.ResponseWriter, r *http.Request) {
-	var params = new(model.QueryMonthlyVoucherInfoAttrParameters)
+	var params = new(model.QueryLatestVoucherInfoParameters)
 	err := vh.HttpRequestParse(r, params)
 	if err != nil {
 		gLogger.ErrorContext(r.Context(), "[voucherHandlers/GetLatestVoucherInfo] [HttpRequestParse: %v]", err)

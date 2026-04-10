@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"errors"
 	_ "net/http/pprof"
-	//"runtime"
 	"strconv"
 
 	"financeMgr/src/common/config"
@@ -56,14 +56,14 @@ func startServer(router *url.UrlRouter, serverConf *cfg.ServerConf) {
 	}()
 }
 
-func startBusinessWorker(ws *sync.WaitGroup) {
+func startBusinessWorker(ws *sync.WaitGroup, syncDuration int) {
 	ws.Add(1)
 	go interceptSignal(ws)
 	//用户登录的过期检查服务
 	ws.Add(1)
 	go handler.GAccessTokenH.ExpirationCheck(ws)
 	ws.Add(1)
-	go service.StartIdResourcePersistence(time.Duration(5)*time.Minute, ws)
+	go service.StartIdResourcePersistence(time.Duration(syncDuration)*time.Minute, ws)
 }
 
 func releaseBusinessResource() {
@@ -81,7 +81,7 @@ func registerHandler(httpRouter *url.UrlRouter, logger *log.Logger, dbIns *sql.D
 	//初始化API service
 	ccErr := service.InitService(logger, dbIns)
 	if ccErr != nil {
-		return ccErr
+		return errors.New("InitService err: " + ccErr.Detail())
 	}
 	comService := &service.CompanyService{
 		CompanyDao:      companyDao,
@@ -147,7 +147,7 @@ func main() {
 		return
 	}
 	ws := &sync.WaitGroup{}
-	startBusinessWorker(ws)
+	startBusinessWorker(ws, apiServerConf.ServerConf.SynDuration)
 	//start server
 	startServer(httpRouter, apiServerConf.ServerConf)
 	ws.Wait()

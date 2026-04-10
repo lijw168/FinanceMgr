@@ -245,17 +245,18 @@ func (dao *VoucherInfoDao) Update(ctx context.Context, do DbOperator, voucherId,
 		} else {
 			strSql += "," + dbKey + "=?"
 		}
-		if dbKey == "voucher_date" {
-			iDate, bOk := value.(int)
-			if !bOk {
-				continue
-			}
-			iYear := iDate / 10000
-			iMonth := (iDate - iYear*10000) / 100
-			iDay := iDate % 100
-			t := time.Date(iYear, time.Month(iMonth), iDay, 0, 0, 0, 0, time.Local)
-			value = t
-		}
+		//voucher_date 字段的类型为int,不需要转换成time.Time类型
+		// if dbKey == "voucher_date" {
+		// 	iDate, bOk := value.(int)
+		// 	if !bOk {
+		// 		continue
+		// 	}
+		// 	iYear := iDate / 10000
+		// 	iMonth := (iDate - iYear*10000) / 100
+		// 	iDay := iDate % 100
+		// 	t := time.Date(iYear, time.Month(iMonth), iDay, 0, 0, 0, 0, time.Local)
+		// 	value = t
+		// }
 		values = append(values, value)
 	}
 	if first {

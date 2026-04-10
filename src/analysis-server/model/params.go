@@ -226,8 +226,15 @@ type VoucherInfoParams struct {
 	BillCount     *int    `json:"billCount"`
 }
 
-// QueryMonthlyVoucherInfoAttrParameters 查询月的凭证信息的属性参数...
+// QueryMonthlyVoucherInfoAttrParameters 查询月凭证信息的属性参数...
 type QueryMonthlyVoucherInfoAttrParameters struct {
+	CompanyID    *int `json:"companyId"`
+	VoucherYear  *int `json:"voucherYear"`
+	VoucherMonth *int `json:"voucherMonth"`
+}
+
+// QueryLatestVoucherInfoParameters 查询最新凭证信息的参数...
+type QueryLatestVoucherInfoParameters struct {
 	CompanyID    *int `json:"companyId"`
 	VoucherYear  *int `json:"voucherYear"`
 	VoucherMonth *int `json:"voucherMonth"`
@@ -308,10 +315,10 @@ type UpdateVoucherParams struct {
 
 // VoucherArrangeParams 凭证整理参数
 type VoucherArrangeParams struct {
-	VoucherYear       *int  `json:"voucherYear"`
-	CompanyID         *int  `json:"companyId"`
-	VoucherMonth      *int  `json:"voucherMonth"`
-	ArrangeVoucherNum *bool `json:"arrangeVoucherNum"`
+	VoucherYear         *int  `json:"voucherYear"`
+	CompanyID           *int  `json:"companyId"`
+	VoucherMonth        *int  `json:"voucherMonth"`
+	IsArrangeVoucherNum *bool `json:"isArrangeVoucherNum"`
 }
 
 type ListParams struct {
