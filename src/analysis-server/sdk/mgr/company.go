@@ -155,8 +155,10 @@ func (c *Company) AssociatedCompanyGroup(opts *options.AssociatedCompanyGroupOpt
 	return err
 }
 
-func (c *Company) InitResourceInfo(opts *options.BaseOptions) (*model.DescData, error) {
-	action := "InitResourceInfo"
+// ListCompanyAccountYearInfo 列出公司账套信息,包含公司账套的起始会计年度和最新会计年度，
+// 因为公司账套信息记录比较少，所以不用进行分页了。
+func (c *Company) ListCompanyAccountYearInfo(opts *options.BaseOptions) ([]*model.CompanyAccountYearInfoView, error) {
+	action := "ListCompanyAccountYearInfo"
 	if opts.ID <= 0 {
 		return nil, errors.New("operatorID is required")
 	}
@@ -167,9 +169,9 @@ func (c *Company) InitResourceInfo(opts *options.BaseOptions) (*model.DescData, 
 	if err != nil {
 		return nil, err
 	}
-	desc := &(model.DescData{})
-	if err := util.FormatView(result.Data, desc); err != nil {
+	var ret []*model.CompanyAccountYearInfoView
+	if err = util.FormatView(result.Data, &ret); err != nil {
 		return nil, err
 	}
-	return desc, nil
+	return ret, nil
 }

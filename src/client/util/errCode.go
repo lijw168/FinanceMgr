@@ -38,4 +38,5 @@ const (
 	ErrCancelAnnualClosing        = 34 // calcel annual closing,failed
 	ErrGetAnnualClosingStatus     = 35 // get annual closing status,failed
 	ErrInitLogFailed              = 36 // initialize log,failed
+	ErrListCompanyAccountYearInfo = 37 // list company account year info,failed
 )

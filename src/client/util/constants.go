@@ -18,7 +18,7 @@ const (
 	CompanyList
 	CompanyShow
 	CompanyDel
-	InitResourceInfo
+	ListComAccYearInfo
 	CompanyUpdate
 	AccSubCreate
 	AccSubReferenceQuery

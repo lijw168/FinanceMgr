@@ -223,7 +223,8 @@ type VoucherInfoParams struct {
 	CompanyID     *int    `json:"companyId"`
 	VoucherDate   *int    `json:"voucherDate"`
 	VoucherFiller *string `json:"voucherFiller"`
-	BillCount     *int    `json:"billCount"`
+	//VoucherAuditor *string `json:"voucherAuditor"`
+	BillCount *int `json:"billCount"`
 }
 
 // QueryMonthlyVoucherInfoAttrParameters 查询月凭证信息的属性参数...

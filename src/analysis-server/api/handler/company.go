@@ -147,7 +147,7 @@ func (ch *CompanyHandlers) CreateCompany(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	ch.Response(r.Context(), gLogger, w, nil, comView)
-	return
+	//return
 }
 
 func (ch *CompanyHandlers) UpdateCompany(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +237,7 @@ func (ch *CompanyHandlers) DeleteCompany(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	ch.Response(r.Context(), gLogger, w, nil, nil)
-	return
+	//return
 }
 
 func (ch *CompanyHandlers) AssociatedCompanyGroup(w http.ResponseWriter, r *http.Request) {
@@ -276,4 +276,32 @@ func (ch *CompanyHandlers) AssociatedCompanyGroup(w http.ResponseWriter, r *http
 		return
 	}
 	ch.Response(r.Context(), gLogger, w, nil, nil)
+}
+
+func (ch *CompanyHandlers) ListCompanyAccountYearInfo(w http.ResponseWriter, r *http.Request) {
+	var params = new(model.DescribeIdParams)
+	err := ch.HttpRequestParse(r, params)
+	if err != nil {
+		gLogger.ErrorContext(r.Context(), "[company/ListCompanyAccountYearInfo] [HttpRequestParse: %v]", err)
+		ccErr := service.NewError(service.ErrCompany, service.ErrMalformed, service.ErrNull, err.Error())
+		ch.Response(r.Context(), gLogger, w, ccErr, nil)
+		return
+	}
+
+	if params.ID == nil || *params.ID <= 0 {
+		ccErr := service.NewError(service.ErrCompany, service.ErrMiss, service.ErrOperatorId, service.ErrNull)
+		ch.Response(r.Context(), gLogger, w, ccErr, nil)
+		return
+	}
+	requestId := ch.GetTraceId(r)
+
+	resViews, ccErr := ch.ComService.ListCompanyAccountYearInfo(r.Context(), *params.ID, requestId)
+	if ccErr != nil {
+		gLogger.WarnContext(r.Context(), "[company/ListCompanyAccountYearInfo/ServerHTTP] [ComService.ListCompanyAccountYearInfo: %s]", ccErr.Detail())
+		ch.Response(r.Context(), gLogger, w, ccErr, nil)
+		return
+	}
+	//dataBuf := &DescData{int64(len(resViews)), resViews}
+	ch.Response(r.Context(), gLogger, w, nil, resViews)
+	//return
 }

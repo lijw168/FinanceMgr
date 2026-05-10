@@ -54,6 +54,7 @@ const (
 	ErrName              = "name"
 	ErrCommonId          = "commonId"
 	ErrCompanyId         = "companyId"
+	ErrOperatorId        = "operatorId"
 	ErrCookie            = "cookie"
 	ErrPasswd            = "password"
 	ErrVouYear           = "voucher_year"

@@ -1,4 +1,4 @@
-1、install mingw-w64
+1、install mingw-w64，其实在git bash下编译就可以
 2、在client目录下执行： CGO_ENABLED=1  go build -o ./out/clientProxy.dll -buildmode=c-shared ./main
 
 --use c++17 执行时，需要在系统的命令行中或者bash中执行。
@@ -10,6 +10,7 @@ lib.exe /DEF:E:\project_go\financeMgr\src\client\out\clientProxy.def /MACHINE:x6
 -- use vs2022
 cd C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64
 lib.exe /DEF:E:\project_go\financeMgr\src\client\out\clientProxy.def /MACHINE:x64 /OUT:E:\project_go\financeMgr\src\client\out\clientProxy.lib
+对如下的修改方案进行说明（2026.4.19），使用golang v26版本后，在编译时，会自动生成如下的代码
 备注说明，无论上面哪种方式生成的库的头文件都需要手动修改符合c++17标准。修改方式之一如下：
 可以把非标准的_Fcomplex和_Dcomplex类型定义替换成标准的 C++ 复数类型。
 ---

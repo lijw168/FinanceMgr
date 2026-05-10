@@ -81,6 +81,8 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		vInfo.BillCount = *infoParams.BillCount
 	}
 	vInfo.VoucherFiller = *infoParams.VoucherFiller
+	//因为创建时，还未对凭证进行审核，所以凭证审核人先设置成空字符串，等以后审核时，再更新这个字段。
+	vInfo.VoucherAuditor = ""
 	vInfo.NumOfMonth = int(count + 1)
 	vInfo.CreatedAt = time.Now()
 	vInfo.UpdatedAt = time.Now()

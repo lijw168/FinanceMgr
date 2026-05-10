@@ -159,6 +159,7 @@ func (is *IDInfoService) UpdateIdInfo(params map[string]interface{}) CcError {
 	return nil
 }
 
+// 优化该函数，把下面访问数据库的操作，改成批量操作，减少数据库的访问次数，提高性能
 func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	gLogger.Info("WriteIdResourceToDb method begin")
 	updateFields := make(map[string]interface{})
@@ -190,6 +191,10 @@ func (is *IDInfoService) WriteIdResourceToDb() CcError {
 	if is.genvVouTempIdInfo.IsChanged() {
 		vouTempId := is.genvVouTempIdInfo.GetId(true)
 		updateFields["voucherTemplateId"] = vouTempId
+	}
+	if len(updateFields) == 0 {
+		gLogger.Debug("No fields to update")
+		return nil
 	}
 	updateFields["updatedAt"] = time.Now()
 	ccErr := is.UpdateIdInfo(updateFields)

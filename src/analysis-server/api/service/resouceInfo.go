@@ -10,8 +10,8 @@ import (
 	cons "financeMgr/src/common/constant"
 )
 
+// the service of resource info will be Ready to remove.
 type ResouceInfoService struct {
-	VInfoDao   *db.VoucherInfoDao
 	CompanyDao *db.CompanyDao
 }
 
@@ -58,14 +58,14 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
 		}
 		for _, comInfo := range comInfos {
-			resInfo, err := rs.getResourceData(ctx, comInfo)
+			resInfo, err := rs.generateResourceData(ctx, comInfo)
 			if err != nil {
 				return nil, err
 			}
 			resInfoSlice = append(resInfoSlice, resInfo)
 		}
 	} else if comInfo.CompanyGroupID == 0 {
-		resInfo, err := rs.getResourceData(ctx, comInfo)
+		resInfo, err := rs.generateResourceData(ctx, comInfo)
 		if err != nil {
 			return nil, err
 		}
@@ -83,12 +83,12 @@ func (rs *ResouceInfoService) GetResouceByOptId(ctx context.Context, operatorId 
 }
 
 // 这是中间计算的函
-func (rs *ResouceInfoService) getResourceData(ctx context.Context,
+func (rs *ResouceInfoService) generateResourceData(ctx context.Context,
 	pComView *model.CompanyInfo) (*model.ResourceInfoView, CcError) {
 	resInfo := new(model.ResourceInfoView)
 	resInfo.CompanyId = pComView.CompanyID
 	resInfo.CompanyName = pComView.CompanyName
-	iStartAccountYear := pComView.StartAccountPeriod / 100
+	iStartAccountYear := pComView.BeginAccountDate / 100
 	iLatestAccountYear := pComView.LatestAccountYear
 	yearSlice := make([]int, 0, (iLatestAccountYear - iStartAccountYear + 1))
 	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {

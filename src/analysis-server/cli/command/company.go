@@ -16,7 +16,7 @@ func NewCompanyCommand(cmd *cobra.Command) {
 	cmd.AddCommand(newCompanyShowCmd())
 	cmd.AddCommand(newCompanyUpdateCmd())
 	cmd.AddCommand(newAssociatedCompanyGroupCmd())
-	cmd.AddCommand(newInitResourceInfoCmd())
+	cmd.AddCommand(newListCompanyAccountYearInfoCmd())
 }
 
 func newCompanyCreateCmd() *cobra.Command {
@@ -173,28 +173,31 @@ func newAssociatedCompanyGroupCmd() *cobra.Command {
 	return cmd
 }
 
-func newInitResourceInfoCmd() *cobra.Command {
-	var opts options.BaseOptions
+func newListCompanyAccountYearInfoCmd() *cobra.Command {
+	//defCs 要与ListCompanyAccountYearInfo返回的字段（json keys）保持一致
+	defCs := []string{"companyId", "companyName", "beginAccountYear", "latestAccountYear"}
 	cmd := &cobra.Command{
-		Use:   "resourceInfo-init [OPTIONS] operatorId",
-		Short: "init resource information",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				cmd.Help()
-				return
-			}
-			if id, err := strconv.Atoi(args[0]); err != nil {
-				fmt.Println("change to int fail", args[0])
-				return
-			} else {
-				opts.ID = id
-			}
-			if hv, err := Sdk.InitResourceInfo(&opts); err != nil {
-				util.FormatErrorOutput(err)
-			} else {
-				util.FormatViewOutput(hv)
-			}
-		},
+		Use:   "companyAccountYearInfo-list [OPTIONS] operatorId",
+		Short: "List company account year information",
+	}
+	columns := cmd.Flags().StringArrayP("column", "c", defCs, "Columns to display")
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		var opts options.BaseOptions
+		if len(args) < 1 {
+			cmd.Help()
+			return
+		}
+		if id, err := strconv.Atoi(args[0]); err != nil {
+			fmt.Println("change to int fail", args[0])
+			return
+		} else {
+			opts.ID = id
+		}
+		if views, err := Sdk.ListCompanyAccountYearInfo(&opts); err != nil {
+			util.FormatErrorOutput(err)
+		} else {
+			util.FormatListOutput(*columns, views)
+		}
 	}
 	return cmd
 }

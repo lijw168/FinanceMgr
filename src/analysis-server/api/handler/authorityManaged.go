@@ -11,7 +11,7 @@ import (
 	// "time"
 )
 
-//该authorityManaged是对操作接口的权限的管理。
+// 该authorityManaged是对操作接口的权限的管理。
 type AuthorityManaged struct {
 	// loginCheckMu      sync.RWMutex
 	// tokenToOptIDMap   map[string]int
@@ -27,7 +27,7 @@ func NewAuthorityManaged() *AuthorityManaged {
 	return &authManaged
 }
 
-//api接口的权限鉴别
+// api接口的权限鉴别
 func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) (bool, error) {
 	bIsPass := true
 	var err error
@@ -47,21 +47,21 @@ func (am *AuthorityManaged) InterfaceAuthorityCheck(action, accessToken string) 
 			bIsPass = false
 			err = errors.New("No authority,access the function")
 		}
-		break
+		//break
 	case "ListLoginInfo":
 		//区分root和普通的管理员的操作，通过是否有operatorId这个参数作为选择条件
 		fallthrough
 	case "CreateOperator":
 		//区分创建管理员和普通的操作员，是通过给role赋值来实现的。
 		fallthrough
-	case "InitResourceInfo":
-		fallthrough
+	// case "InitResourceInfo":
+	// 	fallthrough
 	case "DeleteOperator":
 		if !GAccessTokenH.isAdminToken(accessToken) {
 			bIsPass = false
 			err = errors.New("No authority,access the function")
 		}
-		break
+		//break
 	default:
 		break
 	}

@@ -8,6 +8,7 @@ import (
 	"financeMgr/src/analysis-server/model"
 )
 
+// the handler of resource info will be Ready to remove.
 type ResourceInfoHandlers struct {
 	CCHandler
 	//Logger     *log.Logger
@@ -25,7 +26,7 @@ func (rh *ResourceInfoHandlers) InitResourceInfo(w http.ResponseWriter, r *http.
 	}
 
 	if params.ID == nil || *params.ID <= 0 {
-		ccErr := service.NewError(service.ErrResInfo, service.ErrMiss, service.ErrId, service.ErrNull)
+		ccErr := service.NewError(service.ErrResInfo, service.ErrMiss, service.ErrOperatorId, service.ErrNull)
 		rh.Response(r.Context(), gLogger, w, ccErr, nil)
 		return
 	}
@@ -39,5 +40,5 @@ func (rh *ResourceInfoHandlers) InitResourceInfo(w http.ResponseWriter, r *http.
 	}
 	dataBuf := &DescData{int64(len(resViews)), resViews}
 	rh.Response(r.Context(), gLogger, w, nil, dataBuf)
-	return
+	//return
 }

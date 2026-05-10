@@ -403,8 +403,8 @@ func (ys *YearBalanceService) AnnualClosing(ctx context.Context, params *model.B
 		return NewError(ErrSystem, ErrError, ErrNull, err.Error())
 	}
 	bIsRollBack = false
-	//进行年度结算后，生成下一年的凭证表和凭证记录表,该操作为异步创建表
-	iVoucherYear := *params.Year + 1
+	//此时的年度参数就是要结算到的那个年度参数；进行年度结算后，生成下一年的凭证表和凭证记录表,该操作为异步创建表
+	iVoucherYear := *params.Year
 	gCreateVoucherTableCh <- iVoucherYear
 	// err = CreateYearVoucherTable(ctx, iVoucherYear)
 	// if err != nil {

@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// 该结构体里的Tc字段是为了满足分页查询时，客户端需要知道符合条件的总记录数的需求而设计的，Elements字段才是实际的返回数据
+// 例如，ListCompany接口需要分页查询公司列表，客户端需要知道符合条件的公司总数，以判断是否需要继续分页查询，所以在ListCompany接口中，返回的数据结构就是DescData类型的，其中Tc字段表示符合条件的公司总数，Elements字段才是实际的公司列表数据。
+// 但在2026.4.18之前的设计中，都没有继续分页的判断，以后要进行修改。
 type DescData struct {
 	Tc       int64       `json:"total_count"`
 	Elements interface{} `json:"elements"`
@@ -33,19 +36,21 @@ type YearBalanceView struct {
 }
 
 type CompanyView struct {
-	CompanyID          int       `json:"companyId"`
-	CompanyName        string    `json:"companyName"`
-	AbbrevName         string    `json:"abbreviationName"`
-	Corporator         string    `json:"corporator"`
-	Phone              string    `json:"phone"`
-	Email              string    `json:"e_mail"`
-	CompanyAddr        string    `json:"companyAddr"`
-	Backup             string    `json:"backup"`
-	StartAccountPeriod int       `json:"startAccountPeriod"`
-	LatestAccountYear  int       `json:"latestAccountPeriod"`
-	CreatedAt          time.Time `json:"createdAt"`
-	UpdatedAt          time.Time `json:"updatedAt"`
-	CompanyGroupID     int       `json:"companyGroupId"`
+	CompanyID   int    `json:"companyId"`
+	CompanyName string `json:"companyName"`
+	AbbrevName  string `json:"abbreviationName"`
+	Corporator  string `json:"corporator"`
+	Phone       string `json:"phone"`
+	Email       string `json:"e_mail"`
+	CompanyAddr string `json:"companyAddr"`
+	Backup      string `json:"backup"`
+	// StartAccountPeriod这个字段是为了满足客户端的需求而设计的，表示公司的起始建账的时间，包括年和月，不包括具体哪天，
+	// 例如201901，202001等，客户端通过该字段可以知道公司的建账期间，以便于进行凭证的查询和统计等操作。
+	BeginAccountDate  int       `json:"beginAccountDate"`
+	LatestAccountYear int       `json:"latestAccountYear"`
+	CreatedAt         time.Time `json:"createdAt"`
+	UpdatedAt         time.Time `json:"updatedAt"`
+	CompanyGroupID    int       `json:"companyGroupId"`
 }
 
 type CompanyGroupView struct {
@@ -141,6 +146,13 @@ type ResourceInfoView struct {
 	CompanyId   int    `json:"companyId"`
 	CompanyName string `json:"companyName"`
 	YearSlice   []int  `json:"year"`
+}
+
+type CompanyAccountYearInfoView struct {
+	CompanyId         int    `json:"companyId"`
+	CompanyName       string `json:"companyName"`
+	BeginAccountYear  int    `json:"beginAccountYear"`
+	LatestAccountYear int    `json:"latestAccountYear"`
 }
 
 // MenuInfo ...

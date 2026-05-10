@@ -21,7 +21,7 @@ var (
 		"updated_at", "company_group_id"}
 	scanCompanyInfo = func(r DbScanner, st *model.CompanyInfo) error {
 		return r.Scan(&st.CompanyID, &st.CompanyName, &st.AbbrevName, &st.Corporator, &st.Phone,
-			&st.Email, &st.CompanyAddr, &st.Backup, &st.StartAccountPeriod, &st.LatestAccountYear,
+			&st.Email, &st.CompanyAddr, &st.Backup, &st.BeginAccountDate, &st.LatestAccountYear,
 			&st.CreatedAt, &st.UpdatedAt, &st.CompanyGroupID)
 	}
 )
@@ -93,7 +93,7 @@ func (dao *CompanyDao) Create(ctx context.Context, do DbOperator, st *model.Comp
 	strSql := "insert into " + companyInfoTN + " (" + strings.Join(companyInfoFields, ",") +
 		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.CompanyID, st.CompanyName, st.AbbrevName, st.Corporator, st.Phone,
-		st.Email, st.CompanyAddr, st.Backup, st.StartAccountPeriod, st.LatestAccountYear,
+		st.Email, st.CompanyAddr, st.Backup, st.BeginAccountDate, st.LatestAccountYear,
 		st.CreatedAt, st.UpdatedAt, st.CompanyGroupID}
 	gLogger.DebugContext(ctx, "[CompanyInfo/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()

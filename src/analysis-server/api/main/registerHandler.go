@@ -56,6 +56,7 @@ func registerCompany(httpRouter *url.UrlRouter, comService *service.CompanyServi
 	httpRouter.RegisterFunc("ListCompany", comHandlers.ListCompany)
 	httpRouter.RegisterFunc("UpdateCompany", comHandlers.UpdateCompany)
 	httpRouter.RegisterFunc("AssociatedCompanyGroup", comHandlers.AssociatedCompanyGroup)
+	httpRouter.RegisterFunc("ListCompanyAccountYearInfo", comHandlers.ListCompanyAccountYearInfo)
 }
 
 // register account subject
@@ -113,11 +114,11 @@ func registerResAndVoucherHandler(httpRouter *url.UrlRouter, comDao *db.CompanyD
 	voucherService := &service.VoucherService{VRecordDao: voucherRecordDao, VInfoDao: voucherInfoDao, VouDao: vouDao}
 	vouRecordService := &service.VoucherRecordService{VRecordDao: voucherRecordDao}
 	//resource
-	resService := &service.ResouceInfoService{VInfoDao: voucherInfoDao, CompanyDao: comDao}
-	resHandlers := &handler.ResourceInfoHandlers{ResService: resService}
-	voucherHandlers := &handler.VoucherHandlers{Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
-	httpRouter.RegisterFunc("InitResourceInfo", resHandlers.InitResourceInfo)
+	//resService := &service.ResouceInfoService{CompanyDao: comDao}
+	//resHandlers := &handler.ResourceInfoHandlers{ResService: resService}
+	//httpRouter.RegisterFunc("InitResourceInfo", resHandlers.InitResourceInfo)
 	//voucher
+	voucherHandlers := &handler.VoucherHandlers{Vis: vouInfoService, Vs: voucherService, Vrs: vouRecordService}
 	httpRouter.RegisterFunc("CreateVoucher", voucherHandlers.CreateVoucher)
 	httpRouter.RegisterFunc("UpdateVoucher", voucherHandlers.UpdateVoucher)
 	httpRouter.RegisterFunc("DeleteVoucher", voucherHandlers.DeleteVoucher)

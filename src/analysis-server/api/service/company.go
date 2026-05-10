@@ -77,7 +77,7 @@ func (cs *CompanyService) CreateCompany(ctx context.Context, params *model.Creat
 	comInfo.CreatedAt = time.Now()
 	comInfo.CompanyID = gIdInfoService.genComIdInfo.GetNextId()
 	if params.StartAccountPeriod != nil {
-		comInfo.StartAccountPeriod = *params.StartAccountPeriod
+		comInfo.BeginAccountDate = *params.StartAccountPeriod
 		comInfo.LatestAccountYear = (*params.StartAccountPeriod) / 100
 	}
 	if err = cs.CompanyDao.Create(ctx, tx, comInfo); err != nil {
@@ -104,7 +104,7 @@ func (cs *CompanyService) CompanyModelToView(comInfo *model.CompanyInfo) *model.
 	comView.Email = comInfo.Email
 	comView.CompanyAddr = comInfo.CompanyAddr
 	comView.Backup = comInfo.Backup
-	comView.StartAccountPeriod = comInfo.StartAccountPeriod
+	comView.BeginAccountDate = comInfo.BeginAccountDate
 	comView.LatestAccountYear = comInfo.LatestAccountYear
 	comView.CompanyID = comInfo.CompanyID
 	comView.CreatedAt = comInfo.CreatedAt
@@ -281,4 +281,81 @@ func (cs *CompanyService) AssociatedCompanyGroup(ctx context.Context, params *mo
 	}
 	bIsRollBack = false
 	return nil
+}
+
+// ListCompanyAccountYearInfo 列出公司及其年度信息，可以根据操作员id获取到公司信息，进而获取到公司的年度信息
+func (cs *CompanyService) ListCompanyAccountYearInfo(ctx context.Context, operatorId int,
+	requestId string) ([]*model.CompanyAccountYearInfoView, CcError) {
+	//create
+	gLogger.InfoContext(ctx, "ListCompanyAccountYearInfo method start, "+"operator:%d", operatorId)
+	FuncName := "CompanyService/Service/ListCompanyAccountYearInfo"
+	bIsRollBack := true
+	// Begin transaction
+	tx, err := gDb.Begin()
+	if err != nil {
+		gLogger.ErrorContext(ctx, "[%s] [DB.Begin: %s]", FuncName, err.Error())
+		return nil, NewError(ErrSystem, ErrError, ErrNull, "tx begin error")
+	}
+	defer func() {
+		if bIsRollBack {
+			RollbackLog(ctx, FuncName, tx)
+		}
+	}()
+	//get company info
+	comInfo, err := cs.CompanyDao.GetCompanyByOperatorId(ctx, tx, operatorId)
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return nil, NewCcError(cons.CodeComInfoNotExist, ErrCompany, ErrNotFound, ErrNull, "the company information is not exist")
+	default:
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	resInfoSlice := make([]*model.CompanyAccountYearInfoView, 0)
+	if comInfo.CompanyGroupID > 0 {
+		//获取同一个公司组里的所有的公司信息
+		filterFields := make(map[string]interface{})
+		limit, offset := -1, 0
+		filterFields["companyGroupId"] = comInfo.CompanyGroupID
+		orderField := ""
+		orderDirection := 0
+		comInfos, err := cs.CompanyDao.List(ctx, tx, filterFields, limit, offset, orderField, orderDirection)
+		if err != nil {
+			gLogger.ErrorContext(ctx, "[CompanyService/Service/ListCompanyAccountYearInfo] [CompanyDao.List: %s, filterFields: %v]",
+				err.Error(), filterFields)
+			return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		}
+		for _, comInfo := range comInfos {
+			resInfo, err := cs.generateCompanyAccountYearData(ctx, comInfo)
+			if err != nil {
+				return nil, err
+			}
+			resInfoSlice = append(resInfoSlice, resInfo)
+		}
+	} else if comInfo.CompanyGroupID == 0 {
+		resInfo, err := cs.generateCompanyAccountYearData(ctx, comInfo)
+		if err != nil {
+			return nil, err
+		}
+		resInfoSlice = append(resInfoSlice, resInfo)
+	} else {
+		panic("company group id is negative")
+	}
+	if err = tx.Commit(); err != nil {
+		gLogger.ErrorContext(ctx, "[%s] [Commit Err: %v]", FuncName, err)
+		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+	}
+	bIsRollBack = false
+	gLogger.InfoContext(ctx, "ListCompanyAccountYearInfo method end")
+	return resInfoSlice, nil
+}
+
+func (cs *CompanyService) generateCompanyAccountYearData(ctx context.Context,
+	pComView *model.CompanyInfo) (*model.CompanyAccountYearInfoView, CcError) {
+	resInfo := new(model.CompanyAccountYearInfoView)
+	resInfo.CompanyId = pComView.CompanyID
+	resInfo.CompanyName = pComView.CompanyName
+	resInfo.BeginAccountYear = pComView.BeginAccountDate / 100
+	resInfo.LatestAccountYear = pComView.LatestAccountYear
+	gLogger.InfoContext(ctx, "generateCompanyAccountYearData has finished")
+	return resInfo, nil
 }

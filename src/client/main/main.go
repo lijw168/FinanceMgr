@@ -277,9 +277,13 @@ func processCompany(iOpCode int, dataBuf []byte) []byte {
 		} else {
 			return respOptResWithoutData(errCode)
 		}
-	case util.InitResourceInfo:
-		resData, errCode := comGate.InitResourceInfo(auth.OperatorID)
-		return respOptResWithData(iOpCode, resData, errCode)
+	case util.ListComAccYearInfo:
+		resData, errCode, errMsg := comGate.ListCompanyAccountYearInfo(dataBuf)
+		if errCode != util.ErrNull {
+			return respOptResWithErrMsg(errCode, errMsg)
+		} else {
+			return respOptResWithData(iOpCode, resData, errCode)
+		}
 	default:
 		logger.Error("opcode is mistake,the mistake operation code is: %d", iOpCode)
 		panic("bug")

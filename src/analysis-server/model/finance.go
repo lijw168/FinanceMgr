@@ -96,19 +96,19 @@ type VoucherTemplate struct {
 
 // CompanyInfo ...
 type CompanyInfo struct {
-	CompanyID          int
-	CompanyName        string
-	AbbrevName         string
-	Corporator         string
-	Phone              string
-	Email              string
-	CompanyAddr        string
-	Backup             string
-	StartAccountPeriod int
-	LatestAccountYear  int
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	CompanyGroupID     int
+	CompanyID         int
+	CompanyName       string
+	AbbrevName        string
+	Corporator        string
+	Phone             string
+	Email             string
+	CompanyAddr       string
+	Backup            string
+	BeginAccountDate  int
+	LatestAccountYear int
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	CompanyGroupID    int
 }
 
 // CompanyGroup ...

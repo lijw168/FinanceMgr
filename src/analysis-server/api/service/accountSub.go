@@ -206,7 +206,7 @@ func (as *AccountSubService) getRefsOfAccSubID(ctx context.Context, subjectID in
 		return iTotalCount, err
 	}
 	//获取有数据的会计年度
-	iStartAccountYear := comInfo.StartAccountPeriod / 100
+	iStartAccountYear := comInfo.BeginAccountDate / 100
 	iLatestAccountYear := comInfo.LatestAccountYear
 	yearSlice := make([]int, 0, (iLatestAccountYear - iStartAccountYear + 1))
 	for i := iStartAccountYear; i <= iLatestAccountYear; i++ {

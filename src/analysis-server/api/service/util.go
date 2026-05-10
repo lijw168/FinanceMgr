@@ -45,7 +45,7 @@ func CreateYearVoucherTable(iYear int) error {
 }
 
 func createNewTable(oldTableName, newTableName string) error {
-	gLogger.Debug("[CompanyInfo/db/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
+	gLogger.Debug("[Service/createNewTable] [oldTableName: %s, newTableName: %s]", oldTableName, newTableName)
 	//judge ,is not exist
 	var c int64
 	strSql := "select count(1) from information_schema.TABLES where table_name = ?"

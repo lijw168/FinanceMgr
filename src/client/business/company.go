@@ -3,7 +3,6 @@ package business
 import (
 	"encoding/binary"
 	"encoding/json"
-	"financeMgr/src/analysis-server/model"
 	"financeMgr/src/analysis-server/sdk/options"
 	sdkUtil "financeMgr/src/analysis-server/sdk/util"
 	"financeMgr/src/client/util"
@@ -19,6 +18,7 @@ func (cg *CompanyGateway) ListCompany(param []byte) (resData []byte, errCode int
 
 func (cg *CompanyGateway) GetCompany(param []byte) (resData []byte, errCode int, errMsg string) {
 	errCode = util.ErrNull
+	//因为是直接调用的API接口，所以是通过小端的方式把companyId传过来的。
 	id := int(binary.LittleEndian.Uint32(param))
 	if id <= 0 {
 		errMsg = fmt.Sprintf("the id param is: %d", id)
@@ -93,43 +93,36 @@ func (cg *CompanyGateway) DeleteCompany(param []byte) (errCode int, errMsg strin
 	return deleteCmd(resource_type_company, id, cSdk.DeleteCompany)
 }
 
-func (cg *CompanyGateway) InitResourceInfo(operateID int) (resData []byte, errCode int) {
-	//var opts options.BaseOptions
-	//opts.ID = operateID
-	errCode = util.ErrNull
-	// if descData, err := cSdk.CreateVoucher_json(param); err != nil {
-	// 	errCode = util.ErrCreateFailed
-	// 	logger.Error("the CreateVoucher failed,err:%v", err.Error())
-	// } else {
-	// 	logger.Debug("CreateVoucher succeed;views:%v", descData)
-	// 	resData, err = json.Marshal(descData)
-	// 	if err != nil {
-	// 		errCode = util.ErrMarshalFailed
-	// 		logger.Error("the Marshal failed,err:%v", err.Error())
-	// 	}
-	// 	//把相应的资源写入到文件里。
-	// }
-	//test data
-	//errCode = util.ErrInitResourceInfoFailed
-	resInfoSlice := make([]model.ResourceInfoView, 0)
-	var resInfo = model.ResourceInfoView{}
-	resInfo.CompanyId = 3
-	resInfo.CompanyName = "展讯科技"
-	yearSlice := []int{2020, 2021}
-	resInfo.YearSlice = yearSlice
-	resInfoSlice = append(resInfoSlice, resInfo)
-	resInfo.CompanyId = 4
-	resInfo.CompanyName = "中国科技"
-	yearSlice = yearSlice[0:0]
-	yearSlice = append(yearSlice, 2022)
-	yearSlice = append(yearSlice, 2023)
-	resInfo.YearSlice = yearSlice
-	resInfoSlice = append(resInfoSlice, resInfo)
-	var err error
-	resData, err = json.Marshal(resInfoSlice)
-	if err != nil {
-		errCode = util.ErrMarshalFailed
-		logger.Error("the Marshal failed,err:%v", err.Error())
+func (cg *CompanyGateway) ListCompanyAccountYearInfo(param []byte) (resData []byte, errCode int, errMsg string) {
+	//因为是直接调用的API接口，所以是通过小端的方式把companyId传过来的。
+	id := int(binary.LittleEndian.Uint32(param))
+	if id <= 0 {
+		errMsg = fmt.Sprintf("the id param is: %d", id)
+		logger.Error(errMsg)
+		errCode = util.ErrInvalidParam
+		return nil, errCode, errMsg
 	}
-	return
+	var opts options.BaseOptions
+	opts.ID = id
+	errCode = util.ErrNull
+	if views, err := cSdk.ListCompanyAccountYearInfo(&opts); err != nil {
+		if resErr, ok := err.(*sdkUtil.RespErr); ok {
+			errCode = resErr.Code
+			errMsg = resErr.Err.Error()
+		} else {
+			errCode = util.ErrListCompanyAccountYearInfo
+			errMsg = "ListCompanyAccountYearInfo failed,internal error"
+		}
+		logger.LogError(errMsg)
+	} else {
+		resData, err = json.Marshal(views)
+		if err != nil {
+			errCode = util.ErrMarshalFailed
+			errMsg = fmt.Sprintf("the Marshal failed,err:%v", err.Error())
+			logger.LogError(errMsg)
+		} else {
+			logger.Debug("ListCompanyAccountYearInfo succeed;views:%v", views)
+		}
+	}
+	return resData, errCode, errMsg
 }

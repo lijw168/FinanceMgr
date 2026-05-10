@@ -155,6 +155,7 @@ func main() {
 	//release resource
 	releaseBusinessResource()
 	dbIns.Close()
+	gLogger.LogInfo("[Main] analysis server has exited, bye")
 	gLogger.Close()
 	fmt.Println("[Main] analysis server exit")
 }
