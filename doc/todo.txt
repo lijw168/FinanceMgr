@@ -102,4 +102,4 @@ func validate_int_arr(d interface{}) bool {
 34、增加时序账的功能已经把凭证输出到execl里。
 已增加
 
-35、增加一个管理工具，可以创建账套等。
+35、增加一个管理工具，可以创建账套等，并且增加生成客户端程序的配置文件。可以通过调用ListCompanyAccountYearInfo接口，重新生成客户端的配置文件中的客户的相关信息
