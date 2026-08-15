@@ -275,7 +275,7 @@ type CreateVoucherRecordParams struct {
 	CreditMoney *float64 `json:"creditMoney"`
 	Summary     *string  `json:"summary"`
 	SubID1      *int     `json:"subId1"`
-	// SubID2      *int     `json:"subId2"`
+	RecordPos   *int     `json:"recordPos"`
 	// SubID3      *int     `json:"subId3"`
 	// SubID4      *int     `json:"subId4"`
 }
@@ -288,7 +288,7 @@ type ModifyVoucherRecordParams struct {
 	CreditMoney *float64 `json:"creditMoney"`
 	Summary     *string  `json:"summary"`
 	SubID1      *int     `json:"subId1"`
-	// SubID2      *int     `json:"subId2"`
+	RecordPos   *int     `json:"recordPos"`
 	// SubID3      *int     `json:"subId3"`
 	// SubID4      *int     `json:"subId4"`
 }

@@ -98,7 +98,7 @@ func VoucherRecordModelToView(vRecord *model.VoucherRecord) *model.VoucherRecord
 	vRecordView.CreditMoney = vRecord.CreditMoney
 	vRecordView.Summary = vRecord.Summary
 	vRecordView.SubID1 = vRecord.SubID1
-	// vRecordView.SubID2 = vRecord.SubID2
+	vRecordView.RecordPos = vRecord.RecordPos
 	// vRecordView.SubID3 = vRecord.SubID3
 	// vRecordView.SubID4 = vRecord.SubID4
 	return vRecordView

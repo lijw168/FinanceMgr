@@ -142,7 +142,7 @@ create table if not exists `finance_mgr`.`voucherInfo`
    `voucher_filler`        varchar(10) COMMENT '制证者',
    `voucher_auditor`       varchar(10) COMMENT '审核者',
    `bill_count`            int DEFAULT 0 COMMENT '该张凭证的单据个数',
-   `status`                int DEFAULT 1 COMMENT '1:未审核；2：已作废；3：已审核 ...',
+   `status`                int DEFAULT 1 COMMENT '1:未审核;2:已作废;3:已审核 ...',
    `created_at`            datetime,
    `updated_at`            datetime,
    primary key (voucher_id)
@@ -153,7 +153,7 @@ alter table voucherInfo add constraint FK_Reference_3 foreign key (company_id)
 
 /*==============================================================*/
 /* 凭证信息表 Table: voucherRecordInfo                          */
-/* 目前该表中只使用了sub_id1 表示科目的ID。 其他三个ID字段没有使用 */
+/* 目前该表中只使用了sub_id1 表示科目的ID。 sub_id3和sub_id4字段没有使用 */
 /*==============================================================*/
 drop table if exists `finance_mgr`.`voucherRecordInfo`;
 create table  if not exists `finance_mgr`.`voucherRecordInfo`
@@ -165,7 +165,7 @@ create table  if not exists `finance_mgr`.`voucherRecordInfo`
    `credit_money`          decimal(12,4) not null COMMENT '贷方金额',
    `summary`               varchar(128) COMMENT '摘要',
    `sub_id1`               int DEFAULT 0 COMMENT '一级会计科目ID',
-   `sub_id2`               int DEFAULT 0 COMMENT '二级会计科目ID',
+   `record_pos`            int DEFAULT 0 COMMENT '该条分录在该凭证中的位置',
    `sub_id3`               int DEFAULT 0 COMMENT '三级会计科目ID',
    `sub_id4`               int DEFAULT 0 COMMENT '四级会计科目ID',
    `created_at`            datetime,

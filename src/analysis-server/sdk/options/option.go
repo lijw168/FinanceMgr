@@ -88,7 +88,7 @@ type CreateVoucherRecordOptions struct {
 	CreditMoney float64
 	Summary     string
 	SubID1      int
-	SubID2      int
+	RecordPos   int
 	SubID3      int
 	SubID4      int
 	BillCount   int
@@ -102,7 +102,7 @@ type ModifyVoucherRecordOptions struct {
 	CreditMoney float64
 	Summary     string
 	SubID1      int
-	SubID2      int
+	RecordPos   int
 	SubID3      int
 	SubID4      int
 	BillCount   int

@@ -17,10 +17,10 @@ type VoucherRecordDao struct {
 var (
 	voucherRecordTN     = "voucherRecordInfo"
 	voucherRecordFields = []string{"record_id", "voucher_id", "subject_name", "debit_money", "credit_money",
-		"summary", "sub_id1", "sub_id2", "sub_id3", "sub_id4", "created_at", "updated_at"}
+		"summary", "sub_id1", "record_pos", "sub_id3", "sub_id4", "created_at", "updated_at"}
 	scanVoucherRecord = func(r DbScanner, st *model.VoucherRecord) error {
 		return r.Scan(&st.RecordID, &st.VoucherID, &st.SubjectName, &st.DebitMoney, &st.CreditMoney,
-			&st.Summary, &st.SubID1, &st.SubID2, &st.SubID3, &st.SubID4, &st.CreatedAt, &st.UpdatedAt)
+			&st.Summary, &st.SubID1, &st.RecordPos, &st.SubID3, &st.SubID4, &st.CreatedAt, &st.UpdatedAt)
 	}
 )
 
@@ -70,7 +70,7 @@ func (dao *VoucherRecordDao) Create(ctx context.Context, do DbOperator, iYear in
 	strSql := "insert into " + GenTableName(iYear, voucherRecordTN) + " (" + strings.Join(voucherRecordFields, ",") +
 		") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	values := []interface{}{st.RecordID, st.VoucherID, st.SubjectName, st.DebitMoney, st.CreditMoney,
-		st.Summary, st.SubID1, st.SubID2, st.SubID3, st.SubID4, st.CreatedAt, st.UpdatedAt}
+		st.Summary, st.SubID1, st.RecordPos, st.SubID3, st.SubID4, st.CreatedAt, st.UpdatedAt}
 	gLogger.DebugContext(ctx, "[VoucherRecord/db/Create] [sql: %s, values: %v]", strSql, values)
 	start := time.Now()
 	_, err := do.ExecContext(ctx, strSql, values...)

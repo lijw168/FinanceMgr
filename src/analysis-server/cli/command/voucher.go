@@ -69,7 +69,7 @@ func newVoucherCreateCmd() *cobra.Command {
 	createRecOpt.DebitMoney = float64(dm)
 	createRecOpt.CreditMoney = float64(cm)
 	cmd.Flags().IntVar(&createRecOpt.SubID1, "sub1", 1, "SubID1")
-	cmd.Flags().IntVar(&createRecOpt.SubID2, "sub2", 2, "SubID2")
+	cmd.Flags().IntVar(&createRecOpt.RecordPos, "recordPos", 2, "RecordPos")
 	return cmd
 }
 
@@ -218,7 +218,7 @@ func newVoucherArrangeCmd() *cobra.Command {
 // }
 
 func newVoucherRecordListCmd() *cobra.Command {
-	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary", "SubID1"}
+	defCs := []string{"RecordID", "VoucherID", "SubjectName", "DebitMoney", "CreditMoney", "Summary", "SubID1", "RecordPos"}
 	cmd := &cobra.Command{
 		Use:   "vouRecord-list voucherId voucherYear",
 		Short: "List voucher records Support Filter",

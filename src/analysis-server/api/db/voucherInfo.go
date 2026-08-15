@@ -66,7 +66,8 @@ func (dao *VoucherInfoDao) CountByFilter(ctx context.Context, do DbOperator, iYe
 	return c, err
 }
 
-// 通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号
+// 通过vouchrId 和 voucherMonth 获取该月份目前最大的凭证号,该函数实现写的SQL有问题，后续可以直接使用CountByFilter函数来进行代替。
+// 该函数暂未被使用
 func (dao *VoucherInfoDao) GetMaxNumByIdAndMonth(ctx context.Context, do DbOperator,
 	iYear, iVoucherMonth, iVoucherID int) (int64, error) {
 	tableName := GenTableName(iYear, voucherInfoTN)

@@ -79,6 +79,8 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 	vInfo.Status = utils.NoAuditVoucher
 	if infoParams.BillCount != nil {
 		vInfo.BillCount = *infoParams.BillCount
+	} else {
+		vInfo.BillCount = 0
 	}
 	vInfo.VoucherFiller = *infoParams.VoucherFiller
 	//因为创建时，还未对凭证进行审核，所以凭证审核人先设置成空字符串，等以后审核时，再更新这个字段。
@@ -107,9 +109,9 @@ func (vs *VoucherService) CreateVoucher(ctx context.Context, params *model.Creat
 		if recParam.SubID1 != nil {
 			vRecord.SubID1 = *recParam.SubID1
 		}
-		// if recParam.SubID2 != nil {
-		// 	vRecord.SubID2 = *recParam.SubID2
-		// }
+		if recParam.RecordPos != nil {
+			vRecord.RecordPos = *recParam.RecordPos
+		}
 		// if recParam.SubID3 != nil {
 		// 	vRecord.SubID3 = *recParam.SubID3
 		// }
@@ -152,19 +154,20 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		}
 	}()
 	iVoucherYear := *params.VoucherYear
-	//update voucherInfo,目前在client端，暂不支持修改已存凭证的月份或者制作日期，所以下面修改凭证信息的代码，也就无用了。等以后删除。
 	if params.ModifyInfoParams != nil {
 		voucherInfoParams := make(map[string]interface{}, 3)
-		if params.ModifyInfoParams.VoucherMonth != nil {
-			voucherInfoParams["voucherMonth"] = *params.ModifyInfoParams.VoucherMonth
-			//如果凭证的月份发生了变化，则该voucherInfo里的凭证号也发生变化。
-			iMaxNumOfMonth, err := vs.VInfoDao.GetMaxNumByIdAndMonth(ctx, tx, *params.ModifyInfoParams.VoucherMonth,
-				iVoucherYear, *params.ModifyInfoParams.VoucherID)
-			if err != nil {
-				return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
-			}
-			voucherInfoParams["numOfMonth"] = iMaxNumOfMonth + 1
-		}
+		//目前前端不支持修改凭证的月份，所以先注释掉。等以后如果需要支持修改凭证的月份了，再把下面的代码放开。
+		// if params.ModifyInfoParams.VoucherMonth != nil {
+		// 	voucherInfoParams["voucherMonth"] = *params.ModifyInfoParams.VoucherMonth
+		// 	//如果凭证的月份发生了变化，则该voucherInfo里的凭证号也发生变化。
+		// 	iMaxNumOfMonth, err := vs.VInfoDao.GetMaxNumByIdAndMonth(ctx, tx, *params.ModifyInfoParams.VoucherMonth,
+		// 		iVoucherYear, *params.ModifyInfoParams.VoucherID)
+		// 	if err != nil {
+		// 		return nil, NewError(ErrSystem, ErrError, ErrNull, err.Error())
+		// 	}
+		// 	voucherInfoParams["numOfMonth"] = iMaxNumOfMonth + 1
+		// }
+		//修改日期，也只能修改当月内的日期，不支持修改到其他月份的日期(这个条件判断，放在前端)，这样做是为了与凭证的月份保持一致。并且凭证号，也可以不用修改。
 		if params.ModifyInfoParams.VoucherDate != nil {
 			voucherInfoParams["voucherDate"] = *params.ModifyInfoParams.VoucherDate
 		}
@@ -198,6 +201,9 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		if recParam.SubID1 != nil {
 			voucherRecordParams["subId1"] = *recParam.SubID1
 		}
+		if recParam.RecordPos != nil {
+			voucherRecordParams["recordPos"] = *recParam.RecordPos
+		}
 		voucherRecordParams["updatedAt"] = time.Now()
 		err = vs.VRecordDao.UpdateByRecordId(ctx, tx, *recParam.VouRecordID, iVoucherYear, voucherRecordParams)
 		if err != nil {
@@ -226,6 +232,7 @@ func (vs *VoucherService) UpdateVoucher(ctx context.Context, params *model.Updat
 		vRecord.CreditMoney = *itemParam.CreditMoney
 		vRecord.Summary = *itemParam.Summary
 		vRecord.SubID1 = *itemParam.SubID1
+		vRecord.RecordPos = *itemParam.RecordPos
 		// vRecord.SubID2 = *itemParam.SubID2
 		// vRecord.SubID3 = *itemParam.SubID3
 		// vRecord.SubID4 = *itemParam.SubID4
